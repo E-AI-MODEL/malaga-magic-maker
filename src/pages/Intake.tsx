@@ -9,11 +9,12 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { Slider } from "@/components/ui/slider";
-import { ArrowRight, Check, Plane, Car, MapPin } from "lucide-react";
+import { ArrowRight, Check, Plane, Car, MapPin, Home } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogClose } from "@/components/ui/dialog";
 import heroGolf from "@/assets/hero-golf.jpg";
 import heroTransport from "@/assets/hero-transport.jpg";
 import heroBeachTown from "@/assets/hero-beach-town.jpg";
+import heroVilla from "@/assets/hero-villa.jpg";
 
 type ChoiceValue = string | number | boolean;
 
@@ -37,6 +38,11 @@ export default function Intake() {
   const [requireBedrooms3, setRequireBedrooms3] = useState(false);
   const [requireCancelable, setRequireCancelable] = useState(false);
   const [requireTransparentPrice, setRequireTransparentPrice] = useState(false);
+  const [requirePool, setRequirePool] = useState(false);
+  const [requireAirco, setRequireAirco] = useState(false);
+  const [requireWifi, setRequireWifi] = useState(false);
+  const [requireParking, setRequireParking] = useState(false);
+  const [requireTerrace, setRequireTerrace] = useState(false);
   const [budgetCap, setBudgetCap] = useState("");
   const [remarksB, setRemarksB] = useState("");
 
@@ -290,36 +296,56 @@ export default function Intake() {
           </div>
 
           {/* Locatie accommodatie + max reistijd */}
-          <div className="relative min-h-[320px] flex items-end">
+          <div className="relative min-h-[380px] flex items-end">
             <img src={heroBeachTown} alt="Locatie" className="absolute inset-0 w-full h-full object-cover" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/60 to-black/10" />
-            <div className="relative z-10 px-6 py-8 w-full space-y-4">
-              <p className="text-xs font-semibold uppercase tracking-wider text-white/40 flex items-center gap-2"><MapPin className="h-3.5 w-3.5" /> Locatie accommodatie</p>
+            <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/70 to-black/20" />
+            <div className="relative z-10 px-6 py-8 w-full space-y-5">
+              <div className="flex items-center gap-2 mb-1">
+                <MapPin className="h-4 w-4 text-primary" />
+                <h3 className="font-display text-lg font-extrabold text-white">Locatie accommodatie</h3>
+              </div>
               <div className="space-y-2">
                 <DarkRadioOption name="base" value="golf" current={baseChoice} onChange={setBaseChoice} label="Bij de golfbaan (La Cala Golf)" />
                 <DarkRadioOption name="base" value="beach" current={baseChoice} onChange={setBaseChoice} label="Bij het strand (La Cala / Calahonda)" />
                 <DarkRadioOption name="base" value="neutral" current={baseChoice} onChange={setBaseChoice} label="Geen voorkeur" />
               </div>
 
-              <p className="text-xs font-semibold uppercase tracking-wider text-white/40 mt-4">{travelLabel}</p>
-              <div className="grid grid-cols-4 gap-2">
-                {([10, 15, 20, 30] as const).map(v => (
-                  <DarkRadioOption key={v} name="travelMin" value={v} current={maxTravelMinutes} onChange={setMaxTravelMinutes} label={`${v} min`} />
-                ))}
+              <div className="border-t border-white/10 pt-5">
+                <h4 className="font-display text-base font-bold text-white mb-3">{travelLabel}</h4>
+                <div className="grid grid-cols-4 gap-2">
+                  {([10, 15, 20, 30] as const).map(v => (
+                    <DarkRadioOption key={v} name="travelMin" value={v} current={maxTravelMinutes} onChange={setMaxTravelMinutes} label={`${v} min`} />
+                  ))}
+                </div>
               </div>
             </div>
           </div>
 
-          {/* Accommodatie wensen */}
-          <div className="bg-background px-6 py-8 space-y-5">
-            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Accommodatie wensen</p>
+          {/* Accommodatie wensen — hero block */}
+          <div className="relative min-h-[200px] flex items-end">
+            <img src={heroVilla} alt="Accommodatie" className="absolute inset-0 w-full h-full object-cover" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/50 to-black/10" />
+            <div className="relative z-10 px-6 py-8 w-full">
+              <div className="flex items-center gap-2">
+                <Home className="h-4 w-4 text-primary" />
+                <h3 className="font-display text-lg font-extrabold text-white">Accommodatie wensen</h3>
+              </div>
+              <p className="text-white/50 text-sm mt-1">Wat moet de accommodatie minimaal bieden?</p>
+            </div>
+          </div>
 
+          <div className="bg-background px-6 py-6 space-y-5">
             <div className="space-y-3">
               {[
                 { checked: requireFixedBeds, onChange: setRequireFixedBeds, label: "Minimaal 5 vaste bedden", desc: "Geen slaapbanken of luchtbedden" },
                 { checked: requireBedrooms3, onChange: setRequireBedrooms3, label: "Minimaal 3 slaapkamers", desc: "Privé slaapruimte voor iedereen" },
                 { checked: requireCancelable, onChange: setRequireCancelable, label: "Gratis annuleerbaar", desc: "Volledige terugbetaling bij annulering" },
                 { checked: requireTransparentPrice, onChange: setRequireTransparentPrice, label: "Transparante prijs", desc: "Geen verborgen kosten of toeristenbelasting-verrassingen" },
+                { checked: requirePool, onChange: setRequirePool, label: "Zwembad", desc: "Privé of gedeeld zwembad bij de accommodatie" },
+                { checked: requireAirco, onChange: setRequireAirco, label: "Airconditioning", desc: "In april kan het al warm zijn aan de Costa del Sol" },
+                { checked: requireWifi, onChange: setRequireWifi, label: "Goede wifi", desc: "Betrouwbare internetverbinding" },
+                { checked: requireParking, onChange: setRequireParking, label: "Parkeerplaats", desc: "Eigen parkeerplek bij de accommodatie" },
+                { checked: requireTerrace, onChange: setRequireTerrace, label: "Terras / buitenruimte", desc: "Plek om buiten te zitten en te ontspannen" },
               ].map((item, i) => (
                 <label key={i} className="flex items-start gap-3 cursor-pointer p-4 rounded-lg bg-secondary hover:bg-secondary/80 transition-colors">
                   <Checkbox checked={item.checked} onCheckedChange={(c) => item.onChange(!!c)} className="mt-0.5" />

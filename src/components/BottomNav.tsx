@@ -4,12 +4,12 @@ import { useAuth } from "@/lib/auth";
 
 export function BottomNav() {
   const { isAdmin } = useAuth();
-  const base = "flex flex-col items-center gap-0.5 text-xs py-2 px-3 transition-colors";
-  const active = "text-primary font-semibold";
+  const base = "flex flex-col items-center gap-0.5 text-[11px] py-2.5 px-3 transition-colors font-medium";
+  const active = "text-primary";
   const inactive = "text-muted-foreground";
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t bg-card/95 backdrop-blur-sm safe-area-pb">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t bg-background/95 backdrop-blur-sm safe-area-pb">
       <div className="flex justify-around max-w-lg mx-auto">
         <NavLink to="/info" className={({ isActive }) => `${base} ${isActive ? active : inactive}`}>
           <Info className="h-5 w-5" />

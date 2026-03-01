@@ -150,20 +150,16 @@ export default function Info() {
             <div className="bg-foreground text-background rounded-xl p-5">
               <div className="flex items-center gap-2 mb-3">
                 <Car className="h-4 w-4 text-primary" />
-                <h3 className="font-display font-extrabold text-base">Huurauto</h3>
+                <h3 className="font-display font-extrabold text-base">Busje huren (5 pers.)</h3>
               </div>
               <p className="text-white/60 text-sm leading-relaxed mb-4">
-                Maximale flexibiliteit. Zelf rijden naar golfbaan, strand, dorpen en Marbella.
-                Nadeel: iemand kan niet drinken en parkeren moet geregeld zijn.
+                Eén busje, iedereen samen. Ophalen op Malaga Airport, 3 dagen gebruiken
+                voor golfbaan, strand, dorpen en avondeten.
               </p>
               <div className="space-y-2 text-xs">
                 <div className="flex justify-between border-t border-white/10 pt-2">
-                  <span className="text-white/40">Compacte auto (3 dagen)</span>
-                  <span className="text-white font-semibold">ca. €60 – €100 totaal</span>
-                </div>
-                <div className="flex justify-between border-t border-white/10 pt-2">
-                  <span className="text-white/40">MPV / 7-zits (3 dagen)</span>
-                  <span className="text-white font-semibold">ca. €120 – €200 totaal</span>
+                  <span className="text-white/40">9-zits busje (3 dagen)</span>
+                  <span className="text-white font-semibold">ca. €150 – €250 totaal</span>
                 </div>
                 <div className="flex justify-between border-t border-white/10 pt-2">
                   <span className="text-white/40">Verzekering all-in</span>
@@ -171,7 +167,11 @@ export default function Info() {
                 </div>
                 <div className="flex justify-between border-t border-white/10 pt-2">
                   <span className="text-white/40">Brandstof (3 dagen)</span>
-                  <span className="text-white font-semibold">ca. €20 – €30</span>
+                  <span className="text-white font-semibold">ca. €25 – €40</span>
+                </div>
+                <div className="flex justify-between border-t border-white/10 pt-2 font-semibold">
+                  <span className="text-white/60">Totaal geschat</span>
+                  <span className="text-primary">ca. €205 – €350 (€41 – €70 p.p.)</span>
                 </div>
               </div>
               <p className="text-white/30 text-[10px] mt-3">
@@ -186,8 +186,7 @@ export default function Info() {
                 <h3 className="font-display font-extrabold text-base">Taxi / transfer</h3>
               </div>
               <p className="text-muted-foreground text-sm leading-relaxed mb-4">
-                Niemand hoeft te rijden. Ideaal als het verblijf dicht bij strand en restaurants zit
-                en je alleen voor golf hoeft te rijden. Nadeel: kosten lopen op bij veel ritten, soms 2 taxi's nodig voor 5 personen.
+                Geen rijder nodig. Per rit betalen. Let op: voor 5 personen zijn vaak 2 taxi's nodig.
               </p>
               <div className="space-y-2 text-xs">
                 <div className="flex justify-between border-t border-border pt-2">

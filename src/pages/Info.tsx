@@ -140,68 +140,54 @@ export default function Info() {
           </div>
         </section>
 
-        {/* Vervoer: huurauto vs taxi */}
-        <section className="px-6 py-10 bg-background">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground mb-2">Vervoer</p>
-          <h2 className="font-display text-xl font-extrabold mb-6">Huurauto of taxi</h2>
+        {/* Vervoer */}
+        <section className="bg-foreground text-background px-6 py-10">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/50 mb-2">Vervoer</p>
+          <h2 className="font-display text-xl font-extrabold text-white mb-6">Busje of taxi</h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-4">
             {/* Busje */}
-            <div className="bg-foreground text-background rounded-xl p-5">
-              <div className="flex items-center gap-2 mb-4">
-                <Car className="h-4 w-4 text-primary" />
-                <h3 className="font-display font-extrabold text-base">Busje huren</h3>
-              </div>
-              <div className="space-y-2 text-xs">
-                <div className="flex justify-between border-t border-white/10 pt-2">
-                  <span className="text-white/40">9-zits busje (3 dagen)</span>
-                  <span className="text-white font-semibold">€100 – €200</span>
-                </div>
-                <div className="flex justify-between border-t border-white/10 pt-2">
-                  <span className="text-white/40">Verzekering all-in</span>
-                  <span className="text-white font-semibold">€30 – €60</span>
-                </div>
-                <div className="flex justify-between border-t border-white/10 pt-2">
-                  <span className="text-white/40">Brandstof (3 dagen)</span>
-                  <span className="text-white font-semibold">€25 – €40</span>
-                </div>
-                <div className="flex justify-between border-t border-white/10 pt-2 font-semibold">
-                  <span className="text-white/60">Geschat totaal</span>
-                  <span className="text-primary">€155 – €300 (€31 – €60 p.p.)</span>
+            <div className="border border-white/10 rounded-xl p-5">
+              <h3 className="font-display font-extrabold text-sm text-white mb-3">Busje huren (9-zits)</h3>
+              <div className="space-y-0 text-xs">
+                {[
+                  ["Huur 9-zits busje, 3 dagen", "€200 – €350"],
+                  ["Verzekering (CDW + all-risk)", "€40 – €80"],
+                  ["Brandstof geschat", "€25 – €40"],
+                ].map(([label, price], i) => (
+                  <div key={i} className="flex justify-between py-2 border-b border-white/5">
+                    <span className="text-white/40">{label}</span>
+                    <span className="text-white font-medium">{price}</span>
+                  </div>
+                ))}
+                <div className="flex justify-between py-2">
+                  <span className="text-white/60 font-semibold">Totaal</span>
+                  <span className="text-primary font-bold">€265 – €470 (€53 – €94 p.p.)</span>
                 </div>
               </div>
-              <p className="text-white/30 text-[10px] mt-3">
-                Bron: rental24h.com, KAYAK, momondo — 9-zits, april, Malaga Airport
-              </p>
+              <p className="text-white/20 text-[10px] mt-2">rental24h.com, KAYAK, momondo — 9-zits, april, Malaga Airport</p>
             </div>
 
             {/* Taxi */}
-            <div className="bg-foreground text-background rounded-xl p-5">
-              <div className="flex items-center gap-2 mb-4">
-                <Car className="h-4 w-4 text-primary" />
-                <h3 className="font-display font-extrabold text-base">Taxi / transfer</h3>
-              </div>
-              <div className="space-y-2 text-xs">
-                <div className="flex justify-between border-t border-white/10 pt-2">
-                  <span className="text-white/40">Airport → La Cala de Mijas (5-7 pers.)</span>
-                  <span className="text-white font-semibold">€70 – €85</span>
-                </div>
-                <div className="flex justify-between border-t border-white/10 pt-2">
-                  <span className="text-white/40">Airport → Fuengirola (5-7 pers.)</span>
-                  <span className="text-white font-semibold">€50 – €65</span>
-                </div>
-                <div className="flex justify-between border-t border-white/10 pt-2">
-                  <span className="text-white/40">Lokale rit (10-15 min, 1-4 pers.)</span>
-                  <span className="text-white font-semibold">€12 – €20</span>
-                </div>
-                <div className="flex justify-between border-t border-white/10 pt-2 font-semibold">
-                  <span className="text-white/60">Geschat weekend (2x airport + 5 ritten)</span>
-                  <span className="text-primary">€200 – €300 (€40 – €60 p.p.)</span>
+            <div className="border border-white/10 rounded-xl p-5">
+              <h3 className="font-display font-extrabold text-sm text-white mb-3">Taxi / privétransfer</h3>
+              <div className="space-y-0 text-xs">
+                {[
+                  ["Airport → La Cala de Mijas (5-7 pers.)", "€70 – €85"],
+                  ["Airport → Fuengirola (5-7 pers.)", "€50 – €65"],
+                  ["Lokale rit 10-15 min (1-4 pers.)", "€12 – €20"],
+                ].map(([label, price], i) => (
+                  <div key={i} className="flex justify-between py-2 border-b border-white/5">
+                    <span className="text-white/40">{label}</span>
+                    <span className="text-white font-medium">{price}</span>
+                  </div>
+                ))}
+                <div className="flex justify-between py-2">
+                  <span className="text-white/60 font-semibold">Geschat weekend (2x airport + 5 lokaal)</span>
+                  <span className="text-primary font-bold">€200 – €340 (€40 – €68 p.p.)</span>
                 </div>
               </div>
-              <p className="text-white/30 text-[10px] mt-3">
-                Bron: malagaairporttaxi.net, kiwitaxi.com — vaste tarieven 2025
-              </p>
+              <p className="text-white/20 text-[10px] mt-2">malagaairporttaxi.net, kiwitaxi.com — vaste tarieven 2025</p>
             </div>
           </div>
         </section>

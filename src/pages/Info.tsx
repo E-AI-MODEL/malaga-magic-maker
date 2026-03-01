@@ -12,8 +12,9 @@ export default function Info() {
 
   return (
     <AppLayout>
-      <div className="-mx-4 -mt-6 space-y-6">
-        {/* Hero */}
+      <div className="-mx-4 -mt-6">
+
+        {/* ────── HERO ────── */}
         <section className="relative h-[50vh] min-h-[320px] flex items-end">
           <img src={heroCoast} alt="Costa del Sol kustlijn" className="absolute inset-0 w-full h-full object-cover" />
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
@@ -29,124 +30,127 @@ export default function Info() {
           </div>
         </section>
 
-        {/* ═══ VASTE GEGEVENS ═══ */}
-        <section className="bg-foreground text-background px-6 py-8">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/50 mb-5">Vaste gegevens</p>
-          <div className="space-y-3 text-sm">
-            <div className="flex justify-between border-b border-white/10 pb-2">
-              <span className="text-white/50 flex items-center gap-2"><Calendar className="h-3.5 w-3.5" /> Reis</span>
-              <span className="font-semibold text-white">2 – 5 april 2026 (3 nachten)</span>
-            </div>
-            <div className="flex justify-between border-b border-white/10 pb-2">
-              <span className="text-white/50 flex items-center gap-2"><Users className="h-3.5 w-3.5" /> Groep</span>
-              <span className="font-semibold text-white">5 volwassenen</span>
-            </div>
-            <div className="flex justify-between border-b border-white/10 pb-2">
-              <span className="text-white/50 flex items-center gap-2"><Plane className="h-3.5 w-3.5" /> Heen do ochtend</span>
-              <span className="font-semibold text-white">Robin, Mark, Dimitri</span>
-            </div>
-            <div className="flex justify-between border-b border-white/10 pb-2">
-              <span className="text-white/50 flex items-center gap-2"><Plane className="h-3.5 w-3.5" /> Heen do middag</span>
-              <span className="font-semibold text-white">Edwin, Hans</span>
-            </div>
-            <div className="flex justify-between border-b border-white/10 pb-2">
-              <span className="text-white/50 flex items-center gap-2"><Plane className="h-3.5 w-3.5" /> Terug zo ochtend</span>
-              <span className="font-semibold text-white">Allen</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-white/50">Golf</span>
-              <span className="font-semibold text-white">Min. 2x, max 3x 18 holes (La Cala Golf)</span>
-            </div>
-          </div>
-          <p className="text-white/40 text-xs mt-5 leading-relaxed">
-            Deze gegevens staan vast. In de intake bevestig je dat je hiermee akkoord bent.
-          </p>
-        </section>
+        {/* ────── DONKER BLOK: Vaste gegevens + Vervoer + Locatie header ────── */}
+        <section className="bg-foreground text-white">
 
-        {/* ═══ NOG NIET VASTE GEGEVENS ═══ */}
-        {/* Divider inside dark theme */}
-        <section className="bg-foreground px-6 pt-6 pb-2">
-          <div className="border-t border-white/10 pt-6">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">Nog niet vaste gegevens</p>
-            <p className="text-white/40 text-xs mt-1 leading-relaxed">
-              Wordt bepaald op basis van jullie voorkeuren in de intake.
+          {/* Vaste gegevens */}
+          <div className="px-6 py-8">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/50 mb-5">Vaste gegevens</p>
+            <div className="space-y-3 text-sm">
+              <div className="flex justify-between border-b border-white/10 pb-2">
+                <span className="text-white/50 flex items-center gap-2"><Calendar className="h-3.5 w-3.5" /> Reis</span>
+                <span className="font-semibold">2 – 5 april 2026 (3 nachten)</span>
+              </div>
+              <div className="flex justify-between border-b border-white/10 pb-2">
+                <span className="text-white/50 flex items-center gap-2"><Users className="h-3.5 w-3.5" /> Groep</span>
+                <span className="font-semibold">5 volwassenen</span>
+              </div>
+              <div className="flex justify-between border-b border-white/10 pb-2">
+                <span className="text-white/50 flex items-center gap-2"><Plane className="h-3.5 w-3.5" /> Heen do ochtend</span>
+                <span className="font-semibold">Robin, Mark, Dimitri</span>
+              </div>
+              <div className="flex justify-between border-b border-white/10 pb-2">
+                <span className="text-white/50 flex items-center gap-2"><Plane className="h-3.5 w-3.5" /> Heen do middag</span>
+                <span className="font-semibold">Edwin, Hans</span>
+              </div>
+              <div className="flex justify-between border-b border-white/10 pb-2">
+                <span className="text-white/50 flex items-center gap-2"><Plane className="h-3.5 w-3.5" /> Terug zo ochtend</span>
+                <span className="font-semibold">Allen</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-white/50">Golf</span>
+                <span className="font-semibold">Min. 2x, max 3x 18 holes (La Cala Golf)</span>
+              </div>
+            </div>
+            <p className="text-white/40 text-xs mt-5 leading-relaxed">
+              Deze gegevens staan vast. In de intake bevestig je dat je hiermee akkoord bent.
             </p>
           </div>
-        </section>
 
-        {/* 1. Vervoer */}
-        <section className="bg-foreground text-background px-6 pb-8 pt-4">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/50 mb-4">1 · Vervoer</p>
-          <div className="grid grid-cols-2 gap-4 text-xs">
-            <div>
-              <p className="text-white/40 mb-1">Busje huren (9-zits)</p>
-              <p className="text-white font-semibold">€265 – €470 totaal</p>
-              <p className="text-white/30 mt-0.5">€53 – €94 p.p.</p>
-              <p className="text-white/30 mt-0.5">Incl. all-risk &amp; brandstof</p>
-            </div>
-            <div>
-              <p className="text-white/40 mb-1">Taxi / privétransfer</p>
-              <p className="text-white font-semibold">€200 – €340 totaal</p>
-              <p className="text-white/30 mt-0.5">€40 – €68 p.p.</p>
-              <p className="text-white/30 mt-0.5">2× airport + ~5 lokale ritten</p>
+          {/* Divider + "Nog niet vast" label */}
+          <div className="px-6 pb-6">
+            <div className="border-t border-white/10 pt-6">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">Nog niet vaste gegevens</p>
+              <p className="text-white/40 text-xs mt-1 leading-relaxed">
+                Wordt bepaald op basis van jullie voorkeuren in de intake.
+              </p>
             </div>
           </div>
-          <div className="mt-3 flex flex-wrap gap-x-3 gap-y-1 text-[10px] text-white/25">
-            <span>Bronnen (april 2025):</span>
-            <a href="https://www.rental24h.com" target="_blank" rel="noopener noreferrer" className="underline hover:text-white/50 inline-flex items-center gap-0.5">rental24h.com <ExternalLink className="h-2.5 w-2.5" /></a>
-            <a href="https://www.kayak.com" target="_blank" rel="noopener noreferrer" className="underline hover:text-white/50 inline-flex items-center gap-0.5">KAYAK <ExternalLink className="h-2.5 w-2.5" /></a>
-            <a href="https://www.kiwitaxi.com" target="_blank" rel="noopener noreferrer" className="underline hover:text-white/50 inline-flex items-center gap-0.5">kiwitaxi.com <ExternalLink className="h-2.5 w-2.5" /></a>
-          </div>
-        </section>
 
-        {/* 2. Locatie accommodatie */}
-        <section>
-          <div className="bg-foreground px-6 py-6">
+          {/* 1 · Vervoer */}
+          <div className="px-6 pb-8">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/50 mb-4">1 · Vervoer</p>
+            <div className="grid grid-cols-2 gap-4 text-xs">
+              <div>
+                <p className="text-white/40 mb-1">Busje huren (9-zits)</p>
+                <p className="font-semibold">€265 – €470 totaal</p>
+                <p className="text-white/30 mt-0.5">€53 – €94 p.p.</p>
+                <p className="text-white/30 mt-0.5">Incl. all-risk &amp; brandstof</p>
+              </div>
+              <div>
+                <p className="text-white/40 mb-1">Taxi / privétransfer</p>
+                <p className="font-semibold">€200 – €340 totaal</p>
+                <p className="text-white/30 mt-0.5">€40 – €68 p.p.</p>
+                <p className="text-white/30 mt-0.5">2× airport + ~5 lokale ritten</p>
+              </div>
+            </div>
+            <div className="mt-3 flex flex-wrap gap-x-3 gap-y-1 text-[10px] text-white/25">
+              <span>Bronnen (april 2025):</span>
+              <a href="https://www.rental24h.com" target="_blank" rel="noopener noreferrer" className="underline hover:text-white/50 inline-flex items-center gap-0.5">rental24h.com <ExternalLink className="h-2.5 w-2.5" /></a>
+              <a href="https://www.kayak.com" target="_blank" rel="noopener noreferrer" className="underline hover:text-white/50 inline-flex items-center gap-0.5">KAYAK <ExternalLink className="h-2.5 w-2.5" /></a>
+              <a href="https://www.kiwitaxi.com" target="_blank" rel="noopener noreferrer" className="underline hover:text-white/50 inline-flex items-center gap-0.5">kiwitaxi.com <ExternalLink className="h-2.5 w-2.5" /></a>
+            </div>
+          </div>
+
+          {/* 2 · Locatie accommodatie (header) */}
+          <div className="px-6 pb-4">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/50 mb-1">2 · Locatie accommodatie</p>
             <p className="text-white/40 text-xs leading-relaxed">Twee opties — afhankelijk van jullie voorkeuren.</p>
           </div>
-          <div className="flex flex-col md:flex-row">
-            <div className="relative h-[320px] md:h-[380px] md:w-1/2">
-              <img src={heroGolf} alt="Golfbaan La Cala" className="absolute inset-0 w-full h-full object-cover" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/10" />
-              <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-8">
-                <h3 className="font-display font-extrabold text-2xl text-white mb-5">Bij de golfbaan</h3>
-                <div className="space-y-2 text-white/70 text-sm leading-relaxed">
-                  <p className="flex items-center justify-center gap-2">
-                    <CircleDot className="h-3.5 w-3.5 text-primary shrink-0" /> La Cala Golf: 5 min
-                  </p>
-                  <p className="flex items-center justify-center gap-2">
-                    <MapPin className="h-3.5 w-3.5 shrink-0" /> Strand/dorp: 10 – 15 min rijden
-                  </p>
-                  <p className="flex items-center justify-center gap-2">
-                    <Clock className="h-3.5 w-3.5 shrink-0" /> Restaurants: beperkt ter plekke
-                  </p>
-                </div>
-              </div>
-            </div>
-            <div className="relative h-[320px] md:h-[380px] md:w-1/2">
-              <img src={heroBeach} alt="La Cala de Mijas" className="absolute inset-0 w-full h-full object-cover" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/10" />
-              <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-8">
-                <h3 className="font-display font-extrabold text-2xl text-white mb-5">Bij strand en dorp</h3>
-                <div className="space-y-2 text-white/70 text-sm leading-relaxed">
-                  <p className="flex items-center justify-center gap-2">
-                    <MapPin className="h-3.5 w-3.5 text-primary shrink-0" /> Strand en restaurants: lopend
-                  </p>
-                  <p className="flex items-center justify-center gap-2">
-                    <CircleDot className="h-3.5 w-3.5 shrink-0" /> La Cala Golf: 10 – 15 min rijden
-                  </p>
-                  <p className="flex items-center justify-center gap-2">
-                    <Clock className="h-3.5 w-3.5 shrink-0" /> Winkels/centrum: lopend
-                  </p>
-                </div>
+        </section>
+
+        {/* ────── LOCATIE FOTO'S (full-bleed) ────── */}
+        <div className="flex flex-col md:flex-row">
+          <div className="relative h-[280px] md:h-[360px] md:w-1/2">
+            <img src={heroGolf} alt="Golfbaan La Cala" className="absolute inset-0 w-full h-full object-cover" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/10" />
+            <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-8">
+              <h3 className="font-display font-extrabold text-2xl text-white mb-5">Bij de golfbaan</h3>
+              <div className="space-y-2 text-white/70 text-sm leading-relaxed">
+                <p className="flex items-center justify-center gap-2">
+                  <CircleDot className="h-3.5 w-3.5 text-primary shrink-0" /> La Cala Golf: 5 min
+                </p>
+                <p className="flex items-center justify-center gap-2">
+                  <MapPin className="h-3.5 w-3.5 shrink-0" /> Strand/dorp: 10 – 15 min rijden
+                </p>
+                <p className="flex items-center justify-center gap-2">
+                  <Clock className="h-3.5 w-3.5 shrink-0" /> Restaurants: beperkt ter plekke
+                </p>
               </div>
             </div>
           </div>
-        </section>
+          <div className="relative h-[280px] md:h-[360px] md:w-1/2">
+            <img src={heroBeach} alt="La Cala de Mijas" className="absolute inset-0 w-full h-full object-cover" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/10" />
+            <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-8">
+              <h3 className="font-display font-extrabold text-2xl text-white mb-5">Bij strand en dorp</h3>
+              <div className="space-y-2 text-white/70 text-sm leading-relaxed">
+                <p className="flex items-center justify-center gap-2">
+                  <MapPin className="h-3.5 w-3.5 text-primary shrink-0" /> Strand en restaurants: lopend
+                </p>
+                <p className="flex items-center justify-center gap-2">
+                  <CircleDot className="h-3.5 w-3.5 shrink-0" /> La Cala Golf: 10 – 15 min rijden
+                </p>
+                <p className="flex items-center justify-center gap-2">
+                  <Clock className="h-3.5 w-3.5 shrink-0" /> Winkels/centrum: lopend
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
 
-        {/* 3. Accommodatie — harde eisen */}
-        <section className="relative">
+        {/* ────── LICHT BLOK: Accommodatie harde eisen ────── */}
+        <section>
           <img src={heroVilla} alt="Terras met uitzicht" className="w-full h-48 object-cover" />
           <div className="px-6 py-8 bg-background">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground mb-2">3 · Accommodatie</p>
@@ -171,8 +175,8 @@ export default function Info() {
           </div>
         </section>
 
-        {/* CTA */}
-        <section className="bg-foreground text-background px-6 py-10 text-center">
+        {/* ────── CTA ────── */}
+        <section className="bg-foreground px-6 py-10 text-center">
           <p className="text-white/50 text-xs font-semibold uppercase tracking-[0.2em] mb-3">Klaar?</p>
           <h2 className="font-display text-lg font-extrabold text-white mb-2">
             Vul de intake in en we gaan van start
@@ -184,6 +188,7 @@ export default function Info() {
             Start intake <ArrowRight className="h-4 w-4" />
           </Button>
         </section>
+
       </div>
     </AppLayout>
   );

@@ -4,12 +4,11 @@ import { AppLayout } from "@/components/AppLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext } from "@/components/ui/carousel";
-import { MapPin, BedDouble, Car, Clock, Waves, ChevronRight } from "lucide-react";
+import { BedDouble, Car, Clock, Waves, ArrowRight } from "lucide-react";
 import { rankAccommodations, computeGroupRules, type Accommodation, type Submission, type RankedAccommodation } from "@/lib/scoring";
 
 export default function Accommodations() {
@@ -43,22 +42,25 @@ export default function Accommodations() {
     return items;
   }, [ranked, sortBy, eligibleOnly]);
 
-  if (loading) return <AppLayout><div className="flex justify-center py-12">Laden...</div></AppLayout>;
+  if (loading) return <AppLayout><div className="flex justify-center py-12 text-sm text-muted-foreground">Laden...</div></AppLayout>;
 
   const baseLabel = (loc: string) => {
-    if (["La Cala Golf"].includes(loc)) return "⛳ Golf-base";
-    if (["La Cala de Mijas", "Calahonda", "Fuengirola"].includes(loc)) return "🏖️ Strand-base";
-    return "📍 " + loc;
+    if (["La Cala Golf"].includes(loc)) return "Golf-base";
+    if (["La Cala de Mijas", "Calahonda", "Fuengirola"].includes(loc)) return "Strand-base";
+    return loc;
   };
 
   return (
     <AppLayout>
-      <div className="space-y-4">
-        <h2 className="font-display text-xl font-bold">🏠 Verblijven</h2>
+      <div className="space-y-5">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-wider text-primary mb-1">Verblijven</p>
+          <h2 className="font-display text-xl font-extrabold">{filtered.length} opties</h2>
+        </div>
 
         <div className="flex items-center gap-3 flex-wrap">
           <Select value={sortBy} onValueChange={setSortBy}>
-            <SelectTrigger className="w-[160px]">
+            <SelectTrigger className="w-[160px] h-9 text-xs">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -70,7 +72,7 @@ export default function Accommodations() {
           </Select>
           <div className="flex items-center gap-2">
             <Switch checked={eligibleOnly} onCheckedChange={setEligibleOnly} id="eligible" />
-            <Label htmlFor="eligible" className="text-sm">Eligible only</Label>
+            <Label htmlFor="eligible" className="text-xs font-medium">Eligible only</Label>
           </div>
         </div>
 
@@ -86,7 +88,7 @@ export default function Accommodations() {
 
 function AccommodationCard({ acc, baseLabel, onDetail }: { acc: RankedAccommodation; baseLabel: (loc: string) => string; onDetail: () => void }) {
   return (
-    <Card className={`overflow-hidden ${acc.status === "eliminated" ? "opacity-50" : ""}`}>
+    <div className={`border rounded-lg overflow-hidden bg-card transition-opacity ${acc.status === "eliminated" ? "opacity-40" : ""}`}>
       {acc.image_urls.length > 0 && (
         <Carousel className="w-full">
           <CarouselContent>
@@ -106,49 +108,49 @@ function AccommodationCard({ acc, baseLabel, onDetail }: { acc: RankedAccommodat
           )}
         </Carousel>
       )}
-      <CardContent className="p-4 space-y-3">
+      <div className="p-4 space-y-3">
         <div className="flex items-start justify-between gap-2">
-          <div>
-            <h3 className="font-display font-semibold text-sm leading-tight">{acc.name}</h3>
-            <p className="text-xs text-muted-foreground mt-0.5">{baseLabel(acc.location_label)}</p>
+          <div className="min-w-0">
+            <h3 className="font-display font-bold text-sm leading-tight truncate">{acc.name}</h3>
+            <p className="text-xs text-muted-foreground mt-0.5">{baseLabel(acc.location_label)} · {acc.location_label}</p>
           </div>
           <div className="text-right shrink-0">
-            <div className="font-display font-bold text-lg text-primary">{acc.totalScore.toFixed(0)}</div>
-            <div className="text-[10px] text-muted-foreground">score</div>
+            <div className="font-display font-extrabold text-lg text-primary leading-none">{acc.totalScore.toFixed(0)}</div>
+            <div className="text-[10px] text-muted-foreground font-medium">punten</div>
           </div>
         </div>
 
         <div className="flex flex-wrap gap-1.5">
           {acc.eligibility.eligible ? (
-            <Badge className="bg-success text-success-foreground text-[10px]">✓ Eligible</Badge>
+            <Badge className="bg-primary/10 text-primary border-primary/20 text-[10px] font-semibold">Eligible</Badge>
           ) : (
-            <Badge variant="destructive" className="text-[10px]">✗ Not eligible</Badge>
+            <Badge variant="destructive" className="text-[10px]">Not eligible</Badge>
           )}
-          {acc.status === "finalist" && <Badge className="bg-secondary text-secondary-foreground text-[10px]">🏆 Finalist</Badge>}
+          {acc.status === "finalist" && <Badge className="bg-warning text-warning-foreground text-[10px]">Finalist</Badge>}
           {acc.status === "eliminated" && <Badge variant="outline" className="text-[10px]">Eliminated</Badge>}
         </div>
 
-        <div className="grid grid-cols-4 gap-2 text-[11px] text-muted-foreground">
-          <div className="flex items-center gap-1"><BedDouble className="h-3 w-3" /> {acc.bedrooms}k / {acc.fixed_beds_count}b</div>
-          <div className="flex items-center gap-1"><Clock className="h-3 w-3" /> {acc.golf_minutes ?? "?"}m golf</div>
-          <div className="flex items-center gap-1"><Waves className="h-3 w-3" /> {acc.beach_meters ?? "?"}m</div>
-          <div className="flex items-center gap-1"><Car className="h-3 w-3" /> {acc.parking === "yes" ? "✓" : acc.parking === "no" ? "✗" : "?"}</div>
+        <div className="grid grid-cols-4 gap-1 text-[11px] text-muted-foreground">
+          <div className="flex items-center gap-1"><BedDouble className="h-3 w-3 shrink-0" /> {acc.bedrooms}k/{acc.fixed_beds_count}b</div>
+          <div className="flex items-center gap-1"><Clock className="h-3 w-3 shrink-0" /> {acc.golf_minutes ?? "?"}m</div>
+          <div className="flex items-center gap-1"><Waves className="h-3 w-3 shrink-0" /> {acc.beach_meters ?? "?"}m</div>
+          <div className="flex items-center gap-1"><Car className="h-3 w-3 shrink-0" /> {acc.parking === "yes" ? "✓" : acc.parking === "no" ? "✗" : "?"}</div>
         </div>
 
         {acc.total_price_3_nights && (
-          <p className="text-sm font-semibold">€{acc.total_price_3_nights} <span className="text-xs font-normal text-muted-foreground">/ 3 nachten</span></p>
+          <p className="text-sm font-display font-bold">€{acc.total_price_3_nights} <span className="text-xs font-normal text-muted-foreground">/ 3 nachten</span></p>
         )}
 
         {acc.topReasons.length > 0 && (
           <div className="text-[11px] text-muted-foreground space-y-0.5">
-            {acc.topReasons.map((r, i) => <div key={i}>• {r}</div>)}
+            {acc.topReasons.map((r, i) => <div key={i}>· {r}</div>)}
           </div>
         )}
 
-        <Button variant="outline" size="sm" className="w-full" onClick={onDetail}>
-          Details <ChevronRight className="h-4 w-4 ml-1" />
+        <Button variant="outline" size="sm" className="w-full gap-1 text-xs font-semibold" onClick={onDetail}>
+          Details <ArrowRight className="h-3.5 w-3.5" />
         </Button>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

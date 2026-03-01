@@ -78,7 +78,7 @@ export default function Info() {
           </div>
 
           {/* 1 · Vervoer */}
-          <div className="px-6 pb-8">
+          <div className="mx-6 border border-white/10 rounded-lg p-5">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/50 mb-4">1 · Vervoer</p>
             <div className="grid grid-cols-2 gap-4 text-xs">
               <div>
@@ -103,7 +103,7 @@ export default function Info() {
           </div>
 
           {/* 2 · Locatie accommodatie (header) */}
-          <div className="px-6 pb-4">
+          <div className="px-6 pt-8 pb-4">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/50 mb-1">2 · Locatie accommodatie</p>
             <p className="text-white/40 text-xs leading-relaxed">Twee opties — afhankelijk van jullie voorkeuren.</p>
           </div>

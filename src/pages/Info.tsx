@@ -74,30 +74,42 @@ export default function Info() {
         </section>
 
         {/* ═══════════ BLOK 1: VERVOER ═══════════ */}
-        <section className="relative min-h-[320px] flex items-end">
+        <section className="relative min-h-[420px] flex items-end">
           <img src={heroTransport} alt="Kustweg Costa del Sol" className="absolute inset-0 w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-black/20" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/60 to-black/10" />
           <div className="relative z-10 px-6 py-8 w-full">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/50 mb-1 flex items-center gap-2">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/40 mb-2 flex items-center gap-2">
               <Car className="h-3.5 w-3.5" /> 1 · Vervoer
             </p>
-            <h2 className="font-display text-xl font-extrabold text-white mb-5">Busje of taxi?</h2>
-            <div className="grid grid-cols-2 gap-6 text-xs">
-              <div>
-                <p className="text-white/50 mb-1">Busje huren (9-zits)</p>
-                <p className="text-white font-semibold text-sm">€265 – €470 totaal</p>
-                <p className="text-white/40 mt-0.5">€53 – €94 p.p.</p>
-                <p className="text-white/40 mt-0.5">Incl. all-risk &amp; brandstof</p>
+            <h2 className="font-display text-2xl font-extrabold text-white mb-6">Busje of taxi?</h2>
+
+            <div className="grid grid-cols-2 gap-4">
+              {/* Optie A */}
+              <div className="rounded-lg border border-white/15 bg-white/5 backdrop-blur-sm p-4">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.15em] text-white/40 mb-3">Optie A</p>
+                <h3 className="font-display text-base font-bold text-white mb-1">9-zits busje</h3>
+                <p className="text-lg font-extrabold text-white mb-3">€265 – €470<span className="text-xs font-normal text-white/40 ml-1">totaal</span></p>
+                <div className="space-y-1 text-xs text-white/50">
+                  <p>€53 – €94 p.p.</p>
+                  <p>Incl. all-risk &amp; brandstof</p>
+                  <p>Maximale flexibiliteit</p>
+                </div>
               </div>
-              <div>
-                <p className="text-white/50 mb-1">Taxi / privétransfer</p>
-                <p className="text-white font-semibold text-sm">€200 – €340 totaal</p>
-                <p className="text-white/40 mt-0.5">€40 – €68 p.p.</p>
-                <p className="text-white/40 mt-0.5">2× airport + ~5 lokale ritten</p>
+              {/* Optie B */}
+              <div className="rounded-lg border border-white/15 bg-white/5 backdrop-blur-sm p-4">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.15em] text-white/40 mb-3">Optie B</p>
+                <h3 className="font-display text-base font-bold text-white mb-1">Taxi / transfer</h3>
+                <p className="text-lg font-extrabold text-white mb-3">€200 – €340<span className="text-xs font-normal text-white/40 ml-1">totaal</span></p>
+                <div className="space-y-1 text-xs text-white/50">
+                  <p>€40 – €68 p.p.</p>
+                  <p>2× airport transfer</p>
+                  <p>~5 lokale ritten</p>
+                </div>
               </div>
             </div>
-            <div className="mt-4 flex flex-wrap gap-x-3 gap-y-1 text-[10px] text-white/30">
-              <span>Bronnen (april 2025):</span>
+
+            <div className="mt-5 flex flex-wrap gap-x-3 gap-y-1 text-[10px] text-white/25">
+              <span>Bronnen:</span>
               <a href="https://www.rental24h.com" target="_blank" rel="noopener noreferrer" className="underline hover:text-white/50 inline-flex items-center gap-0.5">rental24h.com <ExternalLink className="h-2.5 w-2.5" /></a>
               <a href="https://www.kayak.com" target="_blank" rel="noopener noreferrer" className="underline hover:text-white/50 inline-flex items-center gap-0.5">KAYAK <ExternalLink className="h-2.5 w-2.5" /></a>
               <a href="https://www.kiwitaxi.com" target="_blank" rel="noopener noreferrer" className="underline hover:text-white/50 inline-flex items-center gap-0.5">kiwitaxi.com <ExternalLink className="h-2.5 w-2.5" /></a>

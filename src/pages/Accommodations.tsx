@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext } from "@/components/ui/carousel";
 import { BedDouble, Car, Clock, Waves, ArrowRight } from "lucide-react";
 import { rankAccommodations, computeGroupRules, type Accommodation, type Submission, type RankedAccommodation } from "@/lib/scoring";
+import heroVilla from "@/assets/hero-villa.jpg";
 
 export default function Accommodations() {
   const navigate = useNavigate();
@@ -52,31 +53,40 @@ export default function Accommodations() {
 
   return (
     <AppLayout>
-      <div className="space-y-5">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-wider text-primary mb-1">Verblijven</p>
-          <h2 className="font-display text-xl font-extrabold">{filtered.length} opties</h2>
+      <div className="-mx-4 -mt-6 space-y-0">
+        {/* Hero header */}
+        <div className="relative h-32">
+          <img src={heroVilla} alt="" className="absolute inset-0 w-full h-full object-cover" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/40 to-black/70" />
+          <div className="relative z-10 flex items-end h-full px-6 pb-4">
+            <div>
+              <p className="text-white/50 text-xs font-semibold uppercase tracking-[0.2em]">Verblijven</p>
+              <h2 className="font-display text-2xl font-extrabold text-white mt-1">{filtered.length} opties</h2>
+            </div>
+          </div>
         </div>
 
-        <div className="flex items-center gap-3 flex-wrap">
+        {/* Controls */}
+        <div className="bg-foreground px-6 py-3 flex items-center gap-3 flex-wrap">
           <Select value={sortBy} onValueChange={setSortBy}>
-            <SelectTrigger className="w-[160px] h-9 text-xs">
+            <SelectTrigger className="w-[140px] h-8 text-xs bg-white/10 border-white/15 text-white">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="score">Ranking score</SelectItem>
+              <SelectItem value="score">Ranking</SelectItem>
               <SelectItem value="price">Prijs</SelectItem>
               <SelectItem value="golf">Golf afstand</SelectItem>
-              <SelectItem value="beach">Strand afstand</SelectItem>
+              <SelectItem value="beach">Strand</SelectItem>
             </SelectContent>
           </Select>
           <div className="flex items-center gap-2">
             <Switch checked={eligibleOnly} onCheckedChange={setEligibleOnly} id="eligible" />
-            <Label htmlFor="eligible" className="text-xs font-medium">Eligible only</Label>
+            <Label htmlFor="eligible" className="text-[11px] text-white/50 font-medium">Eligible only</Label>
           </div>
         </div>
 
-        <div className="space-y-4">
+        {/* Cards */}
+        <div className="px-4 py-4 space-y-4 bg-background">
           {filtered.map((acc) => (
             <AccommodationCard key={acc.id} acc={acc} baseLabel={baseLabel} onDetail={() => navigate(`/accommodations/${acc.id}`)} />
           ))}
@@ -88,14 +98,21 @@ export default function Accommodations() {
 
 function AccommodationCard({ acc, baseLabel, onDetail }: { acc: RankedAccommodation; baseLabel: (loc: string) => string; onDetail: () => void }) {
   return (
-    <div className={`border rounded-lg overflow-hidden bg-card transition-opacity ${acc.status === "eliminated" ? "opacity-40" : ""}`}>
+    <div className={`rounded-xl overflow-hidden bg-card border transition-opacity ${acc.status === "eliminated" ? "opacity-30" : ""}`}>
       {acc.image_urls.length > 0 && (
         <Carousel className="w-full">
           <CarouselContent>
             {acc.image_urls.map((url, i) => (
               <CarouselItem key={i}>
-                <div className="aspect-[16/10] relative">
-                  <img src={url} alt={`${acc.name} foto ${i + 1}`} className="w-full h-full object-cover" loading="lazy" />
+                <div className="aspect-[16/9] relative">
+                  <img src={url} alt={`${acc.name} ${i + 1}`} className="w-full h-full object-cover" loading="lazy" />
+                  {/* Score overlay */}
+                  {i === 0 && (
+                    <div className="absolute top-3 right-3 bg-black/70 backdrop-blur-sm rounded-lg px-3 py-1.5 text-center">
+                      <div className="font-display font-extrabold text-lg text-white leading-none">{acc.totalScore.toFixed(0)}</div>
+                      <div className="text-[9px] text-white/50 font-semibold uppercase tracking-wider">score</div>
+                    </div>
+                  )}
                 </div>
               </CarouselItem>
             ))}
@@ -109,46 +126,42 @@ function AccommodationCard({ acc, baseLabel, onDetail }: { acc: RankedAccommodat
         </Carousel>
       )}
       <div className="p-4 space-y-3">
-        <div className="flex items-start justify-between gap-2">
-          <div className="min-w-0">
-            <h3 className="font-display font-bold text-sm leading-tight truncate">{acc.name}</h3>
-            <p className="text-xs text-muted-foreground mt-0.5">{baseLabel(acc.location_label)} · {acc.location_label}</p>
-          </div>
-          <div className="text-right shrink-0">
-            <div className="font-display font-extrabold text-lg text-primary leading-none">{acc.totalScore.toFixed(0)}</div>
-            <div className="text-[10px] text-muted-foreground font-medium">punten</div>
-          </div>
+        <div>
+          <h3 className="font-display font-extrabold text-sm leading-tight">{acc.name}</h3>
+          <p className="text-xs text-muted-foreground mt-0.5">{baseLabel(acc.location_label)} &middot; {acc.location_label}</p>
         </div>
 
         <div className="flex flex-wrap gap-1.5">
           {acc.eligibility.eligible ? (
-            <Badge className="bg-primary/10 text-primary border-primary/20 text-[10px] font-semibold">Eligible</Badge>
+            <Badge className="bg-primary text-primary-foreground text-[10px] font-bold rounded-md">ELIGIBLE</Badge>
           ) : (
-            <Badge variant="destructive" className="text-[10px]">Not eligible</Badge>
+            <Badge variant="destructive" className="text-[10px] font-bold rounded-md">NOT ELIGIBLE</Badge>
           )}
-          {acc.status === "finalist" && <Badge className="bg-warning text-warning-foreground text-[10px]">Finalist</Badge>}
-          {acc.status === "eliminated" && <Badge variant="outline" className="text-[10px]">Eliminated</Badge>}
+          {acc.status === "finalist" && <Badge className="bg-warning text-warning-foreground text-[10px] font-bold rounded-md">FINALIST</Badge>}
+          {acc.status === "eliminated" && <Badge variant="outline" className="text-[10px] font-bold rounded-md">ELIMINATED</Badge>}
         </div>
 
         <div className="grid grid-cols-4 gap-1 text-[11px] text-muted-foreground">
           <div className="flex items-center gap-1"><BedDouble className="h-3 w-3 shrink-0" /> {acc.bedrooms}k/{acc.fixed_beds_count}b</div>
           <div className="flex items-center gap-1"><Clock className="h-3 w-3 shrink-0" /> {acc.golf_minutes ?? "?"}m</div>
           <div className="flex items-center gap-1"><Waves className="h-3 w-3 shrink-0" /> {acc.beach_meters ?? "?"}m</div>
-          <div className="flex items-center gap-1"><Car className="h-3 w-3 shrink-0" /> {acc.parking === "yes" ? "✓" : acc.parking === "no" ? "✗" : "?"}</div>
+          <div className="flex items-center gap-1"><Car className="h-3 w-3 shrink-0" /> {acc.parking === "yes" ? "Ja" : acc.parking === "no" ? "Nee" : "?"}</div>
         </div>
 
         {acc.total_price_3_nights && (
-          <p className="text-sm font-display font-bold">€{acc.total_price_3_nights} <span className="text-xs font-normal text-muted-foreground">/ 3 nachten</span></p>
+          <p className="font-display font-extrabold text-base">
+            EUR {acc.total_price_3_nights} <span className="text-xs font-normal text-muted-foreground">/ 3 nachten</span>
+          </p>
         )}
 
         {acc.topReasons.length > 0 && (
           <div className="text-[11px] text-muted-foreground space-y-0.5">
-            {acc.topReasons.map((r, i) => <div key={i}>· {r}</div>)}
+            {acc.topReasons.map((r, i) => <div key={i}>&middot; {r}</div>)}
           </div>
         )}
 
-        <Button variant="outline" size="sm" className="w-full gap-1 text-xs font-semibold" onClick={onDetail}>
-          Details <ArrowRight className="h-3.5 w-3.5" />
+        <Button variant="outline" size="sm" className="w-full gap-1 text-xs font-bold" onClick={onDetail}>
+          Bekijk details <ArrowRight className="h-3.5 w-3.5" />
         </Button>
       </div>
     </div>

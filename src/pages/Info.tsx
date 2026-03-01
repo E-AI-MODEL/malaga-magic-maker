@@ -63,23 +63,26 @@ export default function Info() {
           </p>
         </section>
 
-        {/* ═══ NOG NIET VASTE GEGEVENS — header ═══ */}
-        <section className="bg-background px-6 py-6">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">Nog niet vaste gegevens</p>
-          <p className="text-muted-foreground text-sm mt-1 leading-relaxed">
-            Onderstaande punten worden bepaald op basis van jullie voorkeuren in de intake.
-          </p>
+        {/* ═══ NOG NIET VASTE GEGEVENS ═══ */}
+        {/* Divider inside dark theme */}
+        <section className="bg-foreground px-6 pt-6 pb-2">
+          <div className="border-t border-white/10 pt-6">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">Nog niet vaste gegevens</p>
+            <p className="text-white/40 text-xs mt-1 leading-relaxed">
+              Wordt bepaald op basis van jullie voorkeuren in de intake.
+            </p>
+          </div>
         </section>
 
         {/* 1. Vervoer */}
-        <section className="bg-foreground text-background px-6 py-8">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/50 mb-5">1 · Vervoer</p>
+        <section className="bg-foreground text-background px-6 pb-8 pt-4">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/50 mb-4">1 · Vervoer</p>
           <div className="grid grid-cols-2 gap-4 text-xs">
             <div>
               <p className="text-white/40 mb-1">Busje huren (9-zits)</p>
               <p className="text-white font-semibold">€265 – €470 totaal</p>
               <p className="text-white/30 mt-0.5">€53 – €94 p.p.</p>
-              <p className="text-white/30 mt-0.5">Incl. all-risk verzekering &amp; brandstof</p>
+              <p className="text-white/30 mt-0.5">Incl. all-risk &amp; brandstof</p>
             </div>
             <div>
               <p className="text-white/40 mb-1">Taxi / privétransfer</p>
@@ -88,7 +91,7 @@ export default function Info() {
               <p className="text-white/30 mt-0.5">2× airport + ~5 lokale ritten</p>
             </div>
           </div>
-          <div className="mt-4 flex flex-wrap gap-x-4 gap-y-1 text-[10px] text-white/30">
+          <div className="mt-3 flex flex-wrap gap-x-3 gap-y-1 text-[10px] text-white/25">
             <span>Bronnen (april 2025):</span>
             <a href="https://www.rental24h.com" target="_blank" rel="noopener noreferrer" className="underline hover:text-white/50 inline-flex items-center gap-0.5">rental24h.com <ExternalLink className="h-2.5 w-2.5" /></a>
             <a href="https://www.kayak.com" target="_blank" rel="noopener noreferrer" className="underline hover:text-white/50 inline-flex items-center gap-0.5">KAYAK <ExternalLink className="h-2.5 w-2.5" /></a>
@@ -96,43 +99,43 @@ export default function Info() {
           </div>
         </section>
 
-        {/* 2. Locatie accommodatie */}
-        <section className="relative h-[44vh] min-h-[300px]">
-          <div className="absolute inset-0 flex">
-            <div className="w-1/2 relative overflow-hidden">
+        {/* 2. Locatie accommodatie — stacked on mobile, side-by-side on md+ */}
+        <section>
+          <div className="flex flex-col md:flex-row">
+            <div className="relative h-[280px] md:h-[340px] md:w-1/2">
               <img src={heroGolf} alt="Golfbaan La Cala" className="absolute inset-0 w-full h-full object-cover" />
               <div className="absolute inset-0 bg-black/60" />
-              <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-4">
-                <p className="text-white/40 text-[10px] font-semibold uppercase tracking-[0.2em] mb-2">2 · Locatie accommodatie</p>
-                <h3 className="font-display font-extrabold text-lg text-white">Bij de golfbaan</h3>
-                <div className="mt-3 space-y-1.5 text-white/70 text-xs leading-relaxed">
-                  <p className="flex items-center justify-center gap-1.5">
-                    <CircleDot className="h-3 w-3 text-primary" /> La Cala Golf: 5 min
+              <div className="absolute inset-0 flex flex-col justify-end p-6">
+                <p className="text-white/40 text-[10px] font-semibold uppercase tracking-[0.2em] mb-1">2 · Locatie accommodatie</p>
+                <h3 className="font-display font-extrabold text-xl text-white mb-3">Bij de golfbaan</h3>
+                <div className="space-y-1.5 text-white/70 text-xs leading-relaxed">
+                  <p className="flex items-center gap-1.5">
+                    <CircleDot className="h-3 w-3 text-primary shrink-0" /> La Cala Golf: 5 min
                   </p>
-                  <p className="flex items-center justify-center gap-1.5">
-                    <MapPin className="h-3 w-3" /> Strand/dorp: 10 – 15 min rijden
+                  <p className="flex items-center gap-1.5">
+                    <MapPin className="h-3 w-3 shrink-0" /> Strand/dorp: 10 – 15 min rijden
                   </p>
-                  <p className="flex items-center justify-center gap-1.5">
-                    <Clock className="h-3 w-3" /> Restaurants: beperkt ter plekke
+                  <p className="flex items-center gap-1.5">
+                    <Clock className="h-3 w-3 shrink-0" /> Restaurants: beperkt ter plekke
                   </p>
                 </div>
               </div>
             </div>
-            <div className="w-1/2 relative overflow-hidden">
+            <div className="relative h-[280px] md:h-[340px] md:w-1/2">
               <img src={heroBeach} alt="La Cala de Mijas" className="absolute inset-0 w-full h-full object-cover" />
               <div className="absolute inset-0 bg-black/60" />
-              <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-4">
-                <p className="text-white/40 text-[10px] font-semibold uppercase tracking-[0.2em] mb-2">&nbsp;</p>
-                <h3 className="font-display font-extrabold text-lg text-white">Bij strand en dorp</h3>
-                <div className="mt-3 space-y-1.5 text-white/70 text-xs leading-relaxed">
-                  <p className="flex items-center justify-center gap-1.5">
-                    <MapPin className="h-3 w-3 text-primary" /> Strand en restaurants: lopend
+              <div className="absolute inset-0 flex flex-col justify-end p-6">
+                <p className="text-white/40 text-[10px] font-semibold uppercase tracking-[0.2em] mb-1 md:invisible">&nbsp;</p>
+                <h3 className="font-display font-extrabold text-xl text-white mb-3">Bij strand en dorp</h3>
+                <div className="space-y-1.5 text-white/70 text-xs leading-relaxed">
+                  <p className="flex items-center gap-1.5">
+                    <MapPin className="h-3 w-3 text-primary shrink-0" /> Strand en restaurants: lopend
                   </p>
-                  <p className="flex items-center justify-center gap-1.5">
-                    <CircleDot className="h-3 w-3" /> La Cala Golf: 10 – 15 min rijden
+                  <p className="flex items-center gap-1.5">
+                    <CircleDot className="h-3 w-3 shrink-0" /> La Cala Golf: 10 – 15 min rijden
                   </p>
-                  <p className="flex items-center justify-center gap-1.5">
-                    <Clock className="h-3 w-3" /> Winkels/centrum: lopend
+                  <p className="flex items-center gap-1.5">
+                    <Clock className="h-3 w-3 shrink-0" /> Winkels/centrum: lopend
                   </p>
                 </div>
               </div>
@@ -142,10 +145,10 @@ export default function Info() {
 
         {/* 3. Accommodatie — harde eisen */}
         <section className="relative">
-          <img src={heroVilla} alt="Terras met uitzicht" className="w-full h-56 object-cover" />
+          <img src={heroVilla} alt="Terras met uitzicht" className="w-full h-48 object-cover" />
           <div className="px-6 py-8 bg-background">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground mb-2">3 · Accommodatie</p>
-            <h2 className="font-display text-xl font-extrabold mb-5">Harde eisen per verblijf</h2>
+            <h2 className="font-display text-xl font-extrabold mb-4">Harde eisen per verblijf</h2>
             <p className="text-muted-foreground text-sm mb-5 leading-relaxed">
               Elk verblijf wordt getoetst op onderstaande punten. In de intake geef je aan welke voor jou een harde eis zijn — als de meerderheid een punt aanvinkt, valt elk verblijf dat niet voldoet af.
             </p>

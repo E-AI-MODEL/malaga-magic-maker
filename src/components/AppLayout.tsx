@@ -10,9 +10,9 @@ export function AppLayout({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen pb-20 bg-background">
       <header className="sticky top-0 z-40 bg-foreground text-background">
-        <div className="flex items-center justify-between px-4 py-2.5 max-w-lg mx-auto">
+        <div className="flex items-center justify-between px-4 py-2.5 max-w-2xl mx-auto">
           <h1 className="font-display text-xs font-extrabold uppercase tracking-[0.15em]">
-            Malaga Afvalrace
+            Malaga
           </h1>
           <div className="flex items-center gap-2">
             <span className="text-[11px] text-white/50 font-medium">{profile?.display_name}</span>
@@ -22,7 +22,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
           </div>
         </div>
       </header>
-      <main className="max-w-lg mx-auto">
+      <main className="max-w-2xl mx-auto">
         {children}
       </main>
       <BottomNav />

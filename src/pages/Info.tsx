@@ -66,8 +66,8 @@ export default function Info() {
         </section>
 
         {/* ═══════════ NOG NIET VAST — INTRO ═══════════ */}
-        <section className="px-6 py-8">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary mb-1">Nog niet vaste gegevens</p>
+        <section className="px-6 py-10">
+          <h2 className="font-display text-xl font-extrabold mb-1">Gegevens die nog niet vast staan</h2>
           <p className="text-muted-foreground text-sm leading-relaxed">
             Wordt bepaald op basis van jullie voorkeuren in de intake.
           </p>

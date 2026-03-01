@@ -136,7 +136,7 @@ export default function Intake() {
     exploring: "Omgeving ontdekken",
     luxury: "Comfort & luxe",
     budget: "Budget laag houden",
-    lowHassle: "Minimaal gedoe",
+    lowHassle: "Gemak & ontzorging",
   };
 
   return (

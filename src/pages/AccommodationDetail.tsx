@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext } from "@/components/ui/carousel";
-import { ArrowLeft, ExternalLink, MapPin, BedDouble, Bath, Car, Clock, Waves, Plane, CheckCircle2, XCircle } from "lucide-react";
+import { ArrowLeft, ExternalLink, BedDouble, Bath, Car, Clock, Waves, Plane, CheckCircle2, XCircle } from "lucide-react";
 import { computeGroupRules, checkEligibility, type Accommodation, type Submission } from "@/lib/scoring";
 
 export default function AccommodationDetail() {
@@ -46,83 +46,98 @@ export default function AccommodationDetail() {
 
   return (
     <AppLayout>
-      <div className="space-y-5">
-        <Button variant="ghost" size="sm" onClick={() => navigate(-1)} className="gap-1 -ml-2 text-xs font-medium">
-          <ArrowLeft className="h-4 w-4" /> Terug
-        </Button>
+      <div className="-mx-4 -mt-6 space-y-0">
+        {/* Image carousel with back button overlay */}
+        <div className="relative">
+          <Button
+            variant="ghost" size="icon"
+            onClick={() => navigate(-1)}
+            className="absolute top-3 left-3 z-20 h-9 w-9 bg-black/50 text-white hover:bg-black/70 rounded-full"
+          >
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
 
-        {acc.image_urls.length > 0 && (
-          <Carousel className="w-full">
-            <CarouselContent>
-              {acc.image_urls.map((url, i) => (
-                <CarouselItem key={i}>
-                  <div className="aspect-[16/10] rounded-lg overflow-hidden">
-                    <img src={url} alt={`${acc.name} ${i + 1}`} className="w-full h-full object-cover" loading="lazy" />
-                  </div>
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-            {acc.image_urls.length > 1 && (
-              <>
-                <CarouselPrevious className="left-2" />
-                <CarouselNext className="right-2" />
-              </>
+          {acc.image_urls.length > 0 && (
+            <Carousel className="w-full">
+              <CarouselContent>
+                {acc.image_urls.map((url, i) => (
+                  <CarouselItem key={i}>
+                    <div className="aspect-[16/10]">
+                      <img src={url} alt={`${acc.name} ${i + 1}`} className="w-full h-full object-cover" loading="lazy" />
+                    </div>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              {acc.image_urls.length > 1 && (
+                <>
+                  <CarouselPrevious className="left-2" />
+                  <CarouselNext className="right-2" />
+                </>
+              )}
+            </Carousel>
+          )}
+        </div>
+
+        {/* Title + badges */}
+        <div className="bg-foreground text-background px-6 py-5">
+          <h2 className="font-display text-xl font-extrabold text-white">{acc.name}</h2>
+          <p className="text-white/50 text-sm mt-1">{acc.location_label} &middot; {acc.type}</p>
+          <div className="flex flex-wrap gap-1.5 mt-3">
+            {eligibility?.eligible ? (
+              <Badge className="bg-primary text-primary-foreground text-[10px] font-bold rounded-md">ELIGIBLE</Badge>
+            ) : (
+              <Badge variant="destructive" className="text-[10px] font-bold rounded-md">NOT ELIGIBLE</Badge>
             )}
-          </Carousel>
-        )}
-
-        <div>
-          <h2 className="font-display text-xl font-extrabold">{acc.name}</h2>
-          <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
-            <MapPin className="h-3.5 w-3.5" /> {acc.location_label} · {acc.type}
-          </p>
-        </div>
-
-        <div className="flex flex-wrap gap-1.5">
-          {eligibility?.eligible ? (
-            <Badge className="bg-primary/10 text-primary border-primary/20 font-semibold">Eligible</Badge>
-          ) : (
-            <Badge variant="destructive">Not eligible</Badge>
-          )}
-          {acc.status === "finalist" && <Badge className="bg-warning text-warning-foreground">Finalist</Badge>}
-          {acc.cancellation_type !== "unknown" && (
-            <Badge variant="outline">{acc.cancellation_type === "free" ? "Gratis annulering" : acc.cancellation_type === "partial" ? "Gedeeltelijk" : "Non-refundable"}</Badge>
+            {acc.status === "finalist" && <Badge className="bg-warning text-warning-foreground text-[10px] font-bold rounded-md">FINALIST</Badge>}
+            {acc.cancellation_type !== "unknown" && (
+              <Badge variant="outline" className="text-[10px] font-bold rounded-md border-white/20 text-white/70">
+                {acc.cancellation_type === "free" ? "GRATIS ANNULERING" : acc.cancellation_type === "partial" ? "GEDEELTELIJK" : "NON-REFUNDABLE"}
+              </Badge>
+            )}
+          </div>
+          {acc.total_price_3_nights && (
+            <p className="font-display font-extrabold text-2xl text-white mt-4">
+              EUR {acc.total_price_3_nights} <span className="text-sm font-normal text-white/40">/ 3 nachten</span>
+            </p>
           )}
         </div>
 
-        {acc.total_price_3_nights && (
-          <div className="text-2xl font-display font-extrabold">€{acc.total_price_3_nights} <span className="text-sm font-normal text-muted-foreground">/ 3 nachten</span></div>
-        )}
-
-        {/* Stats */}
-        <div className="border rounded-lg p-4 grid grid-cols-2 gap-3">
-          {stats.map(({ icon: Icon, label, value }) => (
-            <div key={label} className="flex items-center gap-2 text-sm">
-              <Icon className="h-4 w-4 text-muted-foreground shrink-0" />
-              <span className="text-muted-foreground">{label}:</span>
-              <span className="font-semibold">{value}</span>
-            </div>
-          ))}
+        {/* Stats grid */}
+        <div className="px-6 py-5 bg-background">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground mb-3">Kenmerken</p>
+          <div className="grid grid-cols-2 gap-3">
+            {stats.map(({ icon: Icon, label, value }) => (
+              <div key={label} className="flex items-center gap-2.5 bg-secondary rounded-lg p-3">
+                <Icon className="h-4 w-4 text-muted-foreground shrink-0" />
+                <div>
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{label}</p>
+                  <p className="text-sm font-bold">{value}</p>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
 
         {/* Map */}
-        <div className="rounded-lg overflow-hidden border">
-          <iframe
-            src={`https://www.openstreetmap.org/export/embed.html?bbox=${acc.lng - 0.02},${acc.lat - 0.01},${acc.lng + 0.02},${acc.lat + 0.01}&layer=mapnik&marker=${acc.lat},${acc.lng}`}
-            className="w-full h-48"
-            title="Locatie"
-          />
+        <div className="px-6 pb-5 bg-background">
+          <div className="rounded-xl overflow-hidden border">
+            <iframe
+              src={`https://www.openstreetmap.org/export/embed.html?bbox=${acc.lng - 0.02},${acc.lat - 0.01},${acc.lng + 0.02},${acc.lat + 0.01}&layer=mapnik&marker=${acc.lat},${acc.lng}`}
+              className="w-full h-48"
+              title="Locatie"
+            />
+          </div>
         </div>
 
-        {/* Eligibility details */}
-        <div className="border rounded-lg p-4">
-          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">Criteria check</p>
-          <div className="space-y-1.5 text-sm">
+        {/* Criteria check */}
+        <div className="bg-foreground text-background px-6 py-5">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/40 mb-3">Criteria check</p>
+          <div className="space-y-2">
             {eligibility?.eligible ? (
-              <div className="flex items-center gap-2 text-primary font-medium"><CheckCircle2 className="h-4 w-4" /> Alle criteria gehaald</div>
+              <div className="flex items-center gap-2 text-primary font-semibold text-sm"><CheckCircle2 className="h-4 w-4" /> Alle criteria gehaald</div>
             ) : (
               eligibility?.failures.map((f, i) => (
-                <div key={i} className="flex items-center gap-2 text-destructive"><XCircle className="h-4 w-4 shrink-0" /> {f}</div>
+                <div key={i} className="flex items-center gap-2 text-red-400 text-sm"><XCircle className="h-4 w-4 shrink-0" /> {f}</div>
               ))
             )}
           </div>
@@ -130,27 +145,30 @@ export default function AccommodationDetail() {
 
         {/* Sources */}
         {sources.length > 0 && (
-          <div className="space-y-2">
-            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Bronnen</p>
+          <div className="px-6 py-5 bg-background space-y-2">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground mb-3">Bronnen</p>
             {sources.map((s: any, i: number) => (
-              <div key={i} className="border rounded-lg p-3 flex items-center justify-between gap-2">
+              <a
+                key={i}
+                href={s.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-between gap-2 border rounded-lg p-3 hover:bg-secondary transition-colors group"
+              >
                 <div className="min-w-0">
-                  <p className="text-sm font-semibold">{s.label}</p>
+                  <p className="text-sm font-bold">{s.label}</p>
                   {s.note && <p className="text-xs text-muted-foreground truncate">{s.note}</p>}
                 </div>
-                <Button variant="outline" size="sm" asChild className="shrink-0 text-xs">
-                  <a href={s.url} target="_blank" rel="noopener noreferrer" className="gap-1">
-                    Open <ExternalLink className="h-3 w-3" />
-                  </a>
-                </Button>
-              </div>
+                <ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-foreground shrink-0 transition-colors" />
+              </a>
             ))}
           </div>
         )}
 
         {acc.notes && (
-          <div className="text-sm text-muted-foreground bg-secondary rounded-lg p-3">
-            <span className="font-semibold text-foreground">Notities:</span> {acc.notes}
+          <div className="px-6 py-5 bg-secondary">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground mb-2">Notities</p>
+            <p className="text-sm leading-relaxed">{acc.notes}</p>
           </div>
         )}
       </div>

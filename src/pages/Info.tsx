@@ -12,7 +12,7 @@ export default function Info() {
 
   return (
     <AppLayout>
-      <div className="-mx-4 -mt-6 space-y-0">
+      <div className="-mx-4 -mt-6 space-y-6">
         {/* Hero */}
         <section className="relative h-[50vh] min-h-[320px] flex items-end">
           <img src={heroCoast} alt="Costa del Sol kustlijn" className="absolute inset-0 w-full h-full object-cover" />
@@ -99,43 +99,45 @@ export default function Info() {
           </div>
         </section>
 
-        {/* 2. Locatie accommodatie — stacked on mobile, side-by-side on md+ */}
+        {/* 2. Locatie accommodatie */}
         <section>
+          <div className="bg-foreground px-6 py-6">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/50 mb-1">2 · Locatie accommodatie</p>
+            <p className="text-white/40 text-xs leading-relaxed">Twee opties — afhankelijk van jullie voorkeuren.</p>
+          </div>
           <div className="flex flex-col md:flex-row">
-            <div className="relative h-[280px] md:h-[340px] md:w-1/2">
+            <div className="relative h-[320px] md:h-[380px] md:w-1/2">
               <img src={heroGolf} alt="Golfbaan La Cala" className="absolute inset-0 w-full h-full object-cover" />
-              <div className="absolute inset-0 bg-black/60" />
-              <div className="absolute inset-0 flex flex-col justify-end p-6">
-                <p className="text-white/40 text-[10px] font-semibold uppercase tracking-[0.2em] mb-1">2 · Locatie accommodatie</p>
-                <h3 className="font-display font-extrabold text-xl text-white mb-3">Bij de golfbaan</h3>
-                <div className="space-y-1.5 text-white/70 text-xs leading-relaxed">
-                  <p className="flex items-center gap-1.5">
-                    <CircleDot className="h-3 w-3 text-primary shrink-0" /> La Cala Golf: 5 min
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/10" />
+              <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-8">
+                <h3 className="font-display font-extrabold text-2xl text-white mb-5">Bij de golfbaan</h3>
+                <div className="space-y-2 text-white/70 text-sm leading-relaxed">
+                  <p className="flex items-center justify-center gap-2">
+                    <CircleDot className="h-3.5 w-3.5 text-primary shrink-0" /> La Cala Golf: 5 min
                   </p>
-                  <p className="flex items-center gap-1.5">
-                    <MapPin className="h-3 w-3 shrink-0" /> Strand/dorp: 10 – 15 min rijden
+                  <p className="flex items-center justify-center gap-2">
+                    <MapPin className="h-3.5 w-3.5 shrink-0" /> Strand/dorp: 10 – 15 min rijden
                   </p>
-                  <p className="flex items-center gap-1.5">
-                    <Clock className="h-3 w-3 shrink-0" /> Restaurants: beperkt ter plekke
+                  <p className="flex items-center justify-center gap-2">
+                    <Clock className="h-3.5 w-3.5 shrink-0" /> Restaurants: beperkt ter plekke
                   </p>
                 </div>
               </div>
             </div>
-            <div className="relative h-[280px] md:h-[340px] md:w-1/2">
+            <div className="relative h-[320px] md:h-[380px] md:w-1/2">
               <img src={heroBeach} alt="La Cala de Mijas" className="absolute inset-0 w-full h-full object-cover" />
-              <div className="absolute inset-0 bg-black/60" />
-              <div className="absolute inset-0 flex flex-col justify-end p-6">
-                <p className="text-white/40 text-[10px] font-semibold uppercase tracking-[0.2em] mb-1 md:invisible">&nbsp;</p>
-                <h3 className="font-display font-extrabold text-xl text-white mb-3">Bij strand en dorp</h3>
-                <div className="space-y-1.5 text-white/70 text-xs leading-relaxed">
-                  <p className="flex items-center gap-1.5">
-                    <MapPin className="h-3 w-3 text-primary shrink-0" /> Strand en restaurants: lopend
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/10" />
+              <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-8">
+                <h3 className="font-display font-extrabold text-2xl text-white mb-5">Bij strand en dorp</h3>
+                <div className="space-y-2 text-white/70 text-sm leading-relaxed">
+                  <p className="flex items-center justify-center gap-2">
+                    <MapPin className="h-3.5 w-3.5 text-primary shrink-0" /> Strand en restaurants: lopend
                   </p>
-                  <p className="flex items-center gap-1.5">
-                    <CircleDot className="h-3 w-3 shrink-0" /> La Cala Golf: 10 – 15 min rijden
+                  <p className="flex items-center justify-center gap-2">
+                    <CircleDot className="h-3.5 w-3.5 shrink-0" /> La Cala Golf: 10 – 15 min rijden
                   </p>
-                  <p className="flex items-center gap-1.5">
-                    <Clock className="h-3 w-3 shrink-0" /> Winkels/centrum: lopend
+                  <p className="flex items-center justify-center gap-2">
+                    <Clock className="h-3.5 w-3.5 shrink-0" /> Winkels/centrum: lopend
                   </p>
                 </div>
               </div>

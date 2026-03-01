@@ -55,56 +55,14 @@ export default function Info() {
           </p>
         </section>
 
-        {/* Hoe werkt het - 3 stappen */}
-        <section className="px-6 py-10 bg-background">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground mb-2">Hoe werkt het</p>
-          <h2 className="font-display text-xl font-extrabold mb-8">In 3 stappen naar een keuze</h2>
-
-          <div className="space-y-8">
-            <div className="flex gap-4">
-              <div className="w-10 h-10 rounded-full bg-foreground flex items-center justify-center font-display font-extrabold text-background text-sm shrink-0">1</div>
-              <div>
-                <h3 className="font-display font-extrabold text-base">Gegevens bevestigen en must-haves aangeven</h3>
-                <p className="text-muted-foreground text-sm mt-1 leading-relaxed">
-                  Akkoord met de vaste reisgegevens. Daarna geef je je harde eisen aan:
-                  minimaal aantal slaapkamers, vaste bedden, maximale reistijd naar de golfbaan,
-                  annuleringsbeleid en budget. Verblijven die hier niet aan voldoen vallen direct af.
-                </p>
-              </div>
-            </div>
-
-            <div className="flex gap-4">
-              <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center font-display font-extrabold text-primary-foreground text-sm shrink-0">2</div>
-              <div>
-                <h3 className="font-display font-extrabold text-base">Voorkeuren verdelen</h3>
-                <p className="text-muted-foreground text-sm mt-1 leading-relaxed">
-                  Je verdeelt 100 punten over 6 factoren: golf gemak, strand en avondleven,
-                  omgeving verkennen, comfort, budget en minimaal gedoe. De gemiddelde verdeling van
-                  de groep bepaalt hoe zwaar elk criterium meetelt in de ranking.
-                </p>
-              </div>
-            </div>
-
-            <div className="flex gap-4">
-              <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center font-display font-extrabold text-foreground text-sm shrink-0">3</div>
-              <div>
-                <h3 className="font-display font-extrabold text-base">Definitieve check en boeken</h3>
-                <p className="text-muted-foreground text-sm mt-1 leading-relaxed">
-                  De top 3 wordt handmatig gecheckt op actuele beschikbaarheid, exacte all-in prijs,
-                  en praktische zaken. Daarna kiezen we samen en boeken.
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Locatie split: bij de golfbaan vs bij strand/dorp */}
+        {/* Locatie accommodatie */}
         <section className="relative h-[44vh] min-h-[300px]">
           <div className="absolute inset-0 flex">
             <div className="w-1/2 relative overflow-hidden">
               <img src={heroGolf} alt="Golfbaan La Cala" className="absolute inset-0 w-full h-full object-cover" />
               <div className="absolute inset-0 bg-black/60" />
               <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-4">
+                <p className="text-white/40 text-[10px] font-semibold uppercase tracking-[0.2em] mb-2">Locatie accommodatie</p>
                 <h3 className="font-display font-extrabold text-lg text-white">Bij de golfbaan</h3>
                 <div className="mt-3 space-y-1.5 text-white/70 text-xs leading-relaxed">
                   <p className="flex items-center justify-center gap-1.5">
@@ -141,55 +99,21 @@ export default function Info() {
         </section>
 
         {/* Vervoer */}
-        <section className="bg-foreground text-background px-6 py-10">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/50 mb-2">Vervoer</p>
-          <h2 className="font-display text-xl font-extrabold text-white mb-6">Busje of taxi</h2>
-
-          <div className="space-y-4">
-            {/* Busje */}
-            <div className="border border-white/10 rounded-xl p-5">
-              <h3 className="font-display font-extrabold text-sm text-white mb-3">Busje huren (9-zits)</h3>
-              <div className="space-y-0 text-xs">
-                {[
-                  ["Huur 9-zits busje, 3 dagen", "€200 – €350"],
-                  ["Verzekering (CDW + all-risk)", "€40 – €80"],
-                  ["Brandstof geschat", "€25 – €40"],
-                ].map(([label, price], i) => (
-                  <div key={i} className="flex justify-between py-2 border-b border-white/5">
-                    <span className="text-white/40">{label}</span>
-                    <span className="text-white font-medium">{price}</span>
-                  </div>
-                ))}
-                <div className="flex justify-between py-2">
-                  <span className="text-white/60 font-semibold">Totaal</span>
-                  <span className="text-primary font-bold">€265 – €470 (€53 – €94 p.p.)</span>
-                </div>
-              </div>
-              <p className="text-white/20 text-[10px] mt-2">rental24h.com, KAYAK, momondo — 9-zits, april, Malaga Airport</p>
+        <section className="bg-foreground text-background px-6 py-8">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/50 mb-5">Vervoer</p>
+          <div className="grid grid-cols-2 gap-3 text-xs">
+            <div>
+              <p className="text-white/40 mb-1">Busje huren (9-zits)</p>
+              <p className="text-white font-semibold">€265 – €470 totaal</p>
+              <p className="text-white/30">€53 – €94 p.p.</p>
             </div>
-
-            {/* Taxi */}
-            <div className="border border-white/10 rounded-xl p-5">
-              <h3 className="font-display font-extrabold text-sm text-white mb-3">Taxi / privétransfer</h3>
-              <div className="space-y-0 text-xs">
-                {[
-                  ["Airport → La Cala de Mijas (5-7 pers.)", "€70 – €85"],
-                  ["Airport → Fuengirola (5-7 pers.)", "€50 – €65"],
-                  ["Lokale rit 10-15 min (1-4 pers.)", "€12 – €20"],
-                ].map(([label, price], i) => (
-                  <div key={i} className="flex justify-between py-2 border-b border-white/5">
-                    <span className="text-white/40">{label}</span>
-                    <span className="text-white font-medium">{price}</span>
-                  </div>
-                ))}
-                <div className="flex justify-between py-2">
-                  <span className="text-white/60 font-semibold">Geschat weekend (2x airport + 5 lokaal)</span>
-                  <span className="text-primary font-bold">€200 – €340 (€40 – €68 p.p.)</span>
-                </div>
-              </div>
-              <p className="text-white/20 text-[10px] mt-2">malagaairporttaxi.net, kiwitaxi.com — vaste tarieven 2025</p>
+            <div>
+              <p className="text-white/40 mb-1">Taxi / privétransfer</p>
+              <p className="text-white font-semibold">€200 – €340 totaal</p>
+              <p className="text-white/30">€40 – €68 p.p.</p>
             </div>
           </div>
+          <p className="text-white/20 text-[10px] mt-4">Incl. verzekering & brandstof (busje) of 2x airport + ~5 lokale ritten (taxi). Bronnen: rental24h, KAYAK, kiwitaxi — april 2025.</p>
         </section>
 
         {/* Harde eisen die we checken */}

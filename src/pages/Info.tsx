@@ -105,16 +105,16 @@ export default function Info() {
           </div>
         </section>
 
+        {/* ═══════════ SPACER ═══════════ */}
+        <div className="h-10 bg-background" />
+
         {/* ═══════════ BLOK 2: LOCATIE ═══════════ */}
-        <section className="bg-foreground text-white px-6 py-6">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/50 mb-1">2 · Locatie accommodatie</p>
-          <p className="text-white/40 text-xs leading-relaxed">Twee opties — afhankelijk van jullie voorkeuren.</p>
-        </section>
         <div className="flex flex-col md:flex-row">
-          <div className="relative h-[280px] md:h-[360px] md:w-1/2">
+          <div className="relative h-[340px] md:h-[400px] md:w-1/2">
             <img src={heroGolf} alt="Golfbaan La Cala" className="absolute inset-0 w-full h-full object-cover" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/10" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/50 to-black/20" />
             <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-8">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/40 mb-2">2 · Locatie optie A</p>
               <h3 className="font-display font-extrabold text-2xl text-white mb-5">Bij de golfbaan</h3>
               <div className="space-y-2 text-white/70 text-sm leading-relaxed">
                 <p className="flex items-center justify-center gap-2">
@@ -129,10 +129,11 @@ export default function Info() {
               </div>
             </div>
           </div>
-          <div className="relative h-[280px] md:h-[360px] md:w-1/2">
+          <div className="relative h-[340px] md:h-[400px] md:w-1/2">
             <img src={heroBeach} alt="La Cala de Mijas" className="absolute inset-0 w-full h-full object-cover" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/10" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/50 to-black/20" />
             <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-8">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/40 mb-2">2 · Locatie optie B</p>
               <h3 className="font-display font-extrabold text-2xl text-white mb-5">Bij strand en dorp</h3>
               <div className="space-y-2 text-white/70 text-sm leading-relaxed">
                 <p className="flex items-center justify-center gap-2">
@@ -148,6 +149,9 @@ export default function Info() {
             </div>
           </div>
         </div>
+
+        {/* ═══════════ SPACER ═══════════ */}
+        <div className="h-10 bg-background" />
 
         {/* ═══════════ BLOK 3: ACCOMMODATIE ═══════════ */}
         <section>

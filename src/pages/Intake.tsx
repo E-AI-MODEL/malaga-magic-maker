@@ -20,6 +20,7 @@ import heroVilla from "@/assets/hero-villa.jpg";
 type ChoiceValue = string | number | boolean;
 
 const EDWIN_USER_ID = "d08ef813-36ad-46bb-bd7d-d7dd36d8b3a8";
+const PIETER_USERNAME = "pieter";
 
 export default function Intake() {
   const { user, profile } = useAuth();
@@ -59,6 +60,8 @@ export default function Intake() {
   const totalPoints = Object.values(points).reduce((a, b) => a + b, 0);
 
   const isEdwin = user?.id === EDWIN_USER_ID;
+  const isPieter = profile?.username?.toLowerCase() === PIETER_USERNAME;
+  const isNonGolfer = isEdwin || isPieter;
   const isDisabled = isPastDeadline;
 
   useEffect(() => {
@@ -99,8 +102,8 @@ export default function Intake() {
   }, [user]);
 
   const handleRoundsClick = (value: 2 | 3) => {
-    if (isEdwin) {
-      setEdPopupMessage("Ed, ik zei toch dat je hier niet op moest klikken?");
+    if (isNonGolfer) {
+      setEdPopupMessage(isEdwin ? "Ed, ik zei toch dat je hier niet op moest klikken?" : "Pieter, jij golft niet! Klik op jouw eigen knop.");
       setShowEdPopup(true);
       return;
     }
@@ -115,6 +118,15 @@ export default function Intake() {
     }
     setPreferredRounds(null);
     toast.success("Goed zo Ed! Kies maar hoeveel rondes je wilt.");
+  };
+
+  const handlePieterLoungeClick = () => {
+    if (!isPieter) {
+      setEdPopupMessage("Deze knop is alleen voor Pieter! 🏖️");
+      setShowEdPopup(true);
+      return;
+    }
+    window.open("https://www.maxbeach.es/pool-beach", "_blank");
   };
 
   const handleSubmit = async () => {
@@ -259,6 +271,7 @@ export default function Intake() {
                 <p className="text-white/90 font-semibold">Vluchten</p>
                 <p>Do-ochtend: Robin, Mark &amp; Dimitri</p>
                 <p>Do-middag: Edwin &amp; Hans</p>
+                <p>Pieter: <span className="italic text-white/50">(nog) onbekend</span></p>
                 <p>Zo-ochtend: Iedereen terug</p>
               </div>
             </div>
@@ -269,7 +282,7 @@ export default function Intake() {
                 <p>Minimaal 2 rondes 18 holes bij La Cala Golf</p>
               </div>
             </div>
-            <p className="text-white/50 text-xs">2 – 5 april 2026 · 5 volwassenen</p>
+            <p className="text-white/50 text-xs">2 – 5 april 2026 · 6 volwassenen</p>
           </div>
 
           <label className="flex items-start gap-3 cursor-pointer">
@@ -282,7 +295,7 @@ export default function Intake() {
               Er staat nog <span className="text-white font-semibold">één ding</span> niet vast: hoeveel rondes golf we spelen. Dat bepaalt Edwin.
             </p>
             <p className="text-xs font-semibold uppercase tracking-wider text-white/40">Hoeveel rondes golf?</p>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-2 gap-2">
               <button
                 onClick={() => handleRoundsClick(2)}
                 disabled={isDisabled}
@@ -303,6 +316,13 @@ export default function Intake() {
                 className="p-3.5 rounded-lg text-sm font-semibold transition-all disabled:opacity-50 bg-accent text-accent-foreground hover:bg-accent/80"
               >
                 🏌️ Eddie de Caddy
+              </button>
+              <button
+                onClick={handlePieterLoungeClick}
+                disabled={isDisabled}
+                className="p-3.5 rounded-lg text-sm font-semibold transition-all disabled:opacity-50 bg-accent text-accent-foreground hover:bg-accent/80"
+              >
+                🏖️ Lounge tip Pieter
               </button>
             </div>
           </div>
@@ -367,7 +387,7 @@ export default function Intake() {
           <div className="bg-background px-6 py-6 space-y-5">
             <div className="space-y-3">
               {[
-                { checked: requireFixedBeds, onChange: setRequireFixedBeds, label: "Minimaal 5 vaste bedden", desc: "Geen slaapbanken of luchtbedden" },
+                { checked: requireFixedBeds, onChange: setRequireFixedBeds, label: "Minimaal 6 vaste bedden", desc: "Geen slaapbanken of luchtbedden" },
                 { checked: requireBedrooms3, onChange: setRequireBedrooms3, label: "Minimaal 3 slaapkamers", desc: "Privé slaapruimte voor iedereen" },
                 { checked: requireTransparentPrice, onChange: setRequireTransparentPrice, label: "Transparante prijs", desc: "Geen verborgen kosten of toeristenbelasting-verrassingen" },
                 { checked: requirePool, onChange: setRequirePool, label: "Zwembad", desc: "Privé of gedeeld zwembad bij de accommodatie" },

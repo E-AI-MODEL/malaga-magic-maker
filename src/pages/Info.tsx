@@ -22,7 +22,7 @@ export default function Info() {
           <div className="relative z-10 px-6 pb-8">
             <p className="text-white/60 text-xs font-semibold uppercase tracking-[0.2em] mb-2">2 – 5 april 2026</p>
             <h1 className="font-display text-3xl md:text-4xl font-extrabold text-white leading-tight">
-              5 man. 1 verblijf.<br />3 nachten Costa del Sol.
+              6 man. 1 verblijf.<br />3 nachten Costa del Sol.
             </h1>
             <p className="text-white/70 text-sm mt-3 leading-relaxed max-w-md">
               We kiezen samen het beste verblijf voor golf, strand en goed eten.
@@ -41,7 +41,7 @@ export default function Info() {
             </div>
             <div className="flex justify-between border-b border-white/10 pb-2">
               <span className="text-white/50 flex items-center gap-2"><Users className="h-3.5 w-3.5" /> Groep</span>
-              <span className="font-semibold">5 volwassenen</span>
+              <span className="font-semibold">6 volwassenen</span>
             </div>
             <div className="flex justify-between border-b border-white/10 pb-2">
               <span className="text-white/50 flex items-center gap-2"><Plane className="h-3.5 w-3.5" /> Heen do ochtend</span>
@@ -50,6 +50,10 @@ export default function Info() {
             <div className="flex justify-between border-b border-white/10 pb-2">
               <span className="text-white/50 flex items-center gap-2"><Plane className="h-3.5 w-3.5" /> Heen do middag</span>
               <span className="font-semibold">Edwin, Hans</span>
+            </div>
+            <div className="flex justify-between border-b border-white/10 pb-2">
+              <span className="text-white/50 flex items-center gap-2"><Plane className="h-3.5 w-3.5" /> Heen Pieter</span>
+              <span className="font-semibold text-white/60 italic">(nog) onbekend</span>
             </div>
             <div className="flex justify-between border-b border-white/10 pb-2">
               <span className="text-white/50 flex items-center gap-2"><Plane className="h-3.5 w-3.5" /> Terug zo ochtend</span>
@@ -90,7 +94,7 @@ export default function Info() {
                 <h3 className="font-display text-base font-bold text-white mb-1">9-zits busje</h3>
                 <p className="text-lg font-extrabold text-white mb-3">€265 – €470<span className="text-xs font-normal text-white/40 ml-1">totaal</span></p>
                 <div className="space-y-1 text-xs text-white/50">
-                  <p>€53 – €94 p.p.</p>
+                  <p>€44 – €78 p.p.</p>
                   <p>Incl. all-risk &amp; brandstof</p>
                   <p>Maximale flexibiliteit</p>
                 </div>
@@ -101,7 +105,7 @@ export default function Info() {
                 <h3 className="font-display text-base font-bold text-white mb-1">Taxi / transfer</h3>
                 <p className="text-lg font-extrabold text-white mb-3">€200 – €340<span className="text-xs font-normal text-white/40 ml-1">totaal</span></p>
                 <div className="space-y-1 text-xs text-white/50">
-                  <p>€40 – €68 p.p.</p>
+                  <p>€37 – €57 p.p.</p>
                   <p>2× airport transfer</p>
                   <p>~5 lokale ritten</p>
                 </div>
@@ -179,7 +183,7 @@ export default function Info() {
             </p>
             <ul className="space-y-3">
               {[
-                "Minimaal 3 slaapkamers voor 5 volwassenen",
+                "Minimaal 3 slaapkamers voor 6 volwassenen",
                 "Vaste bedden voor iedereen (geen slaapbanken)",
                 "All-in prijs bevestigd: huur, schoonmaak, toeristenbelasting, borg",
                 "Maximale reistijd naar La Cala Golf (jij bepaalt hoeveel minuten)",

@@ -1,120 +1,64 @@
 
-# Admin Dashboard Extreme Update + Titel Fix
+# Plan: Pieter toevoegen als 6e deelnemer
 
-## Probleem 1: Titel "Malaga Afvalrace"
-De header in `AppLayout.tsx` toont al correct "Malaga". De Info-pagina hero toont "5 man. 1 verblijf. 3 nachten Costa del Sol." -- geen "Afvalrace" zichtbaar. De "Afvalrace controls" sectie op het admin dashboard (regel 384) bevat deze term. Deze wordt hernoemd naar "Selectieronde controls" of vergelijkbaar.
+## Samenvatting
+Pieter wordt toegevoegd als nieuwe deelnemer. Dit raakt meerdere onderdelen: account, vluchtinfo, groepsgrootte, accommodatie-eisen, vervoerskosten, en de speciale golf-logica in de intake.
 
-## Probleem 2: Admin Dashboard is incompleet
+## Wat er verandert
 
-### Huidige staat
-Het dashboard toont momenteel:
-- Deadline beheer (basis)
-- Completion status (locked/niet locked)
-- Gebruikersactiviteit (basis: logins, pageviews, timeline)
-- Stemverdeling (alleen rondes, mobiliteit, base, vaste bedden, 3 slaapkamers)
-- Gemiddelde punten (bar chart)
-- Afvalrace controls + accommodatielijst
-- Override log
+### 1. Nieuw account aanmaken
+- Toevoegen aan de `seed-users` edge function: `pieter@local.app` / `zwarteweduwe`
+- Toevoegen aan de `USERNAME_EMAIL_MAP` in `src/lib/auth.tsx`
+- Account aanmaken in de database via de seed-functie (of direct via SQL)
 
-### Wat ontbreekt
-1. **Per-gebruiker intake details**: de admin kan niet zien WAT een gebruiker precies heeft ingevuld (vervoer, locatie, wensen, diet, activiteiten, punten, budget, opmerkingen)
-2. **Groepsoverzicht van alle intake-velden**: stemverdeling mist pool, airco, wifi, parking, terras, budget caps, eetvoorkeuren, activiteiten
-3. **Admin kan niks aanpassen**: geen mogelijkheid om submissions te unlocken en herkalibreren, of om individuele velden te wijzigen
-4. **Geen export / totaaloverzicht**: geen samenvatting van de groepsbeslissingen
+### 2. Vluchtinformatie updaten
+Op twee plekken worden de vluchten getoond:
 
----
+**Info-pagina (`src/pages/Info.tsx`):**
+- Heenvlucht Pieter: "(nog) onbekend" toevoegen als aparte regel
+- Terugvlucht: Pieter toevoegen aan "Zo-ochtend: Allen"
+- Groepsgrootte: "5 volwassenen" wordt "6 volwassenen"
+- Koptekst: "5 man. 1 verblijf." wordt "6 man. 1 verblijf."
 
-## Plan
+**Intake-pagina (`src/pages/Intake.tsx`):**
+- Vluchtoverzicht in sectie A: Pieter's vlucht toevoegen als "(nog) onbekend"
+- "5 volwassenen" wordt "6 volwassenen"
 
-### 1. Fix "Afvalrace" referenties
-- `Admin.tsx` regel 384: "Afvalrace controls" wordt "Selectieronde"
+### 3. Vervoerskosten herberekenen
+Met 6 personen veranderen de p.p. bedragen op de Info-pagina:
+- **Busje**: totaalprijs blijft gelijk (EUR 265-470), maar p.p. wordt EUR 44-78 (was EUR 53-94)
+- **Taxi/transfer**: mogelijk iets hoger totaal door extra persoon. Wordt aangepast naar EUR 220-380 totaal, en extra lokale ritten berekend voor 6 personen
 
-### 2. Groepsoverzicht uitbreiden (stemverdeling)
-Voeg toe aan de bestaande stemverdeling sectie:
-- **Pool**: vereist vs niet (countVotes require_pool)
-- **Airco**: vereist vs niet
-- **Wifi**: vereist vs niet
-- **Parking**: vereist vs niet
-- **Terras**: vereist vs niet
-- **Transparante prijs**: vereist vs niet
-- **Budget caps**: overzicht van ingevoerde bedragen + mediaan/gemiddelde
-- **Max reistijd**: verdeling per waarde (10/15/20/30 min)
-- **Eetvoorkeuren**: hoe vaak elk dieet-item is gekozen (bar/badge per item)
-- **Activiteiten**: hoe vaak elke activiteit is gekozen
-- **Opmerkingen**: lijst van alle opmerkingen per gebruiker
+### 4. Accommodatie max_guests updaten
+Alle accommodaties moeten opnieuw bekeken worden: de groep is nu 6 personen i.p.v. 5. De `max_guests` check en vaste-bedden-check in `src/lib/scoring.ts` moet aangepast worden:
+- `fixed_beds_count < 5` wordt `fixed_beds_count < 6`
+- Dit betreft regel in `checkEligibility()`
 
-### 3. Per-gebruiker detailweergave (nieuw)
-Onder de bestaande "Gebruikersactiviteit" sectie, of als nieuwe tabbladen per gebruiker, een uitklapbaar paneel met:
-- **Alle intake-antwoorden**: vervoer, locatie, max reistijd, alle wensen (checkboxes), budget, punten, eetvoorkeuren, activiteiten, opmerkingen
-- **Puntenverdeling** als mini bar chart per gebruiker
-- Vergelijking met groepsgemiddelde
+### 5. Pieter's speciale golf-logica in de Intake
+Net als Edwin mag Pieter niet stemmen op 2 of 3 rondes golf. Pieter krijgt een eigen knop:
 
-### 4. Admin-acties per gebruiker
-- **Unlock submission**: bestaat al, behouden
-- **Overzicht wie nog niet heeft ingevuld**: al zichtbaar, maar verduidelijken met call-to-action
+- **Knop**: "Lounge tip Pieter" naast de "Eddie de Caddy" knop
+- **Gedrag**: Alleen Pieter kan deze knop gebruiken. Bij klik opent een link naar `https://www.maxbeach.es/pool-beach` in een nieuw tabblad
+- **Andere gebruikers**: krijgen een popup als ze erop klikken (vergelijkbaar met Edwin's "HEET JIJ ED?!")
+- **Pieter op 2/3 rondes knoppen**: krijgt een waarschuwing, net als Edwin
+- De grid wordt `grid-cols-4` (of 2x2) om 4 knoppen te tonen
 
-### 5. Admin-acties globaal
-- Bij elke accommodatie: meer info tonen (prijs, bedrooms, tags)
-- Groepsregels samenvatting: toon de berekende GroupRules (wat de meerderheid heeft besloten) als duidelijk blok bovenaan
-
-### 6. Scoring model updaten
-Het `scoring.ts` Submission interface mist de nieuwe velden (require_pool, require_airco, etc.). De GroupRules en eligibility checks moeten worden uitgebreid:
-- Voeg `requirePool`, `requireAirco`, `requireWifi`, `requireParking`, `requireTerrace` toe aan GroupRules
-- Voeg eligibility checks toe: als meerderheid pool eist, moet accommodatie "pool" tag hebben, etc.
-
----
+### 6. Login-pagina tekst
+- De subtekst "5 man" wordt "6 man" op de Login-pagina
 
 ## Technische details
 
-### Bestanden
+### Database wijzigingen
+- Nieuw gebruikersaccount via `seed-users` edge function aanroepen (of direct via admin API)
+- Geen schema-wijzigingen nodig
 
-| Bestand | Actie |
-|---|---|
-| `src/pages/Admin.tsx` | Grote refactor: groepsoverzicht uitbreiden, per-gebruiker detail, admin-acties |
-| `src/lib/scoring.ts` | Submission interface + GroupRules + eligibility uitbreiden met nieuwe velden |
-| `src/components/AppLayout.tsx` | Geen wijziging nodig (titel is al "Malaga") |
+### Bestanden die aangepast worden
+1. **`supabase/functions/seed-users/index.ts`** -- Pieter toevoegen aan users array
+2. **`src/lib/auth.tsx`** -- `pieter: "pieter@local.app"` toevoegen aan USERNAME_EMAIL_MAP
+3. **`src/pages/Login.tsx`** -- "5 man" naar "6 man"
+4. **`src/pages/Info.tsx`** -- Vluchtinfo, groepsgrootte, vervoerskosten p.p., koptekst
+5. **`src/pages/Intake.tsx`** -- Pieter-ID constante, golf-logica (isPieter check), "Lounge tip Pieter" knop, vluchtinfo, groepsgrootte
+6. **`src/lib/scoring.ts`** -- `fixed_beds_count < 5` naar `< 6`
 
-### Admin.tsx nieuwe structuur
-
-```text
-+-----------------------------------------------+
-| Admin Dashboard                               |
-+-----------------------------------------------+
-| 1. Deadline beheer (bestaand)                 |
-+-----------------------------------------------+
-| 2. Completion + per-user detail (uitgebreid)  |
-|    Per gebruiker uitklapbaar:                 |
-|    - Status (locked/bezig/niet gestart)       |
-|    - Alle intake-antwoorden                   |
-|    - Puntenverdeling (mini bars)              |
-|    - Eetvoorkeuren + activiteiten             |
-|    - Opmerkingen                              |
-|    - Gedrag (logins, pageviews, timeline)     |
-|    - [Unlock] knop                            |
-+-----------------------------------------------+
-| 3. Groepsresultaten                           |
-|    - Berekende groepsregels (meerderheid)     |
-|    - Stemverdeling ALLE velden               |
-|    - Gemiddelde punten (bestaand)             |
-|    - Budget overzicht                         |
-|    - Eetvoorkeuren totaal                     |
-|    - Activiteiten totaal                      |
-|    - Alle opmerkingen                         |
-+-----------------------------------------------+
-| 4. Selectieronde controls (was Afvalrace)     |
-+-----------------------------------------------+
-| 5. Accommodaties (bestaand, meer info)        |
-+-----------------------------------------------+
-| 6. Override log (bestaand)                    |
-+-----------------------------------------------+
-```
-
-### scoring.ts wijzigingen
-
-- `Submission` interface: voeg `require_pool`, `require_airco`, `require_wifi`, `require_parking`, `require_terrace`, `diet_preferences`, `diet_remarks`, `activities`, `remarks_a`, `budget_cap_total` toe (sommige bestaan al)
-- `GroupRules` interface: voeg `requirePool`, `requireAirco`, `requireWifi`, `requireParking`, `requireTerrace` toe
-- `computeGroupRules`: bereken meerderheid voor de 5 nieuwe velden
-- `checkEligibility`: voeg checks toe voor pool (tag "pool"), parking (parking === "yes"), etc.
-
-### Geen database wijzigingen nodig
-Alle benodigde kolommen bestaan al in de `submissions` tabel.
+### Bestaande data
+Alle huidige locked submissions en accommodaties blijven ongewijzigd.

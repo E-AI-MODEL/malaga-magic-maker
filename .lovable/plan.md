@@ -1,90 +1,80 @@
 
-# Malaga Afvalrace 🏌️‍♂️🏖️
+# Dilemma-keuze systeem voor de 100 punten
 
-Een mobile-first webapp waarmee 5 vrienden samen de perfecte accommodatie kiezen voor hun golfreis naar Malaga (2-5 april 2026). Via een "afvalrace" in 3 rondes wordt de groep snel naar een keuze geleid.
+## Concept
+De huidige sliders worden vervangen door een **Tinder-achtige dilemma-flow**: de gebruiker krijgt steeds twee tegels naast elkaar te zien en kiest welke ze belangrijker vinden. Na alle keuzes worden de resultaten automatisch omgerekend naar de 100-punten verdeling.
 
----
+## Hoe het werkt
 
-## Backend Setup (Lovable Cloud / Supabase)
+Met 6 categorieen zijn er **15 unieke paren** (elke categorie vs. elke andere). Per dilemma:
+- Twee visueel aantrekkelijke tegels naast elkaar
+- Gebruiker tikt op hun voorkeur
+- Animatie naar het volgende paar
+- Voortgangsbalk bovenaan (1/15, 2/15, etc.)
 
-### Database tabellen
-- **profiles** – id, username, displayName, role (participant/admin)
-- **trip** – vaste reisgegevens (data, groepsgrootte, vluchtnotes, golf rondes)
-- **submissions** – 1 per user, alle intake antwoorden + locked status
-- **accommodations** – alle accommodatie data inclusief foto's, bronnen, locatie, stats, status
-- **admin_overrides** – log van admin wijzigingen
+Na alle 15 keuzes: elke "win" levert punten op. De scores worden genormaliseerd naar exact 100 punten (afgerond op 5-en, conform het huidige systeem).
 
-### Accounts
-5 vooraf aangemaakte accounts met username/password login:
-- Robin, Mark, Dimitri, Edwin (participants) + Admin (Hans)
+## Visueel ontwerp per tegel
 
-### Beveiliging
-- Row Level Security: users zien alleen eigen submission, admin ziet alles
-- Submissions worden gelocked na invullen
+Elke categorie krijgt een eigen icoon en korte beschrijving:
+- **Golf gemak** - Dichtbij de baan, snel op de green
+- **Strand en avondleven** - Zon, zee en stappen
+- **Omgeving ontdekken** - Dorpjes, markten, cultuur
+- **Comfort en luxe** - Mooi verblijf, zwembad, ruimte
+- **Budget laag houden** - Zo voordelig mogelijk
+- **Gemak en ontzorging** - Alles geregeld, geen gedoe
 
----
+Tegels worden gestyled als donkere kaarten met iconen, passend bij het bestaande dark-section design van blok C.
 
-## Pagina's
+## Flow in de UI
 
-### 1. Login
-- Simpel loginscherm met username + password
-- Na login: doorsturen naar Intake (als nog niet ingevuld) of Info pagina
+```text
++-------------------------------------+
+|  C · Wat vind jij belangrijk?       |
+|  Kies steeds wat je belangrijker    |
+|  vindt                               |
+|                                      |
+|  ████████░░░░░░░░  5 / 15           |
+|                                      |
+|  +---------------+ +---------------+ |
+|  |   icon        | |   icon        | |
+|  |               | |               | |
+|  | Golf gemak    | | Strand &      | |
+|  |               | | avondleven    | |
+|  | Dichtbij de   | | Zon, zee en   | |
+|  | baan          | | stappen       | |
+|  +---------------+ +---------------+ |
+|                                      |
++-------------------------------------+
+```
 
-### 2. Info pagina
-- Korte, leuke uitleg van het doel: "1 verblijf kiezen voor 5 man, golf én omgeving"
-- Uitleg van de 3 rondes (Sloperhamer → Scorebord → Reality Check)
-- Consequenties uitgelegd: huurauto vs taxi life, golf-base vs strand-base
-- Checklist voor de top 3 (bedden, prijs, parkeren, annulering, reviews)
+Na afloop: een samenvatting met de berekende punten en een "Opnieuw" knop.
 
-### 3. Intake (1 pagina, alles in 1 keer)
-- **Blok A**: Akkoord met vaste gegevens + keuze 2 of 3 rondes golf
-- **Blok B**: Kill criteria – mobiliteit, base locatie, max reistijd golf, bedden, slaapkamers, annulering, prijstransparantie, budget cap
-- **Blok C**: 100 punten verdelen over 6 factoren (golf gemak, strand/avondleven, omgeving, comfort, budget, minimaal gedoe) met live teller
-- Na submit: locked, read-only, bevestiging
+## Technische aanpak
 
-### 4. Accommodaties (voor iedereen)
-- **Overzicht**: Cards met foto carousel, key stats, eligible/not-eligible badges, golf-base/strand-base labels
-- **Sorteren**: op ranking score, prijs, golfminuten, strandafstand
-- **Filters**: eligible only, slaapkamers, annuleringstype, locatie
-- **Detail pagina**: grote foto carousel, kaart met pin (lat/lng), alle stats, criteria pass/fail uitleg, bronnen als "Open bron" cards
+### 1. Intake pagina aanpassen
+- Verwijder de slider/plus-min sectie uit blok C
+- Voeg een nieuwe `DilemmaGame` component toe
+- Genereer alle 15 paren bij mount
+- Shuffle de volgorde voor variatie
+- Track keuzes in lokale state
 
-### 5. Admin Dashboard (alleen Admin)
-- **Completion overzicht**: wie heeft wel/niet ingevuld
-- **Majority view**: stemverdeling per kill criterium, mobiliteit, base, rondes
-- **Gemiddelde punten** per factor
-- **Afvalrace controls**:
-  - Ronde 1 Sloperhamer: filter eligible accommodaties
-  - Ronde 2 Scorebord: bereken ranking, toon top N
-  - Ronde 3 Reality check: admin selecteert finalisten
-- **Accommodaties tabel**: met elimineer/undo, edit, toggle prijsbevestiging
-- **Admin override log**: wijzigingen met badge, reden en timestamp
+### 2. Score-berekening
+- Elke keuze = +1 punt voor de winnaar
+- Max score per categorie = 5 (wint van alle andere)
+- Normaliseer totaal naar 100, afgerond op 5-en
+- Sla op in dezelfde `points_*` kolommen in de database
 
----
+### 3. Resultaat-scherm
+Na 15 keuzes verschijnt een overzicht:
+- Staafdiagram of ranking van de 6 categorieen
+- Totaal = 100 punten
+- Knop "Opnieuw kiezen" om te resetten
+- De punten worden meegenomen in de submit
 
-## Scoring & Ranking
-- Gemiddelde punten per factor uit alle submissions
-- Per accommodatie een matchscore (0-1) per factor op basis van stats
-- Totaalscore = som van (gemiddelde punten × matchscore)
-- Top accommodaties tonen 3 bullets met grootste score-bijdragers
+### 4. Database
+Geen wijzigingen nodig. De dilemma-resultaten worden omgezet naar dezelfde `points_golf_ease`, `points_beach_life`, etc. kolommen die al bestaan.
 
----
-
-## Seed Data
-8 accommodaties vooraf ingeladen:
-1. Matchroom Country Club (Mijas)
-2. HigueronRentals Mimosa (Fuengirola)
-3. Casa Linda (La Cala de Mijas)
-4. La Cala Resort (La Cala Golf)
-5. Solana Village (La Cala Golf)
-6. + 3 placeholders (beach, golf, budget)
-
-Alle met Unsplash placeholder foto's, lat/lng, bronnen en stats. Admin kan later bijwerken.
-
----
-
-## Design
-- Mobile-first, snel, simpel, fun
-- Geen lange teksten
-- Foto carousels op alle accommodatie views
-- Kaart pins voor locaties
-- Duidelijke eligible/niet-eligible badges met uitleg welke criteria falen
+### Bestanden die worden aangepast
+- **`src/pages/Intake.tsx`** - Blok C vervangen door DilemmaGame component
+- **`src/components/DilemmaGame.tsx`** (nieuw) - De volledige dilemma-flow met tegels, animaties, voortgangsbalk en resultaatscherm

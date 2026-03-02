@@ -1,11 +1,13 @@
 import { ReactNode } from "react";
 import { BottomNav } from "./BottomNav";
 import { useAuth } from "@/lib/auth";
+import { useActivityLog } from "@/hooks/useActivityLog";
 import { Button } from "@/components/ui/button";
 import { LogOut } from "lucide-react";
 
 export function AppLayout({ children }: { children: ReactNode }) {
   const { profile, signOut } = useAuth();
+  useActivityLog();
 
   return (
     <div className="min-h-screen pb-20 bg-background">

@@ -4,9 +4,11 @@ import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { computeGroupRules, rankAccommodations, type Accommodation, type Submission } from "@/lib/scoring";
-import { CheckCircle2, XCircle, Unlock, Trash2, Undo2, Shield, Trophy } from "lucide-react";
+import { CheckCircle2, XCircle, Unlock, Trash2, Undo2, Shield, Trophy, Clock, ChevronDown, ChevronUp, Eye } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 interface Profile {
   id: string;
@@ -23,25 +25,46 @@ interface Override {
   created_at: string;
 }
 
+interface ActivityEvent {
+  id: string;
+  user_id: string;
+  event_type: string;
+  page: string;
+  detail: string | null;
+  created_at: string;
+}
+
 export default function Admin() {
   const { isAdmin, user } = useAuth();
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [accommodations, setAccommodations] = useState<Accommodation[]>([]);
   const [overrides, setOverrides] = useState<Override[]>([]);
+  const [activityLogs, setActivityLogs] = useState<ActivityEvent[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Deadline state
+  const [deadlineValue, setDeadlineValue] = useState("");
+  const [deadlineInput, setDeadlineInput] = useState("");
+
   const fetchAll = async () => {
-    const [p, s, a, o] = await Promise.all([
+    const [p, s, a, o, dl, al] = await Promise.all([
       supabase.from("profiles").select("*"),
       supabase.from("submissions").select("*"),
       supabase.from("accommodations").select("*"),
       supabase.from("admin_overrides").select("*").order("created_at", { ascending: false }),
+      supabase.from("app_settings").select("*").eq("key", "intake_deadline").single(),
+      supabase.from("activity_log").select("*").order("created_at", { ascending: false }).limit(500),
     ]);
     setProfiles((p.data as any[]) || []);
     setSubmissions((s.data as any[]) || []);
     setAccommodations((a.data as any[]) || []);
     setOverrides((o.data as any[]) || []);
+    setActivityLogs((al.data as any[]) || []);
+    if (dl.data) {
+      setDeadlineValue(dl.data.value);
+      setDeadlineInput(dl.data.value);
+    }
     setLoading(false);
   };
 
@@ -127,6 +150,28 @@ export default function Admin() {
     });
   };
 
+  // Deadline handlers
+  const updateDeadline = async (newValue: string) => {
+    const { error } = await supabase.from("app_settings").update({ value: newValue, updated_at: new Date().toISOString() }).eq("key", "intake_deadline");
+    if (error) { toast.error("Fout bij opslaan deadline"); return; }
+    await logOverride("intake_deadline", deadlineValue, newValue, "Deadline aangepast");
+    setDeadlineValue(newValue);
+    setDeadlineInput(newValue);
+    fetchAll();
+    toast.success("Deadline bijgewerkt");
+  };
+
+  const addTime = (hours: number) => {
+    const current = new Date(deadlineValue);
+    current.setTime(current.getTime() + hours * 3600000);
+    updateDeadline(current.toISOString());
+  };
+
+  // User activity helpers
+  const nonAdminProfiles = profiles.filter(p => p.username !== "admin");
+  const getLogsForUser = (userId: string) => activityLogs.filter(l => l.user_id === userId);
+  const getAccName = (accId: string) => accommodations.find(a => a.id === accId)?.name || accId;
+
   return (
     <AppLayout>
       <div className="space-y-8">
@@ -137,11 +182,43 @@ export default function Admin() {
           </h2>
         </div>
 
+        {/* Deadline beheer */}
+        <section className="space-y-3">
+          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+            <Clock className="h-3.5 w-3.5" /> Deadline beheer
+          </p>
+          <div className="border rounded-lg p-4 space-y-4">
+            <div>
+              <p className="text-sm text-muted-foreground">Huidige deadline:</p>
+              <p className="font-display font-extrabold text-lg">
+                {new Date(deadlineValue).toLocaleString("nl-NL", { dateStyle: "full", timeStyle: "short" })}
+              </p>
+              {new Date(deadlineValue) < new Date() && (
+                <Badge variant="destructive" className="mt-1 text-xs">Verlopen</Badge>
+              )}
+            </div>
+            <div className="flex gap-2">
+              <Button size="sm" variant="outline" onClick={() => addTime(1)}>+1 uur</Button>
+              <Button size="sm" variant="outline" onClick={() => addTime(6)}>+6 uur</Button>
+              <Button size="sm" variant="outline" onClick={() => addTime(24)}>+1 dag</Button>
+            </div>
+            <div className="flex gap-2">
+              <Input
+                type="datetime-local"
+                value={deadlineInput ? new Date(deadlineInput).toISOString().slice(0, 16) : ""}
+                onChange={e => setDeadlineInput(new Date(e.target.value).toISOString())}
+                className="flex-1 h-9"
+              />
+              <Button size="sm" onClick={() => updateDeadline(deadlineInput)}>Opslaan</Button>
+            </div>
+          </div>
+        </section>
+
         {/* Completion */}
         <section className="space-y-3">
           <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Completion</p>
           <div className="border rounded-lg divide-y">
-            {profiles.filter(p => p.username !== "Admin").map(p => {
+            {profiles.filter(p => p.username !== "Admin" && p.username !== "admin").map(p => {
               const sub = submissions.find(s => s.user_id === p.id);
               return (
                 <div key={p.id} className="flex items-center justify-between p-3">
@@ -166,6 +243,108 @@ export default function Admin() {
           </div>
         </section>
 
+        {/* Gebruikersactiviteit */}
+        <section className="space-y-3">
+          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+            <Eye className="h-3.5 w-3.5" /> Gebruikersactiviteit
+          </p>
+          <div className="space-y-2">
+            {nonAdminProfiles.map(p => {
+              const logs = getLogsForUser(p.id);
+              const lastActivity = logs[0]?.created_at;
+              const pageViews = logs.filter(l => l.event_type === "page_view").length;
+              const logins = logs.filter(l => l.event_type === "login").length;
+              const uniquePages = [...new Set(logs.filter(l => l.event_type === "page_view").map(l => l.page))];
+              const accViews = logs.filter(l => l.event_type === "click" && l.page === "/accommodations" && l.detail);
+
+              return (
+                <Collapsible key={p.id}>
+                  <CollapsibleTrigger className="w-full">
+                    <div className="flex items-center justify-between p-3 border rounded-lg hover:bg-secondary/50 transition-colors">
+                      <div className="flex items-center gap-3">
+                        <span className="text-sm font-semibold">{p.display_name}</span>
+                        {logs.length === 0 && <Badge variant="outline" className="text-[10px]">Geen activiteit</Badge>}
+                      </div>
+                      <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                        {lastActivity && (
+                          <span>{new Date(lastActivity).toLocaleString("nl-NL", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}</span>
+                        )}
+                        <ChevronDown className="h-4 w-4" />
+                      </div>
+                    </div>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <div className="border border-t-0 rounded-b-lg p-4 space-y-4 bg-secondary/30">
+                      {/* Stats */}
+                      <div className="grid grid-cols-3 gap-3">
+                        <div className="text-center">
+                          <p className="font-display font-extrabold text-lg">{logins}</p>
+                          <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Logins</p>
+                        </div>
+                        <div className="text-center">
+                          <p className="font-display font-extrabold text-lg">{pageViews}</p>
+                          <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Pageviews</p>
+                        </div>
+                        <div className="text-center">
+                          <p className="font-display font-extrabold text-lg">{accViews.length}</p>
+                          <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Acc. bekeken</p>
+                        </div>
+                      </div>
+
+                      {/* Unique pages */}
+                      {uniquePages.length > 0 && (
+                        <div>
+                          <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">Bezochte pagina's</p>
+                          <div className="flex flex-wrap gap-1">
+                            {uniquePages.map(page => (
+                              <Badge key={page} variant="outline" className="text-[10px]">{page}</Badge>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Accommodation views */}
+                      {accViews.length > 0 && (
+                        <div>
+                          <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">Accommodaties bekeken</p>
+                          <div className="flex flex-wrap gap-1">
+                            {[...new Set(accViews.map(l => l.detail!))].map(accId => (
+                              <Badge key={accId} variant="secondary" className="text-[10px]">{getAccName(accId)}</Badge>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Timeline */}
+                      {logs.length > 0 && (
+                        <div>
+                          <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">Laatste activiteit</p>
+                          <div className="space-y-1 max-h-48 overflow-y-auto">
+                            {logs.slice(0, 20).map(l => (
+                              <div key={l.id} className="flex items-center justify-between text-xs py-1 border-b border-border/50 last:border-0">
+                                <div className="flex items-center gap-2">
+                                  <Badge variant={l.event_type === "login" ? "default" : l.event_type === "click" ? "secondary" : "outline"} className="text-[9px] px-1.5 py-0">
+                                    {l.event_type}
+                                  </Badge>
+                                  <span className="text-muted-foreground">{l.page}</span>
+                                  {l.detail && <span className="text-muted-foreground truncate max-w-[120px]">({getAccName(l.detail)})</span>}
+                                </div>
+                                <span className="text-muted-foreground text-[10px] shrink-0">
+                                  {new Date(l.created_at).toLocaleString("nl-NL", { hour: "2-digit", minute: "2-digit", day: "numeric", month: "short" })}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </CollapsibleContent>
+                </Collapsible>
+              );
+            })}
+          </div>
+        </section>
+
         {/* Majority view */}
         {lockedSubs.length > 0 && (
           <section className="space-y-3">
@@ -176,7 +355,6 @@ export default function Admin() {
               <VoteRow label="Base" items={[{ label: "Golf", count: countVotes("base_choice", "golf") }, { label: "Strand", count: countVotes("base_choice", "beach") }, { label: "Neutraal", count: countVotes("base_choice", "neutral") }]} total={lockedSubs.length} />
               <VoteRow label="Vaste bedden" items={[{ label: "Vereist", count: countVotes("require_fixed_beds", true) }, { label: "Niet", count: countVotes("require_fixed_beds", false) }]} total={lockedSubs.length} />
               <VoteRow label="3 slaapkamers" items={[{ label: "Vereist", count: countVotes("require_bedrooms_3", true) }, { label: "Niet", count: countVotes("require_bedrooms_3", false) }]} total={lockedSubs.length} />
-              <VoteRow label="Annuleerbaar" items={[{ label: "Vereist", count: countVotes("require_cancelable", true) }, { label: "Niet", count: countVotes("require_cancelable", false) }]} total={lockedSubs.length} />
             </div>
           </section>
         )}

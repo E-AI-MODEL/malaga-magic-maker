@@ -110,6 +110,33 @@ export type Database = {
         }
         Relationships: []
       }
+      activity_log: {
+        Row: {
+          created_at: string
+          detail: string | null
+          event_type: string
+          id: string
+          page: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          detail?: string | null
+          event_type: string
+          id?: string
+          page: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          detail?: string | null
+          event_type?: string
+          id?: string
+          page?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       admin_overrides: {
         Row: {
           admin_user_id: string
@@ -137,6 +164,24 @@ export type Database = {
           new_value?: string | null
           old_value?: string | null
           reason?: string | null
+        }
+        Relationships: []
+      }
+      app_settings: {
+        Row: {
+          key: string
+          updated_at: string
+          value: string
+        }
+        Insert: {
+          key: string
+          updated_at?: string
+          value: string
+        }
+        Update: {
+          key?: string
+          updated_at?: string
+          value?: string
         }
         Relationships: []
       }
@@ -183,10 +228,15 @@ export type Database = {
           preferred_rounds: number
           remarks_a: string | null
           remarks_b: string | null
+          require_airco: boolean
           require_bedrooms_3: boolean
           require_cancelable: boolean
           require_fixed_beds: boolean
+          require_parking: boolean
+          require_pool: boolean
+          require_terrace: boolean
           require_transparent_price: boolean
+          require_wifi: boolean
           top_accommodations: string[] | null
           updated_at: string
           user_id: string
@@ -212,10 +262,15 @@ export type Database = {
           preferred_rounds?: number
           remarks_a?: string | null
           remarks_b?: string | null
+          require_airco?: boolean
           require_bedrooms_3?: boolean
           require_cancelable?: boolean
           require_fixed_beds?: boolean
+          require_parking?: boolean
+          require_pool?: boolean
+          require_terrace?: boolean
           require_transparent_price?: boolean
+          require_wifi?: boolean
           top_accommodations?: string[] | null
           updated_at?: string
           user_id: string
@@ -241,10 +296,15 @@ export type Database = {
           preferred_rounds?: number
           remarks_a?: string | null
           remarks_b?: string | null
+          require_airco?: boolean
           require_bedrooms_3?: boolean
           require_cancelable?: boolean
           require_fixed_beds?: boolean
+          require_parking?: boolean
+          require_pool?: boolean
+          require_terrace?: boolean
           require_transparent_price?: boolean
+          require_wifi?: boolean
           top_accommodations?: string[] | null
           updated_at?: string
           user_id?: string

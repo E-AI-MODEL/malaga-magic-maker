@@ -84,9 +84,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!email) {
       return { error: "Onbekende gebruiker" };
     }
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { error, data } = await supabase.auth.signInWithPassword({ email, password });
     if (error) {
       return { error: "Verkeerde wachtwoord" };
+    }
+    // Log login event
+    if (data.user) {
+      supabase.from("activity_log").insert({
+        user_id: data.user.id,
+        event_type: "login",
+        page: "/login",
+      }).then(() => {});
     }
     return {};
   };

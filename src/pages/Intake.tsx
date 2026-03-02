@@ -143,7 +143,7 @@ export default function Intake() {
     if (!user) return;
     setSubmitting(true);
     const payload = {
-      user_id: user.id, agreed_facts: agreedFacts, preferred_rounds: preferredRounds,
+      user_id: user.id, agreed_facts: agreedFacts, preferred_rounds: isNonGolfer ? 0 : preferredRounds,
       remarks_a: remarks || null, remarks_b: null,
       mobility_choice: mobilityChoice, base_choice: baseChoice,
       max_golf_minutes: maxTravelMinutes, require_fixed_beds: requireFixedBeds,

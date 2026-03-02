@@ -12,12 +12,14 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { BedDouble, Car, Clock, Waves, ArrowRight, Info } from "lucide-react";
 import { rankAccommodations, computeGroupRules, type Accommodation, type Submission, type RankedAccommodation } from "@/lib/scoring";
 import heroVilla from "@/assets/hero-villa.jpg";
+import { useLogEvent } from "@/contexts/ActivityLogContext";
 
 export default function Accommodations() {
   const navigate = useNavigate();
   const [accommodations, setAccommodations] = useState<Accommodation[]>([]);
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [loading, setLoading] = useState(true);
+  const logEvent = useLogEvent();
   const [sortBy, setSortBy] = useState("score");
   const [eligibleOnly, setEligibleOnly] = useState(false);
   const [showDisclaimer, setShowDisclaimer] = useState(true);
@@ -88,7 +90,7 @@ export default function Accommodations() {
 
         {/* Controls */}
         <div className="bg-foreground px-6 py-3 flex items-center gap-3 flex-wrap">
-          <Select value={sortBy} onValueChange={setSortBy}>
+          <Select value={sortBy} onValueChange={(v) => { setSortBy(v); logEvent("accommodation_list_filter", "/accommodations", `sort:${v}`); }}>
             <SelectTrigger className="w-[140px] h-8 text-xs bg-white/10 border-white/15 text-white">
               <SelectValue />
             </SelectTrigger>
@@ -100,7 +102,7 @@ export default function Accommodations() {
             </SelectContent>
           </Select>
           <div className="flex items-center gap-2">
-            <Switch checked={eligibleOnly} onCheckedChange={setEligibleOnly} id="eligible" />
+            <Switch checked={eligibleOnly} onCheckedChange={(v) => { setEligibleOnly(v); logEvent("accommodation_list_filter", "/accommodations", `eligible_only:${v}`); }} id="eligible" />
             <Label htmlFor="eligible" className="text-[11px] text-white/50 font-medium">Eligible only</Label>
           </div>
         </div>

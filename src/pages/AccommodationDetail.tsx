@@ -8,11 +8,13 @@ import { Button } from "@/components/ui/button";
 import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext } from "@/components/ui/carousel";
 import { ArrowLeft, ExternalLink, BedDouble, Bath, Car, Clock, Waves, Plane, CheckCircle2, XCircle } from "lucide-react";
 import { computeGroupRules, checkEligibility, type Accommodation, type Submission } from "@/lib/scoring";
+import { useLogEvent } from "@/contexts/ActivityLogContext";
 
 export default function AccommodationDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const logEvent = useLogEvent();
   const [acc, setAcc] = useState<Accommodation | null>(null);
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [loading, setLoading] = useState(true);
@@ -27,13 +29,8 @@ export default function AccommodationDetail() {
       setLoading(false);
     });
     // Log accommodation view
-    if (user && id) {
-      supabase.from("activity_log").insert({
-        user_id: user.id,
-        event_type: "click",
-        page: "/accommodations",
-        detail: id,
-      }).then(() => {});
+    if (id) {
+      logEvent("accommodation_view", `/accommodations/${id}`, id);
     }
   }, [id, user]);
 

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { AppLayout } from "@/components/AppLayout";
 import { useAuth } from "@/lib/auth";
@@ -12,6 +12,7 @@ import { ArrowRight, Check, Plane, Car, MapPin, Home, UtensilsCrossed, Dumbbell,
 import { DilemmaGame } from "@/components/DilemmaGame";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogClose } from "@/components/ui/dialog";
 import { useDeadline } from "@/hooks/useDeadline";
+import { useLogEvent } from "@/contexts/ActivityLogContext";
 import heroGolf from "@/assets/hero-golf.jpg";
 import heroTransport from "@/assets/hero-transport.jpg";
 import heroBeachTown from "@/assets/hero-beach-town.jpg";
@@ -26,6 +27,8 @@ export default function Intake() {
   const { user, profile } = useAuth();
   const navigate = useNavigate();
   const { deadline, isPastDeadline, timeRemaining } = useDeadline();
+  const logEvent = useLogEvent();
+  const hasLoggedStart = useRef(false);
   const [locked, setLocked] = useState(false);
   const [existingId, setExistingId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -108,6 +111,7 @@ export default function Intake() {
       return;
     }
     setPreferredRounds(value);
+    if (!hasLoggedStart.current) { hasLoggedStart.current = true; logEvent("intake_started", "/intake"); }
   };
 
   const handleEddieClick = () => {
@@ -126,12 +130,14 @@ export default function Intake() {
       setShowEdPopup(true);
       return;
     }
+    logEvent("external_link_click", "/intake", "https://www.maxbeach.es/pool-beach");
     window.open("https://www.maxbeach.es/pool-beach", "_blank");
   };
 
   const handleSubmit = async () => {
     if (isPastDeadline) { toast.error("De deadline is verstreken"); return; }
     if (!agreedFacts) { toast.error("Je moet akkoord gaan met de vaste gegevens"); return; }
+    logEvent("intake_submitted", "/intake");
     if (!isNonGolfer && preferredRounds === null) { toast.error("Kies het aantal rondes golf"); return; }
     if (totalPoints !== 100) { toast.error("Speel eerst het dilemma-spel om je punten te verdelen"); return; }
     if (!user) return;

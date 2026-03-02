@@ -52,7 +52,7 @@ export default function Admin() {
       supabase.from("accommodations").select("*"),
       supabase.from("admin_overrides").select("*").order("created_at", { ascending: false }),
       supabase.from("app_settings").select("*").eq("key", "intake_deadline").single(),
-      supabase.from("activity_log").select("*").order("created_at", { ascending: false }).limit(500),
+      supabase.from("activity_log").select("*").order("created_at", { ascending: false }).limit(2000),
     ]);
     setProfiles((p.data as any[]) || []);
     setSubmissions((s.data as any[]) || []);
@@ -227,13 +227,25 @@ export default function Admin() {
               const lastActivity = logs[0]?.created_at;
               const pageViews = logs.filter(l => l.event_type === "page_view").length;
               const logins = logs.filter(l => l.event_type === "login").length;
-              const accViews = logs.filter(l => l.event_type === "click" && l.detail);
+              const accViews = logs.filter(l => l.event_type === "accommodation_view" || (l.event_type === "click" && l.detail));
+              const intakeStarted = logs.some(l => l.event_type === "intake_started");
+              const intakeSubmitted = logs.some(l => l.event_type === "intake_submitted");
+              const sectionsViewed = [...new Set(logs.filter(l => l.event_type === "intake_section_view").map(l => l.detail))];
+              const sessionDurations = logs.filter(l => l.event_type === "session_duration");
+              const totalSessionTime = sessionDurations.reduce((acc, l) => acc + parseInt(l.detail || "0"), 0);
+              const isOnline = logs[0] ? (Date.now() - new Date(logs[0].created_at).getTime() < 5 * 60 * 1000) : false;
+              const firstActivity = logs.length > 0 ? logs[logs.length - 1]?.created_at : null;
+
+              // Page breakdown
+              const pageBreakdown: Record<string, number> = {};
+              logs.filter(l => l.event_type === "page_view").forEach(l => { pageBreakdown[l.page] = (pageBreakdown[l.page] || 0) + 1; });
 
               return (
                 <Collapsible key={p.id}>
                   <CollapsibleTrigger className="w-full">
                     <div className="flex items-center justify-between p-3 border rounded-lg hover:bg-secondary/50 transition-colors">
                       <div className="flex items-center gap-3">
+                        <span className={`h-2.5 w-2.5 rounded-full ${isOnline ? "bg-green-500 animate-pulse" : "bg-muted-foreground/30"}`} />
                         <span className="text-sm font-semibold">{p.display_name}</span>
                         {sub?.locked ? (
                           <Badge className="text-[10px] bg-primary/10 text-primary border-primary/20">Locked</Badge>
@@ -333,34 +345,82 @@ export default function Admin() {
                         <p className="text-xs text-muted-foreground italic">Nog geen intake ingevuld</p>
                       )}
 
-                      {/* Gedrag */}
+                      {/* Gedrag - Enhanced */}
                       <div className="space-y-3 border-t pt-3">
                         <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Gedrag</p>
-                        <div className="grid grid-cols-3 gap-3">
+                        
+                        {/* Session overview */}
+                        <div className="grid grid-cols-4 gap-2">
                           <StatBlock value={logins} label="Logins" />
                           <StatBlock value={pageViews} label="Pageviews" />
                           <StatBlock value={accViews.length} label="Acc. bekeken" />
+                          <StatBlock value={totalSessionTime > 0 ? `${Math.round(totalSessionTime / 60)}m` : "—"} label="Sessietijd" />
                         </div>
-                        {accViews.length > 0 && (
-                          <div className="flex flex-wrap gap-1">
-                            {[...new Set(accViews.map(l => l.detail!))].map(accId => (
-                              <Badge key={accId} variant="secondary" className="text-[10px]">{getAccName(accId)}</Badge>
+
+                        {/* Online & first/last activity */}
+                        <div className="grid grid-cols-2 gap-2 text-xs">
+                          <div className="bg-secondary rounded-lg p-2">
+                            <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Eerste activiteit</p>
+                            <p className="font-medium">{firstActivity ? new Date(firstActivity).toLocaleString("nl-NL", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) : "—"}</p>
+                          </div>
+                          <div className="bg-secondary rounded-lg p-2">
+                            <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Laatste activiteit</p>
+                            <p className="font-medium">{lastActivity ? new Date(lastActivity).toLocaleString("nl-NL", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) : "—"}</p>
+                          </div>
+                        </div>
+
+                        {/* Intake voortgang */}
+                        <div className="bg-secondary rounded-lg p-3">
+                          <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Intake voortgang</p>
+                          <div className="flex flex-wrap gap-1.5">
+                            <Badge variant={intakeStarted ? "default" : "outline"} className={`text-[10px] ${!intakeStarted ? "opacity-40" : ""}`}>
+                              {intakeStarted ? "✓" : "✗"} Gestart
+                            </Badge>
+                            {sectionsViewed.map(s => (
+                              <Badge key={s} variant="secondary" className="text-[10px]">Sectie {s}</Badge>
                             ))}
+                            <Badge variant={intakeSubmitted ? "default" : "outline"} className={`text-[10px] ${!intakeSubmitted ? "opacity-40" : ""}`}>
+                              {intakeSubmitted ? "✓" : "✗"} Ingediend
+                            </Badge>
+                          </div>
+                        </div>
+
+                        {/* Page breakdown */}
+                        {Object.keys(pageBreakdown).length > 0 && (
+                          <div>
+                            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Pagina breakdown</p>
+                            <div className="space-y-1">
+                              {Object.entries(pageBreakdown).sort(([, a], [, b]) => b - a).map(([page, count]) => (
+                                <div key={page} className="flex items-center justify-between text-xs py-1 border-b border-border/30 last:border-0">
+                                  <span className="text-muted-foreground">{page}</span>
+                                  <span className="font-bold">{count}×</span>
+                                </div>
+                              ))}
+                            </div>
                           </div>
                         )}
-                        {logs.length > 0 && (
-                          <div className="space-y-1 max-h-36 overflow-y-auto">
-                            {logs.slice(0, 15).map(l => (
-                              <div key={l.id} className="flex items-center justify-between text-xs py-0.5 border-b border-border/30 last:border-0">
-                                <div className="flex items-center gap-1.5">
-                                  <Badge variant={l.event_type === "login" ? "default" : "outline"} className="text-[9px] px-1 py-0">{l.event_type}</Badge>
-                                  <span className="text-muted-foreground">{l.page}</span>
-                                  {l.detail && <span className="text-muted-foreground truncate max-w-[100px]">({getAccName(l.detail)})</span>}
-                                </div>
-                                <span className="text-muted-foreground text-[10px]">{new Date(l.created_at).toLocaleString("nl-NL", { hour: "2-digit", minute: "2-digit", day: "numeric", month: "short" })}</span>
-                              </div>
-                            ))}
+
+                        {/* Accommodatie interactie */}
+                        {accViews.length > 0 && (
+                          <div>
+                            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Bekeken accommodaties</p>
+                            <div className="flex flex-wrap gap-1">
+                              {Object.entries(
+                                accViews.reduce<Record<string, number>>((acc, l) => {
+                                  const key = l.detail || "?";
+                                  acc[key] = (acc[key] || 0) + 1;
+                                  return acc;
+                                }, {})
+                              ).map(([accId, count]) => (
+                                <Badge key={accId} variant="secondary" className="text-[10px]">{getAccName(accId)} <span className="font-bold ml-1">{count}×</span></Badge>
+                              ))}
+                            </div>
                           </div>
+                        )}
+
+                        {/* Full event timeline */}
+                        {logs.length > 0 && (
+                          <EventTimeline logs={logs} getAccName={getAccName} />
                         )}
                       </div>
                     </div>
@@ -681,4 +741,39 @@ function mobilityLabel(v: string) {
 
 function baseLabel(v: string) {
   return v === "golf" ? "Dicht bij golf" : v === "beach" ? "Dicht bij strand" : "Neutraal";
+}
+
+function EventTimeline({ logs, getAccName }: { logs: ActivityEvent[]; getAccName: (id: string) => string }) {
+  const [showAll, setShowAll] = useState(false);
+  const displayed = showAll ? logs : logs.slice(0, 30);
+
+  const eventColor = (type: string) => {
+    if (type === "login") return "default" as const;
+    if (type === "intake_submitted") return "default" as const;
+    if (type === "accommodation_view") return "secondary" as const;
+    return "outline" as const;
+  };
+
+  return (
+    <div>
+      <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Volledige tijdlijn ({logs.length} events)</p>
+      <div className="space-y-1 max-h-60 overflow-y-auto">
+        {displayed.map(l => (
+          <div key={l.id} className="flex items-center justify-between text-xs py-0.5 border-b border-border/30 last:border-0">
+            <div className="flex items-center gap-1.5 min-w-0">
+              <Badge variant={eventColor(l.event_type)} className="text-[9px] px-1 py-0 shrink-0">{l.event_type}</Badge>
+              <span className="text-muted-foreground truncate">{l.page}</span>
+              {l.detail && <span className="text-muted-foreground truncate max-w-[120px]">({l.event_type === "accommodation_view" || l.event_type === "click" ? getAccName(l.detail) : l.detail})</span>}
+            </div>
+            <span className="text-muted-foreground text-[10px] shrink-0 ml-2">{new Date(l.created_at).toLocaleString("nl-NL", { hour: "2-digit", minute: "2-digit", day: "numeric", month: "short" })}</span>
+          </div>
+        ))}
+      </div>
+      {logs.length > 30 && !showAll && (
+        <button onClick={() => setShowAll(true)} className="text-xs text-primary font-semibold mt-2 hover:underline">
+          Toon alle {logs.length} events
+        </button>
+      )}
+    </div>
+  );
 }

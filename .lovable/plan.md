@@ -1,208 +1,120 @@
 
+# Admin Dashboard Extreme Update + Titel Fix
 
-# Compleet plan: Intake opschonen + Timer/Deadline + Activity Tracking
+## Probleem 1: Titel "Malaga Afvalrace"
+De header in `AppLayout.tsx` toont al correct "Malaga". De Info-pagina hero toont "5 man. 1 verblijf. 3 nachten Costa del Sol." -- geen "Afvalrace" zichtbaar. De "Afvalrace controls" sectie op het admin dashboard (regel 384) bevat deze term. Deze wordt hernoemd naar "Selectieronde controls" of vergelijkbaar.
 
-Dit plan combineert alle openstaande wijzigingen in een enkel, volledig uitvoerbaar geheel.
+## Probleem 2: Admin Dashboard is incompleet
+
+### Huidige staat
+Het dashboard toont momenteel:
+- Deadline beheer (basis)
+- Completion status (locked/niet locked)
+- Gebruikersactiviteit (basis: logins, pageviews, timeline)
+- Stemverdeling (alleen rondes, mobiliteit, base, vaste bedden, 3 slaapkamers)
+- Gemiddelde punten (bar chart)
+- Afvalrace controls + accommodatielijst
+- Override log
+
+### Wat ontbreekt
+1. **Per-gebruiker intake details**: de admin kan niet zien WAT een gebruiker precies heeft ingevuld (vervoer, locatie, wensen, diet, activiteiten, punten, budget, opmerkingen)
+2. **Groepsoverzicht van alle intake-velden**: stemverdeling mist pool, airco, wifi, parking, terras, budget caps, eetvoorkeuren, activiteiten
+3. **Admin kan niks aanpassen**: geen mogelijkheid om submissions te unlocken en herkalibreren, of om individuele velden te wijzigen
+4. **Geen export / totaaloverzicht**: geen samenvatting van de groepsbeslissingen
 
 ---
 
-## DEEL 1: Intake pagina opschonen
+## Plan
 
-### Huidige problemen gevonden in de code
+### 1. Fix "Afvalrace" referenties
+- `Admin.tsx` regel 384: "Afvalrace controls" wordt "Selectieronde"
 
-1. **Top 3 accommodaties (regels 381-417)**: Staat er nog in, moet verwijderd worden -- accommodaties zijn ter informatie, keuze volgt later
-2. **"Gratis annuleerbaar" checkbox (regel 352)**: Staat er nog in, was al besloten te verwijderen
-3. **require_pool, require_airco, require_wifi, require_parking, require_terrace**: Database-kolommen bestaan, maar worden NIET meegestuurd in de submit payload (regels 131-145) -- data gaat dus verloren bij opslaan
-4. **top_accommodations staat nog in de payload** (regel 141) -- moet eruit
-5. **Twee opmerkingenvelden**: remarksA (blok A, regel 284) en remarksB (blok B, regel 376) -- consolideren naar 1 veld
-6. **Eetvoorkeuren en Activiteiten** hebben geen sectieletter -- moeten onder "C" vallen
-7. **Dilemma-game staat als "C"** -- moet "D" worden in de nieuwe structuur
+### 2. Groepsoverzicht uitbreiden (stemverdeling)
+Voeg toe aan de bestaande stemverdeling sectie:
+- **Pool**: vereist vs niet (countVotes require_pool)
+- **Airco**: vereist vs niet
+- **Wifi**: vereist vs niet
+- **Parking**: vereist vs niet
+- **Terras**: vereist vs niet
+- **Transparante prijs**: vereist vs niet
+- **Budget caps**: overzicht van ingevoerde bedragen + mediaan/gemiddelde
+- **Max reistijd**: verdeling per waarde (10/15/20/30 min)
+- **Eetvoorkeuren**: hoe vaak elk dieet-item is gekozen (bar/badge per item)
+- **Activiteiten**: hoe vaak elke activiteit is gekozen
+- **Opmerkingen**: lijst van alle opmerkingen per gebruiker
 
-### Nieuwe intake structuur
+### 3. Per-gebruiker detailweergave (nieuw)
+Onder de bestaande "Gebruikersactiviteit" sectie, of als nieuwe tabbladen per gebruiker, een uitklapbaar paneel met:
+- **Alle intake-antwoorden**: vervoer, locatie, max reistijd, alle wensen (checkboxes), budget, punten, eetvoorkeuren, activiteiten, opmerkingen
+- **Puntenverdeling** als mini bar chart per gebruiker
+- Vergelijking met groepsgemiddelde
+
+### 4. Admin-acties per gebruiker
+- **Unlock submission**: bestaat al, behouden
+- **Overzicht wie nog niet heeft ingevuld**: al zichtbaar, maar verduidelijken met call-to-action
+
+### 5. Admin-acties globaal
+- Bij elke accommodatie: meer info tonen (prijs, bedrooms, tags)
+- Groepsregels samenvatting: toon de berekende GroupRules (wat de meerderheid heeft besloten) als duidelijk blok bovenaan
+
+### 6. Scoring model updaten
+Het `scoring.ts` Submission interface mist de nieuwe velden (require_pool, require_airco, etc.). De GroupRules en eligibility checks moeten worden uitgebreid:
+- Voeg `requirePool`, `requireAirco`, `requireWifi`, `requireParking`, `requireTerrace` toe aan GroupRules
+- Voeg eligibility checks toe: als meerderheid pool eist, moet accommodatie "pool" tag hebben, etc.
+
+---
+
+## Technische details
+
+### Bestanden
+
+| Bestand | Actie |
+|---|---|
+| `src/pages/Admin.tsx` | Grote refactor: groepsoverzicht uitbreiden, per-gebruiker detail, admin-acties |
+| `src/lib/scoring.ts` | Submission interface + GroupRules + eligibility uitbreiden met nieuwe velden |
+| `src/components/AppLayout.tsx` | Geen wijziging nodig (titel is al "Malaga") |
+
+### Admin.tsx nieuwe structuur
 
 ```text
-HERO: Intake - Jouw voorkeuren
-
-A - Vaste gegevens (bestaand, blijft)
-    Vluchten, golf, akkoord checkbox, Edwin rondes-keuze
-
-B - Jouw voorkeuren / Must-haves (bestaand, opgeschoond)
-    Vervoer, Locatie, Max reistijd
-    Accommodatie wensen (ZONDER "Gratis annuleerbaar")
-    Budget cap
-
-C - Over jou (NIEUW label, groepeert bestaande losse secties)
-    Eetvoorkeuren
-    Activiteiten naast golf
-    1x opmerkingenveld (vervangt remarksA + remarksB)
-
-D - Wat vind jij belangrijk? (hernummerd van C naar D)
-    Dilemma-game
-
-[Opslaan & locken]
++-----------------------------------------------+
+| Admin Dashboard                               |
++-----------------------------------------------+
+| 1. Deadline beheer (bestaand)                 |
++-----------------------------------------------+
+| 2. Completion + per-user detail (uitgebreid)  |
+|    Per gebruiker uitklapbaar:                 |
+|    - Status (locked/bezig/niet gestart)       |
+|    - Alle intake-antwoorden                   |
+|    - Puntenverdeling (mini bars)              |
+|    - Eetvoorkeuren + activiteiten             |
+|    - Opmerkingen                              |
+|    - Gedrag (logins, pageviews, timeline)     |
+|    - [Unlock] knop                            |
++-----------------------------------------------+
+| 3. Groepsresultaten                           |
+|    - Berekende groepsregels (meerderheid)     |
+|    - Stemverdeling ALLE velden               |
+|    - Gemiddelde punten (bestaand)             |
+|    - Budget overzicht                         |
+|    - Eetvoorkeuren totaal                     |
+|    - Activiteiten totaal                      |
+|    - Alle opmerkingen                         |
++-----------------------------------------------+
+| 4. Selectieronde controls (was Afvalrace)     |
++-----------------------------------------------+
+| 5. Accommodaties (bestaand, meer info)        |
++-----------------------------------------------+
+| 6. Override log (bestaand)                    |
++-----------------------------------------------+
 ```
 
-### Concrete wijzigingen in `src/pages/Intake.tsx`
+### scoring.ts wijzigingen
 
-- **Verwijder** hele Top 3 accommodaties sectie (regels 381-417)
-- **Verwijder** state: `topAccommodations`, `accommodationsList`, en de fetch van accommodations in useEffect
-- **Verwijder** `top_accommodations` uit submit payload
-- **Verwijder** "Gratis annuleerbaar" checkbox uit de wensenlijst (regel 352)
-- **Verwijder** state `requireCancelable` en uit payload
-- **Voeg toe** aan submit payload: `require_pool`, `require_airco`, `require_wifi`, `require_parking`, `require_terrace`
-- **Voeg toe** in useEffect data-load: deze 5 velden uit bestaande submission laden
-- **Verwijder** `remarksA` state en veld uit blok A
-- **Verwijder** `remarksB` state en veld uit blok B
-- **Voeg toe** 1x `remarks` state + veld in blok C (nieuw)
-- **Hernummer** Eetvoorkeuren + Activiteiten secties onder letter "C" met cirkel-label
-- **Hernummer** Dilemma-game van "C" naar "D"
+- `Submission` interface: voeg `require_pool`, `require_airco`, `require_wifi`, `require_parking`, `require_terrace`, `diet_preferences`, `diet_remarks`, `activities`, `remarks_a`, `budget_cap_total` toe (sommige bestaan al)
+- `GroupRules` interface: voeg `requirePool`, `requireAirco`, `requireWifi`, `requireParking`, `requireTerrace` toe
+- `computeGroupRules`: bereken meerderheid voor de 5 nieuwe velden
+- `checkEligibility`: voeg checks toe voor pool (tag "pool"), parking (parking === "yes"), etc.
 
-### Database migratie
-
-- Kolom `require_cancelable` mag blijven bestaan (geen destructieve migratie nodig)
-- Kolommen `require_pool` etc. bestaan al -- geen schema-wijziging nodig
-- Kolom `top_accommodations` mag blijven (geen data loss)
-
----
-
-## DEEL 2: Deadline / Timer systeem
-
-### Database: nieuwe tabel `app_settings`
-
-```sql
-CREATE TABLE public.app_settings (
-  key TEXT PRIMARY KEY,
-  value TEXT NOT NULL,
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
-);
-
-ALTER TABLE public.app_settings ENABLE ROW LEVEL SECURITY;
-
--- Iedereen kan lezen
-CREATE POLICY "Anyone can read settings"
-  ON public.app_settings FOR SELECT
-  USING (true);
-
--- Alleen admin kan updaten
-CREATE POLICY "Admin can update settings"
-  ON public.app_settings FOR UPDATE
-  USING (has_role(auth.uid(), 'admin'));
-
-CREATE POLICY "Admin can insert settings"
-  ON public.app_settings FOR INSERT
-  WITH CHECK (has_role(auth.uid(), 'admin'));
-```
-
-Seed via insert tool:
-```sql
-INSERT INTO public.app_settings (key, value)
-VALUES ('intake_deadline', '2026-03-03T18:00:00+01:00');
-```
-
-### Nieuw bestand: `src/hooks/useDeadline.ts`
-
-- Haalt `intake_deadline` op uit `app_settings`
-- Returned: `deadline: Date`, `isPastDeadline: boolean`, `timeRemaining: string` (aftellend)
-- Pollt elke 30 seconden voor admin-wijzigingen
-- `timeRemaining` formaat: "Xd Xu Xm" of "Verlopen"
-
-### Wijziging: `src/pages/Intake.tsx`
-
-- Importeert `useDeadline`
-- Toont countdown-banner bovenaan het formulier (onder hero): rode balk als < 1 uur resterend, oranje als < 6 uur
-- Als `isPastDeadline`: hele formulier disabled, overlay met "De stemming is gesloten. Neem contact op met de admin."
-- Submit-knop disabled na deadline
-
-### Wijziging: `src/pages/Admin.tsx`
-
-Nieuwe sectie "Deadline beheer":
-- Toont huidige deadline datum/tijd
-- Knoppen: "+1 uur", "+6 uur", "+1 dag"
-- Handmatig datum/tijd invoerveld met opslaan-knop
-- Update via `supabase.from("app_settings").update(...)` + logOverride
-
----
-
-## DEEL 3: Gebruikersgedrag tracking
-
-### Database: nieuwe tabel `activity_log`
-
-```sql
-CREATE TABLE public.activity_log (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID NOT NULL,
-  event_type TEXT NOT NULL,  -- 'login', 'page_view', 'click'
-  page TEXT NOT NULL,         -- '/intake', '/accommodations'
-  detail TEXT,                -- bijv. accommodatie-ID, knopnaam
-  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
-);
-
-ALTER TABLE public.activity_log ENABLE ROW LEVEL SECURITY;
-
--- Gebruikers kunnen eigen logs inserten
-CREATE POLICY "Users can insert own logs"
-  ON public.activity_log FOR INSERT
-  WITH CHECK (user_id = auth.uid());
-
--- Admin kan alles lezen
-CREATE POLICY "Admin can read all logs"
-  ON public.activity_log FOR SELECT
-  USING (has_role(auth.uid(), 'admin'));
-```
-
-### Nieuw bestand: `src/hooks/useActivityLog.ts`
-
-- Custom hook die automatisch page_view logt bij elke route-change (via `useLocation`)
-- Exporteert `logEvent(eventType, page, detail?)` voor handmatige events
-- Debouncet duplicate page_views (niet loggen als dezelfde pagina binnen 2 sec)
-- Wordt gemount in `AppLayout`
-
-### Wijziging: `src/components/AppLayout.tsx`
-
-- Importeert en mount `useActivityLog()` hook
-
-### Wijziging: `src/lib/auth.tsx`
-
-- Na succesvolle `signIn`: log een "login" event via directe Supabase insert
-
-### Wijziging: `src/pages/AccommodationDetail.tsx`
-
-- Log een "click" event met accommodatie-ID als detail bij page load
-
-### Wijziging: `src/pages/Admin.tsx`
-
-Nieuwe sectie "Gebruikersactiviteit":
-- Per gebruiker (niet-admin) een uitklapbare kaart met:
-  - Laatste activiteit (timestamp)
-  - Totaal aantal paginabezoeken
-  - Lijst van unieke pagina's bezocht
-  - Welke accommodaties bekeken (met namen)
-  - Timeline van laatste 20 events
-
----
-
-## Samenvatting alle bestanden
-
-| Bestand | Actie | Wat |
-|---|---|---|
-| Migratie SQL | Nieuw | `app_settings` + `activity_log` tabellen + RLS |
-| Insert SQL | Data | Seed deadline waarde |
-| `src/hooks/useDeadline.ts` | Nieuw | Deadline hook met countdown |
-| `src/hooks/useActivityLog.ts` | Nieuw | Activity tracking hook |
-| `src/pages/Intake.tsx` | Wijzigen | Opschonen (verwijder top3, annuleerbaar, dubbele remarks) + fix payload + deadline lock + countdown |
-| `src/pages/Admin.tsx` | Wijzigen | Deadline beheer + gebruikersactiviteit secties |
-| `src/components/AppLayout.tsx` | Wijzigen | Mount activity tracker |
-| `src/lib/auth.tsx` | Wijzigen | Login event loggen |
-| `src/pages/AccommodationDetail.tsx` | Wijzigen | Accommodatie-view event loggen |
-
-### Volgorde van uitvoering
-
-1. Database migratie (app_settings + activity_log)
-2. Seed deadline data
-3. useDeadline hook
-4. useActivityLog hook
-5. Intake.tsx opschonen + deadline integratie
-6. AppLayout.tsx + auth.tsx activity logging
-7. Admin.tsx uitbreiden met deadline beheer + activiteitsoverzicht
-8. AccommodationDetail.tsx activity logging
-
+### Geen database wijzigingen nodig
+Alle benodigde kolommen bestaan al in de `submissions` tabel.

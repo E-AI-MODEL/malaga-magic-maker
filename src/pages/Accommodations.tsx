@@ -55,14 +55,15 @@ export default function Accommodations() {
     <AppLayout>
       <div className="-mx-4 -mt-6 space-y-0">
         {/* Hero header */}
-        <div className="relative h-32">
+        <div className="relative h-44">
           <img src={heroVilla} alt="" className="absolute inset-0 w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/40 to-black/70" />
-          <div className="relative z-10 flex items-end h-full px-6 pb-4">
-            <div>
-              <p className="text-white/50 text-xs font-semibold uppercase tracking-[0.2em]">Verblijven</p>
-              <h2 className="font-display text-2xl font-extrabold text-white mt-1">{filtered.length} opties</h2>
-            </div>
+          <div className="absolute inset-0 bg-gradient-to-b from-black/40 to-black/80" />
+          <div className="relative z-10 flex flex-col justify-end h-full px-6 pb-4">
+            <p className="text-white/50 text-xs font-semibold uppercase tracking-[0.2em]">Verblijven</p>
+            <h2 className="font-display text-2xl font-extrabold text-white mt-1">{filtered.length} opties</h2>
+            <p className="text-white/50 text-[11px] leading-relaxed mt-2 max-w-xs">
+              Indicatieve prijzen &amp; accommodaties. Op basis van jullie voorkeuren worden uiteindelijk 2 opties aan de groep voorgelegd.
+            </p>
           </div>
         </div>
 

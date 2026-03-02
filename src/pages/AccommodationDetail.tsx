@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { AppLayout } from "@/components/AppLayout";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/lib/auth";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext } from "@/components/ui/carousel";
@@ -11,6 +12,7 @@ import { computeGroupRules, checkEligibility, type Accommodation, type Submissio
 export default function AccommodationDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [acc, setAcc] = useState<Accommodation | null>(null);
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [loading, setLoading] = useState(true);
@@ -24,7 +26,16 @@ export default function AccommodationDetail() {
       setSubmissions((subRes.data as any[]) || []);
       setLoading(false);
     });
-  }, [id]);
+    // Log accommodation view
+    if (user && id) {
+      supabase.from("activity_log").insert({
+        user_id: user.id,
+        event_type: "click",
+        page: "/accommodations",
+        detail: id,
+      }).then(() => {});
+    }
+  }, [id, user]);
 
   const rules = useMemo(() => computeGroupRules(submissions), [submissions]);
   const eligibility = useMemo(() => acc ? checkEligibility(acc, rules) : null, [acc, rules]);

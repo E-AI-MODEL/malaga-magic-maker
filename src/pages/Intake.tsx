@@ -8,8 +8,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { Slider } from "@/components/ui/slider";
 import { ArrowRight, Check, Plane, Car, MapPin, Home } from "lucide-react";
+import { DilemmaGame } from "@/components/DilemmaGame";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogClose } from "@/components/ui/dialog";
 import heroGolf from "@/assets/hero-golf.jpg";
 import heroTransport from "@/assets/hero-transport.jpg";
@@ -111,7 +111,7 @@ export default function Intake() {
   const handleSubmit = async () => {
     if (!agreedFacts) { toast.error("Je moet akkoord gaan met de vaste gegevens"); return; }
     if (preferredRounds === null) { toast.error("Kies het aantal rondes golf"); return; }
-    if (totalPoints !== 100) { toast.error(`Verdeel exact 100 punten (nu: ${totalPoints})`); return; }
+    if (totalPoints !== 100) { toast.error("Speel eerst het dilemma-spel om je punten te verdelen"); return; }
     if (!user) return;
     setSubmitting(true);
     const payload = {
@@ -182,14 +182,6 @@ export default function Intake() {
     </label>
   );
 
-  const pointLabels: Record<string, string> = {
-    golfEase: "Golf gemak",
-    beachLife: "Strand & avondleven",
-    exploring: "Omgeving ontdekken",
-    luxury: "Comfort & luxe",
-    budget: "Budget laag houden",
-    lowHassle: "Gemak & ontzorging",
-  };
 
   return (
     <AppLayout>
@@ -368,49 +360,27 @@ export default function Intake() {
           </div>
         </section>
 
-        {/* Block C — Punten */}
+        {/* Block C — Dilemma keuzes */}
         <section className="bg-foreground text-background px-6 py-8 space-y-5">
           <div className="flex items-center gap-3 mb-2">
             <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center font-display font-extrabold text-sm text-white">C</div>
-            <h3 className="font-display font-extrabold text-base text-white">100 punten verdelen</h3>
+            <h3 className="font-display font-extrabold text-base text-white">Wat vind jij belangrijk?</h3>
           </div>
-          <p className="text-white/50 text-sm">Verdeel exact 100 punten over wat jij belangrijk vindt. Gebruik stappen van 5.</p>
+          <p className="text-white/50 text-sm">Kies steeds wat je belangrijker vindt. Na 15 keuzes berekenen we jouw puntenverdeling.</p>
 
-          <div className={`text-center py-4 rounded-xl font-display text-3xl font-extrabold ${totalPoints === 100 ? "text-primary bg-primary/10" : "text-red-400 bg-red-400/10"}`}>
-            {totalPoints}<span className="text-lg text-white/30 ml-1">/100</span>
-          </div>
-
-          {Object.entries(pointLabels).map(([key, label]) => {
-            const val = points[key as keyof typeof points];
-            return (
-              <div key={key} className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm font-medium text-white/70">{label}</span>
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => setPoint(key, val - 5)}
-                      className="h-7 w-7 rounded-full bg-white/10 text-white/70 hover:bg-white/20 text-sm font-bold flex items-center justify-center"
-                    >
-                      −
-                    </button>
-                    <span className="font-display font-extrabold text-primary tabular-nums w-8 text-center">{val}</span>
-                    <button
-                      onClick={() => setPoint(key, val + 5)}
-                      className="h-7 w-7 rounded-full bg-white/10 text-white/70 hover:bg-white/20 text-sm font-bold flex items-center justify-center"
-                    >
-                      +
-                    </button>
-                  </div>
-                </div>
-                <Slider
-                  value={[val]}
-                  onValueChange={([v]) => setPoint(key, Math.round(v / 5) * 5)}
-                  max={100} step={5}
-                  className="py-1"
-                />
-              </div>
-            );
-          })}
+          <DilemmaGame
+            onComplete={(pts) => {
+              setPoints({
+                golfEase: pts.golfEase ?? 0,
+                beachLife: pts.beachLife ?? 0,
+                exploring: pts.exploring ?? 0,
+                luxury: pts.luxury ?? 0,
+                budget: pts.budget ?? 0,
+                lowHassle: pts.lowHassle ?? 0,
+              });
+            }}
+            initialPoints={existingId ? points : undefined}
+          />
         </section>
 
         {/* Submit */}

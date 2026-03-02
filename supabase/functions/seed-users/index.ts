@@ -21,6 +21,7 @@ Deno.serve(async (req) => {
     { email: "dimitri@local.app", password: "onebunge", username: "Dimitri", display_name: "Dimitri", role: "participant" },
     { email: "edwin@local.app", password: "hetisgeelennietzwaar", username: "Edwin", display_name: "Edwin", role: "participant" },
     { email: "admin@local.app", password: "hans", username: "Admin", display_name: "Hans", role: "admin" },
+    { email: "pieter@local.app", password: "zwarteweduwe", username: "Pieter", display_name: "Pieter", role: "participant" },
   ];
 
   const results = [];

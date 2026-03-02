@@ -56,7 +56,7 @@ export default function Login() {
           </Button>
         </form>
 
-        <p className="text-white/40 text-xs text-center mt-6">5 man &middot; golf &middot; zon &middot; keuze maken</p>
+        <p className="text-white/40 text-xs text-center mt-6">6 man &middot; golf &middot; zon &middot; keuze maken</p>
       </div>
     </div>
   );

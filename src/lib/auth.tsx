@@ -25,6 +25,7 @@ const USERNAME_EMAIL_MAP: Record<string, string> = {
   dimitri: "dimitri@local.app",
   edwin: "edwin@local.app",
   admin: "admin@local.app",
+  pieter: "pieter@local.app",
 };
 
 export function AuthProvider({ children }: { children: ReactNode }) {

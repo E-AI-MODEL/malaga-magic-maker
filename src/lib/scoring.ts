@@ -110,7 +110,7 @@ export interface EligibilityResult {
 
 export function checkEligibility(acc: Accommodation, rules: GroupRules): EligibilityResult {
   const failures: string[] = [];
-  if (rules.requireFixedBeds && acc.fixed_beds_count < 5) failures.push("Te weinig vaste bedden (nodig: 5)");
+  if (rules.requireFixedBeds && acc.fixed_beds_count < 6) failures.push("Te weinig vaste bedden (nodig: 6)");
   if (rules.requireBedrooms3 && acc.bedrooms < 3) failures.push("Te weinig slaapkamers (nodig: 3)");
   if (rules.requireCancelable && acc.cancellation_type === "nonref") failures.push("Niet annuleerbaar");
   if (rules.requireTransparentPrice && !acc.transparent_price_confirmed && acc.total_price_3_nights === null) failures.push("Prijs niet transparant");

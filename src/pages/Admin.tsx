@@ -6,8 +6,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { computeGroupRules, rankAccommodations, type Accommodation, type Submission } from "@/lib/scoring";
-import { CheckCircle2, XCircle, Unlock, Trash2, Undo2, Shield, Trophy, Clock, ChevronDown, ChevronUp, Eye } from "lucide-react";
+import { computeGroupRules, computeAvgPoints, rankAccommodations, type Accommodation, type Submission, type GroupRules } from "@/lib/scoring";
+import { CheckCircle2, XCircle, Unlock, Trash2, Undo2, Shield, Trophy, Clock, ChevronDown, Eye, Users, BarChart3, Settings, FileText } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 interface Profile {
@@ -42,8 +42,6 @@ export default function Admin() {
   const [overrides, setOverrides] = useState<Override[]>([]);
   const [activityLogs, setActivityLogs] = useState<ActivityEvent[]>([]);
   const [loading, setLoading] = useState(true);
-
-  // Deadline state
   const [deadlineValue, setDeadlineValue] = useState("");
   const [deadlineInput, setDeadlineInput] = useState("");
 
@@ -70,23 +68,26 @@ export default function Admin() {
 
   useEffect(() => { fetchAll(); }, []);
 
-  const rules = useMemo(() => computeGroupRules(submissions.filter(s => s.locked)), [submissions]);
-  const ranked = useMemo(() => rankAccommodations(accommodations, submissions.filter(s => s.locked), rules), [accommodations, submissions, rules]);
+  const lockedSubs = useMemo(() => submissions.filter(s => s.locked), [submissions]);
+  const rules = useMemo(() => computeGroupRules(lockedSubs), [lockedSubs]);
+  const ranked = useMemo(() => rankAccommodations(accommodations, lockedSubs, rules), [accommodations, lockedSubs, rules]);
+  const avgPoints = useMemo(() => lockedSubs.length > 0 ? computeAvgPoints(lockedSubs) : null, [lockedSubs]);
 
   if (!isAdmin) return <AppLayout><p className="py-12 text-center text-destructive font-semibold">Geen toegang</p></AppLayout>;
   if (loading) return <AppLayout><div className="flex justify-center py-12 text-sm text-muted-foreground">Laden...</div></AppLayout>;
 
-  const lockedSubs = submissions.filter(s => s.locked);
   const countVotes = (field: keyof Submission, value: any) => lockedSubs.filter(s => s[field] === value).length;
+  const nonAdminProfiles = profiles.filter(p => p.username !== "admin" && p.username !== "Admin");
+  const getAccName = (accId: string) => accommodations.find(a => a.id === accId)?.name || accId.slice(0, 8);
+  const getLogsForUser = (userId: string) => activityLogs.filter(l => l.user_id === userId);
+  const getSubForUser = (userId: string) => submissions.find(s => s.user_id === userId);
+  const getProfileName = (userId: string) => profiles.find(p => p.id === userId)?.display_name || "Onbekend";
 
-  const avgPoints = lockedSubs.length > 0 ? {
-    "Golf": lockedSubs.reduce((s, sub) => s + sub.points_golf_ease, 0) / lockedSubs.length,
-    "Strand": lockedSubs.reduce((s, sub) => s + sub.points_beach_life, 0) / lockedSubs.length,
-    "Omgeving": lockedSubs.reduce((s, sub) => s + sub.points_exploring, 0) / lockedSubs.length,
-    "Luxe": lockedSubs.reduce((s, sub) => s + sub.points_luxury, 0) / lockedSubs.length,
-    "Budget": lockedSubs.reduce((s, sub) => s + sub.points_budget, 0) / lockedSubs.length,
-    "Gedoe": lockedSubs.reduce((s, sub) => s + sub.points_low_hassle, 0) / lockedSubs.length,
-  } : null;
+  // --- Handlers ---
+  const logOverride = async (field: string, oldValue: string | null, newValue: string | null, reason: string) => {
+    if (!user) return;
+    await supabase.from("admin_overrides").insert({ admin_user_id: user.id, field, old_value: oldValue, new_value: newValue, reason });
+  };
 
   const handleEliminate = async (accId: string) => {
     const reason = prompt("Reden voor eliminatie:");
@@ -142,15 +143,6 @@ export default function Admin() {
     toast.success("Ronde 2: Ranking is zichtbaar in de lijst");
   };
 
-  const logOverride = async (field: string, oldValue: string | null, newValue: string | null, reason: string) => {
-    if (!user) return;
-    await supabase.from("admin_overrides").insert({
-      admin_user_id: user.id,
-      field, old_value: oldValue, new_value: newValue, reason,
-    });
-  };
-
-  // Deadline handlers
   const updateDeadline = async (newValue: string) => {
     const { error } = await supabase.from("app_settings").update({ value: newValue, updated_at: new Date().toISOString() }).eq("key", "intake_deadline");
     if (error) { toast.error("Fout bij opslaan deadline"); return; }
@@ -167,10 +159,27 @@ export default function Admin() {
     updateDeadline(current.toISOString());
   };
 
-  // User activity helpers
-  const nonAdminProfiles = profiles.filter(p => p.username !== "admin");
-  const getLogsForUser = (userId: string) => activityLogs.filter(l => l.user_id === userId);
-  const getAccName = (accId: string) => accommodations.find(a => a.id === accId)?.name || accId;
+  // --- Aggregate helpers ---
+  const countBool = (field: keyof Submission) => ({ yes: countVotes(field, true), no: countVotes(field, false) });
+  
+  const budgets = lockedSubs.map(s => s.budget_cap_total).filter((b): b is number => b !== null && b > 0);
+  const budgetMedian = budgets.length > 0 ? budgets.sort((a, b) => a - b)[Math.floor(budgets.length / 2)] : null;
+  const budgetAvg = budgets.length > 0 ? budgets.reduce((a, b) => a + b, 0) / budgets.length : null;
+
+  const allDietPrefs = lockedSubs.flatMap(s => s.diet_preferences || []);
+  const dietCounts: Record<string, number> = {};
+  allDietPrefs.forEach(d => { dietCounts[d] = (dietCounts[d] || 0) + 1; });
+
+  const allActivities = lockedSubs.flatMap(s => s.activities || []);
+  const activityCounts: Record<string, number> = {};
+  allActivities.forEach(a => { activityCounts[a] = (activityCounts[a] || 0) + 1; });
+
+  const allRemarks = lockedSubs
+    .filter(s => s.remarks_a || s.remarks_b)
+    .map(s => ({ user: getProfileName(s.user_id), text: [s.remarks_a, s.remarks_b].filter(Boolean).join(" | ") }));
+
+  const golfMinVotes: Record<number, number> = {};
+  lockedSubs.forEach(s => { golfMinVotes[s.max_golf_minutes] = (golfMinVotes[s.max_golf_minutes] || 0) + 1; });
 
   return (
     <AppLayout>
@@ -182,20 +191,15 @@ export default function Admin() {
           </h2>
         </div>
 
-        {/* Deadline beheer */}
-        <section className="space-y-3">
-          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-            <Clock className="h-3.5 w-3.5" /> Deadline beheer
-          </p>
+        {/* 1. Deadline beheer */}
+        <Section icon={<Clock className="h-3.5 w-3.5" />} title="Deadline beheer">
           <div className="border rounded-lg p-4 space-y-4">
             <div>
               <p className="text-sm text-muted-foreground">Huidige deadline:</p>
               <p className="font-display font-extrabold text-lg">
                 {new Date(deadlineValue).toLocaleString("nl-NL", { dateStyle: "full", timeStyle: "short" })}
               </p>
-              {new Date(deadlineValue) < new Date() && (
-                <Badge variant="destructive" className="mt-1 text-xs">Verlopen</Badge>
-              )}
+              {new Date(deadlineValue) < new Date() && <Badge variant="destructive" className="mt-1 text-xs">Verlopen</Badge>}
             </div>
             <div className="flex gap-2">
               <Button size="sm" variant="outline" onClick={() => addTime(1)}>+1 uur</Button>
@@ -212,50 +216,18 @@ export default function Admin() {
               <Button size="sm" onClick={() => updateDeadline(deadlineInput)}>Opslaan</Button>
             </div>
           </div>
-        </section>
+        </Section>
 
-        {/* Completion */}
-        <section className="space-y-3">
-          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Completion</p>
-          <div className="border rounded-lg divide-y">
-            {profiles.filter(p => p.username !== "Admin" && p.username !== "admin").map(p => {
-              const sub = submissions.find(s => s.user_id === p.id);
-              return (
-                <div key={p.id} className="flex items-center justify-between p-3">
-                  <span className="text-sm font-medium">{p.display_name}</span>
-                  <div className="flex items-center gap-2">
-                    {sub?.locked ? (
-                      <>
-                        <CheckCircle2 className="h-4 w-4 text-primary" />
-                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleUnlockSubmission(sub.id)}>
-                          <Unlock className="h-3.5 w-3.5" />
-                        </Button>
-                      </>
-                    ) : sub ? (
-                      <span className="text-xs text-muted-foreground font-medium">Bezig</span>
-                    ) : (
-                      <XCircle className="h-4 w-4 text-destructive" />
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </section>
-
-        {/* Gebruikersactiviteit */}
-        <section className="space-y-3">
-          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-            <Eye className="h-3.5 w-3.5" /> Gebruikersactiviteit
-          </p>
+        {/* 2. Per-gebruiker detail */}
+        <Section icon={<Users className="h-3.5 w-3.5" />} title="Gebruikers & Intake details">
           <div className="space-y-2">
             {nonAdminProfiles.map(p => {
+              const sub = getSubForUser(p.id);
               const logs = getLogsForUser(p.id);
               const lastActivity = logs[0]?.created_at;
               const pageViews = logs.filter(l => l.event_type === "page_view").length;
               const logins = logs.filter(l => l.event_type === "login").length;
-              const uniquePages = [...new Set(logs.filter(l => l.event_type === "page_view").map(l => l.page))];
-              const accViews = logs.filter(l => l.event_type === "click" && l.page === "/accommodations" && l.detail);
+              const accViews = logs.filter(l => l.event_type === "click" && l.detail);
 
               return (
                 <Collapsible key={p.id}>
@@ -263,7 +235,13 @@ export default function Admin() {
                     <div className="flex items-center justify-between p-3 border rounded-lg hover:bg-secondary/50 transition-colors">
                       <div className="flex items-center gap-3">
                         <span className="text-sm font-semibold">{p.display_name}</span>
-                        {logs.length === 0 && <Badge variant="outline" className="text-[10px]">Geen activiteit</Badge>}
+                        {sub?.locked ? (
+                          <Badge className="text-[10px] bg-primary/10 text-primary border-primary/20">Locked</Badge>
+                        ) : sub ? (
+                          <Badge variant="outline" className="text-[10px]">Bezig</Badge>
+                        ) : (
+                          <Badge variant="destructive" className="text-[10px]">Niet gestart</Badge>
+                        )}
                       </div>
                       <div className="flex items-center gap-3 text-xs text-muted-foreground">
                         {lastActivity && (
@@ -274,139 +252,294 @@ export default function Admin() {
                     </div>
                   </CollapsibleTrigger>
                   <CollapsibleContent>
-                    <div className="border border-t-0 rounded-b-lg p-4 space-y-4 bg-secondary/30">
-                      {/* Stats */}
-                      <div className="grid grid-cols-3 gap-3">
-                        <div className="text-center">
-                          <p className="font-display font-extrabold text-lg">{logins}</p>
-                          <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Logins</p>
-                        </div>
-                        <div className="text-center">
-                          <p className="font-display font-extrabold text-lg">{pageViews}</p>
-                          <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Pageviews</p>
-                        </div>
-                        <div className="text-center">
-                          <p className="font-display font-extrabold text-lg">{accViews.length}</p>
-                          <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Acc. bekeken</p>
-                        </div>
-                      </div>
-
-                      {/* Unique pages */}
-                      {uniquePages.length > 0 && (
-                        <div>
-                          <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">Bezochte pagina's</p>
-                          <div className="flex flex-wrap gap-1">
-                            {uniquePages.map(page => (
-                              <Badge key={page} variant="outline" className="text-[10px]">{page}</Badge>
-                            ))}
-                          </div>
+                    <div className="border border-t-0 rounded-b-lg p-4 space-y-5 bg-secondary/30">
+                      {/* Admin actions */}
+                      {sub && (
+                        <div className="flex gap-2">
+                          {sub.locked && (
+                            <Button size="sm" variant="outline" onClick={() => handleUnlockSubmission(sub.id)}>
+                              <Unlock className="h-3.5 w-3.5 mr-1" /> Unlock submission
+                            </Button>
+                          )}
                         </div>
                       )}
 
-                      {/* Accommodation views */}
-                      {accViews.length > 0 && (
-                        <div>
-                          <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">Accommodaties bekeken</p>
+                      {/* Intake antwoorden */}
+                      {sub ? (
+                        <div className="space-y-4">
+                          <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Intake antwoorden</p>
+                          <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
+                            <LabelValue label="Vervoer" value={mobilityLabel(sub.mobility_choice)} />
+                            <LabelValue label="Locatie" value={baseLabel(sub.base_choice)} />
+                            <LabelValue label="Max golf reistijd" value={`${sub.max_golf_minutes} min`} />
+                            <LabelValue label="Rondes" value={`${sub.preferred_rounds}`} />
+                            <LabelValue label="Budget cap" value={sub.budget_cap_total ? `€${sub.budget_cap_total}` : "—"} />
+                            <LabelValue label="Akkoord feiten" value={sub.agreed_facts ? "Ja" : "Nee"} />
+                          </div>
+
+                          {/* Wensen / must-haves */}
+                          <div>
+                            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Must-haves</p>
+                            <div className="flex flex-wrap gap-1.5">
+                              <WishBadge label="Vaste bedden" active={sub.require_fixed_beds} />
+                              <WishBadge label="3 slaapkamers" active={sub.require_bedrooms_3} />
+                              <WishBadge label="Zwembad" active={sub.require_pool} />
+                              <WishBadge label="Airco" active={sub.require_airco} />
+                              <WishBadge label="Wifi" active={sub.require_wifi} />
+                              <WishBadge label="Parking" active={sub.require_parking} />
+                              <WishBadge label="Terras" active={sub.require_terrace} />
+                              <WishBadge label="Transparante prijs" active={sub.require_transparent_price} />
+                            </div>
+                          </div>
+
+                          {/* Punten mini-bars */}
+                          <div>
+                            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Puntenverdeling (100 punten)</p>
+                            <div className="space-y-1.5">
+                              <MiniBar label="Golf" value={sub.points_golf_ease} avg={avgPoints?.golfEase} />
+                              <MiniBar label="Strand" value={sub.points_beach_life} avg={avgPoints?.beachLife} />
+                              <MiniBar label="Omgeving" value={sub.points_exploring} avg={avgPoints?.exploring} />
+                              <MiniBar label="Luxe" value={sub.points_luxury} avg={avgPoints?.luxury} />
+                              <MiniBar label="Budget" value={sub.points_budget} avg={avgPoints?.budget} />
+                              <MiniBar label="Gedoe" value={sub.points_low_hassle} avg={avgPoints?.lowHassle} />
+                            </div>
+                          </div>
+
+                          {/* Diet & activities */}
+                          {(sub.diet_preferences?.length ?? 0) > 0 && (
+                            <div>
+                              <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">Eetvoorkeuren</p>
+                              <div className="flex flex-wrap gap-1">{sub.diet_preferences!.map(d => <Badge key={d} variant="outline" className="text-[10px]">{d}</Badge>)}</div>
+                              {sub.diet_remarks && <p className="text-xs text-muted-foreground mt-1 italic">{sub.diet_remarks}</p>}
+                            </div>
+                          )}
+
+                          {(sub.activities?.length ?? 0) > 0 && (
+                            <div>
+                              <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">Activiteiten</p>
+                              <div className="flex flex-wrap gap-1">{sub.activities!.map(a => <Badge key={a} variant="secondary" className="text-[10px]">{a}</Badge>)}</div>
+                            </div>
+                          )}
+
+                          {/* Opmerkingen */}
+                          {(sub.remarks_a || sub.remarks_b) && (
+                            <div>
+                              <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">Opmerkingen</p>
+                              <p className="text-xs text-muted-foreground italic">{[sub.remarks_a, sub.remarks_b].filter(Boolean).join(" | ")}</p>
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <p className="text-xs text-muted-foreground italic">Nog geen intake ingevuld</p>
+                      )}
+
+                      {/* Gedrag */}
+                      <div className="space-y-3 border-t pt-3">
+                        <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Gedrag</p>
+                        <div className="grid grid-cols-3 gap-3">
+                          <StatBlock value={logins} label="Logins" />
+                          <StatBlock value={pageViews} label="Pageviews" />
+                          <StatBlock value={accViews.length} label="Acc. bekeken" />
+                        </div>
+                        {accViews.length > 0 && (
                           <div className="flex flex-wrap gap-1">
                             {[...new Set(accViews.map(l => l.detail!))].map(accId => (
                               <Badge key={accId} variant="secondary" className="text-[10px]">{getAccName(accId)}</Badge>
                             ))}
                           </div>
-                        </div>
-                      )}
-
-                      {/* Timeline */}
-                      {logs.length > 0 && (
-                        <div>
-                          <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">Laatste activiteit</p>
-                          <div className="space-y-1 max-h-48 overflow-y-auto">
-                            {logs.slice(0, 20).map(l => (
-                              <div key={l.id} className="flex items-center justify-between text-xs py-1 border-b border-border/50 last:border-0">
-                                <div className="flex items-center gap-2">
-                                  <Badge variant={l.event_type === "login" ? "default" : l.event_type === "click" ? "secondary" : "outline"} className="text-[9px] px-1.5 py-0">
-                                    {l.event_type}
-                                  </Badge>
+                        )}
+                        {logs.length > 0 && (
+                          <div className="space-y-1 max-h-36 overflow-y-auto">
+                            {logs.slice(0, 15).map(l => (
+                              <div key={l.id} className="flex items-center justify-between text-xs py-0.5 border-b border-border/30 last:border-0">
+                                <div className="flex items-center gap-1.5">
+                                  <Badge variant={l.event_type === "login" ? "default" : "outline"} className="text-[9px] px-1 py-0">{l.event_type}</Badge>
                                   <span className="text-muted-foreground">{l.page}</span>
-                                  {l.detail && <span className="text-muted-foreground truncate max-w-[120px]">({getAccName(l.detail)})</span>}
+                                  {l.detail && <span className="text-muted-foreground truncate max-w-[100px]">({getAccName(l.detail)})</span>}
                                 </div>
-                                <span className="text-muted-foreground text-[10px] shrink-0">
-                                  {new Date(l.created_at).toLocaleString("nl-NL", { hour: "2-digit", minute: "2-digit", day: "numeric", month: "short" })}
-                                </span>
+                                <span className="text-muted-foreground text-[10px]">{new Date(l.created_at).toLocaleString("nl-NL", { hour: "2-digit", minute: "2-digit", day: "numeric", month: "short" })}</span>
                               </div>
                             ))}
                           </div>
-                        </div>
-                      )}
+                        )}
+                      </div>
                     </div>
                   </CollapsibleContent>
                 </Collapsible>
               );
             })}
           </div>
-        </section>
+        </Section>
 
-        {/* Majority view */}
+        {/* 3. Groepsresultaten */}
         {lockedSubs.length > 0 && (
-          <section className="space-y-3">
-            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Stemverdeling</p>
-            <div className="space-y-4">
-              <VoteRow label="Rondes" items={[{ label: "2 rondes", count: countVotes("preferred_rounds", 2) }, { label: "3 rondes", count: countVotes("preferred_rounds", 3) }]} total={lockedSubs.length} />
-              <VoteRow label="Mobiliteit" items={[{ label: "Auto", count: countVotes("mobility_choice", "car") }, { label: "Taxi", count: countVotes("mobility_choice", "transfers") }, { label: "Neutraal", count: countVotes("mobility_choice", "neutral") }]} total={lockedSubs.length} />
-              <VoteRow label="Base" items={[{ label: "Golf", count: countVotes("base_choice", "golf") }, { label: "Strand", count: countVotes("base_choice", "beach") }, { label: "Neutraal", count: countVotes("base_choice", "neutral") }]} total={lockedSubs.length} />
-              <VoteRow label="Vaste bedden" items={[{ label: "Vereist", count: countVotes("require_fixed_beds", true) }, { label: "Niet", count: countVotes("require_fixed_beds", false) }]} total={lockedSubs.length} />
-              <VoteRow label="3 slaapkamers" items={[{ label: "Vereist", count: countVotes("require_bedrooms_3", true) }, { label: "Niet", count: countVotes("require_bedrooms_3", false) }]} total={lockedSubs.length} />
-            </div>
-          </section>
-        )}
-
-        {/* Average points */}
-        {avgPoints && (
-          <section className="space-y-3">
-            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Gemiddelde punten</p>
-            <div className="border rounded-lg p-4">
-              <div className="space-y-2">
-                {Object.entries(avgPoints).map(([k, v]) => (
-                  <div key={k} className="flex items-center gap-3">
-                    <span className="text-sm text-muted-foreground w-16">{k}</span>
-                    <div className="flex-1 bg-secondary rounded-full h-2 overflow-hidden">
-                      <div className="bg-primary h-full rounded-full transition-all" style={{ width: `${v}%` }} />
-                    </div>
-                    <span className="text-sm font-display font-bold tabular-nums w-8 text-right">{v.toFixed(0)}</span>
-                  </div>
-                ))}
+          <Section icon={<BarChart3 className="h-3.5 w-3.5" />} title="Groepsresultaten">
+            {/* Berekende groepsregels */}
+            <div className="border rounded-lg p-4 space-y-3">
+              <p className="text-xs font-semibold text-foreground">Berekende groepsregels (meerderheid)</p>
+              <div className="flex flex-wrap gap-1.5">
+                <RuleBadge label="Vaste bedden" active={rules.requireFixedBeds} />
+                <RuleBadge label="3 slaapkamers" active={rules.requireBedrooms3} />
+                <RuleBadge label="Annuleerbaar" active={rules.requireCancelable} />
+                <RuleBadge label="Transparante prijs" active={rules.requireTransparentPrice} />
+                <RuleBadge label="Zwembad" active={rules.requirePool} />
+                <RuleBadge label="Airco" active={rules.requireAirco} />
+                <RuleBadge label="Wifi" active={rules.requireWifi} />
+                <RuleBadge label="Parking" active={rules.requireParking} />
+                <RuleBadge label="Terras" active={rules.requireTerrace} />
+              </div>
+              <div className="text-xs text-muted-foreground space-y-0.5">
+                <p>Max golf reistijd: <strong>{rules.maxGolfMinutes} min</strong> (mediaan)</p>
+                <p>Budget cap: <strong>{rules.budgetCap ? `€${rules.budgetCap}` : "Geen"}</strong></p>
               </div>
             </div>
-          </section>
+
+            {/* Stemverdeling */}
+            <div className="space-y-4 mt-4">
+              <p className="text-xs font-semibold text-foreground">Stemverdeling</p>
+              <VoteRow label="Rondes" items={[{ label: "2 rondes", count: countVotes("preferred_rounds", 2) }, { label: "3 rondes", count: countVotes("preferred_rounds", 3) }]} total={lockedSubs.length} />
+              <VoteRow label="Vervoer" items={[{ label: "Auto", count: countVotes("mobility_choice", "car") }, { label: "Taxi", count: countVotes("mobility_choice", "transfers") }, { label: "Neutraal", count: countVotes("mobility_choice", "neutral") }]} total={lockedSubs.length} />
+              <VoteRow label="Locatie" items={[{ label: "Golf", count: countVotes("base_choice", "golf") }, { label: "Strand", count: countVotes("base_choice", "beach") }, { label: "Neutraal", count: countVotes("base_choice", "neutral") }]} total={lockedSubs.length} />
+              
+              {/* Boolean must-haves */}
+              {([
+                ["Vaste bedden", "require_fixed_beds"],
+                ["3 slaapkamers", "require_bedrooms_3"],
+                ["Zwembad", "require_pool"],
+                ["Airco", "require_airco"],
+                ["Wifi", "require_wifi"],
+                ["Parking", "require_parking"],
+                ["Terras", "require_terrace"],
+                ["Transparante prijs", "require_transparent_price"],
+              ] as [string, keyof Submission][]).map(([label, field]) => {
+                const b = countBool(field);
+                return <VoteRow key={field} label={label} items={[{ label: "Vereist", count: b.yes }, { label: "Niet", count: b.no }]} total={lockedSubs.length} />;
+              })}
+
+              {/* Max golf reistijd verdeling */}
+              {Object.keys(golfMinVotes).length > 0 && (
+                <VoteRow label="Max golf reistijd" items={Object.entries(golfMinVotes).sort(([a], [b]) => Number(a) - Number(b)).map(([min, count]) => ({ label: `${min} min`, count }))} total={lockedSubs.length} />
+              )}
+            </div>
+
+            {/* Gemiddelde punten */}
+            {avgPoints && (
+              <div className="mt-4">
+                <p className="text-xs font-semibold text-foreground mb-2">Gemiddelde punten</p>
+                <div className="border rounded-lg p-4 space-y-2">
+                  {([
+                    ["Golf", avgPoints.golfEase],
+                    ["Strand", avgPoints.beachLife],
+                    ["Omgeving", avgPoints.exploring],
+                    ["Luxe", avgPoints.luxury],
+                    ["Budget", avgPoints.budget],
+                    ["Gedoe", avgPoints.lowHassle],
+                  ] as [string, number][]).map(([k, v]) => (
+                    <div key={k} className="flex items-center gap-3">
+                      <span className="text-sm text-muted-foreground w-16">{k}</span>
+                      <div className="flex-1 bg-secondary rounded-full h-2 overflow-hidden">
+                        <div className="bg-primary h-full rounded-full transition-all" style={{ width: `${v}%` }} />
+                      </div>
+                      <span className="text-sm font-display font-bold tabular-nums w-8 text-right">{v.toFixed(0)}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Budget overzicht */}
+            {budgets.length > 0 && (
+              <div className="mt-4">
+                <p className="text-xs font-semibold text-foreground mb-2">Budget overzicht</p>
+                <div className="border rounded-lg p-4 grid grid-cols-3 gap-3">
+                  <StatBlock value={`€${Math.min(...budgets)}`} label="Laagste" />
+                  <StatBlock value={`€${budgetMedian}`} label="Mediaan" />
+                  <StatBlock value={`€${Math.round(budgetAvg!)}`} label="Gemiddeld" />
+                </div>
+                <div className="flex flex-wrap gap-1 mt-2">
+                  {lockedSubs.map(s => (
+                    <Badge key={s.id} variant="outline" className="text-[10px]">
+                      {getProfileName(s.user_id)}: {s.budget_cap_total ? `€${s.budget_cap_total}` : "—"}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Eetvoorkeuren totaal */}
+            {Object.keys(dietCounts).length > 0 && (
+              <div className="mt-4">
+                <p className="text-xs font-semibold text-foreground mb-2">Eetvoorkeuren</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {Object.entries(dietCounts).sort(([, a], [, b]) => b - a).map(([diet, count]) => (
+                    <Badge key={diet} variant="secondary" className="text-[10px]">{diet} <span className="font-bold ml-1">{count}×</span></Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Activiteiten totaal */}
+            {Object.keys(activityCounts).length > 0 && (
+              <div className="mt-4">
+                <p className="text-xs font-semibold text-foreground mb-2">Activiteiten naast golf</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {Object.entries(activityCounts).sort(([, a], [, b]) => b - a).map(([act, count]) => (
+                    <Badge key={act} variant="outline" className="text-[10px]">{act} <span className="font-bold ml-1">{count}×</span></Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Alle opmerkingen */}
+            {allRemarks.length > 0 && (
+              <div className="mt-4">
+                <p className="text-xs font-semibold text-foreground mb-2">Opmerkingen</p>
+                <div className="border rounded-lg divide-y">
+                  {allRemarks.map((r, i) => (
+                    <div key={i} className="p-3 text-xs">
+                      <span className="font-semibold">{r.user}:</span>{" "}
+                      <span className="text-muted-foreground italic">{r.text}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </Section>
         )}
 
-        {/* Afvalrace controls */}
-        <section className="space-y-3">
-          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Afvalrace controls</p>
+        {/* 4. Selectieronde controls */}
+        <Section icon={<Settings className="h-3.5 w-3.5" />} title="Selectieronde controls">
           <div className="space-y-2">
             <Button onClick={handleRunRound1} variant="destructive" className="w-full font-semibold">Ronde 1: Sloperhamer</Button>
             <Button onClick={handleRunRound2} className="w-full font-semibold">Ronde 2: Scorebord</Button>
             <p className="text-xs text-muted-foreground text-center">Ronde 3: Selecteer finalisten hieronder</p>
           </div>
-        </section>
+        </Section>
 
-        {/* Accommodations */}
-        <section className="space-y-3">
-          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Accommodaties ({ranked.length})</p>
+        {/* 5. Accommodaties */}
+        <Section icon={<FileText className="h-3.5 w-3.5" />} title={`Accommodaties (${ranked.length})`}>
           <div className="space-y-2">
             {ranked.map(acc => (
               <div key={acc.id} className={`border rounded-lg p-3 space-y-2 transition-opacity ${acc.status === "eliminated" ? "opacity-40" : ""}`}>
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
                     <p className="text-sm font-semibold truncate">{acc.name}</p>
-                    <p className="text-[11px] text-muted-foreground">{acc.location_label} · {acc.bedrooms}k · {acc.fixed_beds_count}b · {acc.golf_minutes ?? "?"}m golf</p>
+                    <p className="text-[11px] text-muted-foreground">
+                      {acc.location_label} · {acc.bedrooms}k · {acc.fixed_beds_count}b · {acc.golf_minutes ?? "?"}m golf
+                      {acc.total_price_3_nights && ` · €${acc.total_price_3_nights}`}
+                    </p>
+                    {acc.tags.length > 0 && (
+                      <div className="flex flex-wrap gap-0.5 mt-1">
+                        {acc.tags.map(t => <Badge key={t} variant="outline" className="text-[9px] px-1 py-0">{t}</Badge>)}
+                      </div>
+                    )}
+                    {!acc.eligibility.eligible && (
+                      <p className="text-[10px] text-destructive mt-1">{acc.eligibility.failures.join(", ")}</p>
+                    )}
                   </div>
                   <div className="flex items-center gap-1.5 shrink-0">
                     <span className="font-display font-extrabold text-sm text-primary">{acc.totalScore.toFixed(0)}</span>
-                    {acc.eligibility.eligible ? (
-                      <CheckCircle2 className="h-4 w-4 text-primary" />
-                    ) : (
-                      <XCircle className="h-4 w-4 text-destructive" />
-                    )}
+                    {acc.eligibility.eligible ? <CheckCircle2 className="h-4 w-4 text-primary" /> : <XCircle className="h-4 w-4 text-destructive" />}
                     {acc.status === "finalist" && <Trophy className="h-4 w-4 text-warning" />}
                   </div>
                 </div>
@@ -433,14 +566,13 @@ export default function Admin() {
               </div>
             ))}
           </div>
-        </section>
+        </Section>
 
-        {/* Override log */}
+        {/* 6. Override log */}
         {overrides.length > 0 && (
-          <section className="space-y-3">
-            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Override log</p>
+          <Section icon={<Eye className="h-3.5 w-3.5" />} title="Override log">
             <div className="border rounded-lg divide-y">
-              {overrides.slice(0, 15).map(o => (
+              {overrides.slice(0, 20).map(o => (
                 <div key={o.id} className="p-3 text-xs space-y-0.5">
                   <div className="flex items-center justify-between gap-2">
                     <span className="font-semibold">{o.field}</span>
@@ -451,10 +583,23 @@ export default function Admin() {
                 </div>
               ))}
             </div>
-          </section>
+          </Section>
         )}
       </div>
     </AppLayout>
+  );
+}
+
+// --- Helper components ---
+
+function Section({ icon, title, children }: { icon: React.ReactNode; title: string; children: React.ReactNode }) {
+  return (
+    <section className="space-y-3">
+      <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+        {icon} {title}
+      </p>
+      {children}
+    </section>
   );
 }
 
@@ -469,9 +614,7 @@ function VoteRow({ label, items, total }: { label: string; items: { label: strin
             <div
               key={item.label}
               className={`flex-1 text-center rounded-md py-1.5 text-xs font-medium transition-colors ${
-                isMajority
-                  ? "bg-primary/10 text-primary border border-primary/20"
-                  : "bg-secondary text-muted-foreground"
+                isMajority ? "bg-primary/10 text-primary border border-primary/20" : "bg-secondary text-muted-foreground"
               }`}
             >
               {item.label} <span className="font-bold">{item.count}</span>/{total}
@@ -481,4 +624,61 @@ function VoteRow({ label, items, total }: { label: string; items: { label: strin
       </div>
     </div>
   );
+}
+
+function LabelValue({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{label}</p>
+      <p className="text-sm font-medium">{value}</p>
+    </div>
+  );
+}
+
+function WishBadge({ label, active }: { label: string; active: boolean }) {
+  return (
+    <Badge variant={active ? "default" : "outline"} className={`text-[10px] ${active ? "" : "opacity-40"}`}>
+      {active ? "✓" : "✗"} {label}
+    </Badge>
+  );
+}
+
+function RuleBadge({ label, active }: { label: string; active: boolean }) {
+  return (
+    <Badge variant={active ? "default" : "outline"} className={`text-[10px] ${active ? "bg-primary text-primary-foreground" : "opacity-50"}`}>
+      {active ? "✓" : "—"} {label}
+    </Badge>
+  );
+}
+
+function MiniBar({ label, value, avg }: { label: string; value: number; avg?: number }) {
+  return (
+    <div className="flex items-center gap-2">
+      <span className="text-[10px] text-muted-foreground w-14 shrink-0">{label}</span>
+      <div className="flex-1 bg-secondary rounded-full h-2 overflow-hidden relative">
+        <div className="bg-primary h-full rounded-full" style={{ width: `${value}%` }} />
+        {avg !== undefined && (
+          <div className="absolute top-0 h-full w-0.5 bg-destructive/60" style={{ left: `${avg}%` }} title={`Gem: ${avg.toFixed(0)}`} />
+        )}
+      </div>
+      <span className="text-[10px] font-bold tabular-nums w-6 text-right">{value}</span>
+    </div>
+  );
+}
+
+function StatBlock({ value, label }: { value: string | number; label: string }) {
+  return (
+    <div className="text-center">
+      <p className="font-display font-extrabold text-lg">{value}</p>
+      <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{label}</p>
+    </div>
+  );
+}
+
+function mobilityLabel(v: string) {
+  return v === "car" ? "Huurauto" : v === "transfers" ? "Taxi/transfers" : "Neutraal";
+}
+
+function baseLabel(v: string) {
+  return v === "golf" ? "Dicht bij golf" : v === "beach" ? "Dicht bij strand" : "Neutraal";
 }

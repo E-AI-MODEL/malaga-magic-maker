@@ -279,7 +279,7 @@ export default function Intake() {
               <MapPin className="h-4 w-4 mt-0.5 shrink-0 text-white/40" />
               <div>
                 <p className="text-white/90 font-semibold">Golf</p>
-                <p>Minimaal 2 rondes 18 holes bij La Cala Golf</p>
+                <p>Minimaal 2 rondes 18 holes bij La Cala Golf <span className="italic text-white/40">(m.u.v. Pieter &amp; Edwin)</span></p>
               </div>
             </div>
             <p className="text-white/50 text-xs">2 – 5 april 2026 · 6 volwassenen</p>

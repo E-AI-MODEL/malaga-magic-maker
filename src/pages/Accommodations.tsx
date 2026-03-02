@@ -8,7 +8,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext } from "@/components/ui/carousel";
-import { BedDouble, Car, Clock, Waves, ArrowRight } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { BedDouble, Car, Clock, Waves, ArrowRight, Info } from "lucide-react";
 import { rankAccommodations, computeGroupRules, type Accommodation, type Submission, type RankedAccommodation } from "@/lib/scoring";
 import heroVilla from "@/assets/hero-villa.jpg";
 
@@ -19,7 +20,7 @@ export default function Accommodations() {
   const [loading, setLoading] = useState(true);
   const [sortBy, setSortBy] = useState("score");
   const [eligibleOnly, setEligibleOnly] = useState(false);
-
+  const [showDisclaimer, setShowDisclaimer] = useState(true);
   useEffect(() => {
     Promise.all([
       supabase.from("accommodations").select("*"),
@@ -53,17 +54,35 @@ export default function Accommodations() {
 
   return (
     <AppLayout>
+      <Dialog open={showDisclaimer} onOpenChange={setShowDisclaimer}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <div className="flex justify-center mb-2">
+              <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                <Info className="h-5 w-5 text-primary" />
+              </div>
+            </div>
+            <DialogTitle className="text-center">Ter indicatie</DialogTitle>
+            <DialogDescription className="text-center text-sm leading-relaxed">
+              De prijzen en accommodaties op deze pagina zijn indicatief. Op basis van jullie voorkeuren worden uiteindelijk <strong className="text-foreground">2 opties</strong> aan de groep voorgelegd waar we zullen verblijven.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button className="w-full" onClick={() => setShowDisclaimer(false)}>Begrepen</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <div className="-mx-4 -mt-6 space-y-0">
         {/* Hero header */}
-        <div className="relative h-44">
+        <div className="relative h-32">
           <img src={heroVilla} alt="" className="absolute inset-0 w-full h-full object-cover" />
           <div className="absolute inset-0 bg-gradient-to-b from-black/40 to-black/80" />
-          <div className="relative z-10 flex flex-col justify-end h-full px-6 pb-4">
-            <p className="text-white/50 text-xs font-semibold uppercase tracking-[0.2em]">Verblijven</p>
-            <h2 className="font-display text-2xl font-extrabold text-white mt-1">{filtered.length} opties</h2>
-            <p className="text-white/50 text-[11px] leading-relaxed mt-2 max-w-xs">
-              Indicatieve prijzen &amp; accommodaties. Op basis van jullie voorkeuren worden uiteindelijk 2 opties aan de groep voorgelegd.
-            </p>
+          <div className="relative z-10 flex items-end h-full px-6 pb-4">
+            <div>
+              <p className="text-white/50 text-xs font-semibold uppercase tracking-[0.2em]">Verblijven</p>
+              <h2 className="font-display text-2xl font-extrabold text-white mt-1">{filtered.length} opties</h2>
+            </div>
           </div>
         </div>
 

@@ -29,7 +29,7 @@ export default function Login() {
       <div className="relative z-10 w-full max-w-sm mx-auto px-6 pb-12 sm:pb-0">
         <div className="text-center mb-8">
           <h1 className="font-display text-4xl font-extrabold text-white tracking-tight leading-none">
-            MALAGA<br />AFVALRACE
+            MALAGA
           </h1>
           <p className="text-white/70 text-sm mt-3 font-medium">2 – 5 april 2026 &middot; Costa del Sol</p>
         </div>

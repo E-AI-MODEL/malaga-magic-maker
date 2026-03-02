@@ -40,6 +40,11 @@ export interface Submission {
   require_bedrooms_3: boolean;
   require_cancelable: boolean;
   require_transparent_price: boolean;
+  require_pool: boolean;
+  require_airco: boolean;
+  require_wifi: boolean;
+  require_parking: boolean;
+  require_terrace: boolean;
   budget_cap_total: number | null;
   points_golf_ease: number;
   points_beach_life: number;
@@ -47,6 +52,11 @@ export interface Submission {
   points_luxury: number;
   points_budget: number;
   points_low_hassle: number;
+  diet_preferences: string[] | null;
+  diet_remarks: string | null;
+  activities: string[] | null;
+  remarks_a: string | null;
+  remarks_b: string | null;
   locked: boolean;
 }
 
@@ -55,13 +65,18 @@ export interface GroupRules {
   requireBedrooms3: boolean;
   requireCancelable: boolean;
   requireTransparentPrice: boolean;
+  requirePool: boolean;
+  requireAirco: boolean;
+  requireWifi: boolean;
+  requireParking: boolean;
+  requireTerrace: boolean;
   maxGolfMinutes: number;
   budgetCap: number | null;
 }
 
 export function computeGroupRules(submissions: Submission[]): GroupRules {
   const n = submissions.length;
-  if (n === 0) return { requireFixedBeds: false, requireBedrooms3: false, requireCancelable: false, requireTransparentPrice: false, maxGolfMinutes: 20, budgetCap: null };
+  if (n === 0) return { requireFixedBeds: false, requireBedrooms3: false, requireCancelable: false, requireTransparentPrice: false, requirePool: false, requireAirco: false, requireWifi: false, requireParking: false, requireTerrace: false, maxGolfMinutes: 20, budgetCap: null };
 
   const majority = Math.ceil(n / 2);
   const count = (fn: (s: Submission) => boolean) => submissions.filter(fn).length;
@@ -78,6 +93,11 @@ export function computeGroupRules(submissions: Submission[]): GroupRules {
     requireBedrooms3: count(s => s.require_bedrooms_3) >= majority,
     requireCancelable: count(s => s.require_cancelable) >= majority,
     requireTransparentPrice: count(s => s.require_transparent_price) >= majority,
+    requirePool: count(s => s.require_pool) >= majority,
+    requireAirco: count(s => s.require_airco) >= majority,
+    requireWifi: count(s => s.require_wifi) >= majority,
+    requireParking: count(s => s.require_parking) >= majority,
+    requireTerrace: count(s => s.require_terrace) >= majority,
     maxGolfMinutes,
     budgetCap,
   };
@@ -94,6 +114,11 @@ export function checkEligibility(acc: Accommodation, rules: GroupRules): Eligibi
   if (rules.requireBedrooms3 && acc.bedrooms < 3) failures.push("Te weinig slaapkamers (nodig: 3)");
   if (rules.requireCancelable && acc.cancellation_type === "nonref") failures.push("Niet annuleerbaar");
   if (rules.requireTransparentPrice && !acc.transparent_price_confirmed && acc.total_price_3_nights === null) failures.push("Prijs niet transparant");
+  if (rules.requirePool && !acc.tags.some(t => t === "pool")) failures.push("Geen zwembad");
+  if (rules.requireParking && acc.parking !== "yes") failures.push("Geen parking");
+  if (rules.requireAirco && !acc.tags.some(t => t === "airco")) failures.push("Geen airco");
+  if (rules.requireWifi && !acc.tags.some(t => t === "wifi")) failures.push("Geen wifi");
+  if (rules.requireTerrace && !acc.tags.some(t => t === "terrace" || t === "terras")) failures.push("Geen terras");
   if (acc.golf_minutes != null && acc.golf_minutes > rules.maxGolfMinutes) failures.push(`Golf te ver (${acc.golf_minutes} min > max ${rules.maxGolfMinutes})`);
   if (rules.budgetCap && acc.total_price_3_nights != null && acc.total_price_3_nights > rules.budgetCap) failures.push("Boven budget");
   return { eligible: failures.length === 0, failures };

@@ -132,7 +132,7 @@ export default function Intake() {
   const handleSubmit = async () => {
     if (isPastDeadline) { toast.error("De deadline is verstreken"); return; }
     if (!agreedFacts) { toast.error("Je moet akkoord gaan met de vaste gegevens"); return; }
-    if (preferredRounds === null) { toast.error("Kies het aantal rondes golf"); return; }
+    if (!isNonGolfer && preferredRounds === null) { toast.error("Kies het aantal rondes golf"); return; }
     if (totalPoints !== 100) { toast.error("Speel eerst het dilemma-spel om je punten te verdelen"); return; }
     if (!user) return;
     setSubmitting(true);

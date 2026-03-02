@@ -61,7 +61,7 @@ export default function Info() {
             </div>
             <div className="flex justify-between">
               <span className="text-white/50">Golf</span>
-              <span className="font-semibold">Min. 2x, max 3x 18 holes (La Cala Golf)</span>
+              <span className="font-semibold">Min. 2x, max 3x 18 holes (La Cala Golf) <span className="italic text-white/40">(m.u.v. Pieter &amp; Edwin)</span></span>
             </div>
           </div>
           <p className="text-white/40 text-xs mt-5 leading-relaxed">

@@ -95,11 +95,13 @@ export default function AccommodationDetail() {
               </Badge>
             )}
           </div>
-          {acc.total_price_3_nights && (
-            <p className="font-display font-extrabold text-2xl text-white mt-4">
-              EUR {acc.total_price_3_nights} <span className="text-sm font-normal text-white/40">/ 3 nachten</span>
-            </p>
-          )}
+          <p className="font-display font-extrabold text-2xl text-white mt-4">
+            {acc.total_price_3_nights ? (
+              <>EUR {acc.total_price_3_nights} <span className="text-sm font-normal text-white/40">/ 3 nachten</span></>
+            ) : (
+              <span className="text-sm font-normal text-white/40">Prijs nog onbekend</span>
+            )}
+          </p>
         </div>
 
         {/* Stats grid */}

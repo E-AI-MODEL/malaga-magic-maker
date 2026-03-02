@@ -148,11 +148,13 @@ function AccommodationCard({ acc, baseLabel, onDetail }: { acc: RankedAccommodat
           <div className="flex items-center gap-1"><Car className="h-3 w-3 shrink-0" /> {acc.parking === "yes" ? "Ja" : acc.parking === "no" ? "Nee" : "?"}</div>
         </div>
 
-        {acc.total_price_3_nights && (
-          <p className="font-display font-extrabold text-base">
-            EUR {acc.total_price_3_nights} <span className="text-xs font-normal text-muted-foreground">/ 3 nachten</span>
-          </p>
-        )}
+        <p className="font-display font-extrabold text-base">
+          {acc.total_price_3_nights ? (
+            <>EUR {acc.total_price_3_nights} <span className="text-xs font-normal text-muted-foreground">/ 3 nachten</span></>
+          ) : (
+            <span className="text-xs font-normal text-muted-foreground">Prijs nog onbekend</span>
+          )}
+        </p>
 
         {acc.topReasons.length > 0 && (
           <div className="text-[11px] text-muted-foreground space-y-0.5">

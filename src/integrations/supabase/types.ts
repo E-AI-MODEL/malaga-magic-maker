@@ -163,10 +163,13 @@ export type Database = {
       }
       submissions: {
         Row: {
+          activities: string[] | null
           agreed_facts: boolean
           base_choice: string
           budget_cap_total: number | null
           created_at: string
+          diet_preferences: string[] | null
+          diet_remarks: string | null
           id: string
           locked: boolean
           max_golf_minutes: number
@@ -184,14 +187,18 @@ export type Database = {
           require_cancelable: boolean
           require_fixed_beds: boolean
           require_transparent_price: boolean
+          top_accommodations: string[] | null
           updated_at: string
           user_id: string
         }
         Insert: {
+          activities?: string[] | null
           agreed_facts?: boolean
           base_choice?: string
           budget_cap_total?: number | null
           created_at?: string
+          diet_preferences?: string[] | null
+          diet_remarks?: string | null
           id?: string
           locked?: boolean
           max_golf_minutes?: number
@@ -209,14 +216,18 @@ export type Database = {
           require_cancelable?: boolean
           require_fixed_beds?: boolean
           require_transparent_price?: boolean
+          top_accommodations?: string[] | null
           updated_at?: string
           user_id: string
         }
         Update: {
+          activities?: string[] | null
           agreed_facts?: boolean
           base_choice?: string
           budget_cap_total?: number | null
           created_at?: string
+          diet_preferences?: string[] | null
+          diet_remarks?: string | null
           id?: string
           locked?: boolean
           max_golf_minutes?: number
@@ -234,6 +245,7 @@ export type Database = {
           require_cancelable?: boolean
           require_fixed_beds?: boolean
           require_transparent_price?: boolean
+          top_accommodations?: string[] | null
           updated_at?: string
           user_id?: string
         }

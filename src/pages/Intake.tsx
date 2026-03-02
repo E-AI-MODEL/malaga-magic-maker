@@ -8,9 +8,10 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { ArrowRight, Check, Plane, Car, MapPin, Home } from "lucide-react";
+import { ArrowRight, Check, Plane, Car, MapPin, Home, UtensilsCrossed, Trophy, Dumbbell } from "lucide-react";
 import { DilemmaGame } from "@/components/DilemmaGame";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogClose } from "@/components/ui/dialog";
+import { type Accommodation } from "@/lib/scoring";
 import heroGolf from "@/assets/hero-golf.jpg";
 import heroTransport from "@/assets/hero-transport.jpg";
 import heroBeachTown from "@/assets/hero-beach-town.jpg";
@@ -45,6 +46,11 @@ export default function Intake() {
   const [requireTerrace, setRequireTerrace] = useState(false);
   const [budgetCap, setBudgetCap] = useState("");
   const [remarksB, setRemarksB] = useState("");
+  const [topAccommodations, setTopAccommodations] = useState<string[]>([]);
+  const [dietPreferences, setDietPreferences] = useState<string[]>([]);
+  const [dietRemarks, setDietRemarks] = useState("");
+  const [activities, setActivities] = useState<string[]>([]);
+  const [accommodationsList, setAccommodationsList] = useState<Accommodation[]>([]);
 
   // Fun popups
   const [showEdPopup, setShowEdPopup] = useState(false);
@@ -62,7 +68,10 @@ export default function Intake() {
 
   useEffect(() => {
     if (!user) return;
-    supabase.from("submissions").select("*").eq("user_id", user.id).maybeSingle().then(({ data }) => {
+    Promise.all([
+      supabase.from("submissions").select("*").eq("user_id", user.id).maybeSingle(),
+      supabase.from("accommodations").select("*").neq("status", "eliminated"),
+    ]).then(([{ data }, accRes]) => {
       if (data) {
         setExistingId(data.id);
         setLocked(data.locked);
@@ -78,12 +87,17 @@ export default function Intake() {
         setRequireTransparentPrice(data.require_transparent_price);
         setBudgetCap(data.budget_cap_total?.toString() || "");
         setRemarksB(data.remarks_b || "");
+        setTopAccommodations((data as any).top_accommodations || []);
+        setDietPreferences((data as any).diet_preferences || []);
+        setDietRemarks((data as any).diet_remarks || "");
+        setActivities((data as any).activities || []);
         setPoints({
           golfEase: data.points_golf_ease, beachLife: data.points_beach_life,
           exploring: data.points_exploring, luxury: data.points_luxury,
           budget: data.points_budget, lowHassle: data.points_low_hassle,
         });
       }
+      setAccommodationsList((accRes.data as any[]) || []);
       setLoading(false);
     });
   }, [user]);
@@ -124,6 +138,10 @@ export default function Intake() {
       points_golf_ease: points.golfEase, points_beach_life: points.beachLife,
       points_exploring: points.exploring, points_luxury: points.luxury,
       points_budget: points.budget, points_low_hassle: points.lowHassle, locked: true,
+      top_accommodations: topAccommodations,
+      diet_preferences: dietPreferences,
+      diet_remarks: dietRemarks || null,
+      activities: activities,
     };
     let error;
     if (existingId) {
@@ -357,6 +375,122 @@ export default function Intake() {
               <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Opmerking</p>
               <Textarea value={remarksB} onChange={e => setRemarksB(e.target.value)} placeholder="Optioneel..." className="min-h-[60px]" />
             </div>
+          </div>
+        </section>
+
+        {/* Top 3 accommodaties */}
+        <section className="bg-foreground text-background px-6 py-8 space-y-4">
+          <div className="flex items-center gap-2">
+            <Trophy className="h-4 w-4 text-primary" />
+            <h4 className="font-display font-extrabold text-sm text-white">Top 3 accommodaties</h4>
+          </div>
+          <p className="text-white/50 text-xs">Selecteer max. 3 accommodaties waar jij het liefst verblijft (volgorde maakt niet uit).</p>
+          <div className="space-y-2">
+            {accommodationsList.map((acc) => {
+              const isSelected = topAccommodations.includes(acc.id);
+              return (
+                <label
+                  key={acc.id}
+                  className={`flex items-center gap-3 p-3.5 rounded-lg cursor-pointer transition-all ${isSelected ? "bg-primary text-primary-foreground" : "bg-white/10 text-white hover:bg-white/15"}`}
+                >
+                  <Checkbox
+                    checked={isSelected}
+                    onCheckedChange={(c) => {
+                      if (c && topAccommodations.length >= 3) {
+                        toast.error("Je kunt maximaal 3 accommodaties kiezen");
+                        return;
+                      }
+                      setTopAccommodations(prev =>
+                        c ? [...prev, acc.id] : prev.filter(id => id !== acc.id)
+                      );
+                    }}
+                    className="border-white/30 data-[state=checked]:bg-primary-foreground data-[state=checked]:text-primary data-[state=checked]:border-primary-foreground"
+                  />
+                  <div className="min-w-0">
+                    <span className="text-sm font-semibold block">{acc.name}</span>
+                    <span className="text-[11px] opacity-60">{acc.location_label}</span>
+                  </div>
+                </label>
+              );
+            })}
+          </div>
+        </section>
+
+        {/* Eetvoorkeuren */}
+        <section className="bg-background px-6 py-8 space-y-4">
+          <div className="flex items-center gap-2">
+            <UtensilsCrossed className="h-4 w-4 text-primary" />
+            <h4 className="font-display font-extrabold text-sm">Eetvoorkeuren</h4>
+          </div>
+          <p className="text-muted-foreground text-xs">Vink aan wat op jou van toepassing is.</p>
+          <div className="space-y-2">
+            {[
+              { value: "vegetarian", label: "Vegetarisch", desc: "Geen vlees of vis" },
+              { value: "no_pork", label: "Geen varkensvlees", desc: "" },
+              { value: "allergies", label: "Voedselallergieën", desc: "Geef details in de opmerking" },
+              { value: "self_cook", label: "Voorkeur zelf koken", desc: "Liever zelf koken dan uit eten" },
+              { value: "eat_out", label: "Voorkeur uit eten", desc: "Liever restaurants dan zelf koken" },
+              { value: "no_preference", label: "Geen voorkeur", desc: "Alles is prima" },
+            ].map((item) => {
+              const isChecked = dietPreferences.includes(item.value);
+              return (
+                <label key={item.value} className="flex items-start gap-3 cursor-pointer p-3.5 rounded-lg bg-secondary hover:bg-secondary/80 transition-colors">
+                  <Checkbox
+                    checked={isChecked}
+                    onCheckedChange={(c) =>
+                      setDietPreferences(prev => c ? [...prev, item.value] : prev.filter(v => v !== item.value))
+                    }
+                    className="mt-0.5"
+                  />
+                  <div>
+                    <span className="text-sm font-semibold block">{item.label}</span>
+                    {item.desc && <span className="text-xs text-muted-foreground">{item.desc}</span>}
+                  </div>
+                </label>
+              );
+            })}
+          </div>
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Opmerkingen eten</p>
+            <Textarea value={dietRemarks} onChange={e => setDietRemarks(e.target.value)} placeholder="Bijv. allergieën, intoleranties..." className="min-h-[60px]" />
+          </div>
+        </section>
+
+        {/* Activiteiten naast golf */}
+        <section className="bg-foreground text-background px-6 py-8 space-y-4">
+          <div className="flex items-center gap-2">
+            <Dumbbell className="h-4 w-4 text-primary" />
+            <h4 className="font-display font-extrabold text-sm text-white">Activiteiten naast golf</h4>
+          </div>
+          <p className="text-white/50 text-xs">Wat zou je naast golf nog willen doen? (meerdere mogelijk)</p>
+          <div className="space-y-2">
+            {[
+              { value: "beach", label: "Strand / zwemmen" },
+              { value: "padel", label: "Padel" },
+              { value: "spa", label: "Spa / wellness" },
+              { value: "hiking", label: "Wandelen / natuur" },
+              { value: "nightlife", label: "Uitgaan / nachtleven" },
+              { value: "sightseeing", label: "Bezienswaardigheden / cultuur" },
+              { value: "shopping", label: "Winkelen" },
+              { value: "relaxing", label: "Gewoon relaxen" },
+            ].map((item) => {
+              const isChecked = activities.includes(item.value);
+              return (
+                <label
+                  key={item.value}
+                  className={`flex items-center gap-3 p-3.5 rounded-lg cursor-pointer transition-all ${isChecked ? "bg-primary text-primary-foreground" : "bg-white/10 text-white hover:bg-white/15"}`}
+                >
+                  <Checkbox
+                    checked={isChecked}
+                    onCheckedChange={(c) =>
+                      setActivities(prev => c ? [...prev, item.value] : prev.filter(v => v !== item.value))
+                    }
+                    className="border-white/30 data-[state=checked]:bg-primary-foreground data-[state=checked]:text-primary data-[state=checked]:border-primary-foreground"
+                  />
+                  <span className="text-sm font-semibold">{item.label}</span>
+                </label>
+              );
+            })}
           </div>
         </section>
 

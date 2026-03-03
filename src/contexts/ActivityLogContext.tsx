@@ -16,8 +16,13 @@ export function ActivityLogProvider({ children }: { children: ReactNode }) {
   );
 }
 
+const noopLogEvent = async () => {};
+
 export function useLogEvent() {
   const ctx = useContext(ActivityLogContext);
-  if (!ctx) throw new Error("useLogEvent must be used within ActivityLogProvider");
+  if (!ctx) {
+    console.warn("useLogEvent called outside ActivityLogProvider – returning no-op");
+    return noopLogEvent;
+  }
   return ctx.logEvent;
 }

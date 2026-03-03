@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
 import { BottomNav } from "./BottomNav";
 import { useAuth } from "@/lib/auth";
-import { ActivityLogProvider } from "@/contexts/ActivityLogContext";
+
 import { AdminFab } from "./AdminFab";
 import { Button } from "@/components/ui/button";
 import { LogOut } from "lucide-react";
@@ -10,7 +10,6 @@ export function AppLayout({ children }: { children: ReactNode }) {
   const { profile, signOut } = useAuth();
 
   return (
-    <ActivityLogProvider>
       <div className="min-h-screen pb-20 bg-background">
         <header className="sticky top-0 z-40 bg-foreground text-background">
           <div className="flex items-center justify-between px-4 py-2.5 max-w-2xl mx-auto">
@@ -31,6 +30,5 @@ export function AppLayout({ children }: { children: ReactNode }) {
         <AdminFab />
         <BottomNav />
       </div>
-    </ActivityLogProvider>
   );
 }

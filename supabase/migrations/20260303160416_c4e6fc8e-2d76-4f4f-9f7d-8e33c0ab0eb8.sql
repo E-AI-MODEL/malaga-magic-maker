@@ -1,0 +1,1 @@
+ALTER TABLE public.submissions DROP CONSTRAINT IF EXISTS submissions_preferred_rounds_check;

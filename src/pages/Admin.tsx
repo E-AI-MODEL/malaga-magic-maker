@@ -7,8 +7,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { computeGroupRules, computeAvgPoints, rankAccommodations, type Accommodation, type Submission, type GroupRules } from "@/lib/scoring";
-import { CheckCircle2, XCircle, Unlock, Trash2, Undo2, Shield, Trophy, Clock, ChevronDown, Eye, Users, BarChart3, Settings, FileText } from "lucide-react";
+import { CheckCircle2, XCircle, Unlock, Trash2, Undo2, Shield, Trophy, Clock, ChevronDown, Eye, Users, BarChart3, Settings, FileText, Pencil } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { AdminEditSubmission } from "@/components/AdminEditSubmission";
 
 interface Profile {
   id: string;
@@ -44,6 +45,7 @@ export default function Admin() {
   const [loading, setLoading] = useState(true);
   const [deadlineValue, setDeadlineValue] = useState("");
   const [deadlineInput, setDeadlineInput] = useState("");
+  const [editingUserId, setEditingUserId] = useState<string | null>(null);
 
   const fetchAll = async () => {
     const [p, s, a, o, dl, al] = await Promise.all([
@@ -273,11 +275,24 @@ export default function Admin() {
                               <Unlock className="h-3.5 w-3.5 mr-1" /> Unlock submission
                             </Button>
                           )}
+                          <Button size="sm" variant="outline" onClick={() => setEditingUserId(editingUserId === p.id ? null : p.id)}>
+                            <Pencil className="h-3.5 w-3.5 mr-1" /> Bewerk intake
+                          </Button>
                         </div>
                       )}
 
+                      {/* Edit form */}
+                      {editingUserId === p.id && sub && (
+                        <AdminEditSubmission
+                          submission={sub}
+                          displayName={p.display_name}
+                          onSaved={() => { setEditingUserId(null); fetchAll(); }}
+                          onCancel={() => setEditingUserId(null)}
+                        />
+                      )}
+
                       {/* Intake antwoorden */}
-                      {sub ? (
+                      {editingUserId !== p.id && sub ? (
                         <div className="space-y-4">
                           <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Intake antwoorden</p>
                           <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs">

@@ -158,7 +158,7 @@ export default function Uitslag() {
     <AppLayout>
       <div className="-mx-4 -mt-6">
         {/* Takenverdeling */}
-        <TaskBoard profiles={profiles} />
+        <TaskBoard profiles={profiles} comments={comments} onAddComment={handleAddComment} onDeleteComment={handleDeleteComment} />
 
         {/* Header */}
         <section className="bg-foreground text-white px-6 py-10">

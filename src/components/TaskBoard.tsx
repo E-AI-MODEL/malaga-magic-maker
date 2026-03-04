@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CheckCircle2, Vote, User } from "lucide-react";
+import { SectionComments } from "@/components/SectionComments";
 
 interface Profile {
   id: string;
@@ -29,11 +30,22 @@ interface TaskVote {
   voted_for_user_id: string;
 }
 
-interface TaskBoardProps {
-  profiles: Profile[];
+interface Comment {
+  id: string;
+  user_id: string;
+  section: string;
+  message: string;
+  created_at: string;
 }
 
-export function TaskBoard({ profiles }: TaskBoardProps) {
+interface TaskBoardProps {
+  profiles: Profile[];
+  comments: Comment[];
+  onAddComment: (section: string, message: string) => void;
+  onDeleteComment: (commentId: string) => void;
+}
+
+export function TaskBoard({ profiles, comments, onAddComment, onDeleteComment }: TaskBoardProps) {
   const { user, isAdmin } = useAuth();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [votes, setVotes] = useState<TaskVote[]>([]);
@@ -184,6 +196,14 @@ export function TaskBoard({ profiles }: TaskBoardProps) {
                     Toewijzing opheffen
                   </Button>
                 )}
+
+                <SectionComments
+                  section={`task-${task.id}`}
+                  comments={comments}
+                  profiles={profiles}
+                  onAdd={onAddComment}
+                  onDelete={onDeleteComment}
+                />
               </CardContent>
             </Card>
           );

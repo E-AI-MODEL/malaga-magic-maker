@@ -3,7 +3,7 @@ import { AppLayout } from "@/components/AppLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { computeGroupRules, computeAvgPoints, type Submission } from "@/lib/scoring";
 import { Badge } from "@/components/ui/badge";
-import { Car, Home, UtensilsCrossed, Dumbbell, BarChart3, Users, CheckCircle2, XCircle } from "lucide-react";
+import { Car, Home, UtensilsCrossed, Dumbbell, BarChart3, Users, CheckCircle2, XCircle, Star, ExternalLink, Bed, Bath, Waves, ParkingCircle, Wind, Wifi, MapPin } from "lucide-react";
 
 interface Profile {
   id: string;
@@ -109,6 +109,88 @@ export default function Uitslag() {
           <p className="text-white/60 text-sm mt-2">
             Op basis van {lockedSubs.length} ingevulde intakes
           </p>
+        </section>
+
+        {/* ═══════════ TOPKANDIDAAT ═══════════ */}
+        <section className="bg-primary/5 border-t border-primary/20">
+          <div className="px-6 py-8">
+            <div className="flex items-center gap-2 mb-1">
+              <Star className="h-4 w-4 text-primary fill-primary" />
+              <p className="text-xs font-semibold uppercase tracking-[0.15em] text-primary">Topkandidaat accommodatie</p>
+            </div>
+            <h2 className="font-display text-xl font-extrabold mb-1">Villa Mercedes</h2>
+            <p className="text-sm text-muted-foreground mb-4">Grote kans dat dit onze accommodatie wordt!</p>
+
+            <div className="rounded-xl overflow-hidden mb-4 border border-border">
+              <img src="/images/villa-mercedes-1.png" alt="Villa Mercedes - Fuengirola" className="w-full h-48 object-cover" />
+            </div>
+
+            <div className="grid grid-cols-2 gap-3 mb-4">
+              <div className="bg-background rounded-lg p-3 border border-border">
+                <p className="text-xs text-muted-foreground">Prijs (3 nachten)</p>
+                <p className="font-display font-extrabold text-lg text-primary">€1.318</p>
+                <p className="text-[10px] text-muted-foreground">incl. belastingen</p>
+              </div>
+              <div className="bg-background rounded-lg p-3 border border-border">
+                <p className="text-xs text-muted-foreground">Beoordeling</p>
+                <div className="flex items-center gap-1">
+                  <Star className="h-3.5 w-3.5 text-primary fill-primary" />
+                  <span className="font-display font-extrabold text-lg">4,06</span>
+                </div>
+                <p className="text-[10px] text-muted-foreground">18 recensies</p>
+              </div>
+            </div>
+
+            <div className="bg-background rounded-lg p-4 border border-border space-y-2.5 mb-4">
+              <div className="flex items-center gap-2 text-sm">
+                <MapPin className="h-4 w-4 text-muted-foreground shrink-0" />
+                <span>Fuengirola – 200m van het strand</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm">
+                <Bed className="h-4 w-4 text-muted-foreground shrink-0" />
+                <span>6 slaapkamers · 13 bedden · max 15 gasten</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm">
+                <Bath className="h-4 w-4 text-muted-foreground shrink-0" />
+                <span>4 badkamers</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm">
+                <Waves className="h-4 w-4 text-muted-foreground shrink-0" />
+                <span>Privé zoutwaterzwembad</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm">
+                <Wind className="h-4 w-4 text-muted-foreground shrink-0" />
+                <span>Airco warm/koud in elke kamer</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm">
+                <Wifi className="h-4 w-4 text-muted-foreground shrink-0" />
+                <span>Wifi in hele villa</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm">
+                <ParkingCircle className="h-4 w-4 text-muted-foreground shrink-0" />
+                <span>Eigen parkeerplaats</span>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap gap-1.5 mb-4">
+              {["BBQ", "Speelkamer", "Pooltafel", "Tafelvoetbal", "Tafeltennis", "Terras", "Tuin 1000m²", "Gratis annuleren"].map(tag => (
+                <Badge key={tag} variant="secondary" className="text-[10px] py-0.5 px-2">{tag}</Badge>
+              ))}
+            </div>
+
+            <p className="text-xs text-muted-foreground mb-4 leading-relaxed">
+              Onafhankelijke villa op 200m van het strand van Fuengirola. Het hoofdhuis heeft 4 slaapkamers, in de tuin nog 2 extra kamers. Speelkamer met pooltafel, tafelvoetbal en tafeltennis. Gratis annuleren vóór 5 maart 2026.
+            </p>
+
+            <a
+              href="https://www.airbnb.nl/rooms/17937917?guests=1&adults=1&s=67&unique_share_id=16ecca80-71b5-4f03-a49c-103551965b29"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 bg-primary text-primary-foreground rounded-lg px-4 py-2.5 text-sm font-semibold hover:opacity-90 transition-opacity"
+            >
+              Bekijk op Airbnb <ExternalLink className="h-3.5 w-3.5" />
+            </a>
+          </div>
         </section>
 
         {/* ═══════════ VERVOER ═══════════ */}

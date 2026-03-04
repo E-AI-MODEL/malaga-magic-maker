@@ -178,9 +178,44 @@ export default function Uitslag() {
               ))}
             </div>
 
-            <p className="text-xs text-muted-foreground mb-4 leading-relaxed">
+            <p className="text-xs text-muted-foreground mb-6 leading-relaxed">
               Onafhankelijke villa op 200m van het strand van Fuengirola. Het hoofdhuis heeft 4 slaapkamers, in de tuin nog 2 extra kamers. Speelkamer met pooltafel, tafelvoetbal en tafeltennis. Gratis annuleren vóór 5 maart 2026.
             </p>
+
+            {/* Locatie & prijs kaart */}
+            <div className="space-y-4 mb-6">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">📍 Locatie & prijs</p>
+                <div className="rounded-xl overflow-hidden border border-border">
+                  <img src="/images/villa-mercedes-locatie.png" alt="Locatie Villa Mercedes in Fuengirola – €1.318" className="w-full" />
+                </div>
+                <p className="text-xs text-muted-foreground mt-2 leading-relaxed">
+                  De villa ligt in het hart van Fuengirola, vlak bij het strand en de boulevard. Op loopafstand van restaurants, winkels en het treinstation. De prijs van <span className="font-semibold text-foreground">€1.318 voor 3 nachten</span> is inclusief alle belastingen – dat is <span className="font-semibold text-foreground">~€220 p.p.</span> voor het hele verblijf.
+                </p>
+              </div>
+
+              {/* Reistijd naar La Cala Golf */}
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">⛳ Reistijd naar La Cala Golf & Country Club</p>
+                <div className="rounded-xl overflow-hidden border border-border">
+                  <img src="/images/villa-mercedes-reistijd-golf.png" alt="Reistijd villa naar La Cala Golf – 27-29 min" className="w-full" />
+                </div>
+                <p className="text-xs text-muted-foreground mt-2 leading-relaxed">
+                  La Cala Golf & Country Club ligt op <span className="font-semibold text-foreground">27–29 minuten rijden</span> (~16 km) van de villa. Er zijn twee routes: via de kust (A-7) of via het binnenland (AP-7). Beide opties zijn comfortabel en bieden prachtige uitzichten over de heuvels en de zee.
+                </p>
+              </div>
+
+              {/* Golfbanen in de omgeving */}
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">🗺️ Golfbanen in de omgeving</p>
+                <div className="rounded-xl overflow-hidden border border-border">
+                  <img src="/images/villa-mercedes-golfbanen.png" alt="Golfbanen rondom Fuengirola" className="w-full" />
+                </div>
+                <p className="text-xs text-muted-foreground mt-2 leading-relaxed">
+                  Fuengirola is een uitstekende uitvalsbasis voor golf aan de Costa del Sol. Binnen een straal van 30 minuten rijden liggen onder andere <span className="font-semibold text-foreground">La Cala Golf & Country Club</span> (3 banen), <span className="font-semibold text-foreground">Chaparral Golf Club</span> (bij het strand), <span className="font-semibold text-foreground">Santana Golf</span>, <span className="font-semibold text-foreground">Calanova Golf Club</span> en <span className="font-semibold text-foreground">Miraflores Golf</span>. Genoeg keuze voor afwisselende rondjes!
+                </p>
+              </div>
+            </div>
 
             <a
               href="https://www.airbnb.nl/rooms/17937917?guests=1&adults=1&s=67&unique_share_id=16ecca80-71b5-4f03-a49c-103551965b29"

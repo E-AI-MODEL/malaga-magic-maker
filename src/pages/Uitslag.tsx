@@ -1,31 +1,87 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { AppLayout } from "@/components/AppLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { computeGroupRules, computeAvgPoints, type Submission } from "@/lib/scoring";
 import { Badge } from "@/components/ui/badge";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Car, Home, UtensilsCrossed, Dumbbell, BarChart3, Users, CheckCircle2, XCircle, Star, ExternalLink, Bed, Bath, Waves, ParkingCircle, Wind, Wifi, MapPin } from "lucide-react";
-
+import { useAuth } from "@/lib/auth";
+import { TaskBoard } from "@/components/TaskBoard";
+import { ReactionBar } from "@/components/ReactionBar";
+import { SectionComments } from "@/components/SectionComments";
 interface Profile {
   id: string;
   username: string;
   display_name: string;
 }
 
+interface Reaction {
+  id: string;
+  user_id: string;
+  section: string;
+  emoji: string;
+}
+
+interface Comment {
+  id: string;
+  user_id: string;
+  section: string;
+  message: string;
+  created_at: string;
+}
+
 export default function Uitslag() {
+  const { user } = useAuth();
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [profiles, setProfiles] = useState<Profile[]>([]);
+  const [reactions, setReactions] = useState<Reaction[]>([]);
+  const [comments, setComments] = useState<Comment[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     Promise.all([
       supabase.from("submissions").select("*"),
       supabase.from("profiles").select("*"),
-    ]).then(([s, p]) => {
+      supabase.from("reactions").select("*"),
+      supabase.from("comments").select("*"),
+    ]).then(([s, p, r, c]) => {
       setSubmissions((s.data as any[]) || []);
       setProfiles((p.data as any[]) || []);
+      setReactions((r.data as any[]) || []);
+      setComments((c.data as any[]) || []);
       setLoading(false);
     });
+
+    const channel = supabase
+      .channel("uitslag-social")
+      .on("postgres_changes", { event: "*", schema: "public", table: "reactions" }, () => {
+        supabase.from("reactions").select("*").then(r => setReactions((r.data as any[]) || []));
+      })
+      .on("postgres_changes", { event: "*", schema: "public", table: "comments" }, () => {
+        supabase.from("comments").select("*").then(c => setComments((c.data as any[]) || []));
+      })
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, []);
+
+  const handleToggleReaction = useCallback(async (section: string, emoji: string) => {
+    if (!user) return;
+    const existing = reactions.find(r => r.user_id === user.id && r.section === section && r.emoji === emoji);
+    if (existing) {
+      await supabase.from("reactions").delete().eq("id", existing.id);
+    } else {
+      await supabase.from("reactions").insert({ user_id: user.id, section, emoji });
+    }
+  }, [user, reactions]);
+
+  const handleAddComment = useCallback(async (section: string, message: string) => {
+    if (!user) return;
+    await supabase.from("comments").insert({ user_id: user.id, section, message });
+  }, [user]);
+
+  const handleDeleteComment = useCallback(async (commentId: string) => {
+    await supabase.from("comments").delete().eq("id", commentId);
   }, []);
 
   const lockedSubs = useMemo(() => submissions.filter(s => s.locked), [submissions]);
@@ -101,6 +157,9 @@ export default function Uitslag() {
   return (
     <AppLayout>
       <div className="-mx-4 -mt-6">
+        {/* Takenverdeling */}
+        <TaskBoard profiles={profiles} />
+
         {/* Header */}
         <section className="bg-foreground text-white px-6 py-10">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/40 mb-2">Gezamenlijke uitslag</p>
@@ -289,6 +348,8 @@ export default function Uitslag() {
             >
               Bekijk op Airbnb <ExternalLink className="h-3.5 w-3.5" />
             </a>
+            <ReactionBar section="villa-mercedes" reactions={reactions} profiles={profiles} onToggle={handleToggleReaction} />
+            <SectionComments section="villa-mercedes" comments={comments} profiles={profiles} onAdd={handleAddComment} onDelete={handleDeleteComment} />
           </div>
         </section>
 
@@ -309,6 +370,8 @@ export default function Uitslag() {
             ]}
             total={lockedSubs.length}
           />
+          <ReactionBar section="vervoer" reactions={reactions} profiles={profiles} onToggle={handleToggleReaction} />
+          <SectionComments section="vervoer" comments={comments} profiles={profiles} onAdd={handleAddComment} onDelete={handleDeleteComment} />
         </ResultSection>
 
         {/* ═══════════ ACCOMMODATIE ═══════════ */}
@@ -363,6 +426,8 @@ export default function Uitslag() {
               total={lockedSubs.length}
             />
           </div>
+          <ReactionBar section="accommodatie" reactions={reactions} profiles={profiles} onToggle={handleToggleReaction} />
+          <SectionComments section="accommodatie" comments={comments} profiles={profiles} onAdd={handleAddComment} onDelete={handleDeleteComment} />
         </ResultSection>
 
         {/* ═══════════ PRIORITEITEN ═══════════ */}
@@ -387,6 +452,8 @@ export default function Uitslag() {
               </div>
             ))}
           </div>
+          <ReactionBar section="prioriteiten" reactions={reactions} profiles={profiles} onToggle={handleToggleReaction} />
+          <SectionComments section="prioriteiten" comments={comments} profiles={profiles} onAdd={handleAddComment} onDelete={handleDeleteComment} />
         </ResultSection>
 
         {/* ═══════════ ETEN ═══════════ */}
@@ -416,6 +483,8 @@ export default function Uitslag() {
               ))}
             </div>
           )}
+          <ReactionBar section="eten" reactions={reactions} profiles={profiles} onToggle={handleToggleReaction} />
+          <SectionComments section="eten" comments={comments} profiles={profiles} onAdd={handleAddComment} onDelete={handleDeleteComment} />
         </ResultSection>
 
         {/* ═══════════ ACTIVITEITEN ═══════════ */}
@@ -440,6 +509,8 @@ export default function Uitslag() {
           ) : (
             <p className="text-sm text-muted-foreground italic">Geen activiteiten opgegeven</p>
           )}
+          <ReactionBar section="activiteiten" reactions={reactions} profiles={profiles} onToggle={handleToggleReaction} />
+          <SectionComments section="activiteiten" comments={comments} profiles={profiles} onAdd={handleAddComment} onDelete={handleDeleteComment} />
         </ResultSection>
 
         {/* ═══════════ OPMERKINGEN ═══════════ */}

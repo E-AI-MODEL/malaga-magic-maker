@@ -185,6 +185,30 @@ export type Database = {
         }
         Relationships: []
       }
+      comments: {
+        Row: {
+          created_at: string
+          id: string
+          message: string
+          section: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message: string
+          section: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string
+          section?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
@@ -203,6 +227,30 @@ export type Database = {
           display_name?: string
           id?: string
           username?: string
+        }
+        Relationships: []
+      }
+      reactions: {
+        Row: {
+          created_at: string
+          emoji: string
+          id: string
+          section: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          emoji: string
+          id?: string
+          section: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          emoji?: string
+          id?: string
+          section?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -308,6 +356,68 @@ export type Database = {
           top_accommodations?: string[] | null
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      task_votes: {
+        Row: {
+          created_at: string
+          id: string
+          task_id: string
+          user_id: string
+          voted_for_user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          task_id: string
+          user_id: string
+          voted_for_user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          task_id?: string
+          user_id?: string
+          voted_for_user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "task_votes_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tasks: {
+        Row: {
+          assigned_to: string | null
+          created_at: string
+          id: string
+          section: string
+          sort_order: number
+          status: string
+          title: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          created_at?: string
+          id?: string
+          section: string
+          sort_order?: number
+          status?: string
+          title: string
+        }
+        Update: {
+          assigned_to?: string | null
+          created_at?: string
+          id?: string
+          section?: string
+          sort_order?: number
+          status?: string
+          title?: string
         }
         Relationships: []
       }

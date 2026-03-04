@@ -1,5 +1,5 @@
 import { NavLink } from "react-router-dom";
-import { Info, ClipboardList, Home, Settings } from "lucide-react";
+import { BarChart3, Info, ClipboardList, Home, Settings } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 
 export function BottomNav() {
@@ -11,13 +11,13 @@ export function BottomNav() {
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 bg-foreground safe-area-pb">
       <div className="flex justify-around max-w-lg mx-auto">
+        <NavLink to="/uitslag" className={({ isActive }) => `${base} ${isActive ? active : inactive}`}>
+          <BarChart3 className="h-4 w-4" />
+          <span>Uitslag</span>
+        </NavLink>
         <NavLink to="/info" className={({ isActive }) => `${base} ${isActive ? active : inactive}`}>
           <Info className="h-4 w-4" />
           <span>Info</span>
-        </NavLink>
-        <NavLink to="/intake" className={({ isActive }) => `${base} ${isActive ? active : inactive}`}>
-          <ClipboardList className="h-4 w-4" />
-          <span>Intake</span>
         </NavLink>
         <NavLink to="/accommodations" className={({ isActive }) => `${base} ${isActive ? active : inactive}`}>
           <Home className="h-4 w-4" />

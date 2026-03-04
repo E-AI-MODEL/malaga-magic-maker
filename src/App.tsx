@@ -7,6 +7,7 @@ import { AuthProvider, useAuth } from "@/lib/auth";
 import { ActivityLogProvider } from "@/contexts/ActivityLogContext";
 import Login from "./pages/Login";
 import Info from "./pages/Info";
+import Uitslag from "./pages/Uitslag";
 import Intake from "./pages/Intake";
 import Accommodations from "./pages/Accommodations";
 import AccommodationDetail from "./pages/AccommodationDetail";
@@ -28,8 +29,9 @@ function AppRoutes() {
 
   return (
     <Routes>
-      <Route path="/login" element={user ? <Navigate to="/info" replace /> : <Login />} />
-      <Route path="/" element={<Navigate to={user ? "/info" : "/login"} replace />} />
+      <Route path="/login" element={user ? <Navigate to="/uitslag" replace /> : <Login />} />
+      <Route path="/" element={<Navigate to={user ? "/uitslag" : "/login"} replace />} />
+      <Route path="/uitslag" element={<ProtectedRoute><Uitslag /></ProtectedRoute>} />
       <Route path="/info" element={<ProtectedRoute><Info /></ProtectedRoute>} />
       <Route path="/intake" element={<ProtectedRoute><Intake /></ProtectedRoute>} />
       <Route path="/accommodations" element={<ProtectedRoute><Accommodations /></ProtectedRoute>} />

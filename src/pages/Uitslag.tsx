@@ -3,6 +3,7 @@ import { AppLayout } from "@/components/AppLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { computeGroupRules, computeAvgPoints, type Submission } from "@/lib/scoring";
 import { Badge } from "@/components/ui/badge";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Car, Home, UtensilsCrossed, Dumbbell, BarChart3, Users, CheckCircle2, XCircle, Star, ExternalLink, Bed, Bath, Waves, ParkingCircle, Wind, Wifi, MapPin } from "lucide-react";
 
 interface Profile {
@@ -212,8 +213,71 @@ export default function Uitslag() {
                   <img src="/images/villa-mercedes-golfbanen.png" alt="Golfbanen rondom Fuengirola" className="w-full" />
                 </div>
                 <p className="text-xs text-muted-foreground mt-2 leading-relaxed">
-                  Fuengirola is een uitstekende uitvalsbasis voor golf aan de Costa del Sol. Binnen een straal van 30 minuten rijden liggen onder andere <span className="font-semibold text-foreground">La Cala Golf & Country Club</span> (3 banen), <span className="font-semibold text-foreground">Chaparral Golf Club</span> (bij het strand), <span className="font-semibold text-foreground">Santana Golf</span>, <span className="font-semibold text-foreground">Calanova Golf Club</span> en <span className="font-semibold text-foreground">Miraflores Golf</span>. Genoeg keuze voor afwisselende rondjes!
+                  Fuengirola is een uitstekende uitvalsbasis voor golf aan de Costa del Sol. Binnen een straal van 30 minuten rijden liggen tal van banen. Bekijk hieronder de details per golfbaan.
                 </p>
+
+                {/* Golf courses accordion */}
+                <Accordion type="multiple" className="mt-3">
+                  <AccordionItem value="lacala" className="border-border/50">
+                    <AccordionTrigger className="text-sm font-semibold py-2 hover:no-underline">
+                      ⛳ La Cala Golf & Country Club
+                    </AccordionTrigger>
+                    <AccordionContent className="text-xs text-muted-foreground space-y-1.5 pb-3">
+                      <p>Het grootste golfresort van Zuid-Europa met <span className="font-semibold text-foreground">3 banen van 18 holes</span> (Campo América, Europa & Asia), ontworpen door Cabell B. Robinson. Gelegen in de heuvels van Mijas met spectaculair uitzicht.</p>
+                      <p><span className="font-semibold text-foreground">Afstand:</span> ~27 min rijden (16 km)</p>
+                      <p><span className="font-semibold text-foreground">Multi-round pakketten</span> beschikbaar (weekpas, 10- en 20-rongenpas).</p>
+                      <a href="https://www.lacala.com" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-primary font-semibold hover:underline">lacala.com <ExternalLink className="h-3 w-3" /></a>
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  <AccordionItem value="chaparral" className="border-border/50">
+                    <AccordionTrigger className="text-sm font-semibold py-2 hover:no-underline">
+                      ⛳ Chaparral Golf Club
+                    </AccordionTrigger>
+                    <AccordionContent className="text-xs text-muted-foreground space-y-1.5 pb-3">
+                      <p>Ontworpen door Pepe Gancedo ("de Picasso van golf"), gelegen <span className="font-semibold text-foreground">direct bij het strand</span> tussen bossen en de zee. Parkland-stijl met prachtig zeezicht vanaf meerdere holes.</p>
+                      <p><span className="font-semibold text-foreground">Afstand:</span> ~15 min rijden</p>
+                      <p><span className="font-semibold text-foreground">Green fee:</span> €80–€110 (afhankelijk van seizoen), buggy +€10</p>
+                      <a href="https://golfelchaparral.com/en/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-primary font-semibold hover:underline">golfelchaparral.com <ExternalLink className="h-3 w-3" /></a>
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  <AccordionItem value="santana" className="border-border/50">
+                    <AccordionTrigger className="text-sm font-semibold py-2 hover:no-underline">
+                      ⛳ Santana Golf
+                    </AccordionTrigger>
+                    <AccordionContent className="text-xs text-muted-foreground space-y-1.5 pb-3">
+                      <p>Ontworpen door Cabell B. Robinson, aangelegd op een <span className="font-semibold text-foreground">voormalige avocadoplantage</span>. 18 holes, par 72. Eén van de meest prestigieuze banen van de Costa del Sol met restaurant La Cabaña.</p>
+                      <p><span className="font-semibold text-foreground">Afstand:</span> ~20 min rijden</p>
+                      <p><span className="font-semibold text-foreground">Reserveren:</span> +34 951 062 560 of greenfees@santanagolf.com</p>
+                      <a href="https://santanagolf.com" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-primary font-semibold hover:underline">santanagolf.com <ExternalLink className="h-3 w-3" /></a>
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  <AccordionItem value="calanova" className="border-border/50">
+                    <AccordionTrigger className="text-sm font-semibold py-2 hover:no-underline">
+                      ⛳ Calanova Golf Club
+                    </AccordionTrigger>
+                    <AccordionContent className="text-xs text-muted-foreground space-y-1.5 pb-3">
+                      <p>18 holes, par 72 (5.866m), geopend in 2006. Gelegen in de <span className="font-semibold text-foreground">golfvallei achter La Cala de Mijas</span> met spectaculair uitzicht op de Middellandse Zee. Green fee inclusief buggy.</p>
+                      <p><span className="font-semibold text-foreground">Afstand:</span> ~25 min rijden</p>
+                      <p>Heuvelachtig terrein, geschikt voor alle niveaus.</p>
+                      <a href="https://calanovagolf.es" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-primary font-semibold hover:underline">calanovagolf.es <ExternalLink className="h-3 w-3" /></a>
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  <AccordionItem value="miraflores" className="border-border/50">
+                    <AccordionTrigger className="text-sm font-semibold py-2 hover:no-underline">
+                      ⛳ Miraflores Golf Club
+                    </AccordionTrigger>
+                    <AccordionContent className="text-xs text-muted-foreground space-y-1.5 pb-3">
+                      <p>Ontworpen door Falco Nardi (1990), gelegen in de <span className="font-semibold text-foreground">heuvels van Calahonda</span> tussen Fuengirola en Marbella. 18 holes met elk een unieke uitdaging. Bekend als "de meest sociale golfclub van de Costa del Sol".</p>
+                      <p><span className="font-semibold text-foreground">Afstand:</span> ~20 min rijden</p>
+                      <p>Vlakker dan het op het eerste gezicht lijkt, volgt de natuurlijke contouren van de vallei.</p>
+                      <a href="https://www.mirafloresgolf.es" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-primary font-semibold hover:underline">mirafloresgolf.es <ExternalLink className="h-3 w-3" /></a>
+                    </AccordionContent>
+                  </AccordionItem>
+                </Accordion>
               </div>
             </div>
 

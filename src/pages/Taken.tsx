@@ -406,18 +406,6 @@ export default function Taken() {
                                     </div>
                                   )}
 
-                                  {/* Context link — visible to everyone */}
-                                  {contextLabel && (
-                                    <div className="pt-2 border-t border-border/40">
-                                      <button
-                                        onClick={() => navigate(`/taken/${task.section}`)}
-                                        className="inline-flex items-center gap-1.5 text-xs text-primary font-medium hover:underline"
-                                      >
-                                        {contextLabel} <ChevronRight className="h-3 w-3" />
-                                      </button>
-                                    </div>
-                                  )}
-
                                   {/* Gear icon — only for owner/backup/admin */}
                                   {editable && (
                                     <div className="pt-2 border-t border-border/40">
@@ -507,6 +495,16 @@ export default function Taken() {
                   <DrawerDescription className="text-xs text-muted-foreground">Beheer voortgang, details en instellingen</DrawerDescription>
                 </DrawerHeader>
                 <div className="px-4 pb-6 space-y-4 overflow-y-auto">
+                  {/* Context link */}
+                  {SECTION_CONTEXT[drawerTask.section] && (
+                    <button
+                      onClick={() => { setDrawerTaskId(null); navigate(`/taken/${drawerTask.section}`); }}
+                      className="inline-flex items-center gap-1.5 text-xs text-primary font-medium hover:underline"
+                    >
+                      {SECTION_CONTEXT[drawerTask.section]} <ChevronRight className="h-3 w-3" />
+                    </button>
+                  )}
+
                   {/* Progress — canEditTask */}
                   <div className="bg-secondary/50 rounded-lg p-3">
                     <label className="text-xs font-semibold text-muted-foreground mb-2 block">Voortgang</label>
@@ -730,9 +728,9 @@ function TaskDetailsEditor({ details, infoText, onSave }: {
             <Calendar className="absolute left-2.5 top-2 h-3.5 w-3.5 text-muted-foreground pointer-events-none z-10" />
             <Input type="date" value={date} onChange={e => setDate(e.target.value)} className="text-xs h-8 pl-8" />
           </div>
-          <div className="relative">
+          <div className="relative min-w-0">
             <Clock className="absolute left-2.5 top-2 h-3.5 w-3.5 text-muted-foreground pointer-events-none z-10" />
-            <Input type="time" value={time} onChange={e => setTime(e.target.value)} className="text-xs h-8 pl-8" />
+            <Input type="time" value={time} onChange={e => setTime(e.target.value)} className="text-xs h-8 pl-8 w-full" />
           </div>
         </div>
       </div>

@@ -176,7 +176,7 @@ export default function Intake() {
   if (locked) {
     return (
       <AppLayout>
-        <div className="-mx-4 -mt-6">
+        <div>
           <div className="relative h-[60vh] flex items-center justify-center">
             <img src={heroGolf} alt="" className="absolute inset-0 w-full h-full object-cover" />
             <div className="absolute inset-0 bg-black/60" />
@@ -228,7 +228,7 @@ export default function Intake() {
 
   return (
     <AppLayout>
-      <div className="-mx-4 -mt-6 space-y-0">
+      <div className="space-y-0">
         {/* Hero header */}
         <div className="relative h-40">
           <img src={heroGolf} alt="" className="absolute inset-0 w-full h-full object-cover" />

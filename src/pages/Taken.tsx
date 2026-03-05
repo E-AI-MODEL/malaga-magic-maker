@@ -290,10 +290,10 @@ export default function Taken() {
           <Accordion type="multiple" defaultValue={[...new Set(tasks.map(t => t.section))]} className="space-y-4">
             {[...new Set(tasks.map(t => t.section))].map(section => {
               const sectionLabels: Record<string, string> = {
-                transport: "🚗 Vervoer",
-                accommodatie: "🏠 Accommodatie",
-                golf: "⛳ Golf",
-                strand: "🏖️ Strand & omgeving",
+                transport: "Vervoer",
+                accommodatie: "Accommodatie",
+                golf: "Golf",
+                strand: "Strand & omgeving",
               };
               const sectionTasks = tasks.filter(t => t.section === section);
 

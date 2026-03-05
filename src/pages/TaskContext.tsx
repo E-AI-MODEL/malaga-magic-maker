@@ -5,14 +5,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { ReactionBar } from "@/components/ReactionBar";
 import { SectionComments } from "@/components/SectionComments";
-import { computeGroupRules, rankAccommodations, type Submission, type Accommodation } from "@/lib/scoring";
+import { computeGroupRules, rankAccommodations, checkEligibility, type Submission, type Accommodation, type GroupRules } from "@/lib/scoring";
 import {
-  ArrowLeft, User, Shield, Globe, MapPin, Clock, Calendar,
-  ExternalLink, Users, Car, CircleDot, Image, ChevronRight,
+  ArrowLeft, User, Shield, MapPin, Clock, Calendar,
+  ExternalLink, Users, Car, ChevronRight, CheckCircle2, XCircle,
 } from "lucide-react";
 
 interface Profile { id: string; username: string; display_name: string; }
@@ -25,29 +24,11 @@ interface Task {
 interface Reaction { id: string; user_id: string; section: string; emoji: string; }
 interface Comment { id: string; user_id: string; section: string; message: string; created_at: string; }
 
-const SECTION_META: Record<string, { title: string; icon: React.ReactNode; color: string }> = {
-  transport: { title: "Vervoer", icon: <Car className="h-5 w-5" />, color: "bg-blue-500/10 text-blue-600" },
-  accommodatie: { title: "Accommodatie", icon: <MapPin className="h-5 w-5" />, color: "bg-emerald-500/10 text-emerald-600" },
-  golf: { title: "Golfbaan", icon: <CircleDot className="h-5 w-5" />, color: "bg-green-500/10 text-green-600" },
-  strand: { title: "Strand", icon: <Globe className="h-5 w-5" />, color: "bg-amber-500/10 text-amber-600" },
-};
-
-const SECTION_LINKS: Record<string, { label: string; url: string }[]> = {
-  transport: [
-    { label: "Rental24h.com – 9-zits busje", url: "https://www.rental24h.com" },
-    { label: "KAYAK – Huurauto vergelijken", url: "https://www.kayak.com" },
-    { label: "Kiwitaxi – Taxi/transfer boeken", url: "https://www.kiwitaxi.com" },
-  ],
-  accommodatie: [
-    { label: "Bekijk alle accommodaties", url: "/accommodations" },
-  ],
-  golf: [
-    { label: "La Cala Golf Resort – Officiële site", url: "https://www.lacala.com/golf" },
-    { label: "TeeTime.es – Tee-times boeken", url: "https://www.teetime.es" },
-  ],
-  strand: [
-    { label: "Google Maps – La Cala de Mijas strand", url: "https://maps.google.com/?q=La+Cala+de+Mijas+beach" },
-  ],
+const SECTION_TITLES: Record<string, string> = {
+  transport: "Vervoer",
+  accommodatie: "Accommodatie",
+  golf: "Golfbaan",
+  strand: "Strand & omgeving",
 };
 
 export default function TaskContext() {
@@ -62,9 +43,6 @@ export default function TaskContext() {
   const [reactions, setReactions] = useState<Reaction[]>([]);
   const [comments, setComments] = useState<Comment[]>([]);
   const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
-
-  const meta = SECTION_META[section || ""] || { title: section, icon: null, color: "" };
-  const links = SECTION_LINKS[section || ""] || [];
 
   useEffect(() => {
     const load = async () => {
@@ -111,18 +89,10 @@ export default function TaskContext() {
     setComments((data as any[]) || []);
   }, []);
 
-  // Section-specific tasks
   const sectionTasks = tasks.filter(t => t.section === section);
   const mainTask = sectionTasks[0];
-
-  // Group rules & ranked accommodations (for accommodatie section)
-  const groupRules = submissions.length > 0 ? computeGroupRules(submissions as Submission[]) : null;
-  const ranked = section === "accommodatie" && groupRules
-    ? rankAccommodations(accommodations as Accommodation[], submissions as Submission[], groupRules).filter(a => a.eligibility.eligible).slice(0, 3)
-    : [];
-
-  // Aggregate group wishes relevant to section
-  const groupWishes = getGroupWishes(section || "", submissions);
+  const n = submissions.length;
+  const groupRules = n > 0 ? computeGroupRules(submissions as Submission[]) : null;
 
   const formatDate = (d: string) => {
     const date = new Date(d);
@@ -133,68 +103,52 @@ export default function TaskContext() {
     <AppLayout>
       <div className="-mx-4 -mt-6">
         {/* Header */}
-        <section className="bg-foreground text-white px-6 py-8">
-          <button onClick={() => navigate("/taken")} className="flex items-center gap-1.5 text-white/50 text-xs mb-4 hover:text-white/80 transition-colors">
+        <section className="bg-foreground text-white px-6 py-6">
+          <button onClick={() => navigate("/taken")} className="flex items-center gap-1.5 text-white/50 text-xs mb-3 hover:text-white/80 transition-colors">
             <ArrowLeft className="h-3.5 w-3.5" /> Terug naar taken
           </button>
-          <div className="flex items-center gap-3 mb-2">
-            <div className={`p-2 rounded-lg ${meta.color}`}>{meta.icon}</div>
-            <div>
-              <h1 className="font-display text-2xl font-extrabold">{meta.title}</h1>
-              {mainTask && (
-                <p className="text-white/50 text-xs mt-0.5">
-                  Taak: {mainTask.title} · {mainTask.progress}% klaar
-                </p>
-              )}
-            </div>
-          </div>
+          <h1 className="font-display text-xl font-extrabold">{SECTION_TITLES[section || ""] || section}</h1>
           {mainTask && (
-            <div className="flex gap-2 mt-3">
+            <p className="text-white/50 text-xs mt-1">Taak: {mainTask.title} · {mainTask.progress}% klaar</p>
+          )}
+          {mainTask && (
+            <div className="flex gap-2 mt-2">
               {mainTask.assigned_to && (
                 <Badge className="bg-white/10 text-white/80 text-[10px]">
-                  <User className="h-3 w-3 mr-1" />{mainTask.assigned_to}
+                  <User className="h-3 w-3 mr-1" />Eigenaar: {mainTask.assigned_to}
                 </Badge>
               )}
               {mainTask.backup_to && (
                 <Badge className="bg-white/5 text-white/50 text-[10px]">
-                  <Shield className="h-3 w-3 mr-1" />{mainTask.backup_to}
+                  <Shield className="h-3 w-3 mr-1" />Backup: {mainTask.backup_to}
                 </Badge>
               )}
             </div>
           )}
         </section>
 
-        <div className="px-6 py-6 pb-24 space-y-6">
+        <div className="px-6 py-5 pb-24 space-y-5">
 
-          {/* ── Groepswensen ── */}
-          {groupWishes.length > 0 && (
-            <div>
-              <SectionHeader icon={<Users className="h-4 w-4" />} label="Groepswensen" />
-              <Card className="border-border/60">
-                <CardContent className="p-4 space-y-2">
-                  {groupWishes.map((wish, i) => (
-                    <div key={i} className="flex items-start gap-2.5 text-sm">
-                      <ChevronRight className="h-3.5 w-3.5 text-primary shrink-0 mt-0.5" />
-                      <span className="text-foreground">{wish}</span>
-                    </div>
-                  ))}
-                </CardContent>
-              </Card>
-            </div>
+          {/* ── Stemmen & voorkeuren ── */}
+          {n > 0 && (
+            <ContextBlock title="Stemmen & groepswensen">
+              {section === "transport" && <TransportWishes submissions={submissions} n={n} />}
+              {section === "accommodatie" && <AccommodatieWishes submissions={submissions} n={n} groupRules={groupRules} />}
+              {section === "golf" && <GolfWishes submissions={submissions} n={n} />}
+              {section === "strand" && <StrandWishes submissions={submissions} n={n} />}
+            </ContextBlock>
           )}
 
-          {/* ── Verzamelde details ── */}
+          {/* ── Verzamelde info door eigenaar ── */}
           {mainTask && (
-            <div>
-              <SectionHeader icon={<Calendar className="h-4 w-4" />} label="Verzamelde details" />
+            <ContextBlock title="Verzamelde details">
               <TaskDetailsSummary task={mainTask} formatDate={formatDate} />
-            </div>
+            </ContextBlock>
           )}
 
           {/* ── Foto's ── */}
           {mainTask && mainTask.info_image_urls.length > 0 && (
-            <div>
-              <SectionHeader icon={<Image className="h-4 w-4" />} label="Foto's" />
+            <ContextBlock title="Foto's">
               <div className="grid grid-cols-2 gap-2">
                 {mainTask.info_image_urls.map((url, i) => (
                   <div key={i} className="rounded-lg overflow-hidden border border-border cursor-pointer hover:ring-2 hover:ring-primary/30 transition-all"
@@ -203,59 +157,33 @@ export default function TaskContext() {
                   </div>
                 ))}
               </div>
-            </div>
+            </ContextBlock>
           )}
 
-          {/* ── Section-specific content ── */}
-          {section === "transport" && <TransportBlock />}
-          {section === "accommodatie" && ranked.length > 0 && <AccommodatieBlock ranked={ranked} navigate={navigate} />}
-          {section === "golf" && <GolfBlock />}
-          {section === "strand" && <StrandBlock />}
-
-          {/* ── Externe bronnen ── */}
-          {links.length > 0 && (
-            <div>
-              <SectionHeader icon={<Globe className="h-4 w-4" />} label="Externe bronnen" />
-              <Card className="border-border/60">
-                <CardContent className="p-4 space-y-2.5">
-                  {links.map((link, i) => {
-                    const isInternal = link.url.startsWith("/");
-                    return (
-                      <a
-                        key={i}
-                        href={isInternal ? undefined : link.url}
-                        onClick={isInternal ? (e) => { e.preventDefault(); navigate(link.url); } : undefined}
-                        target={isInternal ? undefined : "_blank"}
-                        rel={isInternal ? undefined : "noopener noreferrer"}
-                        className="flex items-center justify-between gap-2 text-sm text-primary hover:underline"
-                      >
-                        <span>{link.label}</span>
-                        {isInternal ? <ChevronRight className="h-3.5 w-3.5 shrink-0" /> : <ExternalLink className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />}
-                      </a>
-                    );
-                  })}
-                </CardContent>
-              </Card>
-            </div>
+          {/* ── Sectie-specifieke inhoud ── */}
+          {section === "transport" && <TransportInfo />}
+          {section === "accommodatie" && groupRules && (
+            <AccommodatieInfo accommodations={accommodations} submissions={submissions} groupRules={groupRules} navigate={navigate} />
           )}
+          {section === "golf" && <GolfInfo />}
+          {section === "strand" && <StrandInfo />}
 
-          {/* ── Reacties & Comments ── */}
-          <div>
-            <SectionHeader icon={<Users className="h-4 w-4" />} label="Reacties" />
-            <div className="space-y-2">
-              <ReactionBar section={`context-${section}`} reactions={reactions} profiles={profiles} onToggle={handleToggleReaction} />
-              <SectionComments
-                section={`context-${section}`}
-                comments={comments}
-                profiles={profiles}
-                onAdd={handleAddComment}
-                onDelete={handleDeleteComment}
-              />
-            </div>
-          </div>
+          {/* ── Externe links ── */}
+          <ExternalLinks section={section || ""} navigate={navigate} />
+
+          {/* ── Reacties ── */}
+          <ContextBlock title="Reacties">
+            <ReactionBar section={`context-${section}`} reactions={reactions} profiles={profiles} onToggle={handleToggleReaction} />
+            <SectionComments
+              section={`context-${section}`}
+              comments={comments}
+              profiles={profiles}
+              onAdd={handleAddComment}
+              onDelete={handleDeleteComment}
+            />
+          </ContextBlock>
         </div>
 
-        {/* Lightbox */}
         <Dialog open={!!lightboxUrl} onOpenChange={() => setLightboxUrl(null)}>
           <DialogContent className="max-w-[90vw] max-h-[90vh] p-2 bg-background/95 border-border">
             {lightboxUrl && <img src={lightboxUrl} alt="" className="w-full h-full object-contain rounded-lg" />}
@@ -266,201 +194,364 @@ export default function TaskContext() {
   );
 }
 
-/* ── Helpers ── */
+/* ── Layout helpers ── */
 
-function SectionHeader({ icon, label }: { icon: React.ReactNode; label: string }) {
+function ContextBlock({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="flex items-center gap-2 mb-3">
-      <div className="text-primary">{icon}</div>
-      <p className="text-xs font-semibold uppercase tracking-[0.15em] text-primary">{label}</p>
+    <div>
+      <p className="text-xs font-semibold uppercase tracking-[0.15em] text-primary mb-2">{title}</p>
+      <div className="space-y-2">{children}</div>
     </div>
   );
 }
+
+function InfoLine({ label, value }: { label: string; value: string | number }) {
+  return (
+    <div className="flex justify-between text-sm py-1 border-b border-border/30 last:border-0">
+      <span className="text-muted-foreground">{label}</span>
+      <span className="font-medium text-foreground">{value}</span>
+    </div>
+  );
+}
+
+/* ── Task details summary ── */
 
 function TaskDetailsSummary({ task, formatDate }: { task: Task; formatDate: (d: string) => string }) {
   const details: InfoDetails = (task.info_details as any) || {};
   const hasAny = details.url || details.activity_date || details.activity_time || details.location || task.info_text;
   if (!hasAny) {
-    return (
-      <Card className="border-border/60 border-dashed">
-        <CardContent className="p-4 text-center">
-          <p className="text-sm text-muted-foreground">Nog geen details ingevuld door de eigenaar.</p>
-        </CardContent>
-      </Card>
-    );
+    return <p className="text-sm text-muted-foreground italic">Nog geen details ingevuld door de eigenaar.</p>;
   }
   return (
-    <Card className="border-primary/20 bg-primary/5">
-      <CardContent className="p-4 space-y-2">
+    <Card className="border-border/60">
+      <CardContent className="p-4 space-y-1.5">
         {details.url && (
           <div className="flex items-center gap-2 text-sm">
-            <Globe className="h-3.5 w-3.5 text-primary shrink-0" />
+            <ExternalLink className="h-3.5 w-3.5 text-primary shrink-0" />
             <a href={details.url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline truncate">{details.url}</a>
           </div>
         )}
         {details.activity_date && (
           <div className="flex items-center gap-2 text-sm">
-            <Calendar className="h-3.5 w-3.5 text-primary shrink-0" />
+            <Calendar className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
             <span>{formatDate(details.activity_date)}</span>
           </div>
         )}
         {details.activity_time && (
           <div className="flex items-center gap-2 text-sm">
-            <Clock className="h-3.5 w-3.5 text-primary shrink-0" />
+            <Clock className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
             <span>{details.activity_time}</span>
           </div>
         )}
         {details.location && (
           <div className="flex items-center gap-2 text-sm">
-            <MapPin className="h-3.5 w-3.5 text-primary shrink-0" />
+            <MapPin className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
             <span>{details.location}</span>
           </div>
         )}
         {task.info_text && (
-          <p className="text-sm text-muted-foreground pt-2 border-t border-primary/10">{task.info_text}</p>
+          <p className="text-sm text-muted-foreground pt-2 border-t border-border/30">{task.info_text}</p>
         )}
       </CardContent>
     </Card>
   );
 }
 
-function getGroupWishes(section: string, submissions: Submission[]): string[] {
-  if (submissions.length === 0) return [];
-  const n = submissions.length;
+/* ── Wishes per section ── */
+
+function TransportWishes({ submissions, n }: { submissions: Submission[]; n: number }) {
+  const carVotes = submissions.filter(s => s.mobility_choice === "car").length;
+  const taxiVotes = submissions.filter(s => s.mobility_choice === "taxi").length;
+  const neutralVotes = n - carVotes - taxiVotes;
   const avg = (fn: (s: Submission) => number) => (submissions.reduce((a, s) => a + fn(s), 0) / n).toFixed(1);
 
-  const wishes: string[] = [];
-
-  if (section === "transport") {
-    const busCount = submissions.filter(s => s.mobility_choice === "car").length;
-    const taxiCount = submissions.filter(s => s.mobility_choice === "taxi").length;
-    wishes.push(`Voorkeur busje: ${busCount}/${n} · taxi: ${taxiCount}/${n}`);
-    wishes.push(`Gemiddeld belang "min. gedoe": ${avg(s => s.points_low_hassle)} / 5`);
-    wishes.push(`Gemiddeld belang "budget": ${avg(s => s.points_budget)} / 5`);
-  }
-
-  if (section === "accommodatie") {
-    const majority = Math.ceil(n / 2);
-    const count = (fn: (s: Submission) => boolean) => submissions.filter(fn).length;
-    if (count(s => s.require_fixed_beds) >= majority) wishes.push("Meerderheid eist vaste bedden");
-    if (count(s => s.require_bedrooms_3) >= majority) wishes.push("Meerderheid eist min. 3 slaapkamers");
-    if (count(s => s.require_cancelable) >= majority) wishes.push("Meerderheid eist gratis annulering");
-    if (count(s => s.require_pool) >= majority) wishes.push("Meerderheid eist zwembad");
-    const budgets = submissions.map(s => s.budget_cap_total).filter((b): b is number => b !== null && b > 0);
-    if (budgets.length > 0) wishes.push(`Budget plafond: €${Math.min(...budgets)} (laagste)`);
-    wishes.push(`Gemiddeld belang "luxe": ${avg(s => s.points_luxury)} / 5`);
-    const baseChoices = submissions.map(s => s.base_choice);
-    const golfCount = baseChoices.filter(c => c === "golf").length;
-    const beachCount = baseChoices.filter(c => c === "beach").length;
-    wishes.push(`Locatievoorkeur: golf ${golfCount}/${n} · strand ${beachCount}/${n}`);
-  }
-
-  if (section === "golf") {
-    const rounds = submissions.map(s => s.preferred_rounds);
-    wishes.push(`Voorkeur rondes: gem. ${(rounds.reduce((a, b) => a + b, 0) / n).toFixed(1)}`);
-    const maxMins = submissions.map(s => s.max_golf_minutes).sort((a, b) => a - b);
-    wishes.push(`Max reistijd golf: mediaan ${maxMins[Math.floor(n / 2)]} min`);
-    wishes.push(`Gemiddeld belang "golf gemak": ${avg(s => s.points_golf_ease)} / 5`);
-  }
-
-  if (section === "strand") {
-    wishes.push(`Gemiddeld belang "strandleven": ${avg(s => s.points_beach_life)} / 5`);
-    wishes.push(`Gemiddeld belang "omgeving verkennen": ${avg(s => s.points_exploring)} / 5`);
-    const beachPref = submissions.filter(s => s.base_choice === "beach").length;
-    wishes.push(`${beachPref}/${n} kiest voorkeur strand/dorp`);
-  }
-
-  return wishes;
-}
-
-/* ── Section-specific blocks ── */
-
-function TransportBlock() {
   return (
-    <div>
-      <SectionHeader icon={<Car className="h-4 w-4" />} label="Vervoersopties" />
-      <div className="grid grid-cols-2 gap-3">
-        <Card className="border-border/60">
-          <CardContent className="p-4">
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">Optie A</p>
-            <p className="font-display font-bold text-sm mb-1">9-zits busje</p>
-            <p className="text-lg font-extrabold text-foreground">€265 – €470</p>
-            <p className="text-xs text-muted-foreground mt-1">€44 – €78 p.p.</p>
-            <p className="text-xs text-muted-foreground">Maximale flexibiliteit</p>
-          </CardContent>
-        </Card>
-        <Card className="border-border/60">
-          <CardContent className="p-4">
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">Optie B</p>
-            <p className="font-display font-bold text-sm mb-1">Taxi / transfer</p>
-            <p className="text-lg font-extrabold text-foreground">€200 – €340</p>
-            <p className="text-xs text-muted-foreground mt-1">€37 – €57 p.p.</p>
-            <p className="text-xs text-muted-foreground">~5 lokale ritten nodig</p>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
+    <Card className="border-border/60">
+      <CardContent className="p-4">
+        <p className="text-sm font-medium mb-2">Vervoervoorkeur groep</p>
+        <div className="space-y-1">
+          <InfoLine label="🚗 Huurauto / busje" value={`${carVotes} van ${n} stemmen`} />
+          <InfoLine label="🚕 Taxi / transfer" value={`${taxiVotes} van ${n} stemmen`} />
+          {neutralVotes > 0 && <InfoLine label="🤷 Geen voorkeur" value={`${neutralVotes} van ${n}`} />}
+        </div>
+        {carVotes === taxiVotes && carVotes > 0 && (
+          <p className="text-xs text-destructive mt-2 font-medium">⚠️ Stemmen staan gelijk — overleg nodig</p>
+        )}
+        <div className="mt-3 pt-2 border-t border-border/30 space-y-1">
+          <InfoLine label={'Belang "minimaal gedoe"'} value={`${avg(s => s.points_low_hassle)} / 5`} />
+          <InfoLine label={'Belang "budget"'} value={`${avg(s => s.points_budget)} / 5`} />
+        </div>
+      </CardContent>
+    </Card>
   );
 }
 
-function AccommodatieBlock({ ranked, navigate }: { ranked: any[]; navigate: (path: string) => void }) {
+function AccommodatieWishes({ submissions, n, groupRules }: { submissions: Submission[]; n: number; groupRules: GroupRules | null }) {
+  const count = (fn: (s: Submission) => boolean) => submissions.filter(fn).length;
+  const avg = (fn: (s: Submission) => number) => (submissions.reduce((a, s) => a + fn(s), 0) / n).toFixed(1);
+  const budgets = submissions.map(s => s.budget_cap_total).filter((b): b is number => b !== null && b > 0);
+  const golfCount = submissions.filter(s => s.base_choice === "golf").length;
+  const beachCount = submissions.filter(s => s.base_choice === "beach").length;
+
   return (
-    <div>
-      <SectionHeader icon={<MapPin className="h-4 w-4" />} label="Top accommodaties" />
+    <Card className="border-border/60">
+      <CardContent className="p-4">
+        <p className="text-sm font-medium mb-2">Eisen meerderheid</p>
+        <div className="space-y-1">
+          {groupRules?.requireFixedBeds && <InfoLine label="Vaste bedden" value={`${count(s => s.require_fixed_beds)}/${n} eist dit`} />}
+          {groupRules?.requireBedrooms3 && <InfoLine label="Min. 3 slaapkamers" value={`${count(s => s.require_bedrooms_3)}/${n} eist dit`} />}
+          {groupRules?.requireCancelable && <InfoLine label="Gratis annulering" value={`${count(s => s.require_cancelable)}/${n} eist dit`} />}
+          {groupRules?.requirePool && <InfoLine label="Zwembad" value={`${count(s => s.require_pool)}/${n} eist dit`} />}
+        </div>
+        <div className="mt-3 pt-2 border-t border-border/30 space-y-1">
+          {budgets.length > 0 && <InfoLine label="Budget plafond (laagste)" value={`€${Math.min(...budgets)}`} />}
+          <InfoLine label={'Belang "luxe"'} value={`${avg(s => s.points_luxury)} / 5`} />
+          <InfoLine label="Locatievoorkeur golf" value={`${golfCount}/${n} stemmen`} />
+          <InfoLine label="Locatievoorkeur strand" value={`${beachCount}/${n} stemmen`} />
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function GolfWishes({ submissions, n }: { submissions: Submission[]; n: number }) {
+  const avg = (fn: (s: Submission) => number) => (submissions.reduce((a, s) => a + fn(s), 0) / n).toFixed(1);
+  const maxMins = submissions.map(s => s.max_golf_minutes).sort((a, b) => a - b);
+  const median = maxMins[Math.floor(n / 2)];
+
+  return (
+    <Card className="border-border/60">
+      <CardContent className="p-4">
+        <p className="text-sm font-medium mb-2">Golfvoorkeuren groep</p>
+        <div className="space-y-1">
+          <InfoLine label="Gewenste rondes" value={`gem. ${avg(s => s.preferred_rounds)}`} />
+          <InfoLine label="Max reistijd golfbaan" value={`mediaan ${median} min`} />
+          <InfoLine label={'Belang "golf gemak"'} value={`${avg(s => s.points_golf_ease)} / 5`} />
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function StrandWishes({ submissions, n }: { submissions: Submission[]; n: number }) {
+  const avg = (fn: (s: Submission) => number) => (submissions.reduce((a, s) => a + fn(s), 0) / n).toFixed(1);
+  const beachPref = submissions.filter(s => s.base_choice === "beach").length;
+
+  return (
+    <Card className="border-border/60">
+      <CardContent className="p-4">
+        <p className="text-sm font-medium mb-2">Strand & omgeving voorkeuren</p>
+        <div className="space-y-1">
+          <InfoLine label={'Belang "strandleven"'} value={`${avg(s => s.points_beach_life)} / 5`} />
+          <InfoLine label={'Belang "omgeving verkennen"'} value={`${avg(s => s.points_exploring)} / 5`} />
+          <InfoLine label="Voorkeur strand/dorp" value={`${beachPref}/${n} stemmen`} />
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+/* ── Section-specific content ── */
+
+function TransportInfo() {
+  return (
+    <ContextBlock title="Vervoersopties vergeleken">
+      <Card className="border-border/60">
+        <CardContent className="p-4 space-y-3">
+          <div>
+            <p className="text-sm font-medium">Optie A: 9-zits huurbusje</p>
+            <p className="text-sm text-muted-foreground mt-0.5">
+              {"Geschatte kosten €265 – €470 totaal (€44 – €78 p.p.). Geeft maximale flexibiliteit: zelf rijden naar golfbaan, strand, restaurants en supermarkt. Parkeren bij villa meestal gratis."}
+            </p>
+          </div>
+          <div className="border-t border-border/30 pt-3">
+            <p className="text-sm font-medium">Optie B: Taxi / transfer</p>
+            <p className="text-sm text-muted-foreground mt-0.5">
+              {"Luchthaven-transfer €200 – €340 retour (€37 – €57 p.p.). Lokaal ~5 taxiritten nodig voor golfbaan en uitjes. Minder flexibel, maar geen gedoe met rijden en parkeren."}
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+    </ContextBlock>
+  );
+}
+
+function AccommodatieInfo({ accommodations, submissions, groupRules, navigate }: {
+  accommodations: Accommodation[];
+  submissions: Submission[];
+  groupRules: GroupRules;
+  navigate: (path: string) => void;
+}) {
+  const ranked = rankAccommodations(accommodations, submissions, groupRules);
+
+  return (
+    <ContextBlock title="Alle accommodaties">
+      <div className="space-y-3">
+        {ranked.map((acc, i) => {
+          const eligible = acc.eligibility.eligible;
+          const ppn = acc.total_price_3_nights
+            ? `€${Math.round(acc.total_price_3_nights / 3)} p/nacht`
+            : "Prijs onbekend";
+
+          return (
+            <Card key={acc.id} className={`border-border/60 ${!eligible ? "opacity-70" : ""}`}>
+              <CardContent className="p-4">
+                <div className="flex items-start justify-between gap-2 mb-2">
+                  <div>
+                    <p className="text-sm font-medium">{acc.name}</p>
+                    <p className="text-xs text-muted-foreground">{acc.location_label} · {acc.type} · {ppn}</p>
+                  </div>
+                  <Badge variant={eligible ? "default" : "outline"} className={`text-[10px] shrink-0 ${eligible ? "bg-primary/10 text-primary" : "text-muted-foreground"}`}>
+                    #{i + 1} · {acc.totalScore.toFixed(1)} pt
+                  </Badge>
+                </div>
+
+                {/* Kenmerken */}
+                <p className="text-xs text-muted-foreground">
+                  {acc.bedrooms} slpk · {acc.bathrooms} badk · {acc.fixed_beds_count} vaste bedden · max {acc.max_guests} gasten
+                </p>
+                {acc.golf_minutes != null && (
+                  <p className="text-xs text-muted-foreground">Reistijd golf: {acc.golf_minutes} min</p>
+                )}
+                {acc.beach_meters != null && (
+                  <p className="text-xs text-muted-foreground">Afstand strand: {acc.beach_meters}m</p>
+                )}
+
+                {/* Voorwaarden check */}
+                {eligible ? (
+                  <p className="text-xs text-primary mt-2 flex items-center gap-1">
+                    <CheckCircle2 className="h-3 w-3" /> Voldoet aan alle groepseisen
+                  </p>
+                ) : (
+                  <div className="mt-2 space-y-0.5">
+                    {acc.eligibility.failures.map((f, fi) => (
+                      <p key={fi} className="text-xs text-destructive flex items-center gap-1">
+                        <XCircle className="h-3 w-3 shrink-0" /> {f}
+                      </p>
+                    ))}
+                  </div>
+                )}
+
+                {/* Notities */}
+                {acc.notes && (
+                  <p className="text-xs text-muted-foreground mt-2 italic">{acc.notes}</p>
+                )}
+
+                {/* Top redenen */}
+                <p className="text-[10px] text-muted-foreground mt-2">
+                  Sterkste punten: {acc.topReasons.join(" · ")}
+                </p>
+
+                <button
+                  onClick={() => navigate(`/accommodations/${acc.id}`)}
+                  className="inline-flex items-center gap-1 text-xs text-primary font-medium hover:underline mt-2"
+                >
+                  Bekijk details <ChevronRight className="h-3 w-3" />
+                </button>
+              </CardContent>
+            </Card>
+          );
+        })}
+      </div>
+    </ContextBlock>
+  );
+}
+
+const GOLF_COURSES = [
+  { name: "La Cala Golf Resort", distance: "Op locatie (0 min)", desc: "3 banen (Asia, America, Europa), elk 18 holes. Green fee ca. \u20AC60\u2013\u20AC90. Eerste tee-time vaak vanaf 08:00.", url: "https://www.lacala.com/golf" },
+  { name: "Chaparral Golf Club", distance: "~10 min rijden", desc: "18-holes baan ontworpen door Pepe Gancedo. Onderhouden baan met goede faciliteiten.", url: "https://www.chaparralgolf.com" },
+  { name: "Santana Golf", distance: "~12 min rijden", desc: "18-holes par-72 baan in Mijas Costa. Gevarieerd terrein met uitzicht op zee.", url: "https://www.santanagolf.com" },
+  { name: "Calanova Golf", distance: "~15 min rijden", desc: "18-holes baan bij Mijas Pueblo. Bergachtig terrein, mooie uitzichten.", url: "https://www.calanovagolf.com" },
+  { name: "Miraflores Golf", distance: "~8 min rijden", desc: "18-holes baan, goed onderhouden. Populair bij internationale golfers.", url: "https://www.mirafloresgolf.com" },
+];
+
+function GolfInfo() {
+  return (
+    <ContextBlock title="Golfbanen in de buurt">
       <div className="space-y-2">
-        {ranked.map((acc, i) => (
-          <Card key={acc.id} className="border-border/60 cursor-pointer hover:bg-accent/5 transition-colors"
-            onClick={() => navigate(`/accommodations/${acc.id}`)}>
-            <CardContent className="p-3 flex items-center gap-3">
-              <div className="bg-primary/10 text-primary font-bold rounded-full w-7 h-7 flex items-center justify-center text-xs shrink-0">
-                #{i + 1}
+        {GOLF_COURSES.map((course, i) => (
+          <Card key={i} className="border-border/60">
+            <CardContent className="p-4">
+              <div className="flex items-start justify-between gap-2">
+                <p className="text-sm font-medium">{course.name}</p>
+                <Badge variant="outline" className="text-[10px] shrink-0">{course.distance}</Badge>
               </div>
-              <div className="flex-1 min-w-0">
-                <p className="font-display font-bold text-sm truncate">{acc.name}</p>
-                <p className="text-xs text-muted-foreground">{acc.location_label} · Score: {acc.totalScore.toFixed(1)}</p>
-              </div>
-              <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
+              <p className="text-xs text-muted-foreground mt-1">{course.desc}</p>
+              <a href={course.url} target="_blank" rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 text-xs text-primary hover:underline mt-1.5">
+                Website <ExternalLink className="h-3 w-3" />
+              </a>
             </CardContent>
           </Card>
         ))}
       </div>
-    </div>
+    </ContextBlock>
   );
 }
 
-function GolfBlock() {
+function StrandInfo() {
   return (
-    <div>
-      <SectionHeader icon={<CircleDot className="h-4 w-4" />} label="Golfbaan info" />
+    <ContextBlock title="Strand & omgeving">
       <Card className="border-border/60">
-        <CardContent className="p-4 space-y-2.5">
-          <p className="font-display font-bold text-sm">La Cala Golf Resort</p>
-          <div className="space-y-1.5 text-sm text-muted-foreground">
-            <p className="flex items-center gap-2"><MapPin className="h-3.5 w-3.5 text-primary shrink-0" /> La Cala de Mijas, Málaga</p>
-            <p className="flex items-center gap-2"><CircleDot className="h-3.5 w-3.5 text-primary shrink-0" /> 3 banen: Asia, America, Europa (elk 18 holes)</p>
-            <p className="flex items-center gap-2"><Clock className="h-3.5 w-3.5 text-primary shrink-0" /> Eerste tee-time: vaak vanaf 08:00</p>
-            <p className="flex items-center gap-2"><Globe className="h-3.5 w-3.5 text-primary shrink-0" /> Green fee: ~€60 – €90 per ronde</p>
-          </div>
+        <CardContent className="p-4 space-y-2">
+          <p className="text-sm font-medium">La Cala de Mijas</p>
+          <p className="text-xs text-muted-foreground">
+            {"Gezellig kustdorpje met breed zandstrand, diverse chiringuitos (strandtenten) direct aan zee, restaurants en winkeltjes. Vanaf de meeste accommodaties ~10\u201315 min rijden. Goed bereikbaar en minder toeristisch dan Fuengirola of Marbella."}
+          </p>
+          <p className="text-xs text-muted-foreground">
+            {"In de buurt: Fuengirola (20 min), Marbella (30 min), Mijas Pueblo (15 min, pittoresk bergdorpje)."}
+          </p>
         </CardContent>
       </Card>
-    </div>
+    </ContextBlock>
   );
 }
 
-function StrandBlock() {
+/* ── External links ── */
+
+const SECTION_LINKS: Record<string, { label: string; url: string }[]> = {
+  transport: [
+    { label: "Rental24h.com – 9-zits busje", url: "https://www.rental24h.com" },
+    { label: "KAYAK – Huurauto vergelijken", url: "https://www.kayak.com" },
+    { label: "Kiwitaxi – Taxi/transfer boeken", url: "https://www.kiwitaxi.com" },
+  ],
+  accommodatie: [
+    { label: "Alle accommodaties bekijken", url: "/accommodations" },
+  ],
+  golf: [
+    { label: "TeeTime.es – Tee-times boeken", url: "https://www.teetime.es" },
+  ],
+  strand: [
+    { label: "Google Maps – La Cala de Mijas strand", url: "https://maps.google.com/?q=La+Cala+de+Mijas+beach" },
+  ],
+};
+
+function ExternalLinks({ section, navigate }: { section: string; navigate: (path: string) => void }) {
+  const links = SECTION_LINKS[section] || [];
+  if (links.length === 0) return null;
+
   return (
-    <div>
-      <SectionHeader icon={<Globe className="h-4 w-4" />} label="Strand & omgeving" />
+    <ContextBlock title="Handige links">
       <Card className="border-border/60">
-        <CardContent className="p-4 space-y-2.5">
-          <p className="font-display font-bold text-sm">La Cala de Mijas</p>
-          <div className="space-y-1.5 text-sm text-muted-foreground">
-            <p className="flex items-center gap-2"><MapPin className="h-3.5 w-3.5 text-primary shrink-0" /> Gezellig kustdorpje met strand, restaurants en winkels</p>
-            <p className="flex items-center gap-2"><Clock className="h-3.5 w-3.5 text-primary shrink-0" /> Vanaf golfbaan: ~10-15 min rijden</p>
-            <p className="flex items-center gap-2"><CircleDot className="h-3.5 w-3.5 text-primary shrink-0" /> Strandtenten: diverse chiringuitos direct aan zee</p>
-          </div>
+        <CardContent className="p-4 space-y-2">
+          {links.map((link, i) => {
+            const isInternal = link.url.startsWith("/");
+            return (
+              <a
+                key={i}
+                href={isInternal ? undefined : link.url}
+                onClick={isInternal ? (e) => { e.preventDefault(); navigate(link.url); } : undefined}
+                target={isInternal ? undefined : "_blank"}
+                rel={isInternal ? undefined : "noopener noreferrer"}
+                className="flex items-center justify-between gap-2 text-sm text-primary hover:underline"
+              >
+                <span>{link.label}</span>
+                {isInternal ? <ChevronRight className="h-3.5 w-3.5 shrink-0" /> : <ExternalLink className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />}
+              </a>
+            );
+          })}
         </CardContent>
       </Card>
-    </div>
+    </ContextBlock>
   );
 }

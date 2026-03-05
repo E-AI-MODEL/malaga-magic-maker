@@ -721,12 +721,12 @@ function TaskDetailsEditor({ details, infoText, onSave }: {
         </div>
       </div>
 
-      <div className="bg-secondary/50 rounded-lg p-3 space-y-2">
+      <div className="bg-secondary/50 rounded-lg p-3 space-y-2 overflow-hidden">
         <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Datum & tijd</label>
         <div className="grid grid-cols-2 gap-2">
-          <div className="relative">
+          <div className="relative min-w-0">
             <Calendar className="absolute left-2.5 top-2 h-3.5 w-3.5 text-muted-foreground pointer-events-none z-10" />
-            <Input type="date" value={date} onChange={e => setDate(e.target.value)} className="text-xs h-8 pl-8" />
+            <Input type="date" value={date} onChange={e => setDate(e.target.value)} className="text-xs h-8 pl-8 w-full" />
           </div>
           <div className="relative min-w-0">
             <Clock className="absolute left-2.5 top-2 h-3.5 w-3.5 text-muted-foreground pointer-events-none z-10" />

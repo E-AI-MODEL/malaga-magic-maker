@@ -20,8 +20,11 @@ import { useNavigate } from "react-router-dom";
 import {
   Plane, ChevronDown, CheckCircle2, Upload, User, Shield, X,
   Globe, MapPin, Clock, Calendar, Pencil, Save, ChevronRight, Info,
-  Plus, Trash2
+  Plus, Trash2, Settings2
 } from "lucide-react";
+import {
+  Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription
+} from "@/components/ui/drawer";
 
 interface Profile { id: string; username: string; display_name: string; }
 interface InfoDetails {
@@ -68,6 +71,7 @@ export default function Taken() {
   const [flightsOpen, setFlightsOpen] = useState(false);
   const [newTaskTitle, setNewTaskTitle] = useState("");
   const [addingToSection, setAddingToSection] = useState<string | null>(null);
+  const [drawerTaskId, setDrawerTaskId] = useState<string | null>(null);
 
   useEffect(() => {
     const load = async () => {
@@ -343,7 +347,7 @@ export default function Taken() {
                       {sectionTasks.map(task => {
                         const isOpen = openTask === task.id;
                         const editable = canEditTask(task);
-                        const isEditing = editingTaskId === task.id;
+                        
                         const contextLabel = SECTION_CONTEXT[task.section];
                         const details: InfoDetails = (task.info_details as any) || {};
 
@@ -388,92 +392,21 @@ export default function Taken() {
                               <CollapsibleContent>
                                 <div className="px-4 pb-4 space-y-4 border-t border-border/40 pt-4">
 
-                                  {editable && isEditing ? (
-                                    <>
-                                      <div className="bg-secondary/50 rounded-lg p-3">
-                                        <label className="text-xs font-semibold text-muted-foreground mb-2 block">Voortgang</label>
-                                        <div className="flex gap-1.5">
-                                          {[0, 25, 50, 75, 100].map(step => (
-                                            <button
-                                              key={step}
-                                              onClick={() => handleProgressChange(task.id, [step])}
-                                              className={`flex-1 h-8 rounded-md text-xs font-semibold transition-colors ${
-                                                task.progress >= step
-                                                  ? "bg-primary text-primary-foreground"
-                                                  : "bg-secondary text-muted-foreground hover:bg-secondary/80"
-                                              }`}
-                                            >
-                                              {step}%
-                                            </button>
-                                          ))}
+                                  {/* Read-only details & photos — visible to everyone */}
+                                  <TaskDetailsReadonly details={details} infoText={task.info_text} />
+
+                                  {task.info_image_urls.length > 0 && (
+                                    <div className="grid grid-cols-2 gap-2">
+                                      {task.info_image_urls.map((url, i) => (
+                                        <div key={i} className="rounded-lg overflow-hidden border border-border cursor-pointer"
+                                          onClick={() => setLightboxUrl(url)}>
+                                          <img src={url} alt="" className="w-full h-24 object-cover" />
                                         </div>
-                                      </div>
-
-                                      <TaskDetailsEditor
-                                        details={details}
-                                        infoText={task.info_text || ""}
-                                        onSave={(d, t) => handleDetailsSave(task.id, d, t)}
-                                      />
-
-                                      <div>
-                                        {task.info_image_urls.length > 0 && (
-                                          <div className="grid grid-cols-2 gap-2 mb-2">
-                                            {task.info_image_urls.map((url, i) => (
-                                              <div key={i} className="relative group rounded-lg overflow-hidden border border-border cursor-pointer"
-                                                onClick={() => setLightboxUrl(url)}>
-                                                <img src={url} alt="" className="w-full h-24 object-cover" />
-                                                <button
-                                                  onClick={(e) => { e.stopPropagation(); handleRemoveImage(task.id, url); }}
-                                                  className="absolute top-1 right-1 bg-destructive text-destructive-foreground rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
-                                                >
-                                                  <X className="h-3 w-3" />
-                                                </button>
-                                              </div>
-                                            ))}
-                                          </div>
-                                        )}
-                                        <label className="inline-flex items-center gap-1.5 text-xs text-primary cursor-pointer hover:underline">
-                                          <Upload className="h-3 w-3" />
-                                          {uploading ? "Uploaden..." : "Foto toevoegen"}
-                                          <input
-                                            type="file"
-                                            accept="image/*"
-                                            className="hidden"
-                                            onChange={(e) => e.target.files?.[0] && handleImageUpload(task.id, e.target.files[0])}
-                                            disabled={uploading}
-                                          />
-                                        </label>
-                                      </div>
-                                    </>
-                                  ) : (
-                                    <>
-                                      <TaskDetailsReadonly details={details} infoText={task.info_text} />
-
-                                      {task.info_image_urls.length > 0 && (
-                                        <div className="grid grid-cols-2 gap-2">
-                                          {task.info_image_urls.map((url, i) => (
-                                            <div key={i} className="rounded-lg overflow-hidden border border-border cursor-pointer"
-                                              onClick={() => setLightboxUrl(url)}>
-                                              <img src={url} alt="" className="w-full h-24 object-cover" />
-                                            </div>
-                                          ))}
-                                        </div>
-                                      )}
-
-                                      {editable && (
-                                        <Button
-                                          variant="outline"
-                                          size="sm"
-                                          className="h-8 text-xs gap-1.5"
-                                          onClick={() => setEditingTaskId(task.id)}
-                                        >
-                                          <Pencil className="h-3 w-3" />
-                                          Bewerken
-                                        </Button>
-                                      )}
-                                    </>
+                                      ))}
+                                    </div>
                                   )}
 
+                                  {/* Context link — visible to everyone */}
                                   {contextLabel && (
                                     <div className="pt-2 border-t border-border/40">
                                       <button
@@ -485,104 +418,22 @@ export default function Taken() {
                                     </div>
                                   )}
 
-                                  {isAdmin && (
-                                    <div className="space-y-3 pt-2 border-t border-border/40">
-                                      <div className="grid grid-cols-2 gap-2">
-                                        <div>
-                                          <label className="text-[10px] font-semibold text-muted-foreground mb-1 block">Eigenaar</label>
-                                          <Select value={task.assigned_to || ""} onValueChange={(v) => handleAssign(task.id, "assigned_to", v)}>
-                                            <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Kies..." /></SelectTrigger>
-                                            <SelectContent>
-                                              {profiles.map(p => <SelectItem key={p.id} value={p.display_name}>{p.display_name}</SelectItem>)}
-                                            </SelectContent>
-                                          </Select>
-                                        </div>
-                                        <div>
-                                          <label className="text-[10px] font-semibold text-muted-foreground mb-1 block">Backup</label>
-                                          <Select value={task.backup_to || ""} onValueChange={(v) => handleAssign(task.id, "backup_to", v)}>
-                                            <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Kies..." /></SelectTrigger>
-                                            <SelectContent>
-                                              {profiles.map(p => <SelectItem key={p.id} value={p.display_name}>{p.display_name}</SelectItem>)}
-                                            </SelectContent>
-                                          </Select>
-                                        </div>
-                                      </div>
-                                      <div className="grid grid-cols-2 gap-2">
-                                        <div>
-                                          <label className="text-[10px] font-semibold text-muted-foreground mb-1 block">Kosten (€)</label>
-                                          <Input
-                                            type="number"
-                                            placeholder="0"
-                                            className="h-8 text-xs"
-                                            defaultValue={task.cost ?? ""}
-                                            onBlur={e => {
-                                              const val = e.target.value ? parseFloat(e.target.value) : null;
-                                              supabase.from("tasks").update({ cost: val } as any).eq("id", task.id).then(() => {});
-                                            }}
-                                          />
-                                        </div>
-                                        <div>
-                                          <label className="text-[10px] font-semibold text-muted-foreground mb-1 block">Betaald door</label>
-                                          <Select value={task.paid_by || ""} onValueChange={v => { supabase.from("tasks").update({ paid_by: v || null } as any).eq("id", task.id); }}>
-                                            <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Kies..." /></SelectTrigger>
-                                            <SelectContent>
-                                              {profiles.map(p => <SelectItem key={p.id} value={p.display_name}>{p.display_name}</SelectItem>)}
-                                            </SelectContent>
-                                          </Select>
-                                        </div>
-                                      </div>
-                                      <div>
-                                        <label className="text-[10px] font-semibold text-muted-foreground mb-1.5 block">Deelt mee in kosten</label>
-                                        <div className="flex flex-wrap gap-1.5">
-                                          {profiles.filter(p => p.username !== "admin" && p.username !== "Admin").map(p => {
-                                            const splitAmong: string[] = (task as any).cost_split_among || [];
-                                            const allShare = splitAmong.length === 0;
-                                            const isSelected = allShare || splitAmong.includes(p.display_name);
-                                            return (
-                                              <button
-                                                key={p.id}
-                                                className={`h-7 px-2.5 rounded-md text-xs font-medium border transition-colors ${
-                                                  isSelected
-                                                    ? "bg-primary text-primary-foreground border-primary"
-                                                    : "bg-secondary text-muted-foreground border-border hover:bg-secondary/80"
-                                                }`}
-                                                onClick={() => {
-                                                  let newSplit: string[];
-                                                  if (allShare) {
-                                                    // Switch from "everyone" to explicit: everyone except clicked
-                                                    newSplit = profiles.filter(pp => pp.username !== "admin" && pp.username !== "Admin" && pp.display_name !== p.display_name).map(pp => pp.display_name);
-                                                  } else if (isSelected) {
-                                                    newSplit = splitAmong.filter(n => n !== p.display_name);
-                                                  } else {
-                                                    newSplit = [...splitAmong, p.display_name];
-                                                  }
-                                                  // If all participants selected, reset to null (everyone)
-                                                  const allParticipants = profiles.filter(pp => pp.username !== "admin" && pp.username !== "Admin");
-                                                  if (newSplit.length >= allParticipants.length) newSplit = [];
-                                                  supabase.from("tasks").update({ cost_split_among: newSplit.length > 0 ? newSplit : null } as any).eq("id", task.id);
-                                                }}
-                                              >
-                                                {p.display_name}
-                                              </button>
-                                            );
-                                          })}
-                                        </div>
-                                        <p className="text-[9px] text-muted-foreground mt-1">
-                                          {((task as any).cost_split_among || []).length === 0 ? "Iedereen deelt mee" : `${((task as any).cost_split_among || []).length} personen`}
-                                        </p>
-                                      </div>
+                                  {/* Gear icon — only for owner/backup/admin */}
+                                  {editable && (
+                                    <div className="pt-2 border-t border-border/40">
                                       <Button
-                                        variant="destructive"
+                                        variant="outline"
                                         size="sm"
-                                        className="h-7 text-xs gap-1.5"
-                                        onClick={() => handleDeleteTask(task.id, task.title)}
+                                        className="h-8 text-xs gap-1.5"
+                                        onClick={() => setDrawerTaskId(task.id)}
                                       >
-                                        <Trash2 className="h-3 w-3" />
-                                        Taak verwijderen
+                                        <Settings2 className="h-3.5 w-3.5" />
+                                        Beheren
                                       </Button>
                                     </div>
                                   )}
 
+                                  {/* Reactions & comments — visible to everyone */}
                                   <div className="pt-3 border-t border-border/40 space-y-2">
                                     <ReactionBar section={`task-${task.id}`} reactions={reactions} profiles={profiles} onToggle={handleToggleReaction} />
                                     <SectionComments
@@ -642,6 +493,191 @@ export default function Taken() {
             })}
           </Accordion>
         </section>
+
+        {/* ═══ TASK EDIT DRAWER ═══ */}
+        {(() => {
+          const drawerTask = tasks.find(t => t.id === drawerTaskId);
+          if (!drawerTask) return null;
+          const drawerDetails: InfoDetails = (drawerTask.info_details as any) || {};
+          return (
+            <Drawer open={!!drawerTaskId} onOpenChange={(open) => { if (!open) { setDrawerTaskId(null); setEditingTaskId(null); } }}>
+              <DrawerContent className="max-h-[85vh]">
+                <DrawerHeader className="pb-2">
+                  <DrawerTitle className="font-display text-base">{drawerTask.title}</DrawerTitle>
+                  <DrawerDescription className="text-xs text-muted-foreground">Beheer voortgang, details en instellingen</DrawerDescription>
+                </DrawerHeader>
+                <div className="px-4 pb-6 space-y-4 overflow-y-auto">
+                  {/* Progress — canEditTask */}
+                  <div className="bg-secondary/50 rounded-lg p-3">
+                    <label className="text-xs font-semibold text-muted-foreground mb-2 block">Voortgang</label>
+                    <div className="flex gap-1.5">
+                      {[0, 25, 50, 75, 100].map(step => (
+                        <button
+                          key={step}
+                          onClick={() => handleProgressChange(drawerTask.id, [step])}
+                          className={`flex-1 h-8 rounded-md text-xs font-semibold transition-colors ${
+                            drawerTask.progress >= step
+                              ? "bg-primary text-primary-foreground"
+                              : "bg-secondary text-muted-foreground hover:bg-secondary/80"
+                          }`}
+                        >
+                          {step}%
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Details editor — canEditTask */}
+                  {editingTaskId === drawerTask.id ? (
+                    <TaskDetailsEditor
+                      details={drawerDetails}
+                      infoText={drawerTask.info_text || ""}
+                      onSave={(d, t) => handleDetailsSave(drawerTask.id, d, t)}
+                    />
+                  ) : (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-8 text-xs gap-1.5 w-full"
+                      onClick={() => setEditingTaskId(drawerTask.id)}
+                    >
+                      <Pencil className="h-3 w-3" />
+                      Details bewerken
+                    </Button>
+                  )}
+
+                  {/* Photo management — canEditTask */}
+                  <div>
+                    {drawerTask.info_image_urls.length > 0 && (
+                      <div className="grid grid-cols-3 gap-2 mb-2">
+                        {drawerTask.info_image_urls.map((url, i) => (
+                          <div key={i} className="relative group rounded-lg overflow-hidden border border-border">
+                            <img src={url} alt="" className="w-full h-20 object-cover" />
+                            <button
+                              onClick={() => handleRemoveImage(drawerTask.id, url)}
+                              className="absolute top-1 right-1 bg-destructive text-destructive-foreground rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                            >
+                              <X className="h-3 w-3" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    <label className="inline-flex items-center gap-1.5 text-xs text-primary cursor-pointer hover:underline">
+                      <Upload className="h-3 w-3" />
+                      {uploading ? "Uploaden..." : "Foto toevoegen"}
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => e.target.files?.[0] && handleImageUpload(drawerTask.id, e.target.files[0])}
+                        disabled={uploading}
+                      />
+                    </label>
+                  </div>
+
+                  {/* Admin-only section */}
+                  {isAdmin && (
+                    <div className="space-y-3 pt-3 border-t border-border/40">
+                      <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Admin</p>
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <label className="text-[10px] font-semibold text-muted-foreground mb-1 block">Eigenaar</label>
+                          <Select value={drawerTask.assigned_to || ""} onValueChange={(v) => handleAssign(drawerTask.id, "assigned_to", v)}>
+                            <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Kies..." /></SelectTrigger>
+                            <SelectContent>
+                              {profiles.map(p => <SelectItem key={p.id} value={p.display_name}>{p.display_name}</SelectItem>)}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div>
+                          <label className="text-[10px] font-semibold text-muted-foreground mb-1 block">Backup</label>
+                          <Select value={drawerTask.backup_to || ""} onValueChange={(v) => handleAssign(drawerTask.id, "backup_to", v)}>
+                            <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Kies..." /></SelectTrigger>
+                            <SelectContent>
+                              {profiles.map(p => <SelectItem key={p.id} value={p.display_name}>{p.display_name}</SelectItem>)}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <label className="text-[10px] font-semibold text-muted-foreground mb-1 block">Kosten (€)</label>
+                          <Input
+                            type="number"
+                            placeholder="0"
+                            className="h-8 text-xs"
+                            defaultValue={drawerTask.cost ?? ""}
+                            onBlur={e => {
+                              const val = e.target.value ? parseFloat(e.target.value) : null;
+                              supabase.from("tasks").update({ cost: val } as any).eq("id", drawerTask.id).then(() => {});
+                            }}
+                          />
+                        </div>
+                        <div>
+                          <label className="text-[10px] font-semibold text-muted-foreground mb-1 block">Betaald door</label>
+                          <Select value={drawerTask.paid_by || ""} onValueChange={v => { supabase.from("tasks").update({ paid_by: v || null } as any).eq("id", drawerTask.id); }}>
+                            <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Kies..." /></SelectTrigger>
+                            <SelectContent>
+                              {profiles.map(p => <SelectItem key={p.id} value={p.display_name}>{p.display_name}</SelectItem>)}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                      <div>
+                        <label className="text-[10px] font-semibold text-muted-foreground mb-1.5 block">Deelt mee in kosten</label>
+                        <div className="flex flex-wrap gap-1.5">
+                          {profiles.filter(p => p.username !== "admin" && p.username !== "Admin").map(p => {
+                            const splitAmong: string[] = (drawerTask as any).cost_split_among || [];
+                            const allShare = splitAmong.length === 0;
+                            const isSelected = allShare || splitAmong.includes(p.display_name);
+                            return (
+                              <button
+                                key={p.id}
+                                className={`h-7 px-2.5 rounded-md text-xs font-medium border transition-colors ${
+                                  isSelected
+                                    ? "bg-primary text-primary-foreground border-primary"
+                                    : "bg-secondary text-muted-foreground border-border hover:bg-secondary/80"
+                                }`}
+                                onClick={() => {
+                                  let newSplit: string[];
+                                  if (allShare) {
+                                    newSplit = profiles.filter(pp => pp.username !== "admin" && pp.username !== "Admin" && pp.display_name !== p.display_name).map(pp => pp.display_name);
+                                  } else if (isSelected) {
+                                    newSplit = splitAmong.filter(n => n !== p.display_name);
+                                  } else {
+                                    newSplit = [...splitAmong, p.display_name];
+                                  }
+                                  const allParticipants = profiles.filter(pp => pp.username !== "admin" && pp.username !== "Admin");
+                                  if (newSplit.length >= allParticipants.length) newSplit = [];
+                                  supabase.from("tasks").update({ cost_split_among: newSplit.length > 0 ? newSplit : null } as any).eq("id", drawerTask.id);
+                                }}
+                              >
+                                {p.display_name}
+                              </button>
+                            );
+                          })}
+                        </div>
+                        <p className="text-[9px] text-muted-foreground mt-1">
+                          {((drawerTask as any).cost_split_among || []).length === 0 ? "Iedereen deelt mee" : `${((drawerTask as any).cost_split_among || []).length} personen`}
+                        </p>
+                      </div>
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        className="h-7 text-xs gap-1.5"
+                        onClick={() => { handleDeleteTask(drawerTask.id, drawerTask.title); setDrawerTaskId(null); }}
+                      >
+                        <Trash2 className="h-3 w-3" />
+                        Taak verwijderen
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </DrawerContent>
+            </Drawer>
+          );
+        })()}
 
         {/* Lightbox */}
         <Dialog open={!!lightboxUrl} onOpenChange={() => setLightboxUrl(null)}>

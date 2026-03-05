@@ -1,36 +1,49 @@
 
 
-## Plan: Mobiel scroll-fix, dashboard = taken, en uitklapmenu's
+## Plan
 
-### Problemen
-1. **Onrustig scrollen op mobiel** — de pagina's gebruiken `-mx-4 -mt-6` offsets en de `pb-20` voor bottom nav kan conflicteren met scroll-gedrag. Geen `overflow` sturing op de main container.
-2. **Dashboard trackt niet** — er is geen "Dashboard" pagina; de BottomNav heeft "Taken" maar de user bedoelt dat dit de dashboard-functie moet vervullen.
-3. **Uitklapmenu's op dashboard** — de Taken-pagina toont alle secties als losse Collapsible cards, maar er is geen overkoepelend accordion/uitklapmenu-structuur die de pagina overzichtelijk maakt.
+### 1. Verwijder AdminFab
+- **`src/components/AppLayout.tsx`**: Verwijder de `<AdminFab />` component en de import. De admin-knop in de BottomNav is voldoende.
+- **`src/components/AdminFab.tsx`**: Kan verwijderd worden (of laten staan, wordt niet meer gerenderd).
 
-### Oplossing
+### 2. Analyse: verbetermogelijkheden
 
-**1. Mobiel scroll-fix (`AppLayout.tsx` + `index.css`)**
-- Voeg `overflow-x-hidden` toe aan de outer container om horizontale scroll te voorkomen door de negatieve margins
-- Voeg `-webkit-overflow-scrolling: touch` en `scroll-behavior: smooth` toe aan CSS voor vloeiender mobiel scrollen
-- Verwijder de `-mx-4 -mt-6` hack in Taken.tsx en TaskContext.tsx; pas in plaats daarvan de AppLayout `main` padding aan met een prop of maak de header full-bleed via negatieve margins alleen op het header-element
+Na het doornemen van de hele codebase, dit zijn de meest waardevolle verbeteringen:
 
-**2. Dashboard = Taken (BottomNav.tsx)**
-- Hernoem "Taken" naar "Dashboard" in de BottomNav zodat het duidelijk is dat dit de hoofdpagina is
-- Verander het icoon naar `LayoutDashboard` of houd `ListChecks`
-- Route blijft `/taken`
+**A. Info-pagina heeft nog `-mx-4 -mt-6` scroll-hack**
+De scroll-fix is toegepast op Taken en TaskContext, maar `Info.tsx` (regel 16) en `Accommodations.tsx` (regel 78) en `Uitslag.tsx` (regel 158) gebruiken nog `-mx-4 -mt-6`. Dit veroorzaakt het onrustige scrollen op die pagina's. Deze moeten ook gefixed worden.
 
-**3. Uitklapmenu's op de Taken/Dashboard-pagina (`Taken.tsx`)**
-- Groepeer de content in een `Accordion` met secties:
-  - **Vluchtgegevens** (bestaande collapsible → accordion item)
-  - **Taken** per sectie (transport, accommodatie, golf, strand) als accordion items
-- Gebruik `Accordion type="multiple"` zodat meerdere secties open kunnen staan
-- Elke taak-card wordt een AccordionItem met de bestaande content erin
-- Dit vervangt de huidige losse `Collapsible` per taak
+**B. Notificaties verbeteren**
+Er is een basale notificatie-check bij het openen van Taken, maar er is geen notificatie-badge op de BottomNav. Gebruikers zien niet dat er nieuwe reacties/comments zijn zonder de pagina te openen.
 
-### Bestanden
-- **Wijzig**: `src/components/AppLayout.tsx` — overflow-x-hidden, scroll smoothing
-- **Wijzig**: `src/index.css` — webkit smooth scroll
-- **Wijzig**: `src/components/BottomNav.tsx` — label "Dashboard"
-- **Wijzig**: `src/pages/Taken.tsx` — Accordion wrapper, verwijder scroll-problematische offsets
-- **Wijzig**: `src/pages/TaskContext.tsx` — zelfde offset-fix
+**C. Taak drag-and-drop volgorde**
+Taken kunnen nu alleen toegevoegd/verwijderd worden, maar de volgorde (`sort_order`) kan niet aangepast worden door de admin.
+
+**D. Dashboard: totaaloverzicht ontbreekt**
+Het dashboard toont alleen taken per sectie, maar mist een samenvatting bovenaan (bijv. totale voortgang, aantal open taken, aankomende deadlines).
+
+**E. Accommodations pagina heeft nog de disclaimer-modal**
+Elke keer dat je de pagina opent verschijnt een "Ter indicatie" modal. Dit zou beter een eenmalige dismiss zijn (opslaan in localStorage).
+
+**F. Uitslag pagina: nog steeds `-mx-4 -mt-6`**
+Zelfde scroll-probleem als Info.
+
+### Voorstel prioriteit
+
+| # | Verbetering | Impact |
+|---|---|---|
+| 1 | AdminFab verwijderen | Klein, direct |
+| 2 | Scroll-fix op Info, Accommodations, Uitslag | UX fix |
+| 3 | Dashboard totaaloverzicht toevoegen | Overzicht |
+| 4 | Notificatie-badge op BottomNav | Engagement |
+| 5 | Disclaimer modal eenmalig tonen | UX polish |
+
+### Bestanden te wijzigen
+- `src/components/AppLayout.tsx` — verwijder AdminFab
+- `src/pages/Info.tsx` — verwijder `-mx-4 -mt-6`
+- `src/pages/Accommodations.tsx` — verwijder `-mx-4 -mt-6`
+- `src/pages/Uitslag.tsx` — verwijder `-mx-4 -mt-6`
+- `src/pages/Intake.tsx` — verwijder `-mx-4 -mt-6`
+- Optioneel: `src/components/BottomNav.tsx` — notificatie-badge
+- Optioneel: `src/pages/Taken.tsx` — dashboard samenvatting
 

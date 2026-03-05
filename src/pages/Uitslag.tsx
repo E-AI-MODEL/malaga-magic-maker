@@ -6,7 +6,6 @@ import { Badge } from "@/components/ui/badge";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Car, Home, UtensilsCrossed, Dumbbell, BarChart3, Users, CheckCircle2, XCircle, Star, ExternalLink, Bed, Bath, Waves, ParkingCircle, Wind, Wifi, MapPin } from "lucide-react";
 import { useAuth } from "@/lib/auth";
-import { TaskBoard } from "@/components/TaskBoard";
 import { ReactionBar } from "@/components/ReactionBar";
 import { SectionComments } from "@/components/SectionComments";
 interface Profile {
@@ -157,9 +156,6 @@ export default function Uitslag() {
   return (
     <AppLayout>
       <div className="-mx-4 -mt-6">
-        {/* Takenverdeling */}
-        <TaskBoard profiles={profiles} comments={comments} onAddComment={handleAddComment} onDeleteComment={handleDeleteComment} />
-
         {/* Header */}
         <section className="bg-foreground text-white px-6 py-10">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/40 mb-2">Gezamenlijke uitslag</p>

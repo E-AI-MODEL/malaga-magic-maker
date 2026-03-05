@@ -12,6 +12,7 @@ import Intake from "./pages/Intake";
 import Accommodations from "./pages/Accommodations";
 import AccommodationDetail from "./pages/AccommodationDetail";
 import Admin from "./pages/Admin";
+import Taken from "./pages/Taken";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -36,6 +37,7 @@ function AppRoutes() {
       <Route path="/intake" element={<ProtectedRoute><Intake /></ProtectedRoute>} />
       <Route path="/accommodations" element={<ProtectedRoute><Accommodations /></ProtectedRoute>} />
       <Route path="/accommodations/:id" element={<ProtectedRoute><AccommodationDetail /></ProtectedRoute>} />
+      <Route path="/taken" element={<ProtectedRoute><Taken /></ProtectedRoute>} />
       <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
       <Route path="*" element={<NotFound />} />
     </Routes>

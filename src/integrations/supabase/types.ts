@@ -394,30 +394,78 @@ export type Database = {
       tasks: {
         Row: {
           assigned_to: string | null
+          backup_to: string | null
           created_at: string
           id: string
+          info_image_urls: string[]
+          info_text: string | null
+          progress: number
           section: string
           sort_order: number
           status: string
           title: string
+          voting_closed: boolean
         }
         Insert: {
           assigned_to?: string | null
+          backup_to?: string | null
           created_at?: string
           id?: string
+          info_image_urls?: string[]
+          info_text?: string | null
+          progress?: number
           section: string
           sort_order?: number
           status?: string
           title: string
+          voting_closed?: boolean
         }
         Update: {
           assigned_to?: string | null
+          backup_to?: string | null
           created_at?: string
           id?: string
+          info_image_urls?: string[]
+          info_text?: string | null
+          progress?: number
           section?: string
           sort_order?: number
           status?: string
           title?: string
+          voting_closed?: boolean
+        }
+        Relationships: []
+      }
+      travel_legs: {
+        Row: {
+          arrival_time: string | null
+          created_at: string
+          departure_time: string | null
+          id: string
+          note: string | null
+          passengers: string[]
+          sort_order: number
+          travel_date: string | null
+        }
+        Insert: {
+          arrival_time?: string | null
+          created_at?: string
+          departure_time?: string | null
+          id?: string
+          note?: string | null
+          passengers?: string[]
+          sort_order?: number
+          travel_date?: string | null
+        }
+        Update: {
+          arrival_time?: string | null
+          created_at?: string
+          departure_time?: string | null
+          id?: string
+          note?: string | null
+          passengers?: string[]
+          sort_order?: number
+          travel_date?: string | null
         }
         Relationships: []
       }

@@ -213,16 +213,18 @@ export default function Taken() {
             </div>
             <Popover>
               <PopoverTrigger asChild>
-                <button className="mt-1 p-1.5 rounded-full bg-white/10 hover:bg-white/20 transition-colors">
-                  <Info className="h-4 w-4 text-white/70" />
+                <button className="flex items-center gap-1.5 rounded-lg bg-primary/20 hover:bg-primary/30 px-3 py-2 transition-colors">
+                  <Info className="h-4 w-4 text-primary-foreground" />
+                  <span className="text-xs font-medium text-primary-foreground whitespace-nowrap">Speciaal voor Edwin wat uitleg</span>
+                  <ChevronDown className="h-3 w-3 text-primary-foreground" />
                 </button>
               </PopoverTrigger>
               <PopoverContent className="w-72 text-sm" side="bottom" align="end">
                 <p className="font-semibold mb-1.5">Hoe werkt het?</p>
                 <ul className="space-y-1.5 text-muted-foreground text-xs">
                   <li>• Elke taak heeft een <strong>eigenaar</strong> en een <strong>backup</strong>.</li>
-                  <li>• Als eigenaar kun je details invullen, foto's uploaden en de voortgang bijhouden.</li>
-                  <li>• Via <strong>"Bekijk context & info"</strong> vind je alle groepswensen, stemmen en handige links om je te helpen.</li>
+                  <li>• Als eigenaar kun je details invullen, foto{"'"}s uploaden en de voortgang bijhouden.</li>
+                  <li>• Via <strong>{'"'}Bekijk context & info{'"'}</strong> vind je alle groepswensen, stemmen en handige links om je te helpen.</li>
                   <li>• Pas wanneer je wijzigingen <strong>opslaat</strong>, worden ze zichtbaar voor de rest van de groep.</li>
                   <li>• Andere deelnemers kunnen reageren en commentaar achterlaten.</li>
                 </ul>

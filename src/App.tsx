@@ -31,8 +31,8 @@ function AppRoutes() {
 
   return (
     <Routes>
-      <Route path="/login" element={user ? <Navigate to="/uitslag" replace /> : <Login />} />
-      <Route path="/" element={<Navigate to={user ? "/uitslag" : "/login"} replace />} />
+      <Route path="/login" element={user ? <Navigate to="/taken" replace /> : <Login />} />
+      <Route path="/" element={<Navigate to={user ? "/taken" : "/login"} replace />} />
       <Route path="/uitslag" element={<ProtectedRoute><Uitslag /></ProtectedRoute>} />
       <Route path="/info" element={<ProtectedRoute><Info /></ProtectedRoute>} />
       <Route path="/intake" element={<ProtectedRoute><Intake /></ProtectedRoute>} />

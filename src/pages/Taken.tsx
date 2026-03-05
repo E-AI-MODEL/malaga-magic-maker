@@ -14,9 +14,10 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { ReactionBar } from "@/components/ReactionBar";
 import { SectionComments } from "@/components/SectionComments";
+import { toast } from "sonner";
 import {
   Plane, ChevronDown, CheckCircle2, Upload, ExternalLink, User, Shield, X,
-  Globe, MapPin, Clock, Calendar
+  Globe, MapPin, Clock, Calendar, Pencil, Save
 } from "lucide-react";
 
 interface Profile { id: string; username: string; display_name: string; }
@@ -55,6 +56,7 @@ export default function Taken() {
   const [reactions, setReactions] = useState<Reaction[]>([]);
   const [comments, setComments] = useState<Comment[]>([]);
   const [openTask, setOpenTask] = useState<string | null>(null);
+  const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
   const [editingLeg, setEditingLeg] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
@@ -96,6 +98,34 @@ export default function Taken() {
     return () => { supabase.removeChannel(channel); };
   }, []);
 
+  // Notification check on mount
+  useEffect(() => {
+    if (!user) return;
+    const checkNotifications = async () => {
+      const { data } = await supabase
+        .from("notifications")
+        .select("id")
+        .eq("user_id", user.id)
+        .eq("read", false) as any;
+      if (data && data.length > 0) {
+        toast.info(`Je hebt ${data.length} nieuwe reactie${data.length !== 1 ? "s" : ""} op je taken`, {
+          action: {
+            label: "Gelezen",
+            onClick: async () => {
+              await supabase
+                .from("notifications")
+                .update({ read: true } as any)
+                .eq("user_id", user.id)
+                .eq("read", false);
+            },
+          },
+          duration: 8000,
+        });
+      }
+    };
+    checkNotifications();
+  }, [user]);
+
   const handleToggleReaction = useCallback(async (section: string, emoji: string) => {
     if (!user) return;
     const existing = reactions.find(r => r.user_id === user.id && r.section === section && r.emoji === emoji);
@@ -130,6 +160,7 @@ export default function Taken() {
       info_details: details as any,
       info_text: infoText || null,
     }).eq("id", taskId);
+    setEditingTaskId(null);
   };
 
   const handleImageUpload = async (taskId: string, file: File) => {
@@ -233,6 +264,7 @@ export default function Taken() {
             {tasks.map(task => {
               const isOpen = openTask === task.id;
               const editable = canEditTask(task);
+              const isEditing = editingTaskId === task.id;
               const link = TASK_LINKS[task.section];
               const details: InfoDetails = (task.info_details as any) || {};
 
@@ -264,52 +296,44 @@ export default function Taken() {
 
                     <CollapsibleContent>
                       <div className="px-4 pb-4 space-y-4 border-t border-border/40 pt-4">
-                        {/* Progress slider */}
-                        {editable && (
-                          <div>
-                            <label className="text-xs font-semibold text-muted-foreground mb-2 block">Voortgang</label>
-                            <Slider
-                              value={[task.progress]}
-                              max={100}
-                              step={5}
-                              onValueCommit={(v) => handleProgressChange(task.id, v)}
+
+                        {editable && isEditing ? (
+                          <>
+                            {/* Edit mode: progress + structured fields + images + save */}
+                            <div>
+                              <label className="text-xs font-semibold text-muted-foreground mb-2 block">Voortgang</label>
+                              <Slider
+                                value={[task.progress]}
+                                max={100}
+                                step={5}
+                                onValueCommit={(v) => handleProgressChange(task.id, v)}
+                              />
+                            </div>
+
+                            <TaskDetailsEditor
+                              details={details}
+                              infoText={task.info_text || ""}
+                              onSave={(d, t) => handleDetailsSave(task.id, d, t)}
                             />
-                          </div>
-                        )}
 
-                        {/* Structured details */}
-                        {editable ? (
-                          <TaskDetailsEditor
-                            details={details}
-                            infoText={task.info_text || ""}
-                            onSave={(d, t) => handleDetailsSave(task.id, d, t)}
-                          />
-                        ) : (
-                          <TaskDetailsReadonly details={details} infoText={task.info_text} />
-                        )}
-
-                        {/* Images with lightbox */}
-                        {(task.info_image_urls.length > 0 || editable) && (
-                          <div>
-                            {task.info_image_urls.length > 0 && (
-                              <div className="grid grid-cols-2 gap-2 mb-2">
-                                {task.info_image_urls.map((url, i) => (
-                                  <div key={i} className="relative group rounded-lg overflow-hidden border border-border cursor-pointer"
-                                    onClick={() => setLightboxUrl(url)}>
-                                    <img src={url} alt="" className="w-full h-24 object-cover" />
-                                    {editable && (
+                            {/* Images in edit mode */}
+                            <div>
+                              {task.info_image_urls.length > 0 && (
+                                <div className="grid grid-cols-2 gap-2 mb-2">
+                                  {task.info_image_urls.map((url, i) => (
+                                    <div key={i} className="relative group rounded-lg overflow-hidden border border-border cursor-pointer"
+                                      onClick={() => setLightboxUrl(url)}>
+                                      <img src={url} alt="" className="w-full h-24 object-cover" />
                                       <button
                                         onClick={(e) => { e.stopPropagation(); handleRemoveImage(task.id, url); }}
                                         className="absolute top-1 right-1 bg-destructive text-destructive-foreground rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
                                       >
                                         <X className="h-3 w-3" />
                                       </button>
-                                    )}
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-                            {editable && (
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
                               <label className="inline-flex items-center gap-1.5 text-xs text-primary cursor-pointer hover:underline">
                                 <Upload className="h-3 w-3" />
                                 {uploading ? "Uploaden..." : "Foto toevoegen"}
@@ -321,8 +345,38 @@ export default function Taken() {
                                   disabled={uploading}
                                 />
                               </label>
+                            </div>
+                          </>
+                        ) : (
+                          <>
+                            {/* Read-only view for everyone */}
+                            <TaskDetailsReadonly details={details} infoText={task.info_text} />
+
+                            {/* Images read-only with lightbox */}
+                            {task.info_image_urls.length > 0 && (
+                              <div className="grid grid-cols-2 gap-2">
+                                {task.info_image_urls.map((url, i) => (
+                                  <div key={i} className="rounded-lg overflow-hidden border border-border cursor-pointer"
+                                    onClick={() => setLightboxUrl(url)}>
+                                    <img src={url} alt="" className="w-full h-24 object-cover" />
+                                  </div>
+                                ))}
+                              </div>
                             )}
-                          </div>
+
+                            {/* Bewerk button for owner/backup/admin */}
+                            {editable && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="h-8 text-xs gap-1.5"
+                                onClick={() => setEditingTaskId(task.id)}
+                              >
+                                <Pencil className="h-3 w-3" />
+                                Bewerken
+                              </Button>
+                            )}
+                          </>
                         )}
 
                         {/* Link */}
@@ -364,6 +418,8 @@ export default function Taken() {
                           profiles={profiles}
                           onAdd={handleAddComment}
                           onDelete={handleDeleteComment}
+                          taskId={task.id}
+                          taskTitle={task.title}
                         />
                       </div>
                     </CollapsibleContent>
@@ -387,7 +443,7 @@ export default function Taken() {
   );
 }
 
-/* ── Structured details editor ── */
+/* ── Structured details editor with Save button ── */
 function TaskDetailsEditor({ details, infoText, onSave }: {
   details: InfoDetails;
   infoText: string;
@@ -411,34 +467,37 @@ function TaskDetailsEditor({ details, infoText, onSave }: {
       <label className="text-xs font-semibold text-muted-foreground block">Details</label>
       <div className="relative">
         <Globe className="absolute left-2.5 top-2 h-3.5 w-3.5 text-muted-foreground" />
-        <Input value={url} onChange={e => setUrl(e.target.value)} onBlur={save} placeholder="Link / URL" className="text-xs h-8 pl-8" />
+        <Input value={url} onChange={e => setUrl(e.target.value)} placeholder="Link / URL" className="text-xs h-8 pl-8" />
       </div>
       <div className="grid grid-cols-2 gap-2">
         <div className="relative">
           <Calendar className="absolute left-2.5 top-2 h-3.5 w-3.5 text-muted-foreground" />
-          <Input type="date" value={date} onChange={e => setDate(e.target.value)} onBlur={save} className="text-xs h-8 pl-8" />
+          <Input type="date" value={date} onChange={e => setDate(e.target.value)} className="text-xs h-8 pl-8" />
         </div>
         <div className="relative">
           <Clock className="absolute left-2.5 top-2 h-3.5 w-3.5 text-muted-foreground" />
-          <Input value={time} onChange={e => setTime(e.target.value)} onBlur={save} placeholder="Tijd" className="text-xs h-8 pl-8" />
+          <Input value={time} onChange={e => setTime(e.target.value)} placeholder="Tijd" className="text-xs h-8 pl-8" />
         </div>
       </div>
       <div className="relative">
         <MapPin className="absolute left-2.5 top-2 h-3.5 w-3.5 text-muted-foreground" />
-        <Input value={location} onChange={e => setLocation(e.target.value)} onBlur={save} placeholder="Locatie" className="text-xs h-8 pl-8" />
+        <Input value={location} onChange={e => setLocation(e.target.value)} placeholder="Locatie" className="text-xs h-8 pl-8" />
       </div>
       <Textarea
         value={notes}
         onChange={e => setNotes(e.target.value)}
-        onBlur={save}
         placeholder="Notities..."
         className="text-xs min-h-[48px]"
       />
+      <Button size="sm" className="h-8 text-xs gap-1.5" onClick={save}>
+        <Save className="h-3 w-3" />
+        Opslaan
+      </Button>
     </div>
   );
 }
 
-/* ── Structured details read-only ── */
+/* ── Structured details read-only (styled card) ── */
 function TaskDetailsReadonly({ details, infoText }: { details: InfoDetails; infoText: string | null }) {
   const hasAny = details.url || details.activity_date || details.activity_time || details.location || infoText;
   if (!hasAny) return null;
@@ -449,33 +508,33 @@ function TaskDetailsReadonly({ details, infoText }: { details: InfoDetails; info
   };
 
   return (
-    <div className="bg-secondary rounded-lg p-3 space-y-1.5">
+    <div className="bg-primary/5 border border-primary/20 rounded-lg p-3 space-y-1.5">
       {details.url && (
         <div className="flex items-center gap-2 text-xs">
-          <Globe className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+          <Globe className="h-3.5 w-3.5 text-primary shrink-0" />
           <a href={details.url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline truncate">{details.url}</a>
         </div>
       )}
       {details.activity_date && (
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <Calendar className="h-3.5 w-3.5 shrink-0" />
+        <div className="flex items-center gap-2 text-xs text-foreground">
+          <Calendar className="h-3.5 w-3.5 text-primary shrink-0" />
           <span>{formatDate(details.activity_date)}</span>
         </div>
       )}
       {details.activity_time && (
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <Clock className="h-3.5 w-3.5 shrink-0" />
+        <div className="flex items-center gap-2 text-xs text-foreground">
+          <Clock className="h-3.5 w-3.5 text-primary shrink-0" />
           <span>{details.activity_time}</span>
         </div>
       )}
       {details.location && (
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <MapPin className="h-3.5 w-3.5 shrink-0" />
+        <div className="flex items-center gap-2 text-xs text-foreground">
+          <MapPin className="h-3.5 w-3.5 text-primary shrink-0" />
           <span>{details.location}</span>
         </div>
       )}
       {infoText && (
-        <p className="text-xs text-muted-foreground pt-1 border-t border-border/40">{infoText}</p>
+        <p className="text-xs text-muted-foreground pt-1.5 border-t border-primary/10">{infoText}</p>
       )}
     </div>
   );

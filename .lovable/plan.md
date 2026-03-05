@@ -1,91 +1,71 @@
-## Plan: Navigatie-refactor, kosten bij taken, en pagina-organisatie
 
-### Analyse huidige situatie
 
-**BottomNav**: 5 items (6 voor admin). Toevoegen van "Kosten" maakt het te druk. Oplossing: **"Meer" tab** die een sheet opent met secundaire pagina's.
+## Plan: Zoom-preventie (alle browsers) + glassmorphism popups
 
-**Admin (794 regels)**: Alles op één lange pagina met losse `Collapsible` secties. Geen structuur, moeilijk scanbaar.
+### Probleem
 
-**Uitslag (575 regels)**: Genummerde `ResultSection`'s maar niet inklapbaar. Lange scroll zonder overzicht.
+Op mobiel (iOS Safari en Chrome/Android) zoomt de browser automatisch in wanneer een input met font-size < 16px focus krijgt. Dit verschuift de viewport en laat horizontaal scrollen toe. De huidige viewport meta tag mist de zoom-restricties en er is geen CSS-level bescherming.
 
-**Taken**: Al goed met Accordion. Mist prijs- en betalingsinformatie.
+### Aanpak
 
----
+#### 1. Viewport meta tag (`index.html`)
 
-### Oplossing
+```html
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+```
 
-#### 1. BottomNav → 4 tabs + "Meer" sheet
+Dit werkt cross-browser: Safari, Chrome, Firefox, Samsung Internet.
 
-Houd 4 primaire tabs: **Dashboard**, **Info**, **Uitslag**, **Meer** (met `Menu` icoon).
+#### 2. CSS-level bescherming (`src/index.css`)
 
-"Meer" opent een `Sheet` (bottom drawer) met links naar:
+```css
+html, body {
+  overflow-x: hidden;
+  overscroll-behavior-x: none;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
 
-- Verblijven
-- Kosten (nieuw)
-- Intake
-- Admin (alleen voor admin)
+/* Voorkom auto-zoom op alle mobiele browsers */
+@media (max-width: 767px) {
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+}
+```
 
-Elke link krijgt een icoon en korte beschrijving. Professionele styling, past bij het editorial design.
+`-webkit-text-size-adjust: 100%` voorkomt dat Chrome op Android tekst automatisch opschaalt. `position: fixed` op de root wrapper is niet nodig; `overflow-x: hidden` op html/body is voldoende.
 
-#### 2. Admin-pagina → Accordion-structuur
+#### 3. Glassmorphism styling op alle popups/dialogs
 
-Wrap alle secties in `Accordion type="multiple"`:
+Alle bestaande `DialogContent` en `SheetContent` componenten krijgen een glassmorphism-stijl. Dit doe ik centraal in de UI-componenten zodat het overal automatisch doorwerkt:
 
-- **Deadline beheer**
-- **Gebruikers & Intake**
-- **Groepsresultaten**
-- **Selectieronde**
-- **Accommodaties**
-- **Override log**
+**`src/components/ui/dialog.tsx`** -- `DialogContent`:
+```
+bg-background/80 backdrop-blur-xl border-white/10 shadow-2xl
+```
 
-Elke sectie wordt een `AccordionItem` met het bestaande icoon in de trigger. Pagina wordt direct scanbaar.
+**`src/components/ui/sheet.tsx`** -- `SheetContent`:
+```
+bg-background/80 backdrop-blur-xl border-white/10 shadow-2xl
+```
 
-#### 3. Uitslag-pagina → Accordion-structuur
+**`src/components/ui/drawer.tsx`** -- `DrawerContent`:
+```
+bg-background/80 backdrop-blur-xl border-white/10
+```
 
-Wrap de genummerde secties (Vervoer, Accommodatie, Prioriteiten, Eten, Activiteiten) in `Accordion type="multiple"`. Topkandidaat blijft altijd zichtbaar bovenaan (buiten accordion). Elke sectie toont een mini-samenvatting in de trigger.
-
-#### 4. Kosten toevoegen aan taken
-
-**Database**: Voeg kolommen toe aan `tasks` tabel:
-
-- `cost` (numeric, nullable) — de prijs/kosten
-- `paid_by` (text, nullable) — wie heeft betaald
-
-**UI in Taken.tsx**: Naast de deelnemers (eigenaar/backup) toon prijs en betaler:
-
-- Read-only: `€120 · Betaald door Robin`
-- In edit-mode: Input voor bedrag + Select voor betaler
-
-#### 5. Nieuwe "Kosten" pagina (`/kosten`)
-
-Overzichtspagina die alle taken met kosten aggregeert:
-
-- Totaal uitgegeven
-- Per persoon: hoeveel betaald vs. eerlijk deel
-- Wie moet wie nog betalen (settlement)
-- Lijst van alle uitgaven per taak
-
-Query't de `tasks` tabel op `cost IS NOT NULL`. Geen extra tabel nodig.
-
-Route toevoegen in `App.tsx`, bereikbaar via het "Meer" menu.
-
-#### 6. Hero-illustraties per pagina
-
-Elke pagina in het "Meer" menu krijgt een compacte hero-header (zoals Taken en Uitslag al hebben) met de bestaande `bg-foreground` stijl + beschrijvend label. De Kosten-pagina krijgt een `Wallet`/`Receipt` icoon header in dezelfde editorial stijl. En bijpassende achtergrond illustratie in stijl kleur en toon  van andere illustraties. 
-
-Daar waar functioneel en mogelijk wordt glassmorfing gebruikt voor extra prof look 
+Dit zorgt ervoor dat alle popups (lightbox, intake popup, "Meer" menu, admin edit, disclaimers) automatisch de glassmorphism-stijl krijgen zonder per-pagina aanpassingen.
 
 ---
 
 ### Bestanden
 
+| Bestand | Wijziging |
+|---|---|
+| `index.html` | viewport: `maximum-scale=1.0, user-scalable=no` |
+| `src/index.css` | overflow-x, text-size-adjust, 16px inputs |
+| `src/components/ui/dialog.tsx` | glassmorphism op DialogContent |
+| `src/components/ui/sheet.tsx` | glassmorphism op SheetContent |
+| `src/components/ui/drawer.tsx` | glassmorphism op DrawerContent |
 
-| Bestand                        | Wijziging                                                            |
-| ------------------------------ | -------------------------------------------------------------------- |
-| `src/components/BottomNav.tsx` | 4 tabs + Sheet met "Meer" menu                                       |
-| `src/pages/Admin.tsx`          | Collapsible → Accordion                                              |
-| `src/pages/Uitslag.tsx`        | ResultSection → AccordionItems                                       |
-| `src/pages/Taken.tsx`          | Kosten + betaler velden in task cards                                |
-| `src/pages/Kosten.tsx`         | **Nieuw** — kostenoverzicht & settlements                            |
-| `src/App.tsx`                  | Route `/kosten` toevoegen                                            |
-| **Database migratie**          | `ALTER TABLE tasks ADD COLUMN cost numeric, ADD COLUMN paid_by text` |

@@ -130,8 +130,8 @@ export default function Kosten() {
   }, [balanceByPerson, participants]);
 
   const handleAddExpense = async () => {
-    if (!user || !newDesc.trim() || !newAmount || !newPaidBy) {
-      toast.error("Vul alle velden in");
+    if (!user || !newDesc.trim() || !newAmount || !newPaidBy || newSplitAmong.length === 0) {
+      toast.error("Vul alle velden in en selecteer minimaal 1 deelnemer");
       return;
     }
     const amount = parseFloat(newAmount);
@@ -139,12 +139,11 @@ export default function Kosten() {
       toast.error("Ongeldig bedrag");
       return;
     }
-    const splitAmong = newSplitAmong.length > 0 ? newSplitAmong : participants.map(p => p.display_name);
     const { error } = await supabase.from("expenses").insert({
       description: newDesc.trim(),
       amount,
       paid_by: newPaidBy,
-      split_among: splitAmong,
+      split_among: newSplitAmong,
       created_by: user.id,
     } as any);
     if (error) {
@@ -321,8 +320,7 @@ export default function Kosten() {
                 <label className="text-xs font-semibold text-muted-foreground mb-1.5 block">Deelt mee in kosten</label>
                 <div className="flex flex-wrap gap-1.5">
                   {participants.map(p => {
-                    const allShare = newSplitAmong.length === 0;
-                    const isSelected = allShare || newSplitAmong.includes(p.display_name);
+                    const isSelected = newSplitAmong.includes(p.display_name);
                     return (
                       <button
                         key={p.id}
@@ -333,9 +331,7 @@ export default function Kosten() {
                             : "bg-secondary text-muted-foreground border-border hover:bg-secondary/80"
                         }`}
                         onClick={() => {
-                          if (allShare) {
-                            setNewSplitAmong(participants.filter(pp => pp.display_name !== p.display_name).map(pp => pp.display_name));
-                          } else if (isSelected) {
+                          if (isSelected) {
                             setNewSplitAmong(prev => prev.filter(n => n !== p.display_name));
                           } else {
                             setNewSplitAmong(prev => [...prev, p.display_name]);
@@ -348,7 +344,7 @@ export default function Kosten() {
                   })}
                 </div>
                 <p className="text-[9px] text-muted-foreground mt-1">
-                  {newSplitAmong.length === 0 ? "Iedereen deelt mee" : `${newSplitAmong.length} personen`}
+                  {newSplitAmong.length === 0 ? "Selecteer deelnemers" : `${newSplitAmong.length} personen`}
                 </p>
               </div>
             </div>

@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Receipt, Users, ArrowRight, Wallet, Plus, Trash2 } from "lucide-react";
+import { Receipt, Users, ArrowRight, Wallet, Plus, Trash2, CheckCircle } from "lucide-react";
 import heroKosten from "@/assets/hero-kosten.jpg";
 import { toast } from "sonner";
 
@@ -226,26 +226,49 @@ export default function Kosten() {
             </div>
           )}
 
-          {/* Settlements */}
-          {settlements.length > 0 && (
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">Verrekeningen</p>
+          {/* Conclusie */}
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">Conclusie — Wie betaalt wie</p>
+            {allCostItems.length === 0 ? (
+              <Card className="border-border/60 bg-secondary/30">
+                <CardContent className="p-4 text-center">
+                  <p className="text-sm text-muted-foreground">Nog geen uitgaven. Voeg uitgaven toe om de verrekeningen te berekenen.</p>
+                </CardContent>
+              </Card>
+            ) : settlements.length === 0 ? (
+              <Card className="border-primary/20 bg-primary/5">
+                <CardContent className="p-4 text-center">
+                  <CheckCircle className="h-5 w-5 text-primary mx-auto mb-1" />
+                  <p className="text-sm font-semibold text-primary">Alles is verrekend!</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">Iedereen heeft evenveel betaald.</p>
+                </CardContent>
+              </Card>
+            ) : (
               <div className="space-y-2">
                 {settlements.map((s, i) => (
-                  <Card key={i} className="border-border/60">
-                    <CardContent className="p-3 flex items-center justify-between">
-                      <div className="flex items-center gap-2 text-sm">
-                        <span className="font-semibold">{s.from}</span>
-                        <ArrowRight className="h-3.5 w-3.5 text-muted-foreground" />
-                        <span className="font-semibold">{s.to}</span>
+                  <Card key={i} className="border-primary/20 bg-primary/5">
+                    <CardContent className="p-4 flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="h-8 w-8 rounded-full bg-destructive/10 flex items-center justify-center text-xs font-bold text-destructive">
+                          {s.from.charAt(0)}
+                        </div>
+                        <div>
+                          <p className="text-sm font-semibold">{s.from}</p>
+                          <p className="text-[10px] text-muted-foreground">betaalt aan {s.to}</p>
+                        </div>
                       </div>
-                      <span className="font-display font-extrabold text-primary">€{s.amount.toFixed(2)}</span>
+                      <div className="text-right">
+                        <p className="font-display font-extrabold text-lg text-primary">€{s.amount.toFixed(2)}</p>
+                      </div>
                     </CardContent>
                   </Card>
                 ))}
+                <p className="text-[10px] text-muted-foreground text-center mt-2">
+                  Gebaseerd op {allCostItems.length} uitgave{allCostItems.length !== 1 ? "n" : ""} · totaal €{totalSpent.toFixed(2)}
+                </p>
               </div>
-            </div>
-          )}
+            )}
+          </div>
 
           {/* Add expense button */}
           {user && (

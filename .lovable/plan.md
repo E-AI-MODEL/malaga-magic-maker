@@ -1,49 +1,91 @@
+## Plan: Navigatie-refactor, kosten bij taken, en pagina-organisatie
+
+### Analyse huidige situatie
+
+**BottomNav**: 5 items (6 voor admin). Toevoegen van "Kosten" maakt het te druk. Oplossing: **"Meer" tab** die een sheet opent met secundaire pagina's.
+
+**Admin (794 regels)**: Alles op één lange pagina met losse `Collapsible` secties. Geen structuur, moeilijk scanbaar.
+
+**Uitslag (575 regels)**: Genummerde `ResultSection`'s maar niet inklapbaar. Lange scroll zonder overzicht.
+
+**Taken**: Al goed met Accordion. Mist prijs- en betalingsinformatie.
+
+---
+
+### Oplossing
+
+#### 1. BottomNav → 4 tabs + "Meer" sheet
+
+Houd 4 primaire tabs: **Dashboard**, **Info**, **Uitslag**, **Meer** (met `Menu` icoon).
+
+"Meer" opent een `Sheet` (bottom drawer) met links naar:
+
+- Verblijven
+- Kosten (nieuw)
+- Intake
+- Admin (alleen voor admin)
+
+Elke link krijgt een icoon en korte beschrijving. Professionele styling, past bij het editorial design.
+
+#### 2. Admin-pagina → Accordion-structuur
+
+Wrap alle secties in `Accordion type="multiple"`:
+
+- **Deadline beheer**
+- **Gebruikers & Intake**
+- **Groepsresultaten**
+- **Selectieronde**
+- **Accommodaties**
+- **Override log**
+
+Elke sectie wordt een `AccordionItem` met het bestaande icoon in de trigger. Pagina wordt direct scanbaar.
+
+#### 3. Uitslag-pagina → Accordion-structuur
+
+Wrap de genummerde secties (Vervoer, Accommodatie, Prioriteiten, Eten, Activiteiten) in `Accordion type="multiple"`. Topkandidaat blijft altijd zichtbaar bovenaan (buiten accordion). Elke sectie toont een mini-samenvatting in de trigger.
+
+#### 4. Kosten toevoegen aan taken
+
+**Database**: Voeg kolommen toe aan `tasks` tabel:
+
+- `cost` (numeric, nullable) — de prijs/kosten
+- `paid_by` (text, nullable) — wie heeft betaald
+
+**UI in Taken.tsx**: Naast de deelnemers (eigenaar/backup) toon prijs en betaler:
+
+- Read-only: `€120 · Betaald door Robin`
+- In edit-mode: Input voor bedrag + Select voor betaler
+
+#### 5. Nieuwe "Kosten" pagina (`/kosten`)
+
+Overzichtspagina die alle taken met kosten aggregeert:
+
+- Totaal uitgegeven
+- Per persoon: hoeveel betaald vs. eerlijk deel
+- Wie moet wie nog betalen (settlement)
+- Lijst van alle uitgaven per taak
+
+Query't de `tasks` tabel op `cost IS NOT NULL`. Geen extra tabel nodig.
+
+Route toevoegen in `App.tsx`, bereikbaar via het "Meer" menu.
+
+#### 6. Hero-illustraties per pagina
+
+Elke pagina in het "Meer" menu krijgt een compacte hero-header (zoals Taken en Uitslag al hebben) met de bestaande `bg-foreground` stijl + beschrijvend label. De Kosten-pagina krijgt een `Wallet`/`Receipt` icoon header in dezelfde editorial stijl. En bijpassende achtergrond illustratie in stijl kleur en toon  van andere illustraties. 
+
+Daar waar functioneel en mogelijk wordt glassmorfing gebruikt voor extra prof look 
+
+---
+
+### Bestanden
 
 
-## Plan
-
-### 1. Verwijder AdminFab
-- **`src/components/AppLayout.tsx`**: Verwijder de `<AdminFab />` component en de import. De admin-knop in de BottomNav is voldoende.
-- **`src/components/AdminFab.tsx`**: Kan verwijderd worden (of laten staan, wordt niet meer gerenderd).
-
-### 2. Analyse: verbetermogelijkheden
-
-Na het doornemen van de hele codebase, dit zijn de meest waardevolle verbeteringen:
-
-**A. Info-pagina heeft nog `-mx-4 -mt-6` scroll-hack**
-De scroll-fix is toegepast op Taken en TaskContext, maar `Info.tsx` (regel 16) en `Accommodations.tsx` (regel 78) en `Uitslag.tsx` (regel 158) gebruiken nog `-mx-4 -mt-6`. Dit veroorzaakt het onrustige scrollen op die pagina's. Deze moeten ook gefixed worden.
-
-**B. Notificaties verbeteren**
-Er is een basale notificatie-check bij het openen van Taken, maar er is geen notificatie-badge op de BottomNav. Gebruikers zien niet dat er nieuwe reacties/comments zijn zonder de pagina te openen.
-
-**C. Taak drag-and-drop volgorde**
-Taken kunnen nu alleen toegevoegd/verwijderd worden, maar de volgorde (`sort_order`) kan niet aangepast worden door de admin.
-
-**D. Dashboard: totaaloverzicht ontbreekt**
-Het dashboard toont alleen taken per sectie, maar mist een samenvatting bovenaan (bijv. totale voortgang, aantal open taken, aankomende deadlines).
-
-**E. Accommodations pagina heeft nog de disclaimer-modal**
-Elke keer dat je de pagina opent verschijnt een "Ter indicatie" modal. Dit zou beter een eenmalige dismiss zijn (opslaan in localStorage).
-
-**F. Uitslag pagina: nog steeds `-mx-4 -mt-6`**
-Zelfde scroll-probleem als Info.
-
-### Voorstel prioriteit
-
-| # | Verbetering | Impact |
-|---|---|---|
-| 1 | AdminFab verwijderen | Klein, direct |
-| 2 | Scroll-fix op Info, Accommodations, Uitslag | UX fix |
-| 3 | Dashboard totaaloverzicht toevoegen | Overzicht |
-| 4 | Notificatie-badge op BottomNav | Engagement |
-| 5 | Disclaimer modal eenmalig tonen | UX polish |
-
-### Bestanden te wijzigen
-- `src/components/AppLayout.tsx` — verwijder AdminFab
-- `src/pages/Info.tsx` — verwijder `-mx-4 -mt-6`
-- `src/pages/Accommodations.tsx` — verwijder `-mx-4 -mt-6`
-- `src/pages/Uitslag.tsx` — verwijder `-mx-4 -mt-6`
-- `src/pages/Intake.tsx` — verwijder `-mx-4 -mt-6`
-- Optioneel: `src/components/BottomNav.tsx` — notificatie-badge
-- Optioneel: `src/pages/Taken.tsx` — dashboard samenvatting
-
+| Bestand                        | Wijziging                                                            |
+| ------------------------------ | -------------------------------------------------------------------- |
+| `src/components/BottomNav.tsx` | 4 tabs + Sheet met "Meer" menu                                       |
+| `src/pages/Admin.tsx`          | Collapsible → Accordion                                              |
+| `src/pages/Uitslag.tsx`        | ResultSection → AccordionItems                                       |
+| `src/pages/Taken.tsx`          | Kosten + betaler velden in task cards                                |
+| `src/pages/Kosten.tsx`         | **Nieuw** — kostenoverzicht & settlements                            |
+| `src/App.tsx`                  | Route `/kosten` toevoegen                                            |
+| **Database migratie**          | `ALTER TABLE tasks ADD COLUMN cost numeric, ADD COLUMN paid_by text` |

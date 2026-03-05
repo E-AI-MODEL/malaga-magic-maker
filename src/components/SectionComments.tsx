@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useAuth } from "@/lib/auth";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { MessageSquare, Send, Trash2, ChevronDown } from "lucide-react";
@@ -25,12 +26,28 @@ interface SectionCommentsProps {
   profiles: Profile[];
   onAdd: (section: string, message: string) => void;
   onDelete: (commentId: string) => void;
+  taskId?: string;
+  taskTitle?: string;
 }
 
-export function SectionComments({ section, comments, profiles, onAdd, onDelete }: SectionCommentsProps) {
+function renderMessageWithMentions(message: string) {
+  const parts = message.split(/(@\w+)/g);
+  return parts.map((part, i) =>
+    part.startsWith("@") ? (
+      <span key={i} className="font-bold text-primary">{part}</span>
+    ) : (
+      <span key={i}>{part}</span>
+    )
+  );
+}
+
+export function SectionComments({ section, comments, profiles, onAdd, onDelete, taskId, taskTitle }: SectionCommentsProps) {
   const { user } = useAuth();
   const [message, setMessage] = useState("");
   const [open, setOpen] = useState(false);
+  const [showMentions, setShowMentions] = useState(false);
+  const [mentionFilter, setMentionFilter] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const sectionComments = comments
     .filter(c => c.section === section)
@@ -38,9 +55,56 @@ export function SectionComments({ section, comments, profiles, onAdd, onDelete }
 
   const getProfileName = (userId: string) => profiles.find(p => p.id === userId)?.display_name || "?";
 
-  const handleSubmit = () => {
-    if (!message.trim()) return;
+  const filteredProfiles = profiles.filter(p =>
+    p.display_name.toLowerCase().includes(mentionFilter.toLowerCase())
+  );
+
+  const handleInputChange = (val: string) => {
+    setMessage(val);
+    const lastAt = val.lastIndexOf("@");
+    if (lastAt !== -1) {
+      const afterAt = val.slice(lastAt + 1);
+      if (!afterAt.includes(" ") && afterAt.length < 20) {
+        setShowMentions(true);
+        setMentionFilter(afterAt);
+        return;
+      }
+    }
+    setShowMentions(false);
+  };
+
+  const insertMention = (name: string) => {
+    const lastAt = message.lastIndexOf("@");
+    const newMsg = message.slice(0, lastAt) + `@${name} `;
+    setMessage(newMsg);
+    setShowMentions(false);
+    inputRef.current?.focus();
+  };
+
+  const handleSubmit = async () => {
+    if (!message.trim() || !user) return;
     onAdd(section, message.trim());
+
+    // Find @mentioned users and create notifications
+    const mentions = message.match(/@(\w+)/g);
+    if (mentions && taskId) {
+      for (const mention of mentions) {
+        const name = mention.slice(1);
+        const mentionedProfile = profiles.find(p =>
+          p.display_name.toLowerCase() === name.toLowerCase()
+        );
+        if (mentionedProfile && mentionedProfile.id !== user.id) {
+          const senderName = profiles.find(p => p.id === user.id)?.display_name || "Iemand";
+          await supabase.from("notifications").insert({
+            user_id: mentionedProfile.id,
+            from_user_id: user.id,
+            task_id: taskId,
+            message: `${senderName} heeft je genoemd in "${taskTitle || "een taak"}"`,
+          } as any);
+        }
+      }
+    }
+
     setMessage("");
   };
 
@@ -70,23 +134,39 @@ export function SectionComments({ section, comments, profiles, onAdd, onDelete }
                 )}
               </div>
             </div>
-            <p className="text-muted-foreground">{c.message}</p>
+            <p className="text-muted-foreground">{renderMessageWithMentions(c.message)}</p>
           </div>
         ))}
 
         {user && (
-          <div className="flex gap-2">
-            <input
-              type="text"
-              value={message}
-              onChange={e => setMessage(e.target.value)}
-              onKeyDown={e => e.key === "Enter" && handleSubmit()}
-              placeholder="Schrijf een reactie..."
-              className="flex-1 bg-secondary rounded-lg px-3 py-2 text-xs border-0 outline-none placeholder:text-muted-foreground/60"
-            />
-            <Button size="sm" className="h-8 px-2.5" onClick={handleSubmit} disabled={!message.trim()}>
-              <Send className="h-3 w-3" />
-            </Button>
+          <div className="relative">
+            <div className="flex gap-2">
+              <input
+                ref={inputRef}
+                type="text"
+                value={message}
+                onChange={e => handleInputChange(e.target.value)}
+                onKeyDown={e => e.key === "Enter" && handleSubmit()}
+                placeholder="Schrijf een reactie... (@naam om te taggen)"
+                className="flex-1 bg-secondary rounded-lg px-3 py-2 text-xs border-0 outline-none placeholder:text-muted-foreground/60"
+              />
+              <Button size="sm" className="h-8 px-2.5" onClick={handleSubmit} disabled={!message.trim()}>
+                <Send className="h-3 w-3" />
+              </Button>
+            </div>
+            {showMentions && filteredProfiles.length > 0 && (
+              <div className="absolute bottom-full left-0 mb-1 bg-popover border border-border rounded-lg shadow-lg z-50 w-48 max-h-32 overflow-y-auto">
+                {filteredProfiles.map(p => (
+                  <button
+                    key={p.id}
+                    className="block w-full text-left px-3 py-1.5 text-xs hover:bg-accent transition-colors"
+                    onClick={() => insertMention(p.display_name)}
+                  >
+                    {p.display_name}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         )}
       </CollapsibleContent>

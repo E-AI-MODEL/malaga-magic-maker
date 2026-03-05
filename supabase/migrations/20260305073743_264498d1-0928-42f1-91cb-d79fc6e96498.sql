@@ -1,0 +1,1 @@
+UPDATE tasks SET title = 'Golfbaan boeken', section = 'golf' WHERE id = 'de06a0de-83ef-492c-9822-ef08109fe5b0';

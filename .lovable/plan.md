@@ -1,84 +1,45 @@
-
-
-## Plan: Takenpagina + Uitslag opschonen
-
-### Samenvatting
-De taken worden verplaatst naar een eigen pagina `/taken` met uitgebreide functionaliteit: backup-toewijzing, voortgangsbarometer, foto-uploads en vluchtgegevens. De Uitslagpagina wordt opgeschoond (TaskBoard verwijderd). Stemmen op taken wordt afgesloten nu taken zijn toegewezen.
-
----
+## Plan: Gestructureerde taakinvoer, foto-lightbox en uitklapbare vluchtgegevens
 
 ### 1. Database migratie
 
-**Wijzigingen aan `tasks` tabel:**
-- `backup_to` text nullable — tweede persoon als backup
-- `voting_closed` boolean default true — stemmen sluiten
-- `progress` integer default 0 — barometer 0-100
-- `info_text` text nullable — status-update tekst van eigenaar/backup
-- `info_image_urls` text[] default '{}' — geüploade foto's
+Voeg een `info_details` jsonb-kolom toe aan `tasks` (naast bestaand `info_text`):
 
-**Nieuwe tabel `travel_legs`** (vluchtgegevens):
-- `id` uuid PK
-- `passengers` text[] — namen
-- `departure_time` text — "7:50"
-- `arrival_time` text — "10:45"
-- `travel_date` date
-- `note` text nullable — "vertrek en bestemming onbekend"
-- `sort_order` int
-- `created_at` timestamptz
+- Slaat gestructureerde velden op: `url`, `activity_date`, `activity_time`, `location`
+- Flexibel per taaktype (golfbaan URL vs. accommodatie-link vs. vluchtnummer)
+- `info_text` blijft bestaan als vrij notitieveld
 
-RLS: iedereen kan lezen, admin kan CRUD.
+### 2. Gestructureerde invoervelden (eigenaar/backup)
 
-Seed travel_legs met de 3 vluchtgroepen.
+Vervang het enkele "Status update" textarea door meerdere compacte velden:
 
-**Storage bucket** `task-attachments` voor foto-uploads.
+- **Link/URL** (input met globe-icoon) — bijv. link naar golfbaan, Airbnb
+- **Datum** (date input) — dag van de activiteit
+- **Tijd** (text input) — tijdstip
+- **Locatie** (text input) — naam locatie
+- **Notities** (textarea, kleiner) — vrije tekst
 
-Realtime op `travel_legs`.
+Niet-bewerkbare gebruikers zien dit als een overzichtelijk kaartje met labels en waarden (geen lege velden tonen).
 
----
+### 3. Foto lightbox
 
-### 2. Nieuwe pagina `/taken` (src/pages/Taken.tsx)
+- Klik op miniatuurfoto opent een fullscreen overlay (Dialog) met de grote versie
+- Sluiten met X-knop of klik buiten het beeld
+- Miniaturen blijven in het 2-koloms grid
 
-Layout in blokken, consistent met de rest van de site:
+### 4. Vluchtgegevens uitklapbaar
 
-**Blok 1 — Vluchtgegevens**
-- Compact overzicht van de 3 reisgroepen (accordion of cards)
-- Admin kan gegevens inline bewerken (tijden, passagiers, notities)
+- Wrap de vluchtgegevens-sectie in een Collapsible component
+- Header toont "Vluchtgegevens" met chevron, standaard ingeklapt
+- Zelfde stijl als de taakkaarten
 
-**Blok 2 — Takenkaarten** (4 taken)
-Per taak een uitklapbare card:
-- **Header**: titel + eigenaar badge + backup badge
-- **Ingeklapt**: compacte voortgangsbalk (0-100%)
-- **Uitgeklapt**:
-  - Slider/barometer (0-100) — alleen eigenaar, backup & admin kunnen schuiven
-  - Tekstveld voor status-update + foto-upload — alleen eigenaar, backup & admin
-  - Minimalistische hyperlink naar gerelateerde info (bijv. "/accommodations" voor "Accommodatie boeken", Airbnb-link, etc.)
-  - Reacties (ReactionBar) + Commentaren (SectionComments) — alle gebruikers
-  - Admin: dropdown om eigenaar/backup te wijzigen
+### 5. Bestanden die wijzigen
 
-**Stijl**: editorial blokken, accordions, zelfde typografie en kleuren als de rest.
+- **Database**: migratie voor `info_details jsonb default '{}'` op `tasks`
+- `**src/pages/Taken.tsx**`: 
+  - Gestructureerde invoervelden i.p.v. enkele textarea
+  - Overzichtelijke read-only weergave van details
+  - Foto-klik lightbox (Dialog)
+  - Vluchtgegevens in Collapsible
+- Geen nieuwe componenten nodig, alles past in Taken.tsx
 
----
-
-### 3. Uitslag opschonen (src/pages/Uitslag.tsx)
-
-- Verwijder `<TaskBoard>` component-import en rendering (regel 9, 161)
-- Verwijder comments/onAddComment/onDeleteComment props die alleen voor TaskBoard waren (die worden nog gebruikt door secties zelf, dus die blijven)
-- Eventueel een subtiele link toevoegen naar `/taken`: "Bekijk de takenverdeling →"
-
----
-
-### 4. Routing & navigatie
-
-- Nieuwe route `/taken` in App.tsx (ProtectedRoute)
-- Toevoegen aan BottomNav met ClipboardList icon + "Taken" label
-
----
-
-### 5. Technische details
-
-- Eigenaar/backup check: vergelijk `task.assigned_to` en `task.backup_to` met `profile.display_name` van huidige user
-- Foto-upload: Supabase Storage bucket `task-attachments`, public URLs opslaan in `info_image_urls`
-- Progress slider: Radix Slider component (al geïnstalleerd)
-- Hyperlinks per taak: hardcoded mapping van task section → relevante URL
-- Admin kan alle velden bewerken via inline Select/Input componenten
-
+Verplaats de sectie taken in de footer op de plek waar nu uitslag staat en uitslag op de plek waar nu taken staat. 

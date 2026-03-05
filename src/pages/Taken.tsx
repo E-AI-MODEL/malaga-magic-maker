@@ -19,7 +19,8 @@ import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import {
   Plane, ChevronDown, CheckCircle2, Upload, User, Shield, X,
-  Globe, MapPin, Clock, Calendar, Pencil, Save, ChevronRight, Info
+  Globe, MapPin, Clock, Calendar, Pencil, Save, ChevronRight, Info,
+  Plus, Trash2
 } from "lucide-react";
 
 interface Profile { id: string; username: string; display_name: string; }
@@ -64,6 +65,8 @@ export default function Taken() {
   const [uploading, setUploading] = useState(false);
   const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
   const [flightsOpen, setFlightsOpen] = useState(false);
+  const [newTaskTitle, setNewTaskTitle] = useState("");
+  const [addingToSection, setAddingToSection] = useState<string | null>(null);
 
   useEffect(() => {
     const load = async () => {
@@ -193,6 +196,33 @@ export default function Taken() {
   const handleLegUpdate = async (legId: string, updates: Partial<TravelLeg>) => {
     await supabase.from("travel_legs").update(updates).eq("id", legId);
     setEditingLeg(null);
+  };
+
+  const handleAddTask = async (section: string) => {
+    if (!newTaskTitle.trim()) return;
+    const maxSort = tasks.filter(t => t.section === section).reduce((m, t) => Math.max(m, t.sort_order), 0);
+    const { error } = await supabase.from("tasks").insert({
+      title: newTaskTitle.trim(),
+      section,
+      sort_order: maxSort + 1,
+    });
+    if (error) {
+      toast.error("Kon taak niet toevoegen");
+    } else {
+      toast.success("Taak toegevoegd");
+      setNewTaskTitle("");
+      setAddingToSection(null);
+    }
+  };
+
+  const handleDeleteTask = async (taskId: string, title: string) => {
+    if (!confirm(`Weet je zeker dat je "${title}" wilt verwijderen?`)) return;
+    const { error } = await supabase.from("tasks").delete().eq("id", taskId);
+    if (error) {
+      toast.error("Kon taak niet verwijderen");
+    } else {
+      toast.success("Taak verwijderd");
+    }
   };
 
   const formatDate = (d: string | null) => {
@@ -449,25 +479,36 @@ export default function Taken() {
                                   )}
 
                                   {isAdmin && (
-                                    <div className="grid grid-cols-2 gap-2 pt-2 border-t border-border/40">
-                                      <div>
-                                        <label className="text-[10px] font-semibold text-muted-foreground mb-1 block">Eigenaar</label>
-                                        <Select value={task.assigned_to || ""} onValueChange={(v) => handleAssign(task.id, "assigned_to", v)}>
-                                          <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Kies..." /></SelectTrigger>
-                                          <SelectContent>
-                                            {profiles.map(p => <SelectItem key={p.id} value={p.display_name}>{p.display_name}</SelectItem>)}
-                                          </SelectContent>
-                                        </Select>
+                                    <div className="space-y-3 pt-2 border-t border-border/40">
+                                      <div className="grid grid-cols-2 gap-2">
+                                        <div>
+                                          <label className="text-[10px] font-semibold text-muted-foreground mb-1 block">Eigenaar</label>
+                                          <Select value={task.assigned_to || ""} onValueChange={(v) => handleAssign(task.id, "assigned_to", v)}>
+                                            <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Kies..." /></SelectTrigger>
+                                            <SelectContent>
+                                              {profiles.map(p => <SelectItem key={p.id} value={p.display_name}>{p.display_name}</SelectItem>)}
+                                            </SelectContent>
+                                          </Select>
+                                        </div>
+                                        <div>
+                                          <label className="text-[10px] font-semibold text-muted-foreground mb-1 block">Backup</label>
+                                          <Select value={task.backup_to || ""} onValueChange={(v) => handleAssign(task.id, "backup_to", v)}>
+                                            <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Kies..." /></SelectTrigger>
+                                            <SelectContent>
+                                              {profiles.map(p => <SelectItem key={p.id} value={p.display_name}>{p.display_name}</SelectItem>)}
+                                            </SelectContent>
+                                          </Select>
+                                        </div>
                                       </div>
-                                      <div>
-                                        <label className="text-[10px] font-semibold text-muted-foreground mb-1 block">Backup</label>
-                                        <Select value={task.backup_to || ""} onValueChange={(v) => handleAssign(task.id, "backup_to", v)}>
-                                          <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Kies..." /></SelectTrigger>
-                                          <SelectContent>
-                                            {profiles.map(p => <SelectItem key={p.id} value={p.display_name}>{p.display_name}</SelectItem>)}
-                                          </SelectContent>
-                                        </Select>
-                                      </div>
+                                      <Button
+                                        variant="destructive"
+                                        size="sm"
+                                        className="h-7 text-xs gap-1.5"
+                                        onClick={() => handleDeleteTask(task.id, task.title)}
+                                      >
+                                        <Trash2 className="h-3 w-3" />
+                                        Taak verwijderen
+                                      </Button>
                                     </div>
                                   )}
 
@@ -489,6 +530,40 @@ export default function Taken() {
                           </Collapsible>
                         );
                       })}
+
+                      {/* Admin: taak toevoegen */}
+                      {isAdmin && (
+                        <div className="pt-2">
+                          {addingToSection === section ? (
+                            <div className="flex gap-2">
+                              <Input
+                                value={newTaskTitle}
+                                onChange={e => setNewTaskTitle(e.target.value)}
+                                placeholder="Taaknaam..."
+                                className="text-xs h-8 flex-1"
+                                onKeyDown={e => e.key === "Enter" && handleAddTask(section)}
+                                autoFocus
+                              />
+                              <Button size="sm" className="h-8 text-xs" onClick={() => handleAddTask(section)}>
+                                <Plus className="h-3 w-3 mr-1" />Toevoegen
+                              </Button>
+                              <Button size="sm" variant="ghost" className="h-8 text-xs" onClick={() => { setAddingToSection(null); setNewTaskTitle(""); }}>
+                                Annuleer
+                              </Button>
+                            </div>
+                          ) : (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="h-8 text-xs gap-1.5 w-full border-dashed"
+                              onClick={() => setAddingToSection(section)}
+                            >
+                              <Plus className="h-3 w-3" />
+                              Taak toevoegen
+                            </Button>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </AccordionContent>
                 </AccordionItem>

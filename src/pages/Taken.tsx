@@ -11,13 +11,14 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ReactionBar } from "@/components/ReactionBar";
 import { SectionComments } from "@/components/SectionComments";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import {
   Plane, ChevronDown, CheckCircle2, Upload, User, Shield, X,
-  Globe, MapPin, Clock, Calendar, Pencil, Save, ChevronRight
+  Globe, MapPin, Clock, Calendar, Pencil, Save, ChevronRight, Info
 } from "lucide-react";
 
 interface Profile { id: string; username: string; display_name: string; }
@@ -204,9 +205,30 @@ export default function Taken() {
       <div className="-mx-4 -mt-6">
         {/* Header */}
         <section className="bg-foreground text-white px-6 py-8">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/40 mb-2">Organisatie</p>
-          <h1 className="font-display text-2xl font-extrabold">Takenverdeling</h1>
-          <p className="text-white/60 text-sm mt-1">Voortgang, vluchtgegevens en taakverdeling</p>
+          <div className="flex items-start justify-between">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/40 mb-2">Organisatie</p>
+              <h1 className="font-display text-2xl font-extrabold">Takenverdeling</h1>
+              <p className="text-white/60 text-sm mt-1">Voortgang, vluchtgegevens en taakverdeling</p>
+            </div>
+            <Popover>
+              <PopoverTrigger asChild>
+                <button className="mt-1 p-1.5 rounded-full bg-white/10 hover:bg-white/20 transition-colors">
+                  <Info className="h-4 w-4 text-white/70" />
+                </button>
+              </PopoverTrigger>
+              <PopoverContent className="w-72 text-sm" side="bottom" align="end">
+                <p className="font-semibold mb-1.5">Hoe werkt het?</p>
+                <ul className="space-y-1.5 text-muted-foreground text-xs">
+                  <li>• Elke taak heeft een <strong>eigenaar</strong> en een <strong>backup</strong>.</li>
+                  <li>• Als eigenaar kun je details invullen, foto's uploaden en de voortgang bijhouden.</li>
+                  <li>• Via <strong>"Bekijk context & info"</strong> vind je alle groepswensen, stemmen en handige links om je te helpen.</li>
+                  <li>• Pas wanneer je wijzigingen <strong>opslaat</strong>, worden ze zichtbaar voor de rest van de groep.</li>
+                  <li>• Andere deelnemers kunnen reageren en commentaar achterlaten.</li>
+                </ul>
+              </PopoverContent>
+            </Popover>
+          </div>
         </section>
 
         {/* ═══ VLUCHTGEGEVENS (uitklapbaar) ═══ */}

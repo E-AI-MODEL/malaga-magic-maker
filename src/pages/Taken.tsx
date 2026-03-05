@@ -223,6 +223,7 @@ export default function Taken() {
                 <p className="font-semibold mb-1.5">Hoe werkt het?</p>
                 <ul className="space-y-1.5 text-muted-foreground text-xs">
                   <li>• Elke taak heeft een <strong>eigenaar</strong> en een <strong>backup</strong>.</li>
+                  <li>• Alleen de <strong>eigenaar</strong> en <strong>backup</strong> kunnen de contextpagina openen en taakdetails bewerken via de bewerkknop.</li>
                   <li>• Als eigenaar kun je details invullen, foto{"'"}s uploaden en de voortgang bijhouden.</li>
                   <li>• Via <strong>{'"'}Bekijk context & info{'"'}</strong> vind je alle groepswensen, stemmen en handige links om je te helpen.</li>
                   <li>• Pas wanneer je wijzigingen <strong>opslaat</strong>, worden ze zichtbaar voor de rest van de groep.</li>

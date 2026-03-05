@@ -6,7 +6,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Slider } from "@/components/ui/slider";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -42,10 +41,10 @@ interface Reaction { id: string; user_id: string; section: string; emoji: string
 interface Comment { id: string; user_id: string; section: string; message: string; created_at: string; }
 
 const TASK_LINKS: Record<string, { label: string; href: string }> = {
-  car: { label: "Vervoersoverzicht", href: "/info" },
-  accommodation: { label: "Accommodaties bekijken", href: "/accommodations" },
-  flights: { label: "Vluchtinfo", href: "/info" },
-  lounge: { label: "Strandinfo", href: "/info" },
+  transport: { label: "Vervoersoverzicht", href: "/info" },
+  accommodatie: { label: "Accommodaties bekijken", href: "/accommodations" },
+  golf: { label: "Golfinfo", href: "/info" },
+  strand: { label: "Strandinfo", href: "/info" },
 };
 
 export default function Taken() {
@@ -211,12 +210,12 @@ export default function Taken() {
         {/* ═══ VLUCHTGEGEVENS (uitklapbaar) ═══ */}
         <Collapsible open={flightsOpen} onOpenChange={setFlightsOpen}>
           <section className="border-b border-border px-6 py-4">
-            <CollapsibleTrigger className="flex items-center justify-between w-full">
+      <CollapsibleTrigger className="flex items-center justify-between w-full bg-secondary/50 rounded-lg px-3 py-2.5 hover:bg-secondary/80 transition-colors">
               <div className="flex items-center gap-2">
                 <Plane className="h-4 w-4 text-primary" />
-                <p className="text-xs font-semibold uppercase tracking-[0.15em] text-primary">Vluchtgegevens</p>
+                <p className="text-sm font-semibold text-foreground">Vluchtgegevens</p>
               </div>
-              <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${flightsOpen ? "rotate-180" : ""}`} />
+              <ChevronDown className={`h-5 w-5 text-primary transition-transform ${flightsOpen ? "rotate-180" : ""}`} />
             </CollapsibleTrigger>
 
             <CollapsibleContent>
@@ -272,12 +271,19 @@ export default function Taken() {
                 <Collapsible key={task.id} open={isOpen} onOpenChange={(o) => setOpenTask(o ? task.id : null)}>
                   <Card className="border-border/60 overflow-hidden">
                     <CollapsibleTrigger asChild>
-                      <CardContent className="p-4 cursor-pointer">
-                        <div className="flex items-start justify-between gap-2 mb-2">
+                      <CardContent className="p-4 cursor-pointer hover:bg-accent/5 transition-colors">
+                        <div className="flex items-center justify-between gap-2 mb-3">
                           <p className="font-display font-bold text-sm flex-1">{task.title}</p>
-                          <ChevronDown className={`h-4 w-4 text-muted-foreground shrink-0 transition-transform ${isOpen ? "rotate-180" : ""}`} />
+                          <div className="flex items-center gap-2">
+                            <Badge variant="outline" className="text-[10px] font-mono tabular-nums border-primary/30 text-primary">
+                              {task.progress}%
+                            </Badge>
+                            <div className="bg-primary/10 rounded-full p-1.5">
+                              <ChevronDown className={`h-4 w-4 text-primary transition-transform ${isOpen ? "rotate-180" : ""}`} />
+                            </div>
+                          </div>
                         </div>
-                        <div className="flex flex-wrap gap-1.5 mb-2">
+                        <div className="flex flex-wrap gap-1.5 mb-3">
                           {task.assigned_to && (
                             <Badge className="bg-primary/10 text-primary border-primary/20 text-[10px]">
                               <User className="h-3 w-3 mr-1" />{task.assigned_to}
@@ -289,8 +295,7 @@ export default function Taken() {
                             </Badge>
                           )}
                         </div>
-                        <Progress value={task.progress} className="h-1.5" />
-                        <p className="text-[10px] text-muted-foreground mt-1">{task.progress}% gereed</p>
+                        <Progress value={task.progress} className="h-2 rounded-full" />
                       </CardContent>
                     </CollapsibleTrigger>
 
@@ -299,15 +304,24 @@ export default function Taken() {
 
                         {editable && isEditing ? (
                           <>
-                            {/* Edit mode: progress + structured fields + images + save */}
-                            <div>
+                            {/* Edit mode: progress steps + structured fields + images + save */}
+                            <div className="bg-secondary/50 rounded-lg p-3">
                               <label className="text-xs font-semibold text-muted-foreground mb-2 block">Voortgang</label>
-                              <Slider
-                                value={[task.progress]}
-                                max={100}
-                                step={5}
-                                onValueCommit={(v) => handleProgressChange(task.id, v)}
-                              />
+                              <div className="flex gap-1.5">
+                                {[0, 25, 50, 75, 100].map(step => (
+                                  <button
+                                    key={step}
+                                    onClick={() => handleProgressChange(task.id, [step])}
+                                    className={`flex-1 h-8 rounded-md text-xs font-semibold transition-colors ${
+                                      task.progress >= step
+                                        ? "bg-primary text-primary-foreground"
+                                        : "bg-secondary text-muted-foreground hover:bg-secondary/80"
+                                    }`}
+                                  >
+                                    {step}%
+                                  </button>
+                                ))}
+                              </div>
                             </div>
 
                             <TaskDetailsEditor
@@ -381,9 +395,11 @@ export default function Taken() {
 
                         {/* Link */}
                         {link && (
-                          <a href={link.href} className="inline-flex items-center gap-1 text-xs text-primary font-medium hover:underline">
-                            {link.label} <ExternalLink className="h-3 w-3" />
-                          </a>
+                          <div className="pt-2 border-t border-border/40">
+                            <a href={link.href} className="inline-flex items-center gap-1 text-xs text-primary font-medium hover:underline">
+                              {link.label} <ExternalLink className="h-3 w-3" />
+                            </a>
+                          </div>
                         )}
 
                         {/* Admin assign */}
@@ -411,8 +427,9 @@ export default function Taken() {
                         )}
 
                         {/* Reactions & Comments */}
-                        <ReactionBar section={`task-${task.id}`} reactions={reactions} profiles={profiles} onToggle={handleToggleReaction} />
-                        <SectionComments
+                        <div className="pt-3 border-t border-border/40 space-y-2">
+                          <ReactionBar section={`task-${task.id}`} reactions={reactions} profiles={profiles} onToggle={handleToggleReaction} />
+                          <SectionComments
                           section={`task-${task.id}`}
                           comments={comments}
                           profiles={profiles}
@@ -420,7 +437,8 @@ export default function Taken() {
                           onDelete={handleDeleteComment}
                           taskId={task.id}
                           taskTitle={task.title}
-                        />
+                          />
+                        </div>
                       </div>
                     </CollapsibleContent>
                   </Card>
@@ -463,33 +481,50 @@ function TaskDetailsEditor({ details, infoText, onSave }: {
   };
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-3">
       <label className="text-xs font-semibold text-muted-foreground block">Details</label>
-      <div className="relative">
-        <Globe className="absolute left-2.5 top-2 h-3.5 w-3.5 text-muted-foreground" />
-        <Input value={url} onChange={e => setUrl(e.target.value)} placeholder="Link / URL" className="text-xs h-8 pl-8" />
-      </div>
-      <div className="grid grid-cols-2 gap-2">
+      
+      <div className="bg-secondary/50 rounded-lg p-3 space-y-2">
+        <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Link</label>
         <div className="relative">
-          <Calendar className="absolute left-2.5 top-2 h-3.5 w-3.5 text-muted-foreground" />
-          <Input type="date" value={date} onChange={e => setDate(e.target.value)} className="text-xs h-8 pl-8" />
-        </div>
-        <div className="relative">
-          <Clock className="absolute left-2.5 top-2 h-3.5 w-3.5 text-muted-foreground" />
-          <Input value={time} onChange={e => setTime(e.target.value)} placeholder="Tijd" className="text-xs h-8 pl-8" />
+          <Globe className="absolute left-2.5 top-2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
+          <Input value={url} onChange={e => setUrl(e.target.value)} placeholder="Link / URL" className="text-xs h-8 pl-8" />
         </div>
       </div>
-      <div className="relative">
-        <MapPin className="absolute left-2.5 top-2 h-3.5 w-3.5 text-muted-foreground" />
-        <Input value={location} onChange={e => setLocation(e.target.value)} placeholder="Locatie" className="text-xs h-8 pl-8" />
+
+      <div className="bg-secondary/50 rounded-lg p-3 space-y-2">
+        <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Datum & tijd</label>
+        <div className="grid grid-cols-2 gap-2">
+          <div className="relative">
+            <Calendar className="absolute left-2.5 top-2 h-3.5 w-3.5 text-muted-foreground pointer-events-none z-10" />
+            <Input type="date" value={date} onChange={e => setDate(e.target.value)} className="text-xs h-8 pl-8" />
+          </div>
+          <div className="relative">
+            <Clock className="absolute left-2.5 top-2 h-3.5 w-3.5 text-muted-foreground pointer-events-none z-10" />
+            <Input type="time" value={time} onChange={e => setTime(e.target.value)} className="text-xs h-8 pl-8" />
+          </div>
+        </div>
       </div>
-      <Textarea
-        value={notes}
-        onChange={e => setNotes(e.target.value)}
-        placeholder="Notities..."
-        className="text-xs min-h-[48px]"
-      />
-      <Button size="sm" className="h-8 text-xs gap-1.5" onClick={save}>
+
+      <div className="bg-secondary/50 rounded-lg p-3 space-y-2">
+        <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Locatie</label>
+        <div className="relative">
+          <MapPin className="absolute left-2.5 top-2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
+          <Input value={location} onChange={e => setLocation(e.target.value)} placeholder="Locatie" className="text-xs h-8 pl-8" />
+        </div>
+      </div>
+
+      <div className="bg-secondary/50 rounded-lg p-3 space-y-2">
+        <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Notities</label>
+        <Textarea
+          value={notes}
+          onChange={e => setNotes(e.target.value)}
+          placeholder="Notities..."
+          className="text-xs min-h-[48px]"
+        />
+      </div>
+
+      <Button size="sm" className="h-8 text-xs gap-1.5 w-full" onClick={save}>
         <Save className="h-3 w-3" />
         Opslaan
       </Button>

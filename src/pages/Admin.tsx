@@ -246,20 +246,24 @@ export default function Admin() {
                         </CollapsibleTrigger>
                         <CollapsibleContent>
                           <div className="border border-t-0 rounded-b-lg p-4 space-y-5 bg-secondary/30">
-                            {sub && (
-                              <div className="flex gap-2">
-                                {sub.locked && (
-                                  <Button size="sm" variant="outline" onClick={() => handleUnlockSubmission(sub.id)}>
-                                    <Unlock className="h-3.5 w-3.5 mr-1" /> Unlock
-                                  </Button>
-                                )}
-                                <Button size="sm" variant="outline" onClick={() => setEditingUserId(editingUserId === p.id ? null : p.id)}>
-                                  <Pencil className="h-3.5 w-3.5 mr-1" /> Bewerk intake
+                            <div className="flex gap-2">
+                              {sub?.locked && (
+                                <Button size="sm" variant="outline" onClick={() => handleUnlockSubmission(sub.id)}>
+                                  <Unlock className="h-3.5 w-3.5 mr-1" /> Unlock
                                 </Button>
-                              </div>
-                            )}
-                            {editingUserId === p.id && sub && (
-                              <AdminEditSubmission submission={sub} displayName={p.display_name} onSaved={() => { setEditingUserId(null); fetchAll(); }} onCancel={() => setEditingUserId(null)} />
+                              )}
+                              <Button size="sm" variant="outline" onClick={() => setEditingUserId(editingUserId === p.id ? null : p.id)}>
+                                <Pencil className="h-3.5 w-3.5 mr-1" /> {sub ? "Bewerk intake" : "Intake aanmaken"}
+                              </Button>
+                            </div>
+                            {editingUserId === p.id && (
+                              <AdminEditSubmission
+                                submission={sub}
+                                userId={p.id}
+                                displayName={p.display_name}
+                                onSaved={() => { setEditingUserId(null); fetchAll(); }}
+                                onCancel={() => setEditingUserId(null)}
+                              />
                             )}
                             {editingUserId !== p.id && sub ? (
                               <div className="space-y-4">

@@ -13,7 +13,7 @@ export default function Info() {
 
   return (
     <AppLayout>
-      <div className="-mx-4 -mt-6">
+      <div>
 
         {/* ═══════════ HERO ═══════════ */}
         <section className="relative h-[50vh] min-h-[320px] flex items-end">

@@ -2,7 +2,6 @@ import { ReactNode } from "react";
 import { BottomNav } from "./BottomNav";
 import { useAuth } from "@/lib/auth";
 
-import { AdminFab } from "./AdminFab";
 import { Button } from "@/components/ui/button";
 import { LogOut } from "lucide-react";
 
@@ -27,7 +26,6 @@ export function AppLayout({ children }: { children: ReactNode }) {
         <main className="max-w-2xl mx-auto">
           {children}
         </main>
-        <AdminFab />
         <BottomNav />
       </div>
   );

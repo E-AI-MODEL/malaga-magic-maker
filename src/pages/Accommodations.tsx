@@ -22,7 +22,7 @@ export default function Accommodations() {
   const logEvent = useLogEvent();
   const [sortBy, setSortBy] = useState("score");
   const [eligibleOnly, setEligibleOnly] = useState(false);
-  const [showDisclaimer, setShowDisclaimer] = useState(true);
+  const [showDisclaimer, setShowDisclaimer] = useState(() => !localStorage.getItem("disclaimer_dismissed"));
   useEffect(() => {
     Promise.all([
       supabase.from("accommodations").select("*"),
@@ -70,12 +70,12 @@ export default function Accommodations() {
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button className="w-full" onClick={() => setShowDisclaimer(false)}>Begrepen</Button>
+            <Button className="w-full" onClick={() => { setShowDisclaimer(false); localStorage.setItem("disclaimer_dismissed", "1"); }}>Begrepen</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      <div className="-mx-4 -mt-6 space-y-0">
+      <div className="space-y-0">
         {/* Hero header */}
         <div className="relative h-32">
           <img src={heroVilla} alt="" className="absolute inset-0 w-full h-full object-cover" />

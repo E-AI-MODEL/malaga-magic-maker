@@ -318,7 +318,7 @@ export default function Taken() {
             <p className="text-xs font-semibold uppercase tracking-[0.15em] text-primary">Taken</p>
           </div>
 
-          <Accordion type="multiple" defaultValue={[...new Set(tasks.map(t => t.section))]} className="space-y-4">
+          <Accordion type="multiple" defaultValue={[]} className="space-y-4">
             {[...new Set(tasks.map(t => t.section))].map(section => {
               const sectionLabels: Record<string, string> = {
                 transport: "Vervoer",

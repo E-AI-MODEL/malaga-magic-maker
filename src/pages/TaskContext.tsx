@@ -101,7 +101,7 @@ export default function TaskContext() {
 
   return (
     <AppLayout>
-      <div className="-mx-4 -mt-6">
+      <div>
         {/* Header */}
         <section className="bg-foreground text-white px-6 py-6">
           <button onClick={() => navigate("/taken")} className="flex items-center gap-1.5 text-white/50 text-xs mb-3 hover:text-white/80 transition-colors">

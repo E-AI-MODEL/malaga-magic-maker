@@ -1,5 +1,5 @@
 import { NavLink, useNavigate } from "react-router-dom";
-import { BarChart3, Info, LayoutDashboard, Menu, Home, Receipt, FileText, Settings } from "lucide-react";
+import { BarChart3, Info, ClipboardList, MoreHorizontal, Home, Receipt, FileText, Settings } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -45,8 +45,8 @@ export function BottomNav() {
       <nav className="fixed bottom-0 left-0 right-0 z-50 bg-foreground safe-area-pb">
         <div className="flex justify-around max-w-lg mx-auto">
           <NavLink to="/taken" className={({ isActive }) => `${base} ${isActive ? active : inactive} relative`}>
-            <LayoutDashboard className="h-4 w-4" />
-            <span>Dashboard</span>
+            <ClipboardList className="h-4 w-4" />
+            <span>Taken</span>
             {unreadCount > 0 && (
               <span className="absolute top-1.5 right-1 h-4 min-w-4 rounded-full bg-destructive text-destructive-foreground text-[9px] font-bold flex items-center justify-center px-1">
                 {unreadCount > 9 ? "9+" : unreadCount}
@@ -62,7 +62,7 @@ export function BottomNav() {
             <span>Uitslag</span>
           </NavLink>
           <button className={`${base} ${moreOpen ? active : inactive}`} onClick={() => setMoreOpen(true)}>
-            <Menu className="h-4 w-4" />
+            <MoreHorizontal className="h-4 w-4" />
             <span>Meer</span>
           </button>
         </div>

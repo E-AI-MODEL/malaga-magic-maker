@@ -8,8 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext } from "@/components/ui/carousel";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
-import { BedDouble, Car, Clock, Waves, ArrowRight, Info } from "lucide-react";
+import { BedDouble, Car, Clock, Waves, ArrowRight } from "lucide-react";
 import { rankAccommodations, computeGroupRules, type Accommodation, type Submission, type RankedAccommodation } from "@/lib/scoring";
 import heroVilla from "@/assets/hero-villa.jpg";
 import { useLogEvent } from "@/contexts/ActivityLogContext";
@@ -22,7 +21,6 @@ export default function Accommodations() {
   const logEvent = useLogEvent();
   const [sortBy, setSortBy] = useState("score");
   const [eligibleOnly, setEligibleOnly] = useState(false);
-  const [showDisclaimer, setShowDisclaimer] = useState(() => !localStorage.getItem("disclaimer_dismissed"));
   useEffect(() => {
     Promise.all([
       supabase.from("accommodations").select("*"),
@@ -56,25 +54,6 @@ export default function Accommodations() {
 
   return (
     <AppLayout>
-      <Dialog open={showDisclaimer} onOpenChange={setShowDisclaimer}>
-        <DialogContent className="max-w-sm">
-          <DialogHeader>
-            <div className="flex justify-center mb-2">
-              <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-                <Info className="h-5 w-5 text-primary" />
-              </div>
-            </div>
-            <DialogTitle className="text-center">Ter indicatie</DialogTitle>
-            <DialogDescription className="text-center text-sm leading-relaxed">
-              De prijzen en accommodaties op deze pagina zijn indicatief. Op basis van jullie voorkeuren worden uiteindelijk <strong className="text-foreground">2 opties</strong> aan de groep voorgelegd waar we zullen verblijven.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button className="w-full" onClick={() => { setShowDisclaimer(false); localStorage.setItem("disclaimer_dismissed", "1"); }}>Begrepen</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
       <div className="space-y-0">
         {/* Hero header */}
         <div className="relative h-32">

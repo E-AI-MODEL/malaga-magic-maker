@@ -163,7 +163,7 @@ export default function Admin() {
         </section>
 
         <div className="px-6 py-6 pb-24">
-          <Accordion type="multiple" defaultValue={["deadline"]} className="space-y-3">
+          <Accordion type="multiple" defaultValue={[]} className="space-y-3">
             
             {/* 1. Deadline beheer */}
             <AccordionItem value="deadline" className="border rounded-lg border-border/60 overflow-hidden">

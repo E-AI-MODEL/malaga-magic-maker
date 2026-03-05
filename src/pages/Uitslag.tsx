@@ -271,7 +271,7 @@ export default function Uitslag() {
 
         {/* ═══════════ SECTIES IN ACCORDION ═══════════ */}
         <div className="px-6 py-6 pb-24">
-          <Accordion type="multiple" defaultValue={["vervoer", "accommodatie", "prioriteiten", "eten", "activiteiten"]} className="space-y-3">
+          <Accordion type="multiple" defaultValue={[]} className="space-y-3">
             
             {/* VERVOER */}
             <AccordionItem value="vervoer" className="border rounded-lg border-border/60 overflow-hidden">

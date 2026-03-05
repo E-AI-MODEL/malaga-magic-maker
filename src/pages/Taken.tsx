@@ -531,6 +531,46 @@ export default function Taken() {
                                           </Select>
                                         </div>
                                       </div>
+                                      <div>
+                                        <label className="text-[10px] font-semibold text-muted-foreground mb-1.5 block">Deelt mee in kosten</label>
+                                        <div className="flex flex-wrap gap-1.5">
+                                          {profiles.filter(p => p.username !== "admin" && p.username !== "Admin").map(p => {
+                                            const splitAmong: string[] = (task as any).cost_split_among || [];
+                                            const allShare = splitAmong.length === 0;
+                                            const isSelected = allShare || splitAmong.includes(p.display_name);
+                                            return (
+                                              <button
+                                                key={p.id}
+                                                className={`h-7 px-2.5 rounded-md text-xs font-medium border transition-colors ${
+                                                  isSelected
+                                                    ? "bg-primary text-primary-foreground border-primary"
+                                                    : "bg-secondary text-muted-foreground border-border hover:bg-secondary/80"
+                                                }`}
+                                                onClick={() => {
+                                                  let newSplit: string[];
+                                                  if (allShare) {
+                                                    // Switch from "everyone" to explicit: everyone except clicked
+                                                    newSplit = profiles.filter(pp => pp.username !== "admin" && pp.username !== "Admin" && pp.display_name !== p.display_name).map(pp => pp.display_name);
+                                                  } else if (isSelected) {
+                                                    newSplit = splitAmong.filter(n => n !== p.display_name);
+                                                  } else {
+                                                    newSplit = [...splitAmong, p.display_name];
+                                                  }
+                                                  // If all participants selected, reset to null (everyone)
+                                                  const allParticipants = profiles.filter(pp => pp.username !== "admin" && pp.username !== "Admin");
+                                                  if (newSplit.length >= allParticipants.length) newSplit = [];
+                                                  supabase.from("tasks").update({ cost_split_among: newSplit.length > 0 ? newSplit : null } as any).eq("id", task.id);
+                                                }}
+                                              >
+                                                {p.display_name}
+                                              </button>
+                                            );
+                                          })}
+                                        </div>
+                                        <p className="text-[9px] text-muted-foreground mt-1">
+                                          {((task as any).cost_split_among || []).length === 0 ? "Iedereen deelt mee" : `${((task as any).cost_split_among || []).length} personen`}
+                                        </p>
+                                      </div>
                                       <Button
                                         variant="destructive"
                                         size="sm"

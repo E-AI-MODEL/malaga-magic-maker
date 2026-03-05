@@ -209,6 +209,36 @@ export type Database = {
         }
         Relationships: []
       }
+      expenses: {
+        Row: {
+          amount: number
+          created_at: string
+          created_by: string
+          description: string
+          id: string
+          paid_by: string
+          split_among: string[]
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          created_by: string
+          description: string
+          id?: string
+          paid_by: string
+          split_among?: string[]
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          created_by?: string
+          description?: string
+          id?: string
+          paid_by?: string
+          split_among?: string[]
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           created_at: string
@@ -434,6 +464,7 @@ export type Database = {
           assigned_to: string | null
           backup_to: string | null
           cost: number | null
+          cost_split_among: string[] | null
           created_at: string
           id: string
           info_details: Json
@@ -451,6 +482,7 @@ export type Database = {
           assigned_to?: string | null
           backup_to?: string | null
           cost?: number | null
+          cost_split_among?: string[] | null
           created_at?: string
           id?: string
           info_details?: Json
@@ -468,6 +500,7 @@ export type Database = {
           assigned_to?: string | null
           backup_to?: string | null
           cost?: number | null
+          cost_split_among?: string[] | null
           created_at?: string
           id?: string
           info_details?: Json

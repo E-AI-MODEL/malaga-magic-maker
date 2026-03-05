@@ -11,9 +11,9 @@ export function BottomNav() {
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 bg-foreground safe-area-pb">
       <div className="flex justify-around max-w-lg mx-auto">
-        <NavLink to="/uitslag" className={({ isActive }) => `${base} ${isActive ? active : inactive}`}>
-          <BarChart3 className="h-4 w-4" />
-          <span>Uitslag</span>
+        <NavLink to="/taken" className={({ isActive }) => `${base} ${isActive ? active : inactive}`}>
+          <ListChecks className="h-4 w-4" />
+          <span>Taken</span>
         </NavLink>
         <NavLink to="/info" className={({ isActive }) => `${base} ${isActive ? active : inactive}`}>
           <Info className="h-4 w-4" />
@@ -23,9 +23,9 @@ export function BottomNav() {
           <Home className="h-4 w-4" />
           <span>Verblijven</span>
         </NavLink>
-        <NavLink to="/taken" className={({ isActive }) => `${base} ${isActive ? active : inactive}`}>
-          <ListChecks className="h-4 w-4" />
-          <span>Taken</span>
+        <NavLink to="/uitslag" className={({ isActive }) => `${base} ${isActive ? active : inactive}`}>
+          <BarChart3 className="h-4 w-4" />
+          <span>Uitslag</span>
         </NavLink>
         {isAdmin && (
           <NavLink to="/admin" className={({ isActive }) => `${base} ${isActive ? active : inactive}`}>

@@ -11,18 +11,26 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { ReactionBar } from "@/components/ReactionBar";
 import { SectionComments } from "@/components/SectionComments";
 import {
-  Plane, ChevronDown, CheckCircle2, Upload, ExternalLink, Image as ImageIcon, User, Shield, X
+  Plane, ChevronDown, CheckCircle2, Upload, ExternalLink, User, Shield, X,
+  Globe, MapPin, Clock, Calendar
 } from "lucide-react";
 
 interface Profile { id: string; username: string; display_name: string; }
+interface InfoDetails {
+  url?: string;
+  activity_date?: string;
+  activity_time?: string;
+  location?: string;
+}
 interface Task {
   id: string; title: string; section: string; assigned_to: string | null;
   backup_to: string | null; status: string; sort_order: number;
   voting_closed: boolean; progress: number; info_text: string | null;
-  info_image_urls: string[];
+  info_image_urls: string[]; info_details: InfoDetails;
 }
 interface TravelLeg {
   id: string; passengers: string[]; departure_time: string | null;
@@ -49,6 +57,8 @@ export default function Taken() {
   const [openTask, setOpenTask] = useState<string | null>(null);
   const [editingLeg, setEditingLeg] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
+  const [flightsOpen, setFlightsOpen] = useState(false);
 
   useEffect(() => {
     const load = async () => {
@@ -115,8 +125,11 @@ export default function Taken() {
     await supabase.from("tasks").update({ progress: value[0] }).eq("id", taskId);
   };
 
-  const handleInfoTextSave = async (taskId: string, text: string) => {
-    await supabase.from("tasks").update({ info_text: text || null }).eq("id", taskId);
+  const handleDetailsSave = async (taskId: string, details: InfoDetails, infoText: string) => {
+    await supabase.from("tasks").update({
+      info_details: details as any,
+      info_text: infoText || null,
+    }).eq("id", taskId);
   };
 
   const handleImageUpload = async (taskId: string, file: File) => {
@@ -164,43 +177,50 @@ export default function Taken() {
           <p className="text-white/60 text-sm mt-1">Voortgang, vluchtgegevens en taakverdeling</p>
         </section>
 
-        {/* ═══ VLUCHTGEGEVENS ═══ */}
-        <section className="border-b border-border px-6 py-6">
-          <div className="flex items-center gap-2 mb-4">
-            <Plane className="h-4 w-4 text-primary" />
-            <p className="text-xs font-semibold uppercase tracking-[0.15em] text-primary">Vluchtgegevens</p>
-          </div>
+        {/* ═══ VLUCHTGEGEVENS (uitklapbaar) ═══ */}
+        <Collapsible open={flightsOpen} onOpenChange={setFlightsOpen}>
+          <section className="border-b border-border px-6 py-4">
+            <CollapsibleTrigger className="flex items-center justify-between w-full">
+              <div className="flex items-center gap-2">
+                <Plane className="h-4 w-4 text-primary" />
+                <p className="text-xs font-semibold uppercase tracking-[0.15em] text-primary">Vluchtgegevens</p>
+              </div>
+              <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${flightsOpen ? "rotate-180" : ""}`} />
+            </CollapsibleTrigger>
 
-          <div className="space-y-2">
-            {travelLegs.map(leg => (
-              <Card key={leg.id} className="border-border/60">
-                <CardContent className="p-3">
-                  {editingLeg === leg.id && isAdmin ? (
-                    <TravelLegEditor leg={leg} onSave={(u) => handleLegUpdate(leg.id, u)} onCancel={() => setEditingLeg(null)} />
-                  ) : (
-                    <div className="flex items-center justify-between">
-                      <div className="flex-1">
-                        <p className="font-display font-bold text-sm">{leg.passengers.join(", ")}</p>
-                        {leg.note ? (
-                          <p className="text-xs text-muted-foreground mt-0.5">{leg.note}</p>
-                        ) : (
-                          <p className="text-xs text-muted-foreground mt-0.5">
-                            {formatDate(leg.travel_date)} · {leg.departure_time} → {leg.arrival_time}
-                          </p>
-                        )}
-                      </div>
-                      {isAdmin && (
-                        <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => setEditingLeg(leg.id)}>
-                          Bewerken
-                        </Button>
+            <CollapsibleContent>
+              <div className="space-y-2 mt-4">
+                {travelLegs.map(leg => (
+                  <Card key={leg.id} className="border-border/60">
+                    <CardContent className="p-3">
+                      {editingLeg === leg.id && isAdmin ? (
+                        <TravelLegEditor leg={leg} onSave={(u) => handleLegUpdate(leg.id, u)} onCancel={() => setEditingLeg(null)} />
+                      ) : (
+                        <div className="flex items-center justify-between">
+                          <div className="flex-1">
+                            <p className="font-display font-bold text-sm">{leg.passengers.join(", ")}</p>
+                            {leg.note ? (
+                              <p className="text-xs text-muted-foreground mt-0.5">{leg.note}</p>
+                            ) : (
+                              <p className="text-xs text-muted-foreground mt-0.5">
+                                {formatDate(leg.travel_date)} · {leg.departure_time} → {leg.arrival_time}
+                              </p>
+                            )}
+                          </div>
+                          {isAdmin && (
+                            <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => setEditingLeg(leg.id)}>
+                              Bewerken
+                            </Button>
+                          )}
+                        </div>
                       )}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </section>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </CollapsibleContent>
+          </section>
+        </Collapsible>
 
         {/* ═══ TAKEN ═══ */}
         <section className="px-6 py-6 pb-24">
@@ -214,6 +234,7 @@ export default function Taken() {
               const isOpen = openTask === task.id;
               const editable = canEditTask(task);
               const link = TASK_LINKS[task.section];
+              const details: InfoDetails = (task.info_details as any) || {};
 
               return (
                 <Collapsible key={task.id} open={isOpen} onOpenChange={(o) => setOpenTask(o ? task.id : null)}>
@@ -256,34 +277,29 @@ export default function Taken() {
                           </div>
                         )}
 
-                        {/* Info text */}
+                        {/* Structured details */}
                         {editable ? (
-                          <div>
-                            <label className="text-xs font-semibold text-muted-foreground mb-1 block">Status update</label>
-                            <Textarea
-                              defaultValue={task.info_text || ""}
-                              placeholder="Deel een update over deze taak..."
-                              className="text-xs min-h-[60px]"
-                              onBlur={(e) => handleInfoTextSave(task.id, e.target.value)}
-                            />
-                          </div>
-                        ) : task.info_text ? (
-                          <div className="bg-secondary rounded-lg p-3">
-                            <p className="text-xs text-muted-foreground">{task.info_text}</p>
-                          </div>
-                        ) : null}
+                          <TaskDetailsEditor
+                            details={details}
+                            infoText={task.info_text || ""}
+                            onSave={(d, t) => handleDetailsSave(task.id, d, t)}
+                          />
+                        ) : (
+                          <TaskDetailsReadonly details={details} infoText={task.info_text} />
+                        )}
 
-                        {/* Images */}
+                        {/* Images with lightbox */}
                         {(task.info_image_urls.length > 0 || editable) && (
                           <div>
                             {task.info_image_urls.length > 0 && (
                               <div className="grid grid-cols-2 gap-2 mb-2">
                                 {task.info_image_urls.map((url, i) => (
-                                  <div key={i} className="relative group rounded-lg overflow-hidden border border-border">
+                                  <div key={i} className="relative group rounded-lg overflow-hidden border border-border cursor-pointer"
+                                    onClick={() => setLightboxUrl(url)}>
                                     <img src={url} alt="" className="w-full h-24 object-cover" />
                                     {editable && (
                                       <button
-                                        onClick={() => handleRemoveImage(task.id, url)}
+                                        onClick={(e) => { e.stopPropagation(); handleRemoveImage(task.id, url); }}
                                         className="absolute top-1 right-1 bg-destructive text-destructive-foreground rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
                                       >
                                         <X className="h-3 w-3" />
@@ -357,8 +373,111 @@ export default function Taken() {
             })}
           </div>
         </section>
+
+        {/* Lightbox */}
+        <Dialog open={!!lightboxUrl} onOpenChange={() => setLightboxUrl(null)}>
+          <DialogContent className="max-w-[90vw] max-h-[90vh] p-2 bg-background/95 border-border">
+            {lightboxUrl && (
+              <img src={lightboxUrl} alt="" className="w-full h-full object-contain rounded-lg" />
+            )}
+          </DialogContent>
+        </Dialog>
       </div>
     </AppLayout>
+  );
+}
+
+/* ── Structured details editor ── */
+function TaskDetailsEditor({ details, infoText, onSave }: {
+  details: InfoDetails;
+  infoText: string;
+  onSave: (details: InfoDetails, infoText: string) => void;
+}) {
+  const [url, setUrl] = useState(details.url || "");
+  const [date, setDate] = useState(details.activity_date || "");
+  const [time, setTime] = useState(details.activity_time || "");
+  const [location, setLocation] = useState(details.location || "");
+  const [notes, setNotes] = useState(infoText);
+
+  const save = () => {
+    onSave(
+      { url: url || undefined, activity_date: date || undefined, activity_time: time || undefined, location: location || undefined },
+      notes
+    );
+  };
+
+  return (
+    <div className="space-y-2">
+      <label className="text-xs font-semibold text-muted-foreground block">Details</label>
+      <div className="relative">
+        <Globe className="absolute left-2.5 top-2 h-3.5 w-3.5 text-muted-foreground" />
+        <Input value={url} onChange={e => setUrl(e.target.value)} onBlur={save} placeholder="Link / URL" className="text-xs h-8 pl-8" />
+      </div>
+      <div className="grid grid-cols-2 gap-2">
+        <div className="relative">
+          <Calendar className="absolute left-2.5 top-2 h-3.5 w-3.5 text-muted-foreground" />
+          <Input type="date" value={date} onChange={e => setDate(e.target.value)} onBlur={save} className="text-xs h-8 pl-8" />
+        </div>
+        <div className="relative">
+          <Clock className="absolute left-2.5 top-2 h-3.5 w-3.5 text-muted-foreground" />
+          <Input value={time} onChange={e => setTime(e.target.value)} onBlur={save} placeholder="Tijd" className="text-xs h-8 pl-8" />
+        </div>
+      </div>
+      <div className="relative">
+        <MapPin className="absolute left-2.5 top-2 h-3.5 w-3.5 text-muted-foreground" />
+        <Input value={location} onChange={e => setLocation(e.target.value)} onBlur={save} placeholder="Locatie" className="text-xs h-8 pl-8" />
+      </div>
+      <Textarea
+        value={notes}
+        onChange={e => setNotes(e.target.value)}
+        onBlur={save}
+        placeholder="Notities..."
+        className="text-xs min-h-[48px]"
+      />
+    </div>
+  );
+}
+
+/* ── Structured details read-only ── */
+function TaskDetailsReadonly({ details, infoText }: { details: InfoDetails; infoText: string | null }) {
+  const hasAny = details.url || details.activity_date || details.activity_time || details.location || infoText;
+  if (!hasAny) return null;
+
+  const formatDate = (d: string) => {
+    const date = new Date(d);
+    return date.toLocaleDateString("nl-NL", { day: "numeric", month: "long", year: "numeric" });
+  };
+
+  return (
+    <div className="bg-secondary rounded-lg p-3 space-y-1.5">
+      {details.url && (
+        <div className="flex items-center gap-2 text-xs">
+          <Globe className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+          <a href={details.url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline truncate">{details.url}</a>
+        </div>
+      )}
+      {details.activity_date && (
+        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          <Calendar className="h-3.5 w-3.5 shrink-0" />
+          <span>{formatDate(details.activity_date)}</span>
+        </div>
+      )}
+      {details.activity_time && (
+        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          <Clock className="h-3.5 w-3.5 shrink-0" />
+          <span>{details.activity_time}</span>
+        </div>
+      )}
+      {details.location && (
+        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          <MapPin className="h-3.5 w-3.5 shrink-0" />
+          <span>{details.location}</span>
+        </div>
+      )}
+      {infoText && (
+        <p className="text-xs text-muted-foreground pt-1 border-t border-border/40">{infoText}</p>
+      )}
+    </div>
   );
 }
 

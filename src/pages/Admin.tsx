@@ -201,7 +201,7 @@ export default function Admin() {
                 <div className="flex items-center gap-2">
                   <Users className="h-4 w-4 text-primary" />
                   <span className="font-display font-bold text-sm">Gebruikers & Intake</span>
-                  <Badge variant="outline" className="text-[10px] font-mono ml-auto">{lockedSubs.length}/{nonAdminProfiles.length}</Badge>
+                  <Badge variant="outline" className="text-[10px] font-mono ml-auto">{lockedSubs.length}/{profiles.length}</Badge>
                 </div>
               </AccordionTrigger>
               <AccordionContent className="px-4 pb-4">

@@ -1,86 +1,84 @@
 
 
-## Plan: Takenverdeling + Reacties & Stemmen
+## Plan: Takenpagina + Uitslag opschonen
+
+### Samenvatting
+De taken worden verplaatst naar een eigen pagina `/taken` met uitgebreide functionaliteit: backup-toewijzing, voortgangsbarometer, foto-uploads en vluchtgegevens. De Uitslagpagina wordt opgeschoond (TaskBoard verwijderd). Stemmen op taken wordt afgesloten nu taken zijn toegewezen.
+
+---
 
 ### 1. Database migratie
 
-**Nieuwe tabel `tasks`:**
+**Wijzigingen aan `tasks` tabel:**
+- `backup_to` text nullable — tweede persoon als backup
+- `voting_closed` boolean default true — stemmen sluiten
+- `progress` integer default 0 — barometer 0-100
+- `info_text` text nullable — status-update tekst van eigenaar/backup
+- `info_image_urls` text[] default '{}' — geüploade foto's
+
+**Nieuwe tabel `travel_legs`** (vluchtgegevens):
 - `id` uuid PK
-- `title` text (bijv. "Autohuur regelen")
-- `section` text (identifier)
-- `assigned_to` text nullable (admin vult naam in)
-- `status` text default 'open'
+- `passengers` text[] — namen
+- `departure_time` text — "7:50"
+- `arrival_time` text — "10:45"
+- `travel_date` date
+- `note` text nullable — "vertrek en bestemming onbekend"
 - `sort_order` int
 - `created_at` timestamptz
 
-RLS: iedereen kan lezen, admin kan insert/update/delete.
+RLS: iedereen kan lezen, admin kan CRUD.
 
-**Nieuwe tabel `task_votes`:**
-- `id` uuid PK
-- `task_id` uuid FK → tasks
-- `user_id` uuid
-- `voted_for_user_id` uuid (op wie je stemt)
-- `created_at` timestamptz
-- Unique constraint op `(task_id, user_id)` — 1 stem per taak per gebruiker
+Seed travel_legs met de 3 vluchtgroepen.
 
-RLS: authenticated kan lezen en eigen insert/update, admin kan alles.
+**Storage bucket** `task-attachments` voor foto-uploads.
 
-**Nieuwe tabel `reactions`:**
-- `id` uuid PK
-- `user_id` uuid
-- `section` text
-- `emoji` text
-- `created_at` timestamptz
-- Unique constraint op `(user_id, section, emoji)`
+Realtime op `travel_legs`.
 
-RLS: authenticated kan lezen, eigen insert/delete.
+---
 
-**Nieuwe tabel `comments`:**
-- `id` uuid PK
-- `user_id` uuid
-- `section` text
-- `message` text
-- `created_at` timestamptz
+### 2. Nieuwe pagina `/taken` (src/pages/Taken.tsx)
 
-RLS: authenticated kan lezen, eigen insert/delete.
+Layout in blokken, consistent met de rest van de site:
 
-Realtime enabled op alle 4 tabellen.
+**Blok 1 — Vluchtgegevens**
+- Compact overzicht van de 3 reisgroepen (accordion of cards)
+- Admin kan gegevens inline bewerken (tijden, passagiers, notities)
 
-Seed de 4 taken: "Autohuur of taxi regelen", "Accommodatie boeken", "Flights boeken", "Lounge tent aan het strand reserveren".
+**Blok 2 — Takenkaarten** (4 taken)
+Per taak een uitklapbare card:
+- **Header**: titel + eigenaar badge + backup badge
+- **Ingeklapt**: compacte voortgangsbalk (0-100%)
+- **Uitgeklapt**:
+  - Slider/barometer (0-100) — alleen eigenaar, backup & admin kunnen schuiven
+  - Tekstveld voor status-update + foto-upload — alleen eigenaar, backup & admin
+  - Minimalistische hyperlink naar gerelateerde info (bijv. "/accommodations" voor "Accommodatie boeken", Airbnb-link, etc.)
+  - Reacties (ReactionBar) + Commentaren (SectionComments) — alle gebruikers
+  - Admin: dropdown om eigenaar/backup te wijzigen
 
-### 2. Takenverdeling bovenaan Uitslag pagina
+**Stijl**: editorial blokken, accordions, zelfde typografie en kleuren als de rest.
 
-Nieuw component `TaskBoard` bovenaan de pagina, vóór de header:
-- Kaartjes per taak met titel en status
-- Per taak: dropdown/knoppen om te stemmen op een groepslid (uit profiles)
-- Toont stemverdeling (wie heeft hoeveel stemmen)
-- Admin ziet een extra veld om een naam/persoon definitief toe te wijzen
-- Wanneer `assigned_to` is ingevuld, toont de kaart een "Toegewezen aan: Naam" badge
+---
 
-### 3. ReactionBar component
+### 3. Uitslag opschonen (src/pages/Uitslag.tsx)
 
-Compact component met 4 emoji-knoppen (👍 🔥 ❤️ 😂):
-- Toggle eigen reactie on/off
-- Toont count per emoji
-- Wordt geplaatst onder elke ResultSection en de Villa Mercedes sectie
+- Verwijder `<TaskBoard>` component-import en rendering (regel 9, 161)
+- Verwijder comments/onAddComment/onDeleteComment props die alleen voor TaskBoard waren (die worden nog gebruikt door secties zelf, dus die blijven)
+- Eventueel een subtiele link toevoegen naar `/taken`: "Bekijk de takenverdeling →"
 
-### 4. SectionComments component
+---
 
-Uitklapbaar (Collapsible) commentaarveld per sectie:
-- Toont comments met gebruikersnaam + relatief tijdstip
-- Tekstveld + verzendknop
-- Eigen comments verwijderbaar
+### 4. Routing & navigatie
 
-### 5. Integratie in Uitslag.tsx
+- Nieuwe route `/taken` in App.tsx (ProtectedRoute)
+- Toevoegen aan BottomNav met ClipboardList icon + "Taken" label
 
-- `TaskBoard` helemaal bovenaan (vóór "Gezamenlijke uitslag" header)
-- `ReactionBar` + `SectionComments` onder elke sectie (villa, vervoer, accommodatie, prioriteiten, eten, activiteiten)
-- Realtime subscriptions voor live updates
-- Activity logging voor reacties, comments en stemmen
+---
 
-### Technische details
+### 5. Technische details
 
-- Alle data wordt opgehaald in Uitslag.tsx via een enkele useEffect, gegroepeerd client-side
-- Admin-check via `useAuth` + `has_role` voor het toewijzingsveld
-- Profielen zijn al beschikbaar in state voor naamweergave
+- Eigenaar/backup check: vergelijk `task.assigned_to` en `task.backup_to` met `profile.display_name` van huidige user
+- Foto-upload: Supabase Storage bucket `task-attachments`, public URLs opslaan in `info_image_urls`
+- Progress slider: Radix Slider component (al geïnstalleerd)
+- Hyperlinks per taak: hardcoded mapping van task section → relevante URL
+- Admin kan alle velden bewerken via inline Select/Input componenten
 

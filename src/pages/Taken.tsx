@@ -14,9 +14,10 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { ReactionBar } from "@/components/ReactionBar";
 import { SectionComments } from "@/components/SectionComments";
 import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 import {
-  Plane, ChevronDown, CheckCircle2, Upload, ExternalLink, User, Shield, X,
-  Globe, MapPin, Clock, Calendar, Pencil, Save
+  Plane, ChevronDown, CheckCircle2, Upload, User, Shield, X,
+  Globe, MapPin, Clock, Calendar, Pencil, Save, ChevronRight
 } from "lucide-react";
 
 interface Profile { id: string; username: string; display_name: string; }
@@ -40,15 +41,16 @@ interface TravelLeg {
 interface Reaction { id: string; user_id: string; section: string; emoji: string; }
 interface Comment { id: string; user_id: string; section: string; message: string; created_at: string; }
 
-const TASK_LINKS: Record<string, { label: string; href: string }> = {
-  transport: { label: "Vervoersoverzicht", href: "/info" },
-  accommodatie: { label: "Accommodaties bekijken", href: "/accommodations" },
-  golf: { label: "Golfinfo", href: "/info" },
-  strand: { label: "Strandinfo", href: "/info" },
+const SECTION_CONTEXT: Record<string, string> = {
+  transport: "Bekijk context & info",
+  accommodatie: "Bekijk context & info",
+  golf: "Bekijk context & info",
+  strand: "Bekijk context & info",
 };
 
 export default function Taken() {
   const { user, profile, isAdmin } = useAuth();
+  const navigate = useNavigate();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [travelLegs, setTravelLegs] = useState<TravelLeg[]>([]);
   const [profiles, setProfiles] = useState<Profile[]>([]);
@@ -264,7 +266,7 @@ export default function Taken() {
               const isOpen = openTask === task.id;
               const editable = canEditTask(task);
               const isEditing = editingTaskId === task.id;
-              const link = TASK_LINKS[task.section];
+              const contextLabel = SECTION_CONTEXT[task.section];
               const details: InfoDetails = (task.info_details as any) || {};
 
               return (
@@ -393,12 +395,15 @@ export default function Taken() {
                           </>
                         )}
 
-                        {/* Link */}
-                        {link && (
+                        {/* Context link */}
+                        {contextLabel && (
                           <div className="pt-2 border-t border-border/40">
-                            <a href={link.href} className="inline-flex items-center gap-1 text-xs text-primary font-medium hover:underline">
-                              {link.label} <ExternalLink className="h-3 w-3" />
-                            </a>
+                            <button
+                              onClick={() => navigate(`/taken/${task.section}`)}
+                              className="inline-flex items-center gap-1.5 text-xs text-primary font-medium hover:underline"
+                            >
+                              {contextLabel} <ChevronRight className="h-3 w-3" />
+                            </button>
                           </div>
                         )}
 

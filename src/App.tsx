@@ -13,6 +13,7 @@ import Accommodations from "./pages/Accommodations";
 import AccommodationDetail from "./pages/AccommodationDetail";
 import Admin from "./pages/Admin";
 import Taken from "./pages/Taken";
+import TaskContext from "./pages/TaskContext";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -38,6 +39,7 @@ function AppRoutes() {
       <Route path="/accommodations" element={<ProtectedRoute><Accommodations /></ProtectedRoute>} />
       <Route path="/accommodations/:id" element={<ProtectedRoute><AccommodationDetail /></ProtectedRoute>} />
       <Route path="/taken" element={<ProtectedRoute><Taken /></ProtectedRoute>} />
+      <Route path="/taken/:section" element={<ProtectedRoute><TaskContext /></ProtectedRoute>} />
       <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
       <Route path="*" element={<NotFound />} />
     </Routes>

@@ -7,23 +7,57 @@ import { toast } from "sonner";
 import { Save, X } from "lucide-react";
 import type { Submission } from "@/lib/scoring";
 
+const DEFAULT_SUBMISSION: Omit<Submission, "id" | "user_id"> = {
+  agreed_facts: false,
+  preferred_rounds: 2,
+  mobility_choice: "neutral",
+  base_choice: "neutral",
+  max_golf_minutes: 20,
+  require_fixed_beds: false,
+  require_bedrooms_3: false,
+  require_cancelable: false,
+  require_transparent_price: false,
+  require_pool: false,
+  require_airco: false,
+  require_wifi: false,
+  require_parking: false,
+  require_terrace: false,
+  budget_cap_total: null,
+  points_golf_ease: 20,
+  points_beach_life: 20,
+  points_exploring: 20,
+  points_luxury: 20,
+  points_budget: 10,
+  points_low_hassle: 10,
+  diet_preferences: [],
+  diet_remarks: null,
+  activities: [],
+  remarks_a: null,
+  remarks_b: null,
+  locked: false,
+};
+
 interface Props {
-  submission: Submission;
+  submission?: Submission;
+  userId?: string;
   displayName: string;
   onSaved: () => void;
   onCancel: () => void;
 }
 
-export function AdminEditSubmission({ submission, displayName, onSaved, onCancel }: Props) {
-  const [form, setForm] = useState({ ...submission });
+export function AdminEditSubmission({ submission, userId, displayName, onSaved, onCancel }: Props) {
+  const isCreate = !submission;
+  const [form, setForm] = useState<Omit<Submission, "id" | "user_id"> & { id?: string; user_id?: string }>(
+    submission ? { ...submission } : { ...DEFAULT_SUBMISSION }
+  );
   const [saving, setSaving] = useState(false);
 
-  const set = <K extends keyof Submission>(key: K, value: Submission[K]) =>
+  const set = <K extends keyof typeof form>(key: K, value: (typeof form)[K]) =>
     setForm(prev => ({ ...prev, [key]: value }));
 
   const handleSave = async () => {
     setSaving(true);
-    const { error } = await supabase.from("submissions").update({
+    const payload = {
       agreed_facts: form.agreed_facts,
       preferred_rounds: form.preferred_rounds,
       mobility_choice: form.mobility_choice,
@@ -51,16 +85,23 @@ export function AdminEditSubmission({ submission, displayName, onSaved, onCancel
       remarks_a: form.remarks_a,
       remarks_b: form.remarks_b,
       locked: form.locked,
-    }).eq("id", submission.id);
+    };
+
+    let error;
+    if (isCreate && userId) {
+      ({ error } = await supabase.from("submissions").insert({ ...payload, user_id: userId }));
+    } else if (submission) {
+      ({ error } = await supabase.from("submissions").update(payload).eq("id", submission.id));
+    }
 
     setSaving(false);
     if (error) { toast.error("Opslaan mislukt: " + error.message); return; }
-    toast.success(`Intake van ${displayName} opgeslagen`);
+    toast.success(`Intake van ${displayName} ${isCreate ? "aangemaakt" : "opgeslagen"}`);
     onSaved();
   };
 
-  const totalPoints = form.points_golf_ease + form.points_beach_life + form.points_exploring +
-    form.points_luxury + form.points_budget + form.points_low_hassle;
+  const totalPoints = (form.points_golf_ease || 0) + (form.points_beach_life || 0) + (form.points_exploring || 0) +
+    (form.points_luxury || 0) + (form.points_budget || 0) + (form.points_low_hassle || 0);
 
   const RadioRow = ({ label, name, options, value, onChange }: {
     label: string; name: string; options: { value: string; label: string }[]; value: string; onChange: (v: string) => void;
@@ -90,15 +131,15 @@ export function AdminEditSubmission({ submission, displayName, onSaved, onCancel
     </label>
   );
 
-  const PointsInput = ({ label, field }: { label: string; field: keyof Submission }) => (
+  const PointsInput = ({ label, field }: { label: string; field: keyof typeof form }) => (
     <div className="flex items-center gap-2">
       <span className="text-xs text-muted-foreground w-16 shrink-0">{label}</span>
       <Input
         type="number"
         min={0}
         max={100}
-        value={form[field] as number}
-        onChange={e => set(field, parseInt(e.target.value) || 0)}
+        value={(form[field] as number) || 0}
+        onChange={e => set(field as any, parseInt(e.target.value) || 0)}
         className="h-7 w-16 text-xs"
       />
     </div>
@@ -107,13 +148,15 @@ export function AdminEditSubmission({ submission, displayName, onSaved, onCancel
   return (
     <div className="border-2 border-primary/30 rounded-lg p-4 space-y-5 bg-background">
       <div className="flex items-center justify-between">
-        <h3 className="font-display font-extrabold text-sm">Bewerk intake: {displayName}</h3>
+        <h3 className="font-display font-extrabold text-sm">
+          {isCreate ? `Intake aanmaken: ${displayName}` : `Bewerk intake: ${displayName}`}
+        </h3>
         <div className="flex gap-2">
           <Button size="sm" variant="outline" onClick={onCancel} disabled={saving}>
             <X className="h-3.5 w-3.5 mr-1" /> Annuleer
           </Button>
           <Button size="sm" onClick={handleSave} disabled={saving}>
-            <Save className="h-3.5 w-3.5 mr-1" /> {saving ? "Opslaan..." : "Opslaan"}
+            <Save className="h-3.5 w-3.5 mr-1" /> {saving ? "Opslaan..." : isCreate ? "Aanmaken" : "Opslaan"}
           </Button>
         </div>
       </div>

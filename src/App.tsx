@@ -14,6 +14,7 @@ import AccommodationDetail from "./pages/AccommodationDetail";
 import Admin from "./pages/Admin";
 import Taken from "./pages/Taken";
 import TaskContext from "./pages/TaskContext";
+import Kosten from "./pages/Kosten";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -40,6 +41,7 @@ function AppRoutes() {
       <Route path="/accommodations/:id" element={<ProtectedRoute><AccommodationDetail /></ProtectedRoute>} />
       <Route path="/taken" element={<ProtectedRoute><Taken /></ProtectedRoute>} />
       <Route path="/taken/:section" element={<ProtectedRoute><TaskContext /></ProtectedRoute>} />
+      <Route path="/kosten" element={<ProtectedRoute><Kosten /></ProtectedRoute>} />
       <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
       <Route path="*" element={<NotFound />} />
     </Routes>

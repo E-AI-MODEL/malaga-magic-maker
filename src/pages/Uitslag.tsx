@@ -8,26 +8,10 @@ import { Car, Home, UtensilsCrossed, Dumbbell, BarChart3, Users, CheckCircle2, X
 import { useAuth } from "@/lib/auth";
 import { ReactionBar } from "@/components/ReactionBar";
 import { SectionComments } from "@/components/SectionComments";
-interface Profile {
-  id: string;
-  username: string;
-  display_name: string;
-}
 
-interface Reaction {
-  id: string;
-  user_id: string;
-  section: string;
-  emoji: string;
-}
-
-interface Comment {
-  id: string;
-  user_id: string;
-  section: string;
-  message: string;
-  created_at: string;
-}
+interface Profile { id: string; username: string; display_name: string; }
+interface Reaction { id: string; user_id: string; section: string; emoji: string; }
+interface Comment { id: string; user_id: string; section: string; message: string; created_at: string; }
 
 export default function Uitslag() {
   const { user } = useAuth();
@@ -88,7 +72,6 @@ export default function Uitslag() {
   const avgPoints = useMemo(() => lockedSubs.length > 0 ? computeAvgPoints(lockedSubs) : null, [lockedSubs]);
   const getName = (userId: string) => profiles.find(p => p.id === userId)?.display_name || "?";
 
-  // Aggregate helpers
   const countVotes = (field: keyof Submission, value: any) => lockedSubs.filter(s => s[field] === value).length;
   const mobilityWinner = (() => {
     const car = countVotes("mobility_choice", "car");
@@ -103,17 +86,13 @@ export default function Uitslag() {
   const dietCounts: Record<string, number> = {};
   allDietPrefs.forEach(d => { dietCounts[d] = (dietCounts[d] || 0) + 1; });
 
-  const allDietRemarks = lockedSubs
-    .filter(s => s.diet_remarks)
-    .map(s => ({ user: getName(s.user_id), text: s.diet_remarks! }));
+  const allDietRemarks = lockedSubs.filter(s => s.diet_remarks).map(s => ({ user: getName(s.user_id), text: s.diet_remarks! }));
 
   const allActivities = lockedSubs.flatMap(s => s.activities || []);
   const activityCounts: Record<string, number> = {};
   allActivities.forEach(a => { activityCounts[a] = (activityCounts[a] || 0) + 1; });
 
-  const allRemarks = lockedSubs
-    .filter(s => s.remarks_a || s.remarks_b)
-    .map(s => ({ user: getName(s.user_id), text: [s.remarks_a, s.remarks_b].filter(Boolean).join(" | ") }));
+  const allRemarks = lockedSubs.filter(s => s.remarks_a || s.remarks_b).map(s => ({ user: getName(s.user_id), text: [s.remarks_a, s.remarks_b].filter(Boolean).join(" | ") }));
 
   const budgets = lockedSubs.map(s => s.budget_cap_total).filter((b): b is number => b !== null && b > 0);
   const budgetMedian = budgets.length > 0 ? budgets.sort((a, b) => a - b)[Math.floor(budgets.length / 2)] : null;
@@ -159,12 +138,8 @@ export default function Uitslag() {
         {/* Header */}
         <section className="bg-foreground text-white px-6 py-10">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/40 mb-2">Gezamenlijke uitslag</p>
-          <h1 className="font-display text-2xl font-extrabold">
-            Wat wij willen
-          </h1>
-          <p className="text-white/60 text-sm mt-2">
-            Op basis van {lockedSubs.length} ingevulde intakes
-          </p>
+          <h1 className="font-display text-2xl font-extrabold">Wat wij willen</h1>
+          <p className="text-white/60 text-sm mt-2">Op basis van {lockedSubs.length} ingevulde intakes</p>
         </section>
 
         {/* ═══════════ TOPKANDIDAAT ═══════════ */}
@@ -198,34 +173,13 @@ export default function Uitslag() {
             </div>
 
             <div className="bg-background rounded-lg p-4 border border-border space-y-2.5 mb-4">
-              <div className="flex items-center gap-2 text-sm">
-                <MapPin className="h-4 w-4 text-muted-foreground shrink-0" />
-                <span>Fuengirola – 200m van het strand</span>
-              </div>
-              <div className="flex items-center gap-2 text-sm">
-                <Bed className="h-4 w-4 text-muted-foreground shrink-0" />
-                <span>6 slaapkamers · 13 bedden · max 15 gasten</span>
-              </div>
-              <div className="flex items-center gap-2 text-sm">
-                <Bath className="h-4 w-4 text-muted-foreground shrink-0" />
-                <span>4 badkamers</span>
-              </div>
-              <div className="flex items-center gap-2 text-sm">
-                <Waves className="h-4 w-4 text-muted-foreground shrink-0" />
-                <span>Privé zoutwaterzwembad</span>
-              </div>
-              <div className="flex items-center gap-2 text-sm">
-                <Wind className="h-4 w-4 text-muted-foreground shrink-0" />
-                <span>Airco warm/koud in elke kamer</span>
-              </div>
-              <div className="flex items-center gap-2 text-sm">
-                <Wifi className="h-4 w-4 text-muted-foreground shrink-0" />
-                <span>Wifi in hele villa</span>
-              </div>
-              <div className="flex items-center gap-2 text-sm">
-                <ParkingCircle className="h-4 w-4 text-muted-foreground shrink-0" />
-                <span>Eigen parkeerplaats</span>
-              </div>
+              <div className="flex items-center gap-2 text-sm"><MapPin className="h-4 w-4 text-muted-foreground shrink-0" /><span>Fuengirola – 200m van het strand</span></div>
+              <div className="flex items-center gap-2 text-sm"><Bed className="h-4 w-4 text-muted-foreground shrink-0" /><span>6 slaapkamers · 13 bedden · max 15 gasten</span></div>
+              <div className="flex items-center gap-2 text-sm"><Bath className="h-4 w-4 text-muted-foreground shrink-0" /><span>4 badkamers</span></div>
+              <div className="flex items-center gap-2 text-sm"><Waves className="h-4 w-4 text-muted-foreground shrink-0" /><span>Privé zoutwaterzwembad</span></div>
+              <div className="flex items-center gap-2 text-sm"><Wind className="h-4 w-4 text-muted-foreground shrink-0" /><span>Airco warm/koud in elke kamer</span></div>
+              <div className="flex items-center gap-2 text-sm"><Wifi className="h-4 w-4 text-muted-foreground shrink-0" /><span>Wifi in hele villa</span></div>
+              <div className="flex items-center gap-2 text-sm"><ParkingCircle className="h-4 w-4 text-muted-foreground shrink-0" /><span>Eigen parkeerplaats</span></div>
             </div>
 
             <div className="flex flex-wrap gap-1.5 mb-4">
@@ -238,97 +192,68 @@ export default function Uitslag() {
               Onafhankelijke villa op 200m van het strand van Fuengirola. Het hoofdhuis heeft 4 slaapkamers, in de tuin nog 2 extra kamers. Speelkamer met pooltafel, tafelvoetbal en tafeltennis. Gratis annuleren vóór 5 maart 2026.
             </p>
 
-            {/* Locatie & prijs kaart */}
+            {/* Locatie & prijs */}
             <div className="space-y-4 mb-6">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">📍 Locatie & prijs</p>
                 <div className="rounded-xl overflow-hidden border border-border">
-                  <img src="/images/villa-mercedes-locatie.png" alt="Locatie Villa Mercedes in Fuengirola – €1.318" className="w-full" />
+                  <img src="/images/villa-mercedes-locatie.png" alt="Locatie Villa Mercedes" className="w-full" />
                 </div>
                 <p className="text-xs text-muted-foreground mt-2 leading-relaxed">
-                  De villa ligt in het hart van Fuengirola, vlak bij het strand en de boulevard. Op loopafstand van restaurants, winkels en het treinstation. De prijs van <span className="font-semibold text-foreground">€1.318 voor 3 nachten</span> is inclusief alle belastingen – dat is <span className="font-semibold text-foreground">~€220 p.p.</span> voor het hele verblijf.
+                  De villa ligt in het hart van Fuengirola, vlak bij het strand en de boulevard. De prijs van <span className="font-semibold text-foreground">€1.318 voor 3 nachten</span> is inclusief alle belastingen – <span className="font-semibold text-foreground">~€220 p.p.</span>
                 </p>
               </div>
-
-              {/* Reistijd naar La Cala Golf */}
               <div>
-                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">⛳ Reistijd naar La Cala Golf & Country Club</p>
+                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">⛳ Reistijd naar La Cala Golf</p>
                 <div className="rounded-xl overflow-hidden border border-border">
-                  <img src="/images/villa-mercedes-reistijd-golf.png" alt="Reistijd villa naar La Cala Golf – 27-29 min" className="w-full" />
+                  <img src="/images/villa-mercedes-reistijd-golf.png" alt="Reistijd villa naar La Cala Golf" className="w-full" />
                 </div>
                 <p className="text-xs text-muted-foreground mt-2 leading-relaxed">
-                  La Cala Golf & Country Club ligt op <span className="font-semibold text-foreground">27–29 minuten rijden</span> (~16 km) van de villa. Er zijn twee routes: via de kust (A-7) of via het binnenland (AP-7). Beide opties zijn comfortabel en bieden prachtige uitzichten over de heuvels en de zee.
+                  La Cala Golf & Country Club ligt op <span className="font-semibold text-foreground">27–29 minuten rijden</span> (~16 km).
                 </p>
               </div>
-
-              {/* Golfbanen in de omgeving */}
               <div>
                 <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">🗺️ Golfbanen in de omgeving</p>
                 <div className="rounded-xl overflow-hidden border border-border">
                   <img src="/images/villa-mercedes-golfbanen.png" alt="Golfbanen rondom Fuengirola" className="w-full" />
                 </div>
                 <p className="text-xs text-muted-foreground mt-2 leading-relaxed">
-                  Fuengirola is een uitstekende uitvalsbasis voor golf aan de Costa del Sol. Binnen een straal van 30 minuten rijden liggen tal van banen. Bekijk hieronder de details per golfbaan.
+                  Fuengirola is een uitstekende uitvalsbasis voor golf. Binnen 30 min liggen tal van banen.
                 </p>
 
-                {/* Golf courses accordion */}
                 <Accordion type="multiple" className="mt-3">
                   <AccordionItem value="lacala" className="border-border/50">
-                    <AccordionTrigger className="text-sm font-semibold py-2 hover:no-underline">
-                      ⛳ La Cala Golf & Country Club
-                    </AccordionTrigger>
+                    <AccordionTrigger className="text-sm font-semibold py-2 hover:no-underline">⛳ La Cala Golf & Country Club</AccordionTrigger>
                     <AccordionContent className="text-xs text-muted-foreground space-y-1.5 pb-3">
-                      <p>Het grootste golfresort van Zuid-Europa met <span className="font-semibold text-foreground">3 banen van 18 holes</span> (Campo América, Europa & Asia), ontworpen door Cabell B. Robinson. Gelegen in de heuvels van Mijas met spectaculair uitzicht.</p>
-                      <p><span className="font-semibold text-foreground">Afstand:</span> ~27 min rijden (16 km)</p>
-                      <p><span className="font-semibold text-foreground">Multi-round pakketten</span> beschikbaar (weekpas, 10- en 20-rongenpas).</p>
+                      <p>3 banen van 18 holes. ~27 min rijden.</p>
                       <a href="https://www.lacala.com" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-primary font-semibold hover:underline">lacala.com <ExternalLink className="h-3 w-3" /></a>
                     </AccordionContent>
                   </AccordionItem>
-
                   <AccordionItem value="chaparral" className="border-border/50">
-                    <AccordionTrigger className="text-sm font-semibold py-2 hover:no-underline">
-                      ⛳ Chaparral Golf Club
-                    </AccordionTrigger>
+                    <AccordionTrigger className="text-sm font-semibold py-2 hover:no-underline">⛳ Chaparral Golf Club</AccordionTrigger>
                     <AccordionContent className="text-xs text-muted-foreground space-y-1.5 pb-3">
-                      <p>Ontworpen door Pepe Gancedo ("de Picasso van golf"), gelegen <span className="font-semibold text-foreground">direct bij het strand</span> tussen bossen en de zee. Parkland-stijl met prachtig zeezicht vanaf meerdere holes.</p>
-                      <p><span className="font-semibold text-foreground">Afstand:</span> ~15 min rijden</p>
-                      <p><span className="font-semibold text-foreground">Green fee:</span> €80–€110 (afhankelijk van seizoen), buggy +€10</p>
+                      <p>Direct bij het strand. ~15 min rijden. Green fee €80–€110.</p>
                       <a href="https://golfelchaparral.com/en/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-primary font-semibold hover:underline">golfelchaparral.com <ExternalLink className="h-3 w-3" /></a>
                     </AccordionContent>
                   </AccordionItem>
-
                   <AccordionItem value="santana" className="border-border/50">
-                    <AccordionTrigger className="text-sm font-semibold py-2 hover:no-underline">
-                      ⛳ Santana Golf
-                    </AccordionTrigger>
+                    <AccordionTrigger className="text-sm font-semibold py-2 hover:no-underline">⛳ Santana Golf</AccordionTrigger>
                     <AccordionContent className="text-xs text-muted-foreground space-y-1.5 pb-3">
-                      <p>Ontworpen door Cabell B. Robinson, aangelegd op een <span className="font-semibold text-foreground">voormalige avocadoplantage</span>. 18 holes, par 72. Eén van de meest prestigieuze banen van de Costa del Sol met restaurant La Cabaña.</p>
-                      <p><span className="font-semibold text-foreground">Afstand:</span> ~20 min rijden</p>
-                      <p><span className="font-semibold text-foreground">Reserveren:</span> +34 951 062 560 of greenfees@santanagolf.com</p>
+                      <p>Par 72. ~20 min rijden.</p>
                       <a href="https://santanagolf.com" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-primary font-semibold hover:underline">santanagolf.com <ExternalLink className="h-3 w-3" /></a>
                     </AccordionContent>
                   </AccordionItem>
-
                   <AccordionItem value="calanova" className="border-border/50">
-                    <AccordionTrigger className="text-sm font-semibold py-2 hover:no-underline">
-                      ⛳ Calanova Golf Club
-                    </AccordionTrigger>
+                    <AccordionTrigger className="text-sm font-semibold py-2 hover:no-underline">⛳ Calanova Golf Club</AccordionTrigger>
                     <AccordionContent className="text-xs text-muted-foreground space-y-1.5 pb-3">
-                      <p>18 holes, par 72 (5.866m), geopend in 2006. Gelegen in de <span className="font-semibold text-foreground">golfvallei achter La Cala de Mijas</span> met spectaculair uitzicht op de Middellandse Zee. Green fee inclusief buggy.</p>
-                      <p><span className="font-semibold text-foreground">Afstand:</span> ~25 min rijden</p>
-                      <p>Heuvelachtig terrein, geschikt voor alle niveaus.</p>
+                      <p>18 holes, par 72. ~25 min rijden.</p>
                       <a href="https://calanovagolf.es" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-primary font-semibold hover:underline">calanovagolf.es <ExternalLink className="h-3 w-3" /></a>
                     </AccordionContent>
                   </AccordionItem>
-
                   <AccordionItem value="miraflores" className="border-border/50">
-                    <AccordionTrigger className="text-sm font-semibold py-2 hover:no-underline">
-                      ⛳ Miraflores Golf Club
-                    </AccordionTrigger>
+                    <AccordionTrigger className="text-sm font-semibold py-2 hover:no-underline">⛳ Miraflores Golf Club</AccordionTrigger>
                     <AccordionContent className="text-xs text-muted-foreground space-y-1.5 pb-3">
-                      <p>Ontworpen door Falco Nardi (1990), gelegen in de <span className="font-semibold text-foreground">heuvels van Calahonda</span> tussen Fuengirola en Marbella. 18 holes met elk een unieke uitdaging. Bekend als "de meest sociale golfclub van de Costa del Sol".</p>
-                      <p><span className="font-semibold text-foreground">Afstand:</span> ~20 min rijden</p>
-                      <p>Vlakker dan het op het eerste gezicht lijkt, volgt de natuurlijke contouren van de vallei.</p>
+                      <p>18 holes, heuvels van Calahonda. ~20 min rijden.</p>
                       <a href="https://www.mirafloresgolf.es" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-primary font-semibold hover:underline">mirafloresgolf.es <ExternalLink className="h-3 w-3" /></a>
                     </AccordionContent>
                   </AccordionItem>
@@ -336,12 +261,7 @@ export default function Uitslag() {
               </div>
             </div>
 
-            <a
-              href="https://www.airbnb.nl/rooms/17937917?guests=1&adults=1&s=67&unique_share_id=16ecca80-71b5-4f03-a49c-103551965b29"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 bg-primary text-primary-foreground rounded-lg px-4 py-2.5 text-sm font-semibold hover:opacity-90 transition-opacity"
-            >
+            <a href="https://www.airbnb.nl/rooms/17937917?guests=1&adults=1&s=67&unique_share_id=16ecca80-71b5-4f03-a49c-103551965b29" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 bg-primary text-primary-foreground rounded-lg px-4 py-2.5 text-sm font-semibold hover:opacity-90 transition-opacity">
               Bekijk op Airbnb <ExternalLink className="h-3.5 w-3.5" />
             </a>
             <ReactionBar section="villa-mercedes" reactions={reactions} profiles={profiles} onToggle={handleToggleReaction} />
@@ -349,175 +269,191 @@ export default function Uitslag() {
           </div>
         </section>
 
-        {/* ═══════════ VERVOER ═══════════ */}
-        <ResultSection icon={<Car className="h-4 w-4" />} title="Vervoer" number={1}>
-          <div className="flex items-center gap-3 mb-4">
-            <span className="text-3xl">{mobilityWinner.icon}</span>
-            <div>
-              <p className="font-display font-extrabold text-lg">{mobilityWinner.label}</p>
-              <p className="text-xs text-muted-foreground">Meerderheidsuitslag</p>
-            </div>
-          </div>
-          <VoteBar
-            items={[
-              { label: "Huurauto", count: countVotes("mobility_choice", "car") },
-              { label: "Taxi", count: countVotes("mobility_choice", "transfers") },
-              { label: "Neutraal", count: countVotes("mobility_choice", "neutral") },
-            ]}
-            total={lockedSubs.length}
-          />
-          <ReactionBar section="vervoer" reactions={reactions} profiles={profiles} onToggle={handleToggleReaction} />
-          <SectionComments section="vervoer" comments={comments} profiles={profiles} onAdd={handleAddComment} onDelete={handleDeleteComment} />
-        </ResultSection>
-
-        {/* ═══════════ ACCOMMODATIE ═══════════ */}
-        <ResultSection icon={<Home className="h-4 w-4" />} title="Accommodatie eisen" number={2}>
-          {/* Must-haves */}
-          <div className="space-y-2 mb-6">
-            {mustHaves.map(mh => (
-              <div key={mh.label} className="flex items-center justify-between py-2 border-b border-border/50 last:border-0">
-                <span className="text-sm">{mh.label}</span>
-                {mh.active ? (
-                  <span className="flex items-center gap-1.5 text-sm font-semibold text-primary">
-                    <CheckCircle2 className="h-4 w-4" /> Vereist
-                  </span>
-                ) : (
-                  <span className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                    <XCircle className="h-4 w-4" /> Niet vereist
-                  </span>
-                )}
-              </div>
-            ))}
-          </div>
-
-          {/* Extra regels */}
-          <div className="bg-secondary rounded-lg p-4 space-y-2 text-sm">
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Max reistijd golf</span>
-              <span className="font-display font-bold">{rules.maxGolfMinutes} min</span>
-            </div>
-            {budgetMedian && (
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Budget plafond (mediaan)</span>
-                <span className="font-display font-bold">€{budgetMedian}</span>
-              </div>
-            )}
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Locatievoorkeur</span>
-              <span className="font-display font-bold">
-                {countVotes("base_choice", "golf") > countVotes("base_choice", "beach") ? "Bij golfbaan" :
-                 countVotes("base_choice", "beach") > countVotes("base_choice", "golf") ? "Bij strand" : "Neutraal"}
-              </span>
-            </div>
-          </div>
-
-          {/* Locatie stemming */}
-          <div className="mt-4">
-            <VoteBar
-              items={[
-                { label: "Golf", count: countVotes("base_choice", "golf") },
-                { label: "Strand", count: countVotes("base_choice", "beach") },
-                { label: "Neutraal", count: countVotes("base_choice", "neutral") },
-              ]}
-              total={lockedSubs.length}
-            />
-          </div>
-          <ReactionBar section="accommodatie" reactions={reactions} profiles={profiles} onToggle={handleToggleReaction} />
-          <SectionComments section="accommodatie" comments={comments} profiles={profiles} onAdd={handleAddComment} onDelete={handleDeleteComment} />
-        </ResultSection>
-
-        {/* ═══════════ PRIORITEITEN ═══════════ */}
-        <ResultSection icon={<BarChart3 className="h-4 w-4" />} title="Prioriteiten" number={3}>
-          <p className="text-sm text-muted-foreground mb-4">Gemiddelde puntenverdeling van de groep</p>
-          <div className="space-y-3">
-            {pointsData.map((p, i) => (
-              <div key={p.label}>
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-sm flex items-center gap-2">
-                    <span>{p.emoji}</span> {p.label}
-                    {i === 0 && <Badge className="text-[9px] ml-1">Hoogste</Badge>}
-                  </span>
-                  <span className="font-display font-bold text-sm tabular-nums">{p.value.toFixed(0)}</span>
+        {/* ═══════════ SECTIES IN ACCORDION ═══════════ */}
+        <div className="px-6 py-6 pb-24">
+          <Accordion type="multiple" defaultValue={["vervoer", "accommodatie", "prioriteiten", "eten", "activiteiten"]} className="space-y-3">
+            
+            {/* VERVOER */}
+            <AccordionItem value="vervoer" className="border rounded-lg border-border/60 overflow-hidden">
+              <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-accent/5">
+                <div className="flex items-center gap-2">
+                  <div className="h-7 w-7 rounded-full bg-primary/10 flex items-center justify-center text-primary font-display font-extrabold text-xs">1</div>
+                  <Car className="h-4 w-4 text-primary" />
+                  <span className="font-display font-bold text-sm">Vervoer</span>
+                  <Badge variant="outline" className="text-[10px] ml-auto">{mobilityWinner.icon} {mobilityWinner.label}</Badge>
                 </div>
-                <div className="w-full bg-secondary rounded-full h-3 overflow-hidden">
-                  <div
-                    className="bg-primary h-full rounded-full transition-all duration-500"
-                    style={{ width: `${Math.min(p.value * 2.5, 100)}%` }}
-                  />
+              </AccordionTrigger>
+              <AccordionContent className="px-4 pb-4">
+                <div className="flex items-center gap-3 mb-4">
+                  <span className="text-3xl">{mobilityWinner.icon}</span>
+                  <div>
+                    <p className="font-display font-extrabold text-lg">{mobilityWinner.label}</p>
+                    <p className="text-xs text-muted-foreground">Meerderheidsuitslag</p>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
-          <ReactionBar section="prioriteiten" reactions={reactions} profiles={profiles} onToggle={handleToggleReaction} />
-          <SectionComments section="prioriteiten" comments={comments} profiles={profiles} onAdd={handleAddComment} onDelete={handleDeleteComment} />
-        </ResultSection>
+                <VoteBar items={[
+                  { label: "Huurauto", count: countVotes("mobility_choice", "car") },
+                  { label: "Taxi", count: countVotes("mobility_choice", "transfers") },
+                  { label: "Neutraal", count: countVotes("mobility_choice", "neutral") },
+                ]} total={lockedSubs.length} />
+                <ReactionBar section="vervoer" reactions={reactions} profiles={profiles} onToggle={handleToggleReaction} />
+                <SectionComments section="vervoer" comments={comments} profiles={profiles} onAdd={handleAddComment} onDelete={handleDeleteComment} />
+              </AccordionContent>
+            </AccordionItem>
 
-        {/* ═══════════ ETEN ═══════════ */}
-        <ResultSection icon={<UtensilsCrossed className="h-4 w-4" />} title="Eten & drinken" number={4}>
-          {Object.keys(dietCounts).length > 0 ? (
-            <div className="space-y-3">
-              <p className="text-sm text-muted-foreground">Eetvoorkeuren binnen de groep</p>
-              <div className="flex flex-wrap gap-2">
-                {Object.entries(dietCounts).sort(([, a], [, b]) => b - a).map(([diet, count]) => (
-                  <Badge key={diet} variant="secondary" className="text-xs py-1 px-3">
-                    {diet} <span className="font-bold ml-1.5">{count}×</span>
-                  </Badge>
-                ))}
-              </div>
-            </div>
-          ) : (
-            <p className="text-sm text-muted-foreground italic">Geen specifieke eetvoorkeuren opgegeven</p>
-          )}
-          {allDietRemarks.length > 0 && (
-            <div className="mt-4 space-y-2">
-              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Opmerkingen over eten</p>
-              {allDietRemarks.map((r, i) => (
-                <div key={i} className="bg-secondary rounded-lg p-3 text-sm">
-                  <span className="font-semibold">{r.user}:</span>{" "}
-                  <span className="text-muted-foreground italic">{r.text}</span>
+            {/* ACCOMMODATIE */}
+            <AccordionItem value="accommodatie" className="border rounded-lg border-border/60 overflow-hidden">
+              <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-accent/5">
+                <div className="flex items-center gap-2">
+                  <div className="h-7 w-7 rounded-full bg-primary/10 flex items-center justify-center text-primary font-display font-extrabold text-xs">2</div>
+                  <Home className="h-4 w-4 text-primary" />
+                  <span className="font-display font-bold text-sm">Accommodatie eisen</span>
                 </div>
-              ))}
-            </div>
-          )}
-          <ReactionBar section="eten" reactions={reactions} profiles={profiles} onToggle={handleToggleReaction} />
-          <SectionComments section="eten" comments={comments} profiles={profiles} onAdd={handleAddComment} onDelete={handleDeleteComment} />
-        </ResultSection>
+              </AccordionTrigger>
+              <AccordionContent className="px-4 pb-4">
+                <div className="space-y-2 mb-6">
+                  {mustHaves.map(mh => (
+                    <div key={mh.label} className="flex items-center justify-between py-2 border-b border-border/50 last:border-0">
+                      <span className="text-sm">{mh.label}</span>
+                      {mh.active ? (
+                        <span className="flex items-center gap-1.5 text-sm font-semibold text-primary"><CheckCircle2 className="h-4 w-4" /> Vereist</span>
+                      ) : (
+                        <span className="flex items-center gap-1.5 text-sm text-muted-foreground"><XCircle className="h-4 w-4" /> Niet vereist</span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+                <div className="bg-secondary rounded-lg p-4 space-y-2 text-sm">
+                  <div className="flex justify-between"><span className="text-muted-foreground">Max reistijd golf</span><span className="font-display font-bold">{rules.maxGolfMinutes} min</span></div>
+                  {budgetMedian && <div className="flex justify-between"><span className="text-muted-foreground">Budget plafond</span><span className="font-display font-bold">€{budgetMedian}</span></div>}
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Locatievoorkeur</span>
+                    <span className="font-display font-bold">{countVotes("base_choice", "golf") > countVotes("base_choice", "beach") ? "Bij golfbaan" : countVotes("base_choice", "beach") > countVotes("base_choice", "golf") ? "Bij strand" : "Neutraal"}</span>
+                  </div>
+                </div>
+                <div className="mt-4">
+                  <VoteBar items={[
+                    { label: "Golf", count: countVotes("base_choice", "golf") },
+                    { label: "Strand", count: countVotes("base_choice", "beach") },
+                    { label: "Neutraal", count: countVotes("base_choice", "neutral") },
+                  ]} total={lockedSubs.length} />
+                </div>
+                <ReactionBar section="accommodatie" reactions={reactions} profiles={profiles} onToggle={handleToggleReaction} />
+                <SectionComments section="accommodatie" comments={comments} profiles={profiles} onAdd={handleAddComment} onDelete={handleDeleteComment} />
+              </AccordionContent>
+            </AccordionItem>
 
-        {/* ═══════════ ACTIVITEITEN ═══════════ */}
-        <ResultSection icon={<Dumbbell className="h-4 w-4" />} title="Activiteiten" number={5}>
-          {Object.keys(activityCounts).length > 0 ? (
-            <div className="space-y-3">
-              <p className="text-sm text-muted-foreground">Wat willen we doen naast golf?</p>
-              <div className="space-y-2">
-                {Object.entries(activityCounts).sort(([, a], [, b]) => b - a).map(([act, count]) => (
-                  <div key={act} className="flex items-center justify-between py-2 border-b border-border/50 last:border-0">
-                    <span className="text-sm">{act}</span>
-                    <div className="flex items-center gap-2">
-                      <div className="w-20 bg-secondary rounded-full h-2 overflow-hidden">
-                        <div className="bg-primary h-full rounded-full" style={{ width: `${(count / lockedSubs.length) * 100}%` }} />
+            {/* PRIORITEITEN */}
+            <AccordionItem value="prioriteiten" className="border rounded-lg border-border/60 overflow-hidden">
+              <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-accent/5">
+                <div className="flex items-center gap-2">
+                  <div className="h-7 w-7 rounded-full bg-primary/10 flex items-center justify-center text-primary font-display font-extrabold text-xs">3</div>
+                  <BarChart3 className="h-4 w-4 text-primary" />
+                  <span className="font-display font-bold text-sm">Prioriteiten</span>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="px-4 pb-4">
+                <p className="text-sm text-muted-foreground mb-4">Gemiddelde puntenverdeling van de groep</p>
+                <div className="space-y-3">
+                  {pointsData.map((p, i) => (
+                    <div key={p.label}>
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-sm flex items-center gap-2"><span>{p.emoji}</span> {p.label} {i === 0 && <Badge className="text-[9px] ml-1">Hoogste</Badge>}</span>
+                        <span className="font-display font-bold text-sm tabular-nums">{p.value.toFixed(0)}</span>
                       </div>
-                      <span className="text-xs font-bold tabular-nums text-muted-foreground">{count}/{lockedSubs.length}</span>
+                      <div className="w-full bg-secondary rounded-full h-3 overflow-hidden">
+                        <div className="bg-primary h-full rounded-full transition-all duration-500" style={{ width: `${Math.min(p.value * 2.5, 100)}%` }} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <ReactionBar section="prioriteiten" reactions={reactions} profiles={profiles} onToggle={handleToggleReaction} />
+                <SectionComments section="prioriteiten" comments={comments} profiles={profiles} onAdd={handleAddComment} onDelete={handleDeleteComment} />
+              </AccordionContent>
+            </AccordionItem>
+
+            {/* ETEN */}
+            <AccordionItem value="eten" className="border rounded-lg border-border/60 overflow-hidden">
+              <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-accent/5">
+                <div className="flex items-center gap-2">
+                  <div className="h-7 w-7 rounded-full bg-primary/10 flex items-center justify-center text-primary font-display font-extrabold text-xs">4</div>
+                  <UtensilsCrossed className="h-4 w-4 text-primary" />
+                  <span className="font-display font-bold text-sm">Eten & drinken</span>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="px-4 pb-4">
+                {Object.keys(dietCounts).length > 0 ? (
+                  <div className="space-y-3">
+                    <p className="text-sm text-muted-foreground">Eetvoorkeuren binnen de groep</p>
+                    <div className="flex flex-wrap gap-2">
+                      {Object.entries(dietCounts).sort(([, a], [, b]) => b - a).map(([diet, count]) => (
+                        <Badge key={diet} variant="secondary" className="text-xs py-1 px-3">{diet} <span className="font-bold ml-1.5">{count}×</span></Badge>
+                      ))}
                     </div>
                   </div>
-                ))}
-              </div>
-            </div>
-          ) : (
-            <p className="text-sm text-muted-foreground italic">Geen activiteiten opgegeven</p>
-          )}
-          <ReactionBar section="activiteiten" reactions={reactions} profiles={profiles} onToggle={handleToggleReaction} />
-          <SectionComments section="activiteiten" comments={comments} profiles={profiles} onAdd={handleAddComment} onDelete={handleDeleteComment} />
-        </ResultSection>
+                ) : (
+                  <p className="text-sm text-muted-foreground italic">Geen specifieke eetvoorkeuren</p>
+                )}
+                {allDietRemarks.length > 0 && (
+                  <div className="mt-4 space-y-2">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Opmerkingen</p>
+                    {allDietRemarks.map((r, i) => (
+                      <div key={i} className="bg-secondary rounded-lg p-3 text-sm">
+                        <span className="font-semibold">{r.user}:</span> <span className="text-muted-foreground italic">{r.text}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                <ReactionBar section="eten" reactions={reactions} profiles={profiles} onToggle={handleToggleReaction} />
+                <SectionComments section="eten" comments={comments} profiles={profiles} onAdd={handleAddComment} onDelete={handleDeleteComment} />
+              </AccordionContent>
+            </AccordionItem>
 
-        {/* ═══════════ OPMERKINGEN ═══════════ */}
+            {/* ACTIVITEITEN */}
+            <AccordionItem value="activiteiten" className="border rounded-lg border-border/60 overflow-hidden">
+              <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-accent/5">
+                <div className="flex items-center gap-2">
+                  <div className="h-7 w-7 rounded-full bg-primary/10 flex items-center justify-center text-primary font-display font-extrabold text-xs">5</div>
+                  <Dumbbell className="h-4 w-4 text-primary" />
+                  <span className="font-display font-bold text-sm">Activiteiten</span>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="px-4 pb-4">
+                {Object.keys(activityCounts).length > 0 ? (
+                  <div className="space-y-3">
+                    <p className="text-sm text-muted-foreground">Wat willen we doen naast golf?</p>
+                    <div className="space-y-2">
+                      {Object.entries(activityCounts).sort(([, a], [, b]) => b - a).map(([act, count]) => (
+                        <div key={act} className="flex items-center justify-between py-2 border-b border-border/50 last:border-0">
+                          <span className="text-sm">{act}</span>
+                          <div className="flex items-center gap-2">
+                            <div className="w-20 bg-secondary rounded-full h-2 overflow-hidden">
+                              <div className="bg-primary h-full rounded-full" style={{ width: `${(count / lockedSubs.length) * 100}%` }} />
+                            </div>
+                            <span className="text-xs font-bold tabular-nums text-muted-foreground">{count}/{lockedSubs.length}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground italic">Geen activiteiten opgegeven</p>
+                )}
+                <ReactionBar section="activiteiten" reactions={reactions} profiles={profiles} onToggle={handleToggleReaction} />
+                <SectionComments section="activiteiten" comments={comments} profiles={profiles} onAdd={handleAddComment} onDelete={handleDeleteComment} />
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+        </div>
+
+        {/* Opmerkingen */}
         {allRemarks.length > 0 && (
           <section className="px-6 py-8 border-t">
             <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-4">💬 Opmerkingen van deelnemers</p>
             <div className="space-y-2">
               {allRemarks.map((r, i) => (
                 <div key={i} className="bg-secondary rounded-lg p-3 text-sm">
-                  <span className="font-semibold">{r.user}:</span>{" "}
-                  <span className="text-muted-foreground italic">{r.text}</span>
+                  <span className="font-semibold">{r.user}:</span> <span className="text-muted-foreground italic">{r.text}</span>
                 </div>
               ))}
             </div>
@@ -526,29 +462,10 @@ export default function Uitslag() {
 
         {/* Footer */}
         <section className="bg-foreground px-6 py-8 text-center">
-          <p className="text-white/40 text-xs">
-            Resultaten op basis van {lockedSubs.length} van 6 intakes
-          </p>
+          <p className="text-white/40 text-xs">Resultaten op basis van {lockedSubs.length} van 6 intakes</p>
         </section>
       </div>
     </AppLayout>
-  );
-}
-
-function ResultSection({ icon, title, number, children }: { icon: React.ReactNode; title: string; number: number; children: React.ReactNode }) {
-  return (
-    <section className="px-6 py-8 border-t">
-      <div className="flex items-center gap-3 mb-5">
-        <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-display font-extrabold text-sm">
-          {number}
-        </div>
-        <div className="flex items-center gap-2">
-          {icon}
-          <h2 className="font-display text-lg font-extrabold">{title}</h2>
-        </div>
-      </div>
-      {children}
-    </section>
   );
 }
 
@@ -556,15 +473,9 @@ function VoteBar({ items, total }: { items: { label: string; count: number }[]; 
   return (
     <div className="flex gap-2">
       {items.map(item => {
-        const pct = total > 0 ? (item.count / total) * 100 : 0;
         const isMajority = item.count >= Math.ceil(total / 2);
         return (
-          <div
-            key={item.label}
-            className={`flex-1 text-center rounded-lg py-3 text-xs font-medium transition-colors ${
-              isMajority ? "bg-primary/10 text-primary border border-primary/20" : "bg-secondary text-muted-foreground"
-            }`}
-          >
+          <div key={item.label} className={`flex-1 text-center rounded-lg py-3 text-xs font-medium transition-colors ${isMajority ? "bg-primary/10 text-primary border border-primary/20" : "bg-secondary text-muted-foreground"}`}>
             <p className="font-display font-extrabold text-lg">{item.count}</p>
             <p className="mt-0.5">{item.label}</p>
           </div>

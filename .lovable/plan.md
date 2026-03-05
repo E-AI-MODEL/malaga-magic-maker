@@ -1,25 +1,29 @@
 
 
-## Twee issues gevonden
+## Analyse: rechtenmodel in het huidige plan
 
-### 1. BottomNav: "Dashboard" label + hamburger-menu icoon
-De eerste tab heet "Dashboard" met een `LayoutDashboard` icoon, en de "Meer" knop gebruikt een `Menu` (hamburger) icoon. Dit is verwarrend -- "Dashboard" is geen duidelijke naam voor de taken-pagina, en het hamburger-icoon suggereert een volledig navigatiemenu.
+Het bestaande rechtenmodel in de code is al drielaags:
 
-**Fix:**
-- Hernoem "Dashboard" naar **"Taken"** (dat is waar `/taken` naartoe gaat)
-- Vervang `LayoutDashboard` icoon door `CheckCircle2` of `ClipboardList` (past beter bij taken)
-- Vervang het `Menu` (hamburger) icoon door `MoreHorizontal` of `Grid2X2` (drie puntjes / grid -- duidelijker voor "meer opties")
+1. **`canEditTask(task)`** (regel 155-159) — retourneert `true` voor admin, eigenaar (`assigned_to`) en backup (`backup_to`). Dit bewaakt de "Bewerken" knop, voortgang, details-editor en foto-upload.
+2. **`isAdmin`** (regel 488) — bewaakt eigenaar/backup-selectie, kosten, betaald-door, cost-split en taak-verwijderen.
+3. **Overige gebruikers** — zien alleen read-only content, foto's, context-link, reacties en comments.
 
-### 2. Accommodaties disclaimer popup verwijderen
-De "Ter indicatie" disclaimer popup op de accommodatie-pagina moet volledig weg. Dit betekent:
-- Verwijder de `showDisclaimer` state
-- Verwijder de `Dialog` component met de disclaimer tekst
-- Verwijder de `localStorage` check
+### Antwoord op je vraag
 
-**Bestanden:**
+Ja, het goedgekeurde plan houdt hier rekening mee. Bij de refactor naar een Drawer/bottom sheet wordt het als volgt:
+
+| Functie | Wie ziet het | Waar |
+|---|---|---|
+| Taakdetails, foto's, voortgang-balk, context-link, reacties, comments | **Iedereen** | Hoofdkaart (altijd zichtbaar) |
+| Voortgang-knoppen, details bewerken, foto upload | **Eigenaar + Backup + Admin** | Drawer (via `canEditTask`) |
+| Eigenaar/backup toewijzen, kosten, betaald-door, cost-split, taak verwijderen | **Alleen Admin** | Drawer (via `isAdmin`, apart admin-blok) |
+| Tandwiel-icoon om Drawer te openen | **Eigenaar + Backup + Admin** | Hoofdkaart (alleen zichtbaar als `canEditTask` true is) |
+
+De bestaande `canEditTask` functie en `isAdmin` check worden 1-op-1 overgenomen in de Drawer. Normale gebruikers zien het tandwiel-icoon niet en kunnen de Drawer niet openen. Het RLS-beleid op de `tasks` tabel bevestigt dit ook server-side (alleen admin, owner of backup kan updaten).
+
+### Implementatie
 
 | Bestand | Wijziging |
 |---|---|
-| `src/components/BottomNav.tsx` | Hernoem "Dashboard" → "Taken", vervang iconen |
-| `src/pages/Accommodations.tsx` | Verwijder disclaimer Dialog volledig |
+| `src/pages/Taken.tsx` | Verplaats edit/admin blokken (regels 391-583) naar een `Drawer` component. Toon het tandwiel-icoon alleen als `canEditTask(task)`. Binnen de Drawer: bovenaan de owner/backup-controls (`canEditTask`), onderaan de admin-only sectie (`isAdmin`). |
 

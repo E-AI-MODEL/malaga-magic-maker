@@ -1,45 +1,61 @@
-## Plan: Gestructureerde taakinvoer, foto-lightbox en uitklapbare vluchtgegevens
+
+
+## Plan: Bewerk/Opslaan flow, @mentions in commentaren, en notificaties
+
+### Samenvatting
+De taakdetails worden niet meer automatisch opgeslagen maar via een expliciete "Bewerk"/"Opslaan" flow. Na opslaan ziet iedereen een gestileerde read-only weergave. Commentaren ondersteunen @mentions. Taakeigenaren krijgen een mini-notificatie bij inloggen over nieuwe reacties.
+
+---
 
 ### 1. Database migratie
 
-Voeg een `info_details` jsonb-kolom toe aan `tasks` (naast bestaand `info_text`):
+**Nieuwe tabel `notifications`:**
+- `id` uuid PK
+- `user_id` uuid (ontvanger)
+- `from_user_id` uuid (afzender)
+- `task_id` uuid nullable (referentie naar taak)
+- `message` text
+- `read` boolean default false
+- `created_at` timestamptz
 
-- Slaat gestructureerde velden op: `url`, `activity_date`, `activity_time`, `location`
-- Flexibel per taaktype (golfbaan URL vs. accommodatie-link vs. vluchtnummer)
-- `info_text` blijft bestaan als vrij notitieveld
+RLS: gebruiker kan alleen eigen notificaties lezen/updaten.
 
-### 2. Gestructureerde invoervelden (eigenaar/backup)
+---
 
-Vervang het enkele "Status update" textarea door meerdere compacte velden:
+### 2. Bewerk/Opslaan flow in Taken.tsx
 
-- **Link/URL** (input met globe-icoon) — bijv. link naar golfbaan, Airbnb
-- **Datum** (date input) — dag van de activiteit
-- **Tijd** (text input) — tijdstip
-- **Locatie** (text input) — naam locatie
-- **Notities** (textarea, kleiner) — vrije tekst
+**Huidige situatie:** Eigenaar/backup ziet altijd de invoervelden, auto-save op blur.
 
-Niet-bewerkbare gebruikers zien dit als een overzichtelijk kaartje met labels en waarden (geen lege velden tonen).
+**Nieuw:**
+- Eigenaar/backup/admin ziet standaard de **read-only weergave** (groene/gekleurde achtergrond, nette layout met iconen)
+- Een "Bewerken" knop schakelt naar edit-modus met de invoervelden
+- Een "Opslaan" knop slaat op en schakelt terug naar read-only
+- Voortgangsslider en foto-upload zijn ook onderdeel van de edit-modus
+- State `editingTaskId` bepaalt welke taak in edit-modus staat
 
-### 3. Foto lightbox
+---
 
-- Klik op miniatuurfoto opent een fullscreen overlay (Dialog) met de grote versie
-- Sluiten met X-knop of klik buiten het beeld
-- Miniaturen blijven in het 2-koloms grid
+### 3. @Mentions in commentaren (SectionComments.tsx)
 
-### 4. Vluchtgegevens uitklapbaar
+- Typ `@` in het invoerveld om een dropdown te tonen met alle profielnamen
+- Selecteer een naam om `@Naam` in te voegen
+- In de weergave worden @mentions vetgedrukt weergegeven
+- Bij het plaatsen van een comment met @mention wordt een notificatie aangemaakt voor de genoemde gebruiker
 
-- Wrap de vluchtgegevens-sectie in een Collapsible component
-- Header toont "Vluchtgegevens" met chevron, standaard ingeklapt
-- Zelfde stijl als de taakkaarten
+---
+
+### 4. Login-notificatie popup
+
+- Bij laden van de Taken-pagina worden ongelezen notificaties opgehaald
+- Een klein toast/popover toont "Je hebt X nieuwe reacties op je taken"
+- Klik om te sluiten markeert als gelezen
+- Gebruikt de bestaande `sonner` toast library
+
+---
 
 ### 5. Bestanden die wijzigen
 
-- **Database**: migratie voor `info_details jsonb default '{}'` op `tasks`
-- `**src/pages/Taken.tsx**`: 
-  - Gestructureerde invoervelden i.p.v. enkele textarea
-  - Overzichtelijke read-only weergave van details
-  - Foto-klik lightbox (Dialog)
-  - Vluchtgegevens in Collapsible
-- Geen nieuwe componenten nodig, alles past in Taken.tsx
+- **Database**: migratie voor `notifications` tabel + RLS
+- **`src/pages/Taken.tsx`**: bewerk/opslaan toggle, notificatie-check bij mount
+- **`src/components/SectionComments.tsx`**: @mention dropdown + notificatie insert bij comment
 
-Verplaats de sectie taken in de footer op de plek waar nu uitslag staat en uitslag op de plek waar nu taken staat. 

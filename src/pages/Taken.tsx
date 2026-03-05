@@ -9,6 +9,7 @@ import { Progress } from "@/components/ui/progress";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -202,7 +203,7 @@ export default function Taken() {
 
   return (
     <AppLayout>
-      <div className="-mx-4 -mt-6">
+      <div>
         {/* Header */}
         <section className="bg-foreground text-white px-6 py-8">
           <div className="flex items-start justify-between">
@@ -286,196 +287,214 @@ export default function Taken() {
             <p className="text-xs font-semibold uppercase tracking-[0.15em] text-primary">Taken</p>
           </div>
 
-          <div className="space-y-3">
-            {tasks.map(task => {
-              const isOpen = openTask === task.id;
-              const editable = canEditTask(task);
-              const isEditing = editingTaskId === task.id;
-              const contextLabel = SECTION_CONTEXT[task.section];
-              const details: InfoDetails = (task.info_details as any) || {};
+          <Accordion type="multiple" defaultValue={[...new Set(tasks.map(t => t.section))]} className="space-y-4">
+            {[...new Set(tasks.map(t => t.section))].map(section => {
+              const sectionLabels: Record<string, string> = {
+                transport: "🚗 Vervoer",
+                accommodatie: "🏠 Accommodatie",
+                golf: "⛳ Golf",
+                strand: "🏖️ Strand & omgeving",
+              };
+              const sectionTasks = tasks.filter(t => t.section === section);
 
               return (
-                <Collapsible key={task.id} open={isOpen} onOpenChange={(o) => setOpenTask(o ? task.id : null)}>
-                  <Card className="border-border/60 overflow-hidden">
-                    <CollapsibleTrigger asChild>
-                      <CardContent className="p-4 cursor-pointer hover:bg-accent/5 transition-colors">
-                        <div className="flex items-center justify-between gap-2 mb-3">
-                          <p className="font-display font-bold text-sm flex-1">{task.title}</p>
-                          <div className="flex items-center gap-2">
-                            <Badge variant="outline" className="text-[10px] font-mono tabular-nums border-primary/30 text-primary">
-                              {task.progress}%
-                            </Badge>
-                            <div className="bg-primary/10 rounded-full p-1.5">
-                              <ChevronDown className={`h-4 w-4 text-primary transition-transform ${isOpen ? "rotate-180" : ""}`} />
-                            </div>
-                          </div>
-                        </div>
-                        <div className="flex flex-wrap gap-1.5 mb-3">
-                          {task.assigned_to && (
-                            <Badge className="bg-primary/10 text-primary border-primary/20 text-[10px]">
-                              <User className="h-3 w-3 mr-1" />{task.assigned_to}
-                            </Badge>
-                          )}
-                          {task.backup_to && (
-                            <Badge variant="outline" className="text-[10px] text-muted-foreground">
-                              <Shield className="h-3 w-3 mr-1" />{task.backup_to}
-                            </Badge>
-                          )}
-                        </div>
-                        <Progress value={task.progress} className="h-2 rounded-full" />
-                      </CardContent>
-                    </CollapsibleTrigger>
+                <AccordionItem key={section} value={section} className="border rounded-lg border-border/60 overflow-hidden">
+                  <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-accent/5">
+                    <div className="flex items-center gap-2">
+                      <span className="font-display font-bold text-sm">{sectionLabels[section] || section}</span>
+                      <Badge variant="outline" className="text-[10px] font-mono tabular-nums border-primary/30 text-primary ml-auto">
+                        {Math.round(sectionTasks.reduce((a, t) => a + t.progress, 0) / sectionTasks.length)}%
+                      </Badge>
+                    </div>
+                  </AccordionTrigger>
+                  <AccordionContent className="px-0 pb-0">
+                    <div className="space-y-3 px-4 pb-4">
+                      {sectionTasks.map(task => {
+                        const isOpen = openTask === task.id;
+                        const editable = canEditTask(task);
+                        const isEditing = editingTaskId === task.id;
+                        const contextLabel = SECTION_CONTEXT[task.section];
+                        const details: InfoDetails = (task.info_details as any) || {};
 
-                    <CollapsibleContent>
-                      <div className="px-4 pb-4 space-y-4 border-t border-border/40 pt-4">
+                        return (
+                          <Collapsible key={task.id} open={isOpen} onOpenChange={(o) => setOpenTask(o ? task.id : null)}>
+                            <Card className="border-border/60 overflow-hidden">
+                              <CollapsibleTrigger asChild>
+                                <CardContent className="p-4 cursor-pointer hover:bg-accent/5 transition-colors">
+                                  <div className="flex items-center justify-between gap-2 mb-3">
+                                    <p className="font-display font-bold text-sm flex-1">{task.title}</p>
+                                    <div className="flex items-center gap-2">
+                                      <Badge variant="outline" className="text-[10px] font-mono tabular-nums border-primary/30 text-primary">
+                                        {task.progress}%
+                                      </Badge>
+                                      <div className="bg-primary/10 rounded-full p-1.5">
+                                        <ChevronDown className={`h-4 w-4 text-primary transition-transform ${isOpen ? "rotate-180" : ""}`} />
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <div className="flex flex-wrap gap-1.5 mb-3">
+                                    {task.assigned_to && (
+                                      <Badge className="bg-primary/10 text-primary border-primary/20 text-[10px]">
+                                        <User className="h-3 w-3 mr-1" />{task.assigned_to}
+                                      </Badge>
+                                    )}
+                                    {task.backup_to && (
+                                      <Badge variant="outline" className="text-[10px] text-muted-foreground">
+                                        <Shield className="h-3 w-3 mr-1" />{task.backup_to}
+                                      </Badge>
+                                    )}
+                                  </div>
+                                  <Progress value={task.progress} className="h-2 rounded-full" />
+                                </CardContent>
+                              </CollapsibleTrigger>
 
-                        {editable && isEditing ? (
-                          <>
-                            {/* Edit mode: progress steps + structured fields + images + save */}
-                            <div className="bg-secondary/50 rounded-lg p-3">
-                              <label className="text-xs font-semibold text-muted-foreground mb-2 block">Voortgang</label>
-                              <div className="flex gap-1.5">
-                                {[0, 25, 50, 75, 100].map(step => (
-                                  <button
-                                    key={step}
-                                    onClick={() => handleProgressChange(task.id, [step])}
-                                    className={`flex-1 h-8 rounded-md text-xs font-semibold transition-colors ${
-                                      task.progress >= step
-                                        ? "bg-primary text-primary-foreground"
-                                        : "bg-secondary text-muted-foreground hover:bg-secondary/80"
-                                    }`}
-                                  >
-                                    {step}%
-                                  </button>
-                                ))}
-                              </div>
-                            </div>
+                              <CollapsibleContent>
+                                <div className="px-4 pb-4 space-y-4 border-t border-border/40 pt-4">
 
-                            <TaskDetailsEditor
-                              details={details}
-                              infoText={task.info_text || ""}
-                              onSave={(d, t) => handleDetailsSave(task.id, d, t)}
-                            />
+                                  {editable && isEditing ? (
+                                    <>
+                                      <div className="bg-secondary/50 rounded-lg p-3">
+                                        <label className="text-xs font-semibold text-muted-foreground mb-2 block">Voortgang</label>
+                                        <div className="flex gap-1.5">
+                                          {[0, 25, 50, 75, 100].map(step => (
+                                            <button
+                                              key={step}
+                                              onClick={() => handleProgressChange(task.id, [step])}
+                                              className={`flex-1 h-8 rounded-md text-xs font-semibold transition-colors ${
+                                                task.progress >= step
+                                                  ? "bg-primary text-primary-foreground"
+                                                  : "bg-secondary text-muted-foreground hover:bg-secondary/80"
+                                              }`}
+                                            >
+                                              {step}%
+                                            </button>
+                                          ))}
+                                        </div>
+                                      </div>
 
-                            {/* Images in edit mode */}
-                            <div>
-                              {task.info_image_urls.length > 0 && (
-                                <div className="grid grid-cols-2 gap-2 mb-2">
-                                  {task.info_image_urls.map((url, i) => (
-                                    <div key={i} className="relative group rounded-lg overflow-hidden border border-border cursor-pointer"
-                                      onClick={() => setLightboxUrl(url)}>
-                                      <img src={url} alt="" className="w-full h-24 object-cover" />
+                                      <TaskDetailsEditor
+                                        details={details}
+                                        infoText={task.info_text || ""}
+                                        onSave={(d, t) => handleDetailsSave(task.id, d, t)}
+                                      />
+
+                                      <div>
+                                        {task.info_image_urls.length > 0 && (
+                                          <div className="grid grid-cols-2 gap-2 mb-2">
+                                            {task.info_image_urls.map((url, i) => (
+                                              <div key={i} className="relative group rounded-lg overflow-hidden border border-border cursor-pointer"
+                                                onClick={() => setLightboxUrl(url)}>
+                                                <img src={url} alt="" className="w-full h-24 object-cover" />
+                                                <button
+                                                  onClick={(e) => { e.stopPropagation(); handleRemoveImage(task.id, url); }}
+                                                  className="absolute top-1 right-1 bg-destructive text-destructive-foreground rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                                                >
+                                                  <X className="h-3 w-3" />
+                                                </button>
+                                              </div>
+                                            ))}
+                                          </div>
+                                        )}
+                                        <label className="inline-flex items-center gap-1.5 text-xs text-primary cursor-pointer hover:underline">
+                                          <Upload className="h-3 w-3" />
+                                          {uploading ? "Uploaden..." : "Foto toevoegen"}
+                                          <input
+                                            type="file"
+                                            accept="image/*"
+                                            className="hidden"
+                                            onChange={(e) => e.target.files?.[0] && handleImageUpload(task.id, e.target.files[0])}
+                                            disabled={uploading}
+                                          />
+                                        </label>
+                                      </div>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <TaskDetailsReadonly details={details} infoText={task.info_text} />
+
+                                      {task.info_image_urls.length > 0 && (
+                                        <div className="grid grid-cols-2 gap-2">
+                                          {task.info_image_urls.map((url, i) => (
+                                            <div key={i} className="rounded-lg overflow-hidden border border-border cursor-pointer"
+                                              onClick={() => setLightboxUrl(url)}>
+                                              <img src={url} alt="" className="w-full h-24 object-cover" />
+                                            </div>
+                                          ))}
+                                        </div>
+                                      )}
+
+                                      {editable && (
+                                        <Button
+                                          variant="outline"
+                                          size="sm"
+                                          className="h-8 text-xs gap-1.5"
+                                          onClick={() => setEditingTaskId(task.id)}
+                                        >
+                                          <Pencil className="h-3 w-3" />
+                                          Bewerken
+                                        </Button>
+                                      )}
+                                    </>
+                                  )}
+
+                                  {contextLabel && (
+                                    <div className="pt-2 border-t border-border/40">
                                       <button
-                                        onClick={(e) => { e.stopPropagation(); handleRemoveImage(task.id, url); }}
-                                        className="absolute top-1 right-1 bg-destructive text-destructive-foreground rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                                        onClick={() => navigate(`/taken/${task.section}`)}
+                                        className="inline-flex items-center gap-1.5 text-xs text-primary font-medium hover:underline"
                                       >
-                                        <X className="h-3 w-3" />
+                                        {contextLabel} <ChevronRight className="h-3 w-3" />
                                       </button>
                                     </div>
-                                  ))}
-                                </div>
-                              )}
-                              <label className="inline-flex items-center gap-1.5 text-xs text-primary cursor-pointer hover:underline">
-                                <Upload className="h-3 w-3" />
-                                {uploading ? "Uploaden..." : "Foto toevoegen"}
-                                <input
-                                  type="file"
-                                  accept="image/*"
-                                  className="hidden"
-                                  onChange={(e) => e.target.files?.[0] && handleImageUpload(task.id, e.target.files[0])}
-                                  disabled={uploading}
-                                />
-                              </label>
-                            </div>
-                          </>
-                        ) : (
-                          <>
-                            {/* Read-only view for everyone */}
-                            <TaskDetailsReadonly details={details} infoText={task.info_text} />
+                                  )}
 
-                            {/* Images read-only with lightbox */}
-                            {task.info_image_urls.length > 0 && (
-                              <div className="grid grid-cols-2 gap-2">
-                                {task.info_image_urls.map((url, i) => (
-                                  <div key={i} className="rounded-lg overflow-hidden border border-border cursor-pointer"
-                                    onClick={() => setLightboxUrl(url)}>
-                                    <img src={url} alt="" className="w-full h-24 object-cover" />
+                                  {isAdmin && (
+                                    <div className="grid grid-cols-2 gap-2 pt-2 border-t border-border/40">
+                                      <div>
+                                        <label className="text-[10px] font-semibold text-muted-foreground mb-1 block">Eigenaar</label>
+                                        <Select value={task.assigned_to || ""} onValueChange={(v) => handleAssign(task.id, "assigned_to", v)}>
+                                          <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Kies..." /></SelectTrigger>
+                                          <SelectContent>
+                                            {profiles.map(p => <SelectItem key={p.id} value={p.display_name}>{p.display_name}</SelectItem>)}
+                                          </SelectContent>
+                                        </Select>
+                                      </div>
+                                      <div>
+                                        <label className="text-[10px] font-semibold text-muted-foreground mb-1 block">Backup</label>
+                                        <Select value={task.backup_to || ""} onValueChange={(v) => handleAssign(task.id, "backup_to", v)}>
+                                          <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Kies..." /></SelectTrigger>
+                                          <SelectContent>
+                                            {profiles.map(p => <SelectItem key={p.id} value={p.display_name}>{p.display_name}</SelectItem>)}
+                                          </SelectContent>
+                                        </Select>
+                                      </div>
+                                    </div>
+                                  )}
+
+                                  <div className="pt-3 border-t border-border/40 space-y-2">
+                                    <ReactionBar section={`task-${task.id}`} reactions={reactions} profiles={profiles} onToggle={handleToggleReaction} />
+                                    <SectionComments
+                                      section={`task-${task.id}`}
+                                      comments={comments}
+                                      profiles={profiles}
+                                      onAdd={handleAddComment}
+                                      onDelete={handleDeleteComment}
+                                      taskId={task.id}
+                                      taskTitle={task.title}
+                                    />
                                   </div>
-                                ))}
-                              </div>
-                            )}
-
-                            {/* Bewerk button for owner/backup/admin */}
-                            {editable && (
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="h-8 text-xs gap-1.5"
-                                onClick={() => setEditingTaskId(task.id)}
-                              >
-                                <Pencil className="h-3 w-3" />
-                                Bewerken
-                              </Button>
-                            )}
-                          </>
-                        )}
-
-                        {/* Context link */}
-                        {contextLabel && (
-                          <div className="pt-2 border-t border-border/40">
-                            <button
-                              onClick={() => navigate(`/taken/${task.section}`)}
-                              className="inline-flex items-center gap-1.5 text-xs text-primary font-medium hover:underline"
-                            >
-                              {contextLabel} <ChevronRight className="h-3 w-3" />
-                            </button>
-                          </div>
-                        )}
-
-                        {/* Admin assign */}
-                        {isAdmin && (
-                          <div className="grid grid-cols-2 gap-2 pt-2 border-t border-border/40">
-                            <div>
-                              <label className="text-[10px] font-semibold text-muted-foreground mb-1 block">Eigenaar</label>
-                              <Select value={task.assigned_to || ""} onValueChange={(v) => handleAssign(task.id, "assigned_to", v)}>
-                                <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Kies..." /></SelectTrigger>
-                                <SelectContent>
-                                  {profiles.map(p => <SelectItem key={p.id} value={p.display_name}>{p.display_name}</SelectItem>)}
-                                </SelectContent>
-                              </Select>
-                            </div>
-                            <div>
-                              <label className="text-[10px] font-semibold text-muted-foreground mb-1 block">Backup</label>
-                              <Select value={task.backup_to || ""} onValueChange={(v) => handleAssign(task.id, "backup_to", v)}>
-                                <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Kies..." /></SelectTrigger>
-                                <SelectContent>
-                                  {profiles.map(p => <SelectItem key={p.id} value={p.display_name}>{p.display_name}</SelectItem>)}
-                                </SelectContent>
-                              </Select>
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Reactions & Comments */}
-                        <div className="pt-3 border-t border-border/40 space-y-2">
-                          <ReactionBar section={`task-${task.id}`} reactions={reactions} profiles={profiles} onToggle={handleToggleReaction} />
-                          <SectionComments
-                          section={`task-${task.id}`}
-                          comments={comments}
-                          profiles={profiles}
-                          onAdd={handleAddComment}
-                          onDelete={handleDeleteComment}
-                          taskId={task.id}
-                          taskTitle={task.title}
-                          />
-                        </div>
-                      </div>
-                    </CollapsibleContent>
-                  </Card>
-                </Collapsible>
+                                </div>
+                              </CollapsibleContent>
+                            </Card>
+                          </Collapsible>
+                        );
+                      })}
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
               );
             })}
-          </div>
+          </Accordion>
         </section>
 
         {/* Lightbox */}

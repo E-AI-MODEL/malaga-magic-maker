@@ -10,7 +10,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
   const { profile, signOut } = useAuth();
 
   return (
-      <div className="min-h-screen pb-20 bg-background">
+      <div className="min-h-screen pb-20 bg-background overflow-x-hidden">
         <header className="sticky top-0 z-40 bg-foreground text-background">
           <div className="flex items-center justify-between px-4 py-2.5 max-w-2xl mx-auto">
             <h1 className="font-display text-xs font-extrabold uppercase tracking-[0.15em]">

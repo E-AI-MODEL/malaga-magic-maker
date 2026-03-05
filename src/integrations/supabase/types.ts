@@ -397,6 +397,7 @@ export type Database = {
           backup_to: string | null
           created_at: string
           id: string
+          info_details: Json
           info_image_urls: string[]
           info_text: string | null
           progress: number
@@ -411,6 +412,7 @@ export type Database = {
           backup_to?: string | null
           created_at?: string
           id?: string
+          info_details?: Json
           info_image_urls?: string[]
           info_text?: string | null
           progress?: number
@@ -425,6 +427,7 @@ export type Database = {
           backup_to?: string | null
           created_at?: string
           id?: string
+          info_details?: Json
           info_image_urls?: string[]
           info_text?: string | null
           progress?: number

@@ -433,11 +433,13 @@ export type Database = {
         Row: {
           assigned_to: string | null
           backup_to: string | null
+          cost: number | null
           created_at: string
           id: string
           info_details: Json
           info_image_urls: string[]
           info_text: string | null
+          paid_by: string | null
           progress: number
           section: string
           sort_order: number
@@ -448,11 +450,13 @@ export type Database = {
         Insert: {
           assigned_to?: string | null
           backup_to?: string | null
+          cost?: number | null
           created_at?: string
           id?: string
           info_details?: Json
           info_image_urls?: string[]
           info_text?: string | null
+          paid_by?: string | null
           progress?: number
           section: string
           sort_order?: number
@@ -463,11 +467,13 @@ export type Database = {
         Update: {
           assigned_to?: string | null
           backup_to?: string | null
+          cost?: number | null
           created_at?: string
           id?: string
           info_details?: Json
           info_image_urls?: string[]
           info_text?: string | null
+          paid_by?: string | null
           progress?: number
           section?: string
           sort_order?: number

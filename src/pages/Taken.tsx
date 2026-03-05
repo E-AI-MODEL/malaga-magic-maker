@@ -35,6 +35,7 @@ interface Task {
   backup_to: string | null; status: string; sort_order: number;
   voting_closed: boolean; progress: number; info_text: string | null;
   info_image_urls: string[]; info_details: InfoDetails;
+  cost: number | null; paid_by: string | null;
 }
 interface TravelLeg {
   id: string; passengers: string[]; departure_time: string | null;
@@ -373,6 +374,12 @@ export default function Taken() {
                                         <Shield className="h-3 w-3 mr-1" />{task.backup_to}
                                       </Badge>
                                     )}
+                                    {task.cost != null && task.cost > 0 && (
+                                      <Badge variant="secondary" className="text-[10px] tabular-nums">
+                                        €{task.cost.toFixed(0)}
+                                        {task.paid_by && <span className="ml-1 text-muted-foreground">· {task.paid_by}</span>}
+                                      </Badge>
+                                    )}
                                   </div>
                                   <Progress value={task.progress} className="h-2 rounded-full" />
                                 </CardContent>
@@ -493,6 +500,30 @@ export default function Taken() {
                                         <div>
                                           <label className="text-[10px] font-semibold text-muted-foreground mb-1 block">Backup</label>
                                           <Select value={task.backup_to || ""} onValueChange={(v) => handleAssign(task.id, "backup_to", v)}>
+                                            <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Kies..." /></SelectTrigger>
+                                            <SelectContent>
+                                              {profiles.map(p => <SelectItem key={p.id} value={p.display_name}>{p.display_name}</SelectItem>)}
+                                            </SelectContent>
+                                          </Select>
+                                        </div>
+                                      </div>
+                                      <div className="grid grid-cols-2 gap-2">
+                                        <div>
+                                          <label className="text-[10px] font-semibold text-muted-foreground mb-1 block">Kosten (€)</label>
+                                          <Input
+                                            type="number"
+                                            placeholder="0"
+                                            className="h-8 text-xs"
+                                            defaultValue={task.cost ?? ""}
+                                            onBlur={e => {
+                                              const val = e.target.value ? parseFloat(e.target.value) : null;
+                                              supabase.from("tasks").update({ cost: val } as any).eq("id", task.id).then(() => {});
+                                            }}
+                                          />
+                                        </div>
+                                        <div>
+                                          <label className="text-[10px] font-semibold text-muted-foreground mb-1 block">Betaald door</label>
+                                          <Select value={task.paid_by || ""} onValueChange={v => { supabase.from("tasks").update({ paid_by: v || null } as any).eq("id", task.id); }}>
                                             <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Kies..." /></SelectTrigger>
                                             <SelectContent>
                                               {profiles.map(p => <SelectItem key={p.id} value={p.display_name}>{p.display_name}</SelectItem>)}

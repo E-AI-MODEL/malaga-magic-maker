@@ -333,7 +333,6 @@ export default function Taken() {
             {lightboxUrl && <img src={lightboxUrl} alt="" className="w-full h-full object-contain rounded-lg" />}
           </DialogContent>
         </Dialog>
-      </PageTransition>
     </AppLayout>
   );
 }

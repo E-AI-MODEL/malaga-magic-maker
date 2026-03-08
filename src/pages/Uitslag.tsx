@@ -577,7 +577,6 @@ export default function Uitslag() {
         <section className="bg-foreground px-6 py-8 text-center">
           <p className="text-white/40 text-xs">Resultaten op basis van {lockedSubs.length} van {activeTrip?.group_size || 6} intakes</p>
         </section>
-      </PageTransition>
     </AppLayout>
   );
 }

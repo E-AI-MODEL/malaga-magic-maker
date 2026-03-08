@@ -10,11 +10,11 @@ import { toast } from "sonner";
 type Msg = { role: "user" | "assistant"; content: string };
 
 const CHIPS = [
-  { label: "🍽️ Restaurant tips", prompt: "Geef me 3-5 goede restauranttips in de buurt van onze accommodatie, passend bij ons groepsprofiel." },
-  { label: "🏖️ Dagtripjes", prompt: "Wat zijn leuke dagtripjes vanuit onze locatie voor onze groep?" },
-  { label: "⛳ Golfbanen", prompt: "Welke golfbanen in de buurt zijn het beste voor onze groep qua prijs en kwaliteit?" },
-  { label: "🌙 Avondprogramma", prompt: "Wat kunnen we 's avonds doen in de buurt? Denk aan bars, livemuziek, etc." },
-  { label: "🛒 Boodschappen", prompt: "Waar kunnen we het beste boodschappen doen en wat moeten we zeker kopen voor de groep?" },
+  { label: "Restaurant tips", icon: UtensilsCrossed, prompt: "Geef me 3-5 goede restauranttips in de buurt van onze accommodatie, passend bij ons groepsprofiel." },
+  { label: "Dagtripjes", icon: Map, prompt: "Wat zijn leuke dagtripjes vanuit onze locatie voor onze groep?" },
+  { label: "Golfbanen", icon: Flag, prompt: "Welke golfbanen in de buurt zijn het beste voor onze groep qua prijs en kwaliteit?" },
+  { label: "Avondprogramma", icon: Moon, prompt: "Wat kunnen we 's avonds doen in de buurt? Denk aan bars, livemuziek, etc." },
+  { label: "Boodschappen", icon: ShoppingCart, prompt: "Waar kunnen we het beste boodschappen doen en wat moeten we zeker kopen voor de groep?" },
 ];
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/trip-ai-chat`;

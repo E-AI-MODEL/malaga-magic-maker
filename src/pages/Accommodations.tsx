@@ -101,7 +101,7 @@ export default function Accommodations() {
           </Select>
           <div className="flex items-center gap-2">
             <Switch checked={eligibleOnly} onCheckedChange={(v) => { setEligibleOnly(v); logEvent("accommodation_list_filter", "/accommodations", `eligible_only:${v}`); }} id="eligible" />
-            <Label htmlFor="eligible" className="text-[11px] text-white/50 font-medium">Eligible only</Label>
+            <Label htmlFor="eligible" className="text-[11px] text-white/50 font-medium">Alleen geschikt</Label>
           </div>
         </div>
 

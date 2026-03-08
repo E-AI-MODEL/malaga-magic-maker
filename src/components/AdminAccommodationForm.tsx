@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useTrip } from "@/contexts/TripContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -8,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { firecrawlApi } from "@/lib/api/firecrawl";
-import { Loader2, Sparkles, Save, X } from "lucide-react";
+import { Loader2, Sparkles, Save, X, Upload, Image as ImageIcon, Trash2 } from "lucide-react";
 
 const TAG_OPTIONS = ["pool", "airco", "wifi", "parking", "terras", "zeezicht", "tuin", "bbq", "gym", "spa"];
 const TYPE_OPTIONS = ["apartment", "villa", "hotel", "resort", "house"];
@@ -33,7 +34,7 @@ interface AccommodationFormData {
   tags: string[];
   parking: string;
   cancellation_type: string;
-  image_urls: string;
+  image_urls: string[];
   notes: string;
   sources: string;
 }
@@ -44,7 +45,7 @@ const emptyForm: AccommodationFormData = {
   bedrooms: 1, bathrooms: 1, fixed_beds_count: 2, max_guests: 2,
   golf_km: null, golf_minutes: null, beach_meters: null, agp_minutes: null,
   tags: [], parking: "unknown", cancellation_type: "unknown",
-  image_urls: "", notes: "", sources: "",
+  image_urls: [], notes: "", sources: "",
 };
 
 interface Props {
@@ -54,9 +55,12 @@ interface Props {
 }
 
 export function AdminAccommodationForm({ editId, onSaved, onCancel }: Props) {
+  const { activeTrip } = useTrip();
   const [form, setForm] = useState<AccommodationFormData>(emptyForm);
   const [scraping, setScraping] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [manualUrlInput, setManualUrlInput] = useState("");
 
   useEffect(() => {
     if (editId) loadExisting(editId);
@@ -73,7 +77,8 @@ export function AdminAccommodationForm({ editId, onSaved, onCancel }: Props) {
       max_guests: data.max_guests, golf_km: data.golf_km, golf_minutes: data.golf_minutes,
       beach_meters: data.beach_meters, agp_minutes: data.agp_minutes,
       tags: data.tags || [], parking: data.parking, cancellation_type: data.cancellation_type,
-      image_urls: (data.image_urls || []).join("\n"), notes: data.notes || "",
+      image_urls: data.image_urls || [],
+      notes: data.notes || "",
       sources: JSON.stringify(data.sources || [], null, 2),
     });
   };
@@ -82,6 +87,49 @@ export function AdminAccommodationForm({ editId, onSaved, onCancel }: Props) {
   const toggleTag = (tag: string) => setForm(f => ({
     ...f, tags: f.tags.includes(tag) ? f.tags.filter(t => t !== tag) : [...f.tags, tag]
   }));
+
+  const handleImageUpload = async (files: FileList) => {
+    setUploading(true);
+    const newUrls: string[] = [];
+
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const ext = file.name.split(".").pop();
+      const path = `${crypto.randomUUID()}.${ext}`;
+
+      const { error } = await supabase.storage
+        .from("accommodation-images")
+        .upload(path, file);
+
+      if (error) {
+        toast.error(`Upload mislukt: ${file.name}`);
+        continue;
+      }
+
+      const { data: urlData } = supabase.storage
+        .from("accommodation-images")
+        .getPublicUrl(path);
+
+      newUrls.push(urlData.publicUrl);
+    }
+
+    if (newUrls.length > 0) {
+      setForm(f => ({ ...f, image_urls: [...f.image_urls, ...newUrls] }));
+      toast.success(`${newUrls.length} afbeelding(en) geüpload`);
+    }
+    setUploading(false);
+  };
+
+  const handleRemoveImage = (url: string) => {
+    setForm(f => ({ ...f, image_urls: f.image_urls.filter(u => u !== url) }));
+  };
+
+  const handleAddManualUrl = () => {
+    const url = manualUrlInput.trim();
+    if (!url) return;
+    setForm(f => ({ ...f, image_urls: [...f.image_urls, url] }));
+    setManualUrlInput("");
+  };
 
   const handleScrape = async () => {
     if (!form.listing_url) { toast.error("Vul eerst een URL in"); return; }
@@ -93,7 +141,6 @@ export function AdminAccommodationForm({ editId, onSaved, onCancel }: Props) {
         return;
       }
       const md = res.data?.markdown || res.data?.data?.markdown || "";
-      // Try to extract title from markdown
       const titleMatch = md.match(/^#\s+(.+)/m);
       if (titleMatch && !form.name) set("name", titleMatch[1].trim());
       toast.success("Scrape voltooid — controleer de velden");
@@ -115,9 +162,10 @@ export function AdminAccommodationForm({ editId, onSaved, onCancel }: Props) {
       max_guests: form.max_guests, golf_km: form.golf_km, golf_minutes: form.golf_minutes,
       beach_meters: form.beach_meters, agp_minutes: form.agp_minutes,
       tags: form.tags, parking: form.parking, cancellation_type: form.cancellation_type,
-      image_urls: form.image_urls.split("\n").map(u => u.trim()).filter(Boolean),
+      image_urls: form.image_urls,
       notes: form.notes || null,
       sources: (() => { try { return JSON.parse(form.sources || "[]"); } catch { return []; } })(),
+      trip_id: activeTrip?.id || null,
     };
 
     let error;
@@ -270,10 +318,57 @@ export function AdminAccommodationForm({ editId, onSaved, onCancel }: Props) {
         </div>
       </div>
 
-      {/* Images */}
-      <div className="space-y-1">
-        <Label className="text-xs">Afbeelding-URLs (één per regel)</Label>
-        <Textarea value={form.image_urls} onChange={e => set("image_urls", e.target.value)} rows={3} placeholder="https://..." className="text-xs" />
+      {/* Images — Upload + URL + Preview */}
+      <div className="space-y-3">
+        <Label className="text-xs flex items-center gap-1.5">
+          <ImageIcon className="h-3.5 w-3.5" />
+          Afbeeldingen ({form.image_urls.length})
+        </Label>
+
+        {/* Thumbnails */}
+        {form.image_urls.length > 0 && (
+          <div className="grid grid-cols-3 gap-2">
+            {form.image_urls.map((url, i) => (
+              <div key={i} className="relative group rounded-lg overflow-hidden border border-border">
+                <img src={url} alt="" className="w-full h-20 object-cover" loading="lazy" />
+                <button
+                  onClick={() => handleRemoveImage(url)}
+                  className="absolute top-1 right-1 bg-destructive text-destructive-foreground rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Upload button */}
+        <label className="inline-flex items-center gap-2 text-xs bg-primary/10 text-primary rounded-lg px-3 py-2.5 cursor-pointer hover:bg-primary/20 transition-colors w-full justify-center font-medium">
+          <Upload className="h-3.5 w-3.5" />
+          {uploading ? "Uploaden..." : "Foto's uploaden"}
+          <input
+            type="file"
+            accept="image/*"
+            multiple
+            className="hidden"
+            onChange={(e) => e.target.files && e.target.files.length > 0 && handleImageUpload(e.target.files)}
+            disabled={uploading}
+          />
+        </label>
+
+        {/* Manual URL input */}
+        <div className="flex gap-2">
+          <Input
+            value={manualUrlInput}
+            onChange={e => setManualUrlInput(e.target.value)}
+            placeholder="Of plak een afbeelding-URL..."
+            className="flex-1 h-8 text-xs"
+            onKeyDown={e => e.key === "Enter" && handleAddManualUrl()}
+          />
+          <Button size="sm" variant="outline" className="h-8 text-xs" onClick={handleAddManualUrl} disabled={!manualUrlInput.trim()}>
+            Toevoegen
+          </Button>
+        </div>
       </div>
 
       {/* Notes */}
@@ -285,7 +380,7 @@ export function AdminAccommodationForm({ editId, onSaved, onCancel }: Props) {
       {/* Sources JSON */}
       <div className="space-y-1">
         <Label className="text-xs">Bronnen (JSON)</Label>
-        <Textarea value={form.sources} onChange={e => set("sources", e.target.value)} rows={2} placeholder='[{"platform":"booking","url":"..."}]' className="text-xs font-mono" />
+        <Textarea value={form.sources} onChange={e => set("sources", e.target.value)} rows={2} placeholder='[{"platform":"booking","url":"...","label":"Booking.com"}]' className="text-xs font-mono" />
       </div>
 
       {/* Actions */}

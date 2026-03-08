@@ -156,7 +156,7 @@ export default function Uitslag() {
 
   return (
     <AppLayout>
-      <div>
+      <PageTransition>
         {/* Header */}
         <section className="bg-foreground text-white px-6 py-10">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/40 mb-2">Gezamenlijke uitslag</p>

@@ -205,7 +205,7 @@ export default function Taken() {
 
   return (
     <AppLayout>
-      <div>
+      <PageTransition>
         <TripHero tasks={tasks} />
         <FlightSection travelLegs={travelLegs} isAdmin={isAdmin} onLegUpdate={handleLegUpdate} />
 

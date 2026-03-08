@@ -415,7 +415,7 @@ export default function Wensen() {
             )}
           </Accordion>
         </section>
-      </div>
+      </PageTransition>
     </AppLayout>
   );
 }

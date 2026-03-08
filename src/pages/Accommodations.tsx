@@ -155,12 +155,12 @@ function AccommodationCard({ acc, baseLabel, onDetail }: { acc: RankedAccommodat
 
         <div className="flex flex-wrap gap-1.5">
           {acc.eligibility.eligible ? (
-            <Badge className="bg-primary text-primary-foreground text-[10px] font-bold rounded-md">ELIGIBLE</Badge>
+            <Badge className="bg-primary text-primary-foreground text-[10px] font-bold rounded-md">GESCHIKT</Badge>
           ) : (
-            <Badge variant="destructive" className="text-[10px] font-bold rounded-md">NOT ELIGIBLE</Badge>
+            <Badge variant="destructive" className="text-[10px] font-bold rounded-md">NIET GESCHIKT</Badge>
           )}
           {acc.status === "finalist" && <Badge className="bg-warning text-warning-foreground text-[10px] font-bold rounded-md">FINALIST</Badge>}
-          {acc.status === "eliminated" && <Badge variant="outline" className="text-[10px] font-bold rounded-md">ELIMINATED</Badge>}
+          {acc.status === "eliminated" && <Badge variant="outline" className="text-[10px] font-bold rounded-md">AFGEVALLEN</Badge>}
         </div>
 
         <div className="grid grid-cols-4 gap-1 text-[11px] text-muted-foreground">

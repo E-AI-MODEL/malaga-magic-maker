@@ -75,7 +75,7 @@ export default function Onboarding() {
             Welkom bij <span className="text-primary">Vakansie</span>
           </h1>
           <p className="text-muted-foreground mt-2 text-sm">
-            Plan je vakansie met Hansie, wel zo makkelijk.
+            Plan je vakantie met Hansie... wel zo makkelijk.
           </p>
         </div>
 

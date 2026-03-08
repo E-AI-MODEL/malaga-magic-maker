@@ -146,12 +146,12 @@ export default function Uitslag() {
   ];
 
   const pointsData = avgPoints ? [
-    { label: "Golf gemak", value: avgPoints.golfEase, emoji: "⛳" },
-    { label: "Strandleven", value: avgPoints.beachLife, emoji: "🏖️" },
-    { label: "Omgeving verkennen", value: avgPoints.exploring, emoji: "🗺️" },
-    { label: "Luxe & comfort", value: avgPoints.luxury, emoji: "✨" },
-    { label: "Budget bewust", value: avgPoints.budget, emoji: "💰" },
-    { label: "Minimaal gedoe", value: avgPoints.lowHassle, emoji: "🧘" },
+    { label: "Golf gemak", value: avgPoints.golfEase, Icon: Flag },
+    { label: "Strandleven", value: avgPoints.beachLife, Icon: Umbrella },
+    { label: "Omgeving verkennen", value: avgPoints.exploring, Icon: Compass },
+    { label: "Luxe & comfort", value: avgPoints.luxury, Icon: Gem },
+    { label: "Budget bewust", value: avgPoints.budget, Icon: Wallet },
+    { label: "Minimaal gedoe", value: avgPoints.lowHassle, Icon: Heart },
   ].sort((a, b) => b.value - a.value) : [];
 
   return (

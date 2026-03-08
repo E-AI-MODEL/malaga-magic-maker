@@ -15,32 +15,55 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const playAttempted = useRef(false);
+  const videoStartedRef = useRef(false);
 
   const handleVideoEnd = () => {
     setShowForm(true);
   };
 
-  // Try to play the video — called from multiple events for robustness
+  // Best-practice mobile autoplay strategy:
+  // 1) attempt on load/canplay
+  // 2) retry on first user gesture (without showing play button)
   const tryPlay = () => {
-    if (playAttempted.current) return;
     const video = videoRef.current;
-    if (!video) return;
-    playAttempted.current = true;
-    video.play().catch(() => {
-      // Autoplay truly blocked — show form
-      setShowForm(true);
-    });
+    if (!video || videoStartedRef.current) return;
+
+    const playPromise = video.play();
+    if (playPromise && typeof playPromise.then === "function") {
+      playPromise
+        .then(() => {
+          videoStartedRef.current = true;
+        })
+        .catch(() => {
+          // Keep silent: we'll retry on user interaction automatically.
+        });
+    }
   };
 
-  // Fallback: if video hasn't started after 3s, show form anyway
+  useEffect(() => {
+    const onUserGesture = () => {
+      tryPlay();
+    };
+
+    document.addEventListener("touchstart", onUserGesture, { passive: true });
+    document.addEventListener("pointerdown", onUserGesture, { passive: true });
+    document.addEventListener("keydown", onUserGesture);
+
+    return () => {
+      document.removeEventListener("touchstart", onUserGesture);
+      document.removeEventListener("pointerdown", onUserGesture);
+      document.removeEventListener("keydown", onUserGesture);
+    };
+  }, []);
+
+  // Fallback: if video still didn't start after 4s, show form anyway
   useEffect(() => {
     const timer = setTimeout(() => {
-      const video = videoRef.current;
-      if (video && video.paused && !showForm) {
+      if (!videoStartedRef.current && !showForm) {
         setShowForm(true);
       }
-    }, 3000);
+    }, 4000);
+
     return () => clearTimeout(timer);
   }, [showForm]);
 
@@ -82,19 +105,22 @@ export default function Login() {
   return (
     <div className="relative min-h-screen flex items-end justify-center overflow-hidden bg-black">
       {/* Video background — plays once, freezes on last frame */}
-      {/* 
-        Mobile: use object-contain so the full video is visible (letterboxed).
-        Desktop: use object-cover for cinematic fill.
-      */}
       <video
         ref={videoRef}
         src="/videos/boot-sequence.mp4"
+        poster="/images/villa-mercedes-1.png"
         autoPlay
         muted
         playsInline
+        preload="auto"
         // @ts-ignore — webkit prefix for older iOS
         webkit-playsinline="true"
+        disablePictureInPicture
+        onPlay={() => {
+          videoStartedRef.current = true;
+        }}
         onEnded={handleVideoEnd}
+        onCanPlay={tryPlay}
         onCanPlayThrough={tryPlay}
         onLoadedData={tryPlay}
         className="absolute inset-0 w-full h-full object-contain sm:object-cover"

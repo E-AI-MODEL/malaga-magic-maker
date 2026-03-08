@@ -118,8 +118,55 @@ async function streamChat({
 
   onDone();
 }
+/** Split assistant markdown into intro + accordion sections by ## headers */
+function AssistantMessage({ content, isStreaming }: { content: string; isStreaming: boolean }) {
+  const sections = useMemo(() => {
+    const parts = content.split(/^## /m);
+    const intro = parts[0]?.trim() || "";
+    const items = parts.slice(1).map((part) => {
+      const newlineIdx = part.indexOf("\n");
+      const title = newlineIdx > -1 ? part.slice(0, newlineIdx).trim() : part.trim();
+      const body = newlineIdx > -1 ? part.slice(newlineIdx + 1).trim() : "";
+      return { title, body };
+    });
+    return { intro, items };
+  }, [content]);
 
-export default function Reisplanner() {
+  // While streaming or if no sections found, show plain markdown
+  if (isStreaming || sections.items.length === 0) {
+    return (
+      <div className="prose prose-sm dark:prose-invert max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
+        <ReactMarkdown>{content}</ReactMarkdown>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-3">
+      {sections.intro && (
+        <div className="prose prose-sm dark:prose-invert max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
+          <ReactMarkdown>{sections.intro}</ReactMarkdown>
+        </div>
+      )}
+      <Accordion type="multiple" className="space-y-1">
+        {sections.items.map((item, idx) => (
+          <AccordionItem key={idx} value={`s-${idx}`} className="border border-border/60 rounded-lg px-3 overflow-hidden">
+            <AccordionTrigger className="text-sm font-semibold py-2.5 hover:no-underline">
+              {item.title}
+            </AccordionTrigger>
+            <AccordionContent className="pb-3">
+              <div className="prose prose-sm dark:prose-invert max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
+                <ReactMarkdown>{item.body}</ReactMarkdown>
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+        ))}
+      </Accordion>
+    </div>
+  );
+}
+
+
   const { activeTrip } = useTrip();
   const { profile } = useAuth();
   const [messages, setMessages] = useState<Msg[]>([]);

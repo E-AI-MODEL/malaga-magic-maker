@@ -11,7 +11,7 @@ import { useAuth } from "@/lib/auth";
 import { useTrip } from "@/contexts/TripContext";
 import { ReactionBar } from "@/components/ReactionBar";
 import { SectionComments } from "@/components/SectionComments";
-import { HeroSkeleton, CardSkeleton } from "@/components/PageSkeleton";
+import { HeroSkeleton, CardSkeleton, PageTransition } from "@/components/PageSkeleton";
 
 interface Profile { id: string; username: string; display_name: string; }
 interface Reaction { id: string; user_id: string; section: string; emoji: string; }

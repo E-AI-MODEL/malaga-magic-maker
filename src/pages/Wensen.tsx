@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/AppLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
+import { useTrip } from "@/contexts/TripContext";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -12,6 +13,7 @@ import {
   Dumbbell, Star, Waves, Wind, Wifi, ParkingCircle, MapPin, DollarSign,
   BarChart3, Palmtree, Mountain, Sparkles, Zap
 } from "lucide-react";
+import { HeroSkeleton, CardSkeleton } from "@/components/PageSkeleton";
 
 interface Profile { id: string; username: string; display_name: string; }
 

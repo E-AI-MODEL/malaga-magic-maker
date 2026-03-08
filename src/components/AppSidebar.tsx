@@ -2,7 +2,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/lib/auth";
 import { useTrip } from "@/contexts/TripContext";
 import {
-  Sparkles,
+  Compass,
   ClipboardList,
   Info,
   BarChart3,
@@ -39,7 +39,7 @@ import { Button } from "@/components/ui/button";
 
 const mainLinks = [
   { to: "/taken", icon: ClipboardList, label: "Taken" },
-  { to: "/reisplanner", icon: Sparkles, label: "Planner" },
+  { to: "/reisplanner", icon: Compass, label: "AI-reisgids" },
   { to: "/info", icon: Info, label: "Info" },
   { to: "/uitslag", icon: BarChart3, label: "Uitslag" },
 ];

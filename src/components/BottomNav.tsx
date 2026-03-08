@@ -1,5 +1,5 @@
 import { NavLink, useNavigate } from "react-router-dom";
-import { BarChart3, Info, ClipboardList, MoreHorizontal, Home, Receipt, FileText, Settings, ListChecks, User, Sparkles } from "lucide-react";
+import { BarChart3, Info, ClipboardList, MoreHorizontal, Home, Receipt, FileText, Settings, ListChecks, User, Compass } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -56,8 +56,8 @@ export function BottomNav() {
             )}
           </NavLink>
           <NavLink to="/reisplanner" className={({ isActive }) => `${base} ${isActive ? active : inactive}`}>
-            <Sparkles className="h-4 w-4" />
-            <span>Planner</span>
+            <Compass className="h-4 w-4" />
+            <span>Reisgids</span>
           </NavLink>
           <NavLink to="/info" className={({ isActive }) => `${base} ${isActive ? active : inactive}`}>
             <Info className="h-4 w-4" />

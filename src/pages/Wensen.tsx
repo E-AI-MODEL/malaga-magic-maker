@@ -135,7 +135,7 @@ export default function Wensen() {
   });
 
   // Budget caps
-  const budgets = submissions.map(s => s.budget_cap_total).filter((b): b is number => b !== null && b > 0);
+  const budgets = submissions.map(s => s.budget_cap_total).filter((b): b is number => b !== null && b > 0 && b < 100000);
 
   // Remarks
   const allRemarks = submissions

@@ -187,7 +187,7 @@ function PrioritiesSection({ subs, config, n }: { subs: Submission[]; config: Tr
               const pct = Math.round((p.score / p.maxPoints) * 100);
               return (
                 <tr key={p.key} className="border-t border-border/40">
-                  <td className="px-3 py-2 font-medium">{p.emoji} {p.label}</td>
+                  <td className="px-3 py-2 font-medium">{p.label}</td>
                   <td className="text-center px-2 py-2 font-bold tabular-nums">{p.score.toFixed(0)}</td>
                   <td className="px-2 py-2">
                     <div className="flex items-center gap-2">

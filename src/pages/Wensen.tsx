@@ -154,7 +154,6 @@ export default function Wensen() {
 
   return (
     <AppLayout>
-      <PageTransition>
         {/* Header */}
         <section className="bg-foreground text-white px-6 py-8">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/40 mb-2">Overzicht</p>

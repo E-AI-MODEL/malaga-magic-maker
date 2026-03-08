@@ -472,7 +472,7 @@ export default function Uitslag() {
                     <div className="space-y-2">
                       {Object.entries(dietCounts).sort(([, a], [, b]) => b - a).map(([diet, count]) => (
                         <div key={diet} className="flex items-center justify-between py-2 border-b border-border/50 last:border-0">
-                          <span className="text-sm">{diet}</span>
+                          <span className="text-sm">{translateLabel(DIET_LABELS, diet)}</span>
                           <div className="flex items-center gap-2">
                             <div className="w-20 bg-secondary rounded-full h-2 overflow-hidden">
                               <div className="bg-primary h-full rounded-full" style={{ width: `${(count / lockedSubs.length) * 100}%` }} />

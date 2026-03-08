@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Plane, Users, ArrowRight, Ticket } from "lucide-react";
+import logo from "@/assets/vakansie-logo.png";
 
 type Step = "choose" | "create" | "join";
 

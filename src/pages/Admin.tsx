@@ -485,6 +485,30 @@ export default function Admin() {
 
           </Accordion>
         </div>
+
+        {/* Eliminatie AlertDialog */}
+        <AlertDialog open={!!eliminateTarget} onOpenChange={(open) => !open && setEliminateTarget(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Accommodatie elimineren</AlertDialogTitle>
+              <AlertDialogDescription>
+                Geef een reden op waarom deze accommodatie wordt geëlimineerd. Dit is zichtbaar in het overzicht.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <Textarea
+              placeholder="Reden voor eliminatie..."
+              value={eliminateReason}
+              onChange={e => setEliminateReason(e.target.value)}
+              className="min-h-[80px]"
+            />
+            <AlertDialogFooter>
+              <AlertDialogCancel>Annuleren</AlertDialogCancel>
+              <AlertDialogAction onClick={confirmEliminate} disabled={!eliminateReason.trim()} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                Elimineer
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </AppLayout>
   );

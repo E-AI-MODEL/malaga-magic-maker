@@ -578,7 +578,20 @@ export default function Admin() {
               </AccordionContent>
             </AccordionItem>
 
-            {/* 6. Override log */}
+            {/* 6. POI Beheer */}
+            <AccordionItem value="pois" className="border rounded-lg border-border/60 overflow-hidden">
+              <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-accent/5">
+                <div className="flex items-center gap-2">
+                  <MapPin className="h-4 w-4 text-primary" />
+                  <span className="font-display font-bold text-sm">POI / Reistijden</span>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="px-4 pb-4">
+                <AdminPOIManager />
+              </AccordionContent>
+            </AccordionItem>
+
+            {/* 7. Override log */}
             {overrides.length > 0 && (
               <AccordionItem value="overrides" className="border rounded-lg border-border/60 overflow-hidden">
                 <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-accent/5">

@@ -12,6 +12,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { AdminEditSubmission } from "@/components/AdminEditSubmission";
 import { AdminAccommodationForm } from "@/components/AdminAccommodationForm";
+import { BulkImportAccommodations } from "@/components/BulkImportAccommodations";
 
 interface Profile { id: string; username: string; display_name: string; }
 interface Override { id: string; field: string; old_value: string | null; new_value: string | null; reason: string | null; created_at: string; }

@@ -59,6 +59,7 @@ function AppRoutes() {
       <Route path="/kosten" element={<ProtectedRoute><TripGuard><Kosten /></TripGuard></ProtectedRoute>} />
       <Route path="/wensen" element={<ProtectedRoute><TripGuard><Wensen /></TripGuard></ProtectedRoute>} />
       <Route path="/admin" element={<ProtectedRoute><TripGuard><Admin /></TripGuard></ProtectedRoute>} />
+      <Route path="/profiel" element={<ProtectedRoute><Profiel /></ProtectedRoute>} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );

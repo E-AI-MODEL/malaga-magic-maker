@@ -79,7 +79,10 @@ export default function Login() {
         autoPlay
         muted
         playsInline
+        // @ts-ignore — webkit prefix for older iOS
+        webkit-playsinline="true"
         onEnded={handleVideoEnd}
+        onLoadedData={handleVideoMount}
         className="absolute inset-0 w-full h-full object-contain sm:object-cover"
       />
 

@@ -13,6 +13,8 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { AdminEditSubmission } from "@/components/AdminEditSubmission";
 import { AdminAccommodationForm } from "@/components/AdminAccommodationForm";
 import { BulkImportAccommodations } from "@/components/BulkImportAccommodations";
+import { AdminPOIManager } from "@/components/AdminPOIManager";
+import { MapPin } from "lucide-react";
 
 interface Profile { id: string; username: string; display_name: string; }
 interface Override { id: string; field: string; old_value: string | null; new_value: string | null; reason: string | null; created_at: string; }

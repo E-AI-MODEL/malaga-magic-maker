@@ -7,10 +7,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { computeGroupRules, computeAvgPoints, rankAccommodations, type Accommodation, type Submission, type GroupRules } from "@/lib/scoring";
-import { CheckCircle2, XCircle, Unlock, Trash2, Undo2, Shield, Trophy, Clock, ChevronDown, Eye, Users, BarChart3, Settings, FileText, Pencil } from "lucide-react";
+import { CheckCircle2, XCircle, Unlock, Trash2, Undo2, Shield, Trophy, Clock, ChevronDown, Eye, Users, BarChart3, Settings, FileText, Pencil, Plus } from "lucide-react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { AdminEditSubmission } from "@/components/AdminEditSubmission";
+import { AdminAccommodationForm } from "@/components/AdminAccommodationForm";
 
 interface Profile { id: string; username: string; display_name: string; }
 interface Override { id: string; field: string; old_value: string | null; new_value: string | null; reason: string | null; created_at: string; }
@@ -27,6 +28,8 @@ export default function Admin() {
   const [deadlineValue, setDeadlineValue] = useState("");
   const [deadlineInput, setDeadlineInput] = useState("");
   const [editingUserId, setEditingUserId] = useState<string | null>(null);
+  const [showAccForm, setShowAccForm] = useState(false);
+  const [editingAccId, setEditingAccId] = useState<string | null>(null);
 
   const fetchAll = async () => {
     const [p, s, a, o, dl, al] = await Promise.all([
@@ -519,7 +522,17 @@ export default function Admin() {
                 </div>
               </AccordionTrigger>
               <AccordionContent className="px-4 pb-4">
-                <div className="space-y-2">
+                <div className="space-y-3">
+                  <Button size="sm" variant="outline" className="w-full" onClick={() => { setShowAccForm(true); setEditingAccId(null); }}>
+                    <Plus className="h-3.5 w-3.5 mr-1" /> Accommodatie toevoegen
+                  </Button>
+                  {(showAccForm || editingAccId) && (
+                    <AdminAccommodationForm
+                      editId={editingAccId}
+                      onSaved={() => { setShowAccForm(false); setEditingAccId(null); fetchAll(); }}
+                      onCancel={() => { setShowAccForm(false); setEditingAccId(null); }}
+                    />
+                  )}
                   {ranked.map(acc => (
                     <div key={acc.id} className={`border rounded-lg p-3 space-y-2 transition-opacity ${acc.status === "eliminated" ? "opacity-40" : ""}`}>
                       <div className="flex items-start justify-between gap-2">
@@ -548,6 +561,9 @@ export default function Admin() {
                         {acc.status === "eliminated" && <Button size="sm" variant="outline" className="h-7 text-[11px] px-2" onClick={() => handleUndo(acc.id)}><Undo2 className="h-3 w-3 mr-1" /> Undo</Button>}
                         <Button size="sm" variant="ghost" className="h-7 text-[11px] px-2" onClick={() => handleTogglePrice(acc.id, acc.transparent_price_confirmed)}>
                           {acc.transparent_price_confirmed ? "✓ Prijs" : "Bevestig prijs"}
+                        </Button>
+                        <Button size="sm" variant="outline" className="h-7 text-[11px] px-2" onClick={() => { setEditingAccId(acc.id); setShowAccForm(false); }}>
+                          <Pencil className="h-3 w-3 mr-1" /> Bewerk
                         </Button>
                       </div>
                     </div>

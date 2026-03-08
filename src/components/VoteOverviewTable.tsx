@@ -322,7 +322,7 @@ function DietSection({ subs, n }: { subs: Submission[]; n: number }) {
 
   return (
     <div>
-      <p className="text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground mb-3">🍽️ Eetvoorkeuren</p>
+      <p className="text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground mb-3">Eetvoorkeuren</p>
       <div className="border rounded-lg overflow-hidden">
         <table className="w-full text-xs">
           <thead>

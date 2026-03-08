@@ -449,7 +449,8 @@ export default function Uitslag() {
                         <div className="bg-primary h-full rounded-full transition-all duration-500" style={{ width: `${Math.min(p.value * 2.5, 100)}%` }} />
                       </div>
                     </div>
-                  ))}
+                    );
+                  })}
                 </div>
                 <ReactionBar section="prioriteiten" reactions={reactions} profiles={profiles} onToggle={handleToggleReaction} />
                 <SectionComments section="prioriteiten" comments={comments} profiles={profiles} onAdd={handleAddComment} onDelete={handleDeleteComment} />

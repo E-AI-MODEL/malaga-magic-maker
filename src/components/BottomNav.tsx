@@ -56,8 +56,8 @@ export function BottomNav() {
             )}
           </NavLink>
           <NavLink to="/reisplanner" className={({ isActive }) => `${base} ${isActive ? active : inactive}`}>
-            <Sparkles className="h-4 w-4" />
-            <span>Planner</span>
+            <Compass className="h-4 w-4" />
+            <span>Reisgids</span>
           </NavLink>
           <NavLink to="/info" className={({ isActive }) => `${base} ${isActive ? active : inactive}`}>
             <Info className="h-4 w-4" />

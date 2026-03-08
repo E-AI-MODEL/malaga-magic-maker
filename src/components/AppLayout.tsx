@@ -71,14 +71,9 @@ export function AppLayout({ children }: { children: ReactNode }) {
             </div>
           </div>
         </header>
-        <motion.main
-          className="max-w-2xl mx-auto"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.2, ease: "easeOut" }}
-        >
+        <main className="max-w-2xl mx-auto">
           {children}
-        </motion.main>
+        </main>
         <BottomNav />
       </div>
     );

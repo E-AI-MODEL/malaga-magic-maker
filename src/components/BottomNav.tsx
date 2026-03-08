@@ -1,5 +1,5 @@
 import { NavLink, useNavigate } from "react-router-dom";
-import { BarChart3, Info, ClipboardList, MoreHorizontal, Home, Receipt, FileText, Settings } from "lucide-react";
+import { BarChart3, Info, ClipboardList, MoreHorizontal, Home, Receipt, FileText, Settings, ListChecks } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";

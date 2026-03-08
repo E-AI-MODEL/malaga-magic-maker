@@ -1,5 +1,5 @@
 import { NavLink, useNavigate } from "react-router-dom";
-import { BarChart3, Info, ClipboardList, MoreHorizontal, Home, Receipt, FileText, Settings, ListChecks, User } from "lucide-react";
+import { BarChart3, Info, ClipboardList, MoreHorizontal, Home, Receipt, FileText, Settings, ListChecks, User, Sparkles } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -54,6 +54,10 @@ export function BottomNav() {
                 {unreadCount > 9 ? "9+" : unreadCount}
               </span>
             )}
+          </NavLink>
+          <NavLink to="/reisplanner" className={({ isActive }) => `${base} ${isActive ? active : inactive}`}>
+            <Sparkles className="h-4 w-4" />
+            <span>Planner</span>
           </NavLink>
           <NavLink to="/info" className={({ isActive }) => `${base} ${isActive ? active : inactive}`}>
             <Info className="h-4 w-4" />

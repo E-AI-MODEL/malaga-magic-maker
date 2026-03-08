@@ -20,6 +20,7 @@ const Accommodations = lazy(() => import("./pages/Accommodations"));
 const AccommodationDetail = lazy(() => import("./pages/AccommodationDetail"));
 const Admin = lazy(() => import("./pages/Admin"));
 const Taken = lazy(() => import("./pages/Taken"));
+const Reisplanner = lazy(() => import("./pages/Reisplanner"));
 const TaskContext = lazy(() => import("./pages/TaskContext"));
 const Kosten = lazy(() => import("./pages/Kosten"));
 const Wensen = lazy(() => import("./pages/Wensen"));
@@ -69,6 +70,7 @@ function AppRoutes() {
         <Route path="/accommodations" element={<ProtectedRoute><TripGuard><Accommodations /></TripGuard></ProtectedRoute>} />
         <Route path="/accommodations/:id" element={<ProtectedRoute><TripGuard><AccommodationDetail /></TripGuard></ProtectedRoute>} />
         <Route path="/taken" element={<ProtectedRoute><TripGuard><Taken /></TripGuard></ProtectedRoute>} />
+        <Route path="/reisplanner" element={<ProtectedRoute><TripGuard><Reisplanner /></TripGuard></ProtectedRoute>} />
         <Route path="/taken/:section" element={<ProtectedRoute><TripGuard><TaskContext /></TripGuard></ProtectedRoute>} />
         <Route path="/kosten" element={<ProtectedRoute><TripGuard><Kosten /></TripGuard></ProtectedRoute>} />
         <Route path="/wensen" element={<ProtectedRoute><TripGuard><Wensen /></TripGuard></ProtectedRoute>} />

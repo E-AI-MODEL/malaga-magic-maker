@@ -28,6 +28,8 @@ export default function Admin() {
   const [deadlineValue, setDeadlineValue] = useState("");
   const [deadlineInput, setDeadlineInput] = useState("");
   const [editingUserId, setEditingUserId] = useState<string | null>(null);
+  const [showAccForm, setShowAccForm] = useState(false);
+  const [editingAccId, setEditingAccId] = useState<string | null>(null);
 
   const fetchAll = async () => {
     const [p, s, a, o, dl, al] = await Promise.all([

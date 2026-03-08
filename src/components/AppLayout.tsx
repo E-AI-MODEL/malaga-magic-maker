@@ -1,5 +1,6 @@
 import { ReactNode } from "react";
 import { BottomNav } from "./BottomNav";
+import { NotificationCenter } from "./NotificationCenter";
 import { useAuth } from "@/lib/auth";
 import { useTrip } from "@/contexts/TripContext";
 import { Button } from "@/components/ui/button";
@@ -58,8 +59,9 @@ export function AppLayout({ children }: { children: ReactNode }) {
             </h1>
           )}
 
-          <div className="flex items-center gap-2">
-            <span className="text-[11px] text-white/50 font-medium">{profile?.display_name}</span>
+          <div className="flex items-center gap-1">
+            <NotificationCenter />
+            <span className="text-[11px] text-white/50 font-medium ml-1">{profile?.display_name}</span>
             <Button variant="ghost" size="icon" onClick={signOut} className="h-7 w-7 text-white/50 hover:text-white hover:bg-white/10">
               <LogOut className="h-3.5 w-3.5" />
             </Button>

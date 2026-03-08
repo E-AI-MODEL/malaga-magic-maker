@@ -266,6 +266,6 @@ Stap 4: Eerste taken aanmaken (templates per sectie)
 - [x] Fase 3: Trip context & navigatie ✅ (TripProvider created, switchTrip, createTrip, joinTrip)
 - [x] Fase 4: Onboarding ✅ (Onboarding page, JoinTrip page, trip selector in header, TripGuard)
 - [x] Fase 5: Dashboard redesign ✅ (Trip hero with countdown/stats/invite code, branding to Vakansie)
-- [ ] Fase 6: Notificaties
-- [ ] Fase 7: Branding
-- [ ] Fase 8: Profiel & instellingen
+- [x] Fase 6: Notificaties ✅ (NotificationCenter component, bell icon in header, real-time updates)
+- [x] Fase 7: Branding ✅ (Vakansie logo, meta tags, tagline "Plan je vakansie met Hansie")
+- [x] Fase 8: Profiel & instellingen ✅ (Profielpagina met naam bewerken, vakanties overzicht)

@@ -3,6 +3,7 @@ import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import heroImg from "@/assets/hero-costa-del-sol.jpg";
+import logo from "@/assets/vakansie-logo.png";
 
 export default function Login() {
   const { signIn, signUp } = useAuth();
@@ -56,11 +57,12 @@ export default function Login() {
 
       <div className="relative z-10 w-full max-w-sm mx-auto px-6 pb-12 sm:pb-0">
         <div className="text-center mb-8">
+          <img src={logo} alt="Vakansie" className="h-16 w-16 mx-auto mb-3 drop-shadow-lg" />
           <h1 className="font-display text-4xl font-extrabold text-white tracking-tight leading-none">
             VAKANSIE
           </h1>
           <p className="text-white/70 text-sm mt-3 font-medium">
-            {isRegister ? "Maak een account aan" : "Plan je vakantie samen"}
+            {isRegister ? "Maak een account aan" : "Plan je vakansie met Hansie, wel zo makkelijk."}
           </p>
         </div>
 

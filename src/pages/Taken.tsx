@@ -205,7 +205,7 @@ export default function Taken() {
 
   return (
     <AppLayout>
-      <PageTransition>
+      {/* Content */}
         <TripHero tasks={tasks} />
         <FlightSection travelLegs={travelLegs} isAdmin={isAdmin} onLegUpdate={handleLegUpdate} />
 
@@ -333,7 +333,6 @@ export default function Taken() {
             {lightboxUrl && <img src={lightboxUrl} alt="" className="w-full h-full object-contain rounded-lg" />}
           </DialogContent>
         </Dialog>
-      </PageTransition>
     </AppLayout>
   );
 }

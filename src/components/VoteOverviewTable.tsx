@@ -53,7 +53,7 @@ function RequirementsSection({ subs, config, rules, n }: { subs: Submission[]; c
   return (
     <div>
       <p className="text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground mb-3">
-        ✅ Vereisten (meerderheid)
+        Vereisten (meerderheid)
       </p>
       <div className="border rounded-lg overflow-hidden">
         <table className="w-full text-xs">

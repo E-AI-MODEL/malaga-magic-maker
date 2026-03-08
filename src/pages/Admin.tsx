@@ -11,6 +11,7 @@ import { CheckCircle2, XCircle, Unlock, Trash2, Undo2, Shield, Trophy, Clock, Ch
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { AdminEditSubmission } from "@/components/AdminEditSubmission";
+import { AdminAccommodationForm } from "@/components/AdminAccommodationForm";
 
 interface Profile { id: string; username: string; display_name: string; }
 interface Override { id: string; field: string; old_value: string | null; new_value: string | null; reason: string | null; created_at: string; }

@@ -140,7 +140,7 @@ export default function Admin() {
   };
 
   const handleRunRound2 = async () => {
-    await logOverride("round_2_scorebord", "", "Ranking berekend", "Ronde 2 uitgevoerd");
+    await logOverride("round_2_ranking", "", "Ranking berekend", "Ronde 2 uitgevoerd");
     toast.success("Ronde 2: Ranking is zichtbaar in de lijst");
   };
 

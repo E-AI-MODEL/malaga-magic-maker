@@ -11,8 +11,10 @@ import { useTrip } from "@/contexts/TripContext";
 import { VoteOverviewTable } from "@/components/VoteOverviewTable";
 import {
   CheckCircle2, XCircle, Unlock, Trash2, Undo2, Shield, Trophy, Clock, ChevronDown, Eye, Users,
-  BarChart3, Settings, FileText, Pencil, Plus, MapPin, Table2, TrendingUp, AlertCircle
+  BarChart3, Settings, FileText, Pencil, Plus, MapPin, Table2, TrendingUp, AlertCircle, Bed, Timer
 } from "lucide-react";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Textarea } from "@/components/ui/textarea";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { AdminEditSubmission } from "@/components/AdminEditSubmission";

@@ -335,7 +335,7 @@ function DietSection({ subs, n }: { subs: Submission[]; n: number }) {
           <tbody>
             {Object.entries(counts).sort(([, a], [, b]) => b - a).map(([diet, count]) => (
               <tr key={diet} className="border-t border-border/40">
-                <td className="px-3 py-2 font-medium">{diet}</td>
+                <td className="px-3 py-2 font-medium">{translateLabel(DIET_LABELS, diet)}</td>
                 <td className="text-center px-2 py-2 font-bold tabular-nums">{count}×</td>
                 <td className="text-center px-2 py-2 tabular-nums text-muted-foreground">{Math.round((count / n) * 100)}%</td>
               </tr>

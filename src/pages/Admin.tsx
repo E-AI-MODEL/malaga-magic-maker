@@ -522,7 +522,17 @@ export default function Admin() {
                 </div>
               </AccordionTrigger>
               <AccordionContent className="px-4 pb-4">
-                <div className="space-y-2">
+                <div className="space-y-3">
+                  <Button size="sm" variant="outline" className="w-full" onClick={() => { setShowAccForm(true); setEditingAccId(null); }}>
+                    <Plus className="h-3.5 w-3.5 mr-1" /> Accommodatie toevoegen
+                  </Button>
+                  {(showAccForm || editingAccId) && (
+                    <AdminAccommodationForm
+                      editId={editingAccId}
+                      onSaved={() => { setShowAccForm(false); setEditingAccId(null); fetchAll(); }}
+                      onCancel={() => { setShowAccForm(false); setEditingAccId(null); }}
+                    />
+                  )}
                   {ranked.map(acc => (
                     <div key={acc.id} className={`border rounded-lg p-3 space-y-2 transition-opacity ${acc.status === "eliminated" ? "opacity-40" : ""}`}>
                       <div className="flex items-start justify-between gap-2">

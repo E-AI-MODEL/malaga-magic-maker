@@ -1,4 +1,5 @@
 import { ReactNode } from "react";
+import { motion } from "framer-motion";
 import { BottomNav } from "./BottomNav";
 import { NotificationCenter } from "./NotificationCenter";
 import { useAuth } from "@/lib/auth";

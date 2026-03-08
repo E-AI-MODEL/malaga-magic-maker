@@ -361,7 +361,7 @@ function PerPersonSection({ subs, config, profiles }: { subs: Submission[]; conf
 
   return (
     <div>
-      <p className="text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground mb-3">👥 Per persoon</p>
+      <p className="text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground mb-3">Per persoon</p>
       <div className="border rounded-lg overflow-x-auto">
         <table className="w-full text-xs min-w-[600px]">
           <thead>

@@ -95,7 +95,8 @@ export default function Login() {
         // @ts-ignore — webkit prefix for older iOS
         webkit-playsinline="true"
         onEnded={handleVideoEnd}
-        onLoadedData={handleVideoMount}
+        onCanPlayThrough={tryPlay}
+        onLoadedData={tryPlay}
         className="absolute inset-0 w-full h-full object-contain sm:object-cover"
       />
 

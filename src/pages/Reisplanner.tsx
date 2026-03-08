@@ -332,7 +332,7 @@ export default function Reisplanner() {
           {messages.map((msg, i) => (
             <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
               <div
-                className={`max-w-[85%] md:max-w-[70%] rounded-2xl px-4 py-3 text-sm ${
+                className={`max-w-[85%] md:max-w-[70%] rounded-2xl px-4 py-3 ${fontSizeClass} ${
                   msg.role === "user"
                     ? "bg-primary text-primary-foreground rounded-br-md"
                     : "bg-card border border-border rounded-bl-md"

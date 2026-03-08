@@ -287,7 +287,7 @@ function ActivitiesSection({ subs, n }: { subs: Submission[]; n: number }) {
 
   return (
     <div>
-      <p className="text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground mb-3">🏄 Activiteiten</p>
+      <p className="text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground mb-3">Activiteiten</p>
       <div className="border rounded-lg overflow-hidden">
         <table className="w-full text-xs">
           <thead>

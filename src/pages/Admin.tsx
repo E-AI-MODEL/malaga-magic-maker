@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { computeGroupRules, computeAvgPoints, rankAccommodations, type Accommodation, type Submission, type GroupRules } from "@/lib/scoring";
+import { useTrip } from "@/contexts/TripContext";
 import { CheckCircle2, XCircle, Unlock, Trash2, Undo2, Shield, Trophy, Clock, ChevronDown, Eye, Users, BarChart3, Settings, FileText, Pencil, Plus } from "lucide-react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";

@@ -303,7 +303,7 @@ export default function Uitslag() {
                 <div className="flex items-center gap-2 w-full">
                   <Car className="h-4 w-4 text-primary" />
                   <span className="font-display font-bold text-sm">Vervoer</span>
-                  <Badge variant="outline" className="text-[10px] ml-auto">{mobilityWinner.icon} {mobilityWinner.label}</Badge>
+                  <Badge variant="outline" className="text-[10px] ml-auto flex items-center gap-1"><mobilityWinner.Icon className="h-3 w-3" /> {mobilityWinner.label}</Badge>
                 </div>
               </AccordionTrigger>
               <AccordionContent className="px-4 pb-4">

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/AppLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
+import { useTrip } from "@/contexts/TripContext";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -12,6 +13,7 @@ import {
   Dumbbell, Star, Waves, Wind, Wifi, ParkingCircle, MapPin, DollarSign,
   BarChart3, Palmtree, Mountain, Sparkles, Zap
 } from "lucide-react";
+import { HeroSkeleton, CardSkeleton } from "@/components/PageSkeleton";
 
 interface Profile { id: string; username: string; display_name: string; }
 
@@ -59,26 +61,34 @@ const REQUIREMENT_LABELS: Record<string, string> = {
 
 export default function Wensen() {
   const { user } = useAuth();
+  const { activeTrip } = useTrip();
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const tripId = activeTrip?.id;
+
   useEffect(() => {
+    if (!tripId) return;
     Promise.all([
-      supabase.from("submissions").select("*"),
+      supabase.from("submissions").select("*").eq("trip_id", tripId),
       supabase.from("profiles").select("*"),
     ]).then(([s, p]) => {
       setSubmissions((s.data as any[]) || []);
       setProfiles((p.data as any[]) || []);
       setLoading(false);
     });
-  }, []);
+  }, [tripId]);
 
   if (loading) {
     return (
       <AppLayout>
-        <div className="flex items-center justify-center min-h-[60vh]">
-          <p className="text-sm text-muted-foreground">Laden...</p>
+        <div>
+          <HeroSkeleton />
+          <div className="px-6 py-6 space-y-4">
+            <CardSkeleton />
+            <CardSkeleton />
+          </div>
         </div>
       </AppLayout>
     );

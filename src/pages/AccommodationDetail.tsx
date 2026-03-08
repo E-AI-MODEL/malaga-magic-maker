@@ -37,7 +37,7 @@ export default function AccommodationDetail() {
   const rules = useMemo(() => computeGroupRules(submissions), [submissions]);
   const eligibility = useMemo(() => acc ? checkEligibility(acc, rules) : null, [acc, rules]);
 
-  if (loading) return <AppLayout><div className="flex justify-center py-12 text-sm text-muted-foreground">Laden...</div></AppLayout>;
+  if (loading) return <AppLayout><div className="flex items-center justify-center py-12"><div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" /></div></AppLayout>;
   if (!acc) return <AppLayout><p className="py-12 text-center text-muted-foreground">Niet gevonden</p></AppLayout>;
 
   const sources = Array.isArray(acc.sources) ? acc.sources : [];
@@ -92,9 +92,9 @@ export default function AccommodationDetail() {
           <p className="text-white/50 text-sm mt-1">{acc.location_label} &middot; {acc.type}</p>
           <div className="flex flex-wrap gap-1.5 mt-3">
             {eligibility?.eligible ? (
-              <Badge className="bg-primary text-primary-foreground text-[10px] font-bold rounded-md">ELIGIBLE</Badge>
+              <Badge className="bg-primary text-primary-foreground text-[10px] font-bold rounded-md">GESCHIKT</Badge>
             ) : (
-              <Badge variant="destructive" className="text-[10px] font-bold rounded-md">NOT ELIGIBLE</Badge>
+              <Badge variant="destructive" className="text-[10px] font-bold rounded-md">NIET GESCHIKT</Badge>
             )}
             {acc.status === "finalist" && <Badge className="bg-warning text-warning-foreground text-[10px] font-bold rounded-md">FINALIST</Badge>}
             {acc.cancellation_type !== "unknown" && (

@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { AppLayout } from "@/components/AppLayout";
 import { supabase } from "@/integrations/supabase/client";
+import { useTrip } from "@/contexts/TripContext";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -12,25 +13,31 @@ import { BedDouble, Car, Clock, Waves, ArrowRight } from "lucide-react";
 import { rankAccommodations, computeGroupRules, type Accommodation, type Submission, type RankedAccommodation } from "@/lib/scoring";
 import heroVilla from "@/assets/hero-villa.jpg";
 import { useLogEvent } from "@/contexts/ActivityLogContext";
+import { HeroSkeleton, CardSkeleton } from "@/components/PageSkeleton";
 
 export default function Accommodations() {
   const navigate = useNavigate();
+  const { activeTrip } = useTrip();
   const [accommodations, setAccommodations] = useState<Accommodation[]>([]);
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [loading, setLoading] = useState(true);
   const logEvent = useLogEvent();
   const [sortBy, setSortBy] = useState("score");
   const [eligibleOnly, setEligibleOnly] = useState(false);
+
+  const tripId = activeTrip?.id;
+
   useEffect(() => {
+    if (!tripId) return;
     Promise.all([
-      supabase.from("accommodations").select("*"),
-      supabase.from("submissions").select("*").eq("locked", true),
+      supabase.from("accommodations").select("*").eq("trip_id", tripId),
+      supabase.from("submissions").select("*").eq("locked", true).eq("trip_id", tripId),
     ]).then(([accRes, subRes]) => {
       setAccommodations((accRes.data as any[]) || []);
       setSubmissions((subRes.data as any[]) || []);
       setLoading(false);
     });
-  }, []);
+  }, [tripId]);
 
   const rules = useMemo(() => computeGroupRules(submissions), [submissions]);
   const ranked = useMemo(() => rankAccommodations(accommodations, submissions, rules), [accommodations, submissions, rules]);
@@ -44,7 +51,19 @@ export default function Accommodations() {
     return items;
   }, [ranked, sortBy, eligibleOnly]);
 
-  if (loading) return <AppLayout><div className="flex justify-center py-12 text-sm text-muted-foreground">Laden...</div></AppLayout>;
+  if (loading) {
+    return (
+      <AppLayout>
+        <div>
+          <HeroSkeleton />
+          <div className="px-4 py-4 space-y-4">
+            <CardSkeleton />
+            <CardSkeleton />
+          </div>
+        </div>
+      </AppLayout>
+    );
+  }
 
   const baseLabel = (loc: string) => {
     if (["La Cala Golf"].includes(loc)) return "Golf-base";
@@ -82,7 +101,7 @@ export default function Accommodations() {
           </Select>
           <div className="flex items-center gap-2">
             <Switch checked={eligibleOnly} onCheckedChange={(v) => { setEligibleOnly(v); logEvent("accommodation_list_filter", "/accommodations", `eligible_only:${v}`); }} id="eligible" />
-            <Label htmlFor="eligible" className="text-[11px] text-white/50 font-medium">Eligible only</Label>
+            <Label htmlFor="eligible" className="text-[11px] text-white/50 font-medium">Alleen geschikt</Label>
           </div>
         </div>
 
@@ -136,12 +155,12 @@ function AccommodationCard({ acc, baseLabel, onDetail }: { acc: RankedAccommodat
 
         <div className="flex flex-wrap gap-1.5">
           {acc.eligibility.eligible ? (
-            <Badge className="bg-primary text-primary-foreground text-[10px] font-bold rounded-md">ELIGIBLE</Badge>
+            <Badge className="bg-primary text-primary-foreground text-[10px] font-bold rounded-md">GESCHIKT</Badge>
           ) : (
-            <Badge variant="destructive" className="text-[10px] font-bold rounded-md">NOT ELIGIBLE</Badge>
+            <Badge variant="destructive" className="text-[10px] font-bold rounded-md">NIET GESCHIKT</Badge>
           )}
           {acc.status === "finalist" && <Badge className="bg-warning text-warning-foreground text-[10px] font-bold rounded-md">FINALIST</Badge>}
-          {acc.status === "eliminated" && <Badge variant="outline" className="text-[10px] font-bold rounded-md">ELIMINATED</Badge>}
+          {acc.status === "eliminated" && <Badge variant="outline" className="text-[10px] font-bold rounded-md">AFGEVALLEN</Badge>}
         </div>
 
         <div className="grid grid-cols-4 gap-1 text-[11px] text-muted-foreground">

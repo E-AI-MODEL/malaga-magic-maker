@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { computeGroupRules, computeAvgPoints, rankAccommodations, type Accommodation, type Submission, type GroupRules } from "@/lib/scoring";
+import { useTrip } from "@/contexts/TripContext";
 import { CheckCircle2, XCircle, Unlock, Trash2, Undo2, Shield, Trophy, Clock, ChevronDown, Eye, Users, BarChart3, Settings, FileText, Pencil, Plus } from "lucide-react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -22,6 +23,7 @@ interface ActivityEvent { id: string; user_id: string; event_type: string; page:
 
 export default function Admin() {
   const { isAdmin, user } = useAuth();
+  const { activeTrip } = useTrip();
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [accommodations, setAccommodations] = useState<Accommodation[]>([]);
@@ -34,14 +36,17 @@ export default function Admin() {
   const [showAccForm, setShowAccForm] = useState(false);
   const [editingAccId, setEditingAccId] = useState<string | null>(null);
 
+  const tripId = activeTrip?.id;
+
   const fetchAll = async () => {
+    if (!tripId) return;
     const [p, s, a, o, dl, al] = await Promise.all([
       supabase.from("profiles").select("*"),
-      supabase.from("submissions").select("*"),
-      supabase.from("accommodations").select("*"),
+      supabase.from("submissions").select("*").eq("trip_id", tripId),
+      supabase.from("accommodations").select("*").eq("trip_id", tripId),
       supabase.from("admin_overrides").select("*").order("created_at", { ascending: false }),
       supabase.from("app_settings").select("*").eq("key", "intake_deadline").single(),
-      supabase.from("activity_log").select("*").order("created_at", { ascending: false }).limit(2000),
+      supabase.from("activity_log").select("*").eq("trip_id", tripId).order("created_at", { ascending: false }).limit(2000),
     ]);
     setProfiles((p.data as any[]) || []);
     setSubmissions((s.data as any[]) || []);
@@ -52,7 +57,7 @@ export default function Admin() {
     setLoading(false);
   };
 
-  useEffect(() => { fetchAll(); }, []);
+  useEffect(() => { fetchAll(); }, [tripId]);
 
   const lockedSubs = useMemo(() => submissions.filter(s => s.locked), [submissions]);
   const rules = useMemo(() => computeGroupRules(lockedSubs), [lockedSubs]);

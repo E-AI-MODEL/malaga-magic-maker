@@ -10,6 +10,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { CheckCircle2, Plus } from "lucide-react";
+import { HeroSkeleton, CardSkeleton } from "@/components/PageSkeleton";
 
 import { TripHero } from "@/components/taken/TripHero";
 import { FlightSection } from "@/components/taken/FlightSection";
@@ -20,6 +21,7 @@ import type { Task, TravelLeg, Profile, Reaction, Comment } from "@/components/t
 
 export default function Taken() {
   const { user, profile, isAdmin } = useAuth();
+  const { activeTrip } = useTrip();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [travelLegs, setTravelLegs] = useState<TravelLeg[]>([]);
   const [profiles, setProfiles] = useState<Profile[]>([]);
@@ -31,42 +33,48 @@ export default function Taken() {
   const [newTaskTitle, setNewTaskTitle] = useState("");
   const [addingToSection, setAddingToSection] = useState<string | null>(null);
   const [drawerTaskId, setDrawerTaskId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  const tripId = activeTrip?.id;
 
   useEffect(() => {
+    if (!tripId) return;
     const load = async () => {
+      setLoading(true);
       const [t, tl, p, r, c] = await Promise.all([
-        supabase.from("tasks").select("*").order("sort_order"),
-        supabase.from("travel_legs").select("*").order("sort_order"),
+        supabase.from("tasks").select("*").eq("trip_id", tripId).order("sort_order"),
+        supabase.from("travel_legs").select("*").eq("trip_id", tripId).order("sort_order"),
         supabase.from("profiles").select("*"),
-        supabase.from("reactions").select("*"),
-        supabase.from("comments").select("*"),
+        supabase.from("reactions").select("*").eq("trip_id", tripId),
+        supabase.from("comments").select("*").eq("trip_id", tripId),
       ]);
       setTasks((t.data as any[]) || []);
       setTravelLegs((tl.data as any[]) || []);
       setProfiles((p.data as any[]) || []);
       setReactions((r.data as any[]) || []);
       setComments((c.data as any[]) || []);
+      setLoading(false);
     };
     load();
 
     const channel = supabase
       .channel("taken-page")
       .on("postgres_changes", { event: "*", schema: "public", table: "tasks" }, () => {
-        supabase.from("tasks").select("*").order("sort_order").then(r => setTasks((r.data as any[]) || []));
+        supabase.from("tasks").select("*").eq("trip_id", tripId).order("sort_order").then(r => setTasks((r.data as any[]) || []));
       })
       .on("postgres_changes", { event: "*", schema: "public", table: "travel_legs" }, () => {
-        supabase.from("travel_legs").select("*").order("sort_order").then(r => setTravelLegs((r.data as any[]) || []));
+        supabase.from("travel_legs").select("*").eq("trip_id", tripId).order("sort_order").then(r => setTravelLegs((r.data as any[]) || []));
       })
       .on("postgres_changes", { event: "*", schema: "public", table: "reactions" }, () => {
-        supabase.from("reactions").select("*").then(r => setReactions((r.data as any[]) || []));
+        supabase.from("reactions").select("*").eq("trip_id", tripId).then(r => setReactions((r.data as any[]) || []));
       })
       .on("postgres_changes", { event: "*", schema: "public", table: "comments" }, () => {
-        supabase.from("comments").select("*").then(r => setComments((r.data as any[]) || []));
+        supabase.from("comments").select("*").eq("trip_id", tripId).then(r => setComments((r.data as any[]) || []));
       })
       .subscribe();
 
     return () => { supabase.removeChannel(channel); };
-  }, []);
+  }, [tripId]);
 
   useEffect(() => {
     if (!user) return;
@@ -92,19 +100,19 @@ export default function Taken() {
   }, [user]);
 
   const handleToggleReaction = useCallback(async (section: string, emoji: string) => {
-    if (!user) return;
+    if (!user || !tripId) return;
     const existing = reactions.find(r => r.user_id === user.id && r.section === section && r.emoji === emoji);
     if (existing) {
       await supabase.from("reactions").delete().eq("id", existing.id);
     } else {
-      await supabase.from("reactions").insert({ user_id: user.id, section, emoji });
+      await supabase.from("reactions").insert({ user_id: user.id, section, emoji, trip_id: tripId });
     }
-  }, [user, reactions]);
+  }, [user, reactions, tripId]);
 
   const handleAddComment = useCallback(async (section: string, message: string) => {
-    if (!user) return;
-    await supabase.from("comments").insert({ user_id: user.id, section, message });
-  }, [user]);
+    if (!user || !tripId) return;
+    await supabase.from("comments").insert({ user_id: user.id, section, message, trip_id: tripId });
+  }, [user, tripId]);
 
   const handleDeleteComment = useCallback(async (commentId: string) => {
     await supabase.from("comments").delete().eq("id", commentId);
@@ -145,9 +153,9 @@ export default function Taken() {
   };
 
   const handleAddTask = async (section: string) => {
-    if (!newTaskTitle.trim()) return;
+    if (!newTaskTitle.trim() || !tripId) return;
     const maxSort = tasks.filter(t => t.section === section).reduce((m, t) => Math.max(m, t.sort_order), 0);
-    const { error } = await supabase.from("tasks").insert({ title: newTaskTitle.trim(), section, sort_order: maxSort + 1 });
+    const { error } = await supabase.from("tasks").insert({ title: newTaskTitle.trim(), section, sort_order: maxSort + 1, trip_id: tripId });
     if (error) toast.error("Kon taak niet toevoegen");
     else { toast.success("Taak toegevoegd"); setNewTaskTitle(""); setAddingToSection(null); }
   };
@@ -157,6 +165,21 @@ export default function Taken() {
   existingSections.forEach(s => { if (!allSections.includes(s)) allSections.push(s); });
 
   const drawerTask = tasks.find(t => t.id === drawerTaskId) || null;
+
+  if (loading) {
+    return (
+      <AppLayout>
+        <div>
+          <HeroSkeleton />
+          <div className="px-6 py-6 space-y-4">
+            <CardSkeleton />
+            <CardSkeleton />
+            <CardSkeleton />
+          </div>
+        </div>
+      </AppLayout>
+    );
+  }
 
   return (
     <AppLayout>

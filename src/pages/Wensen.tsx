@@ -8,6 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { computeGroupRules, computeAvgPoints, type Submission } from "@/lib/scoring";
+import { DIET_LABELS, ACTIVITY_LABELS, translateLabel } from "@/lib/labelMaps";
 import {
   CheckCircle2, XCircle, Users, Bed, Bath, Car, UtensilsCrossed,
   Dumbbell, Star, Waves, Wind, Wifi, ParkingCircle, MapPin, DollarSign,

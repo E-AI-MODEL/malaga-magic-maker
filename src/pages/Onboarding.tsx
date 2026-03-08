@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useTrip } from "@/contexts/TripContext";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -10,11 +10,18 @@ import logo from "@/assets/vakansie-logo.png";
 type Step = "choose" | "create" | "join";
 
 export default function Onboarding() {
-  const { createTrip, joinTrip } = useTrip();
+  const { createTrip, joinTrip, activeTrip, userTrips, loading: tripLoading } = useTrip();
   const navigate = useNavigate();
   const [step, setStep] = useState<Step>("choose");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  // If user already has trips, redirect to dashboard
+  useEffect(() => {
+    if (!tripLoading && (activeTrip || userTrips.length > 0)) {
+      navigate("/taken", { replace: true });
+    }
+  }, [tripLoading, activeTrip, userTrips, navigate]);
 
   // Create trip fields
   const [name, setName] = useState("");

@@ -221,3 +221,67 @@ function TaskDetailsReadonly({ details, infoText }: { details: InfoDetails; info
     </div>
   );
 }
+
+/* ── Voting section ── */
+function TaskVotingSection({
+  taskId, profiles, votes, currentUserId, onVote,
+}: {
+  taskId: string;
+  profiles: Profile[];
+  votes: TaskVote[];
+  currentUserId?: string;
+  onVote: (taskId: string, votedForUserId: string) => void;
+}) {
+  const taskVotes = votes.filter(v => v.task_id === taskId);
+  const myVote = taskVotes.find(v => v.user_id === currentUserId);
+  const votableProfiles = profiles.filter(p => p.username !== "admin" && p.username !== "Admin");
+
+  // Count votes per person
+  const voteCounts: Record<string, number> = {};
+  taskVotes.forEach(v => {
+    voteCounts[v.voted_for_user_id] = (voteCounts[v.voted_for_user_id] || 0) + 1;
+  });
+
+  return (
+    <div className="bg-accent/30 border border-accent/50 rounded-lg p-3 space-y-2.5">
+      <div className="flex items-center gap-2">
+        <Vote className="h-3.5 w-3.5 text-accent-foreground" />
+        <span className="text-[10px] font-semibold uppercase tracking-wider text-accent-foreground">
+          Stem — wie doet dit?
+        </span>
+        <Badge variant="outline" className="text-[9px] ml-auto">
+          {taskVotes.length} stem{taskVotes.length !== 1 ? "men" : ""}
+        </Badge>
+      </div>
+      <div className="flex flex-wrap gap-1.5">
+        {votableProfiles.map(p => {
+          const isMyVote = myVote?.voted_for_user_id === p.id;
+          const count = voteCounts[p.id] || 0;
+          return (
+            <button
+              key={p.id}
+              onClick={() => onVote(taskId, p.id)}
+              className={`h-8 px-3 rounded-md text-xs font-medium border transition-all ${
+                isMyVote
+                  ? "bg-primary text-primary-foreground border-primary shadow-sm"
+                  : "bg-background text-foreground border-border hover:border-primary/50 hover:bg-primary/5"
+              }`}
+            >
+              {p.display_name}
+              {count > 0 && (
+                <span className={`ml-1.5 tabular-nums ${isMyVote ? "text-primary-foreground/70" : "text-muted-foreground"}`}>
+                  ({count})
+                </span>
+              )}
+            </button>
+          );
+        })}
+      </div>
+      {myVote && (
+        <p className="text-[10px] text-muted-foreground">
+          Jouw stem: <span className="font-semibold">{votableProfiles.find(p => p.id === myVote.voted_for_user_id)?.display_name}</span>
+        </p>
+      )}
+    </div>
+  );
+}

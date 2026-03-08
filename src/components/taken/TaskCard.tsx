@@ -9,7 +9,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   ChevronDown, User, Shield, Vote, Settings2, Link2, Calendar, Clock, MapPin, CheckCircle2, Circle
 } from "lucide-react";
-import type { Task, InfoDetails, Profile, Reaction, Comment } from "./types";
+import type { Task, InfoDetails, Profile, Reaction, Comment, TaskVote } from "./types";
 
 interface TaskCardProps {
   task: Task;
@@ -19,17 +19,20 @@ interface TaskCardProps {
   profiles: Profile[];
   reactions: Reaction[];
   comments: Comment[];
+  votes: TaskVote[];
+  currentUserId?: string;
   onToggleReaction: (section: string, emoji: string) => void;
   onAddComment: (section: string, message: string) => void;
   onDeleteComment: (commentId: string) => void;
+  onVote: (taskId: string, votedForUserId: string) => void;
   onOpenDrawer: (taskId: string) => void;
   onOpenLightbox: (url: string) => void;
   index?: number;
 }
 
 export function TaskCard({
-  task, isOpen, onToggle, editable, profiles, reactions, comments,
-  onToggleReaction, onAddComment, onDeleteComment, onOpenDrawer, onOpenLightbox,
+  task, isOpen, onToggle, editable, profiles, reactions, comments, votes, currentUserId,
+  onToggleReaction, onAddComment, onDeleteComment, onVote, onOpenDrawer, onOpenLightbox,
   index = 0,
 }: TaskCardProps) {
   const details: InfoDetails = (task.info_details as any) || {};
@@ -122,6 +125,17 @@ export function TaskCard({
             >
               <TaskDetailsReadonly details={details} infoText={task.info_text} />
 
+              {/* Voting UI */}
+              {!task.voting_closed && (
+                <TaskVotingSection
+                  taskId={task.id}
+                  profiles={profiles}
+                  votes={votes}
+                  currentUserId={currentUserId}
+                  onVote={onVote}
+                />
+              )}
+
               {task.info_image_urls.length > 0 && (
                 <div className="grid grid-cols-2 gap-2">
                   {task.info_image_urls.map((url, i) => (
@@ -203,6 +217,70 @@ function TaskDetailsReadonly({ details, infoText }: { details: InfoDetails; info
       )}
       {infoText && (
         <p className="text-xs text-muted-foreground pt-1.5 border-t border-primary/10">{infoText}</p>
+      )}
+    </div>
+  );
+}
+
+/* ── Voting section ── */
+function TaskVotingSection({
+  taskId, profiles, votes, currentUserId, onVote,
+}: {
+  taskId: string;
+  profiles: Profile[];
+  votes: TaskVote[];
+  currentUserId?: string;
+  onVote: (taskId: string, votedForUserId: string) => void;
+}) {
+  const taskVotes = votes.filter(v => v.task_id === taskId);
+  const myVote = taskVotes.find(v => v.user_id === currentUserId);
+  const votableProfiles = profiles.filter(p => p.username !== "admin" && p.username !== "Admin");
+
+  // Count votes per person
+  const voteCounts: Record<string, number> = {};
+  taskVotes.forEach(v => {
+    voteCounts[v.voted_for_user_id] = (voteCounts[v.voted_for_user_id] || 0) + 1;
+  });
+
+  return (
+    <div className="bg-accent/30 border border-accent/50 rounded-lg p-3 space-y-2.5">
+      <div className="flex items-center gap-2">
+        <Vote className="h-3.5 w-3.5 text-accent-foreground" />
+        <span className="text-[10px] font-semibold uppercase tracking-wider text-accent-foreground">
+          Stem — wie doet dit?
+        </span>
+        <Badge variant="outline" className="text-[9px] ml-auto">
+          {taskVotes.length} stem{taskVotes.length !== 1 ? "men" : ""}
+        </Badge>
+      </div>
+      <div className="flex flex-wrap gap-1.5">
+        {votableProfiles.map(p => {
+          const isMyVote = myVote?.voted_for_user_id === p.id;
+          const count = voteCounts[p.id] || 0;
+          return (
+            <button
+              key={p.id}
+              onClick={() => onVote(taskId, p.id)}
+              className={`h-8 px-3 rounded-md text-xs font-medium border transition-all ${
+                isMyVote
+                  ? "bg-primary text-primary-foreground border-primary shadow-sm"
+                  : "bg-background text-foreground border-border hover:border-primary/50 hover:bg-primary/5"
+              }`}
+            >
+              {p.display_name}
+              {count > 0 && (
+                <span className={`ml-1.5 tabular-nums ${isMyVote ? "text-primary-foreground/70" : "text-muted-foreground"}`}>
+                  ({count})
+                </span>
+              )}
+            </button>
+          );
+        })}
+      </div>
+      {myVote && (
+        <p className="text-[10px] text-muted-foreground">
+          Jouw stem: <span className="font-semibold">{votableProfiles.find(p => p.id === myVote.voted_for_user_id)?.display_name}</span>
+        </p>
       )}
     </div>
   );

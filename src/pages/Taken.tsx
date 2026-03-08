@@ -17,7 +17,7 @@ import { FlightSection } from "@/components/taken/FlightSection";
 import { TaskCard } from "@/components/taken/TaskCard";
 import { TaskDrawer } from "@/components/taken/TaskDrawer";
 import { ALL_SECTIONS, SECTION_LABELS } from "@/components/taken/types";
-import type { Task, TravelLeg, Profile, Reaction, Comment } from "@/components/taken/types";
+import type { Task, TravelLeg, Profile, Reaction, Comment, TaskVote } from "@/components/taken/types";
 
 export default function Taken() {
   const { user, profile, isAdmin } = useAuth();
@@ -27,6 +27,7 @@ export default function Taken() {
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [reactions, setReactions] = useState<Reaction[]>([]);
   const [comments, setComments] = useState<Comment[]>([]);
+  const [taskVotes, setTaskVotes] = useState<TaskVote[]>([]);
   const [openTask, setOpenTask] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
@@ -41,18 +42,20 @@ export default function Taken() {
     if (!tripId) return;
     const load = async () => {
       setLoading(true);
-      const [t, tl, p, r, c] = await Promise.all([
+      const [t, tl, p, r, c, tv] = await Promise.all([
         supabase.from("tasks").select("*").eq("trip_id", tripId).order("sort_order"),
         supabase.from("travel_legs").select("*").eq("trip_id", tripId).order("sort_order"),
         supabase.from("profiles").select("*"),
         supabase.from("reactions").select("*").eq("trip_id", tripId),
         supabase.from("comments").select("*").eq("trip_id", tripId),
+        supabase.from("task_votes").select("*"),
       ]);
       setTasks((t.data as any[]) || []);
       setTravelLegs((tl.data as any[]) || []);
       setProfiles((p.data as any[]) || []);
       setReactions((r.data as any[]) || []);
       setComments((c.data as any[]) || []);
+      setTaskVotes((tv.data as any[]) || []);
       setLoading(false);
     };
     load();
@@ -70,6 +73,9 @@ export default function Taken() {
       })
       .on("postgres_changes", { event: "*", schema: "public", table: "comments" }, () => {
         supabase.from("comments").select("*").eq("trip_id", tripId).then(r => setComments((r.data as any[]) || []));
+      })
+      .on("postgres_changes", { event: "*", schema: "public", table: "task_votes" }, () => {
+        supabase.from("task_votes").select("*").then(r => setTaskVotes((r.data as any[]) || []));
       })
       .subscribe();
 
@@ -117,6 +123,22 @@ export default function Taken() {
   const handleDeleteComment = useCallback(async (commentId: string) => {
     await supabase.from("comments").delete().eq("id", commentId);
   }, []);
+
+  const handleVote = useCallback(async (taskId: string, votedForUserId: string) => {
+    if (!user) return;
+    const existing = taskVotes.find(v => v.task_id === taskId && v.user_id === user.id);
+    if (existing) {
+      if (existing.voted_for_user_id === votedForUserId) {
+        // Remove vote
+        await supabase.from("task_votes").delete().eq("id", existing.id);
+      } else {
+        // Change vote
+        await supabase.from("task_votes").update({ voted_for_user_id: votedForUserId }).eq("id", existing.id);
+      }
+    } else {
+      await supabase.from("task_votes").insert({ task_id: taskId, user_id: user.id, voted_for_user_id: votedForUserId });
+    }
+  }, [user, taskVotes]);
 
   const canEditTask = (task: Task) => {
     if (isAdmin) return true;
@@ -250,9 +272,12 @@ export default function Taken() {
                           profiles={profiles}
                           reactions={reactions}
                           comments={comments}
+                          votes={taskVotes}
+                          currentUserId={user?.id}
                           onToggleReaction={handleToggleReaction}
                           onAddComment={handleAddComment}
                           onDeleteComment={handleDeleteComment}
+                          onVote={handleVote}
                           onOpenDrawer={setDrawerTaskId}
                           onOpenLightbox={setLightboxUrl}
                           index={idx}

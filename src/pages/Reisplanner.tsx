@@ -6,6 +6,7 @@ import ReactMarkdown from "react-markdown";
 import { Send, Sparkles, Loader2, UtensilsCrossed, Map, Flag, Moon, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import vakansielogo from "@/assets/vakansie-logo.png";
 
 type Msg = { role: "user" | "assistant"; content: string };
 

@@ -3,6 +3,7 @@ import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import heroImg from "@/assets/hero-costa-del-sol.jpg";
+import logo from "@/assets/vakansie-logo.png";
 
 export default function Login() {
   const { signIn, signUp } = useAuth();

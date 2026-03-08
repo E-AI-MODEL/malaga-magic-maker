@@ -125,6 +125,17 @@ export function TaskCard({
             >
               <TaskDetailsReadonly details={details} infoText={task.info_text} />
 
+              {/* Voting UI */}
+              {!task.voting_closed && (
+                <TaskVotingSection
+                  taskId={task.id}
+                  profiles={profiles}
+                  votes={votes}
+                  currentUserId={currentUserId}
+                  onVote={onVote}
+                />
+              )}
+
               {task.info_image_urls.length > 0 && (
                 <div className="grid grid-cols-2 gap-2">
                   {task.info_image_urls.map((url, i) => (

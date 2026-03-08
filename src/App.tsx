@@ -24,6 +24,7 @@ const Reisplanner = lazy(() => import("./pages/Reisplanner"));
 const TaskContext = lazy(() => import("./pages/TaskContext"));
 const Kosten = lazy(() => import("./pages/Kosten"));
 const Wensen = lazy(() => import("./pages/Wensen"));
+const BootSequence = lazy(() => import("./pages/BootSequence"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
@@ -60,9 +61,10 @@ function AppRoutes() {
   return (
     <Suspense fallback={<PageLoader />}>
       <Routes>
-        <Route path="/login" element={user ? <Navigate to="/taken" replace /> : <Login />} />
-        <Route path="/" element={<Navigate to={user ? "/taken" : "/login"} replace />} />
+        <Route path="/login" element={user ? <Navigate to="/boot" replace /> : <Login />} />
+        <Route path="/" element={<Navigate to={user ? "/boot" : "/login"} replace />} />
         <Route path="/join/:inviteCode" element={<JoinTrip />} />
+        <Route path="/boot" element={<ProtectedRoute><Suspense fallback={<PageLoader />}><BootSequence /></Suspense></ProtectedRoute>} />
         <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
         <Route path="/uitslag" element={<ProtectedRoute><TripGuard><Uitslag /></TripGuard></ProtectedRoute>} />
         <Route path="/info" element={<ProtectedRoute><TripGuard><Info /></TripGuard></ProtectedRoute>} />

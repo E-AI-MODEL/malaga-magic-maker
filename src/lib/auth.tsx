@@ -56,6 +56,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   useEffect(() => {
+    // Force logout for existing sessions to ensure users see boot sequence
+    const AUTH_VERSION = "v2-boot";
+    if (localStorage.getItem("auth-version") !== AUTH_VERSION) {
+      localStorage.setItem("auth-version", AUTH_VERSION);
+      sessionStorage.removeItem("boot-shown");
+      supabase.auth.signOut().then(() => {
+        setLoading(false);
+      });
+      return;
+    }
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (_event, session) => {
         if (session?.user) {

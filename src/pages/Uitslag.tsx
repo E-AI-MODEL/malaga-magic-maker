@@ -431,7 +431,7 @@ export default function Uitslag() {
                 <div className="flex items-center gap-2 w-full">
                   <BarChart3 className="h-4 w-4 text-primary" />
                   <span className="font-display font-bold text-sm">Prioriteiten</span>
-                  {pointsData.length > 0 && <Badge variant="outline" className="text-[10px] ml-auto">{pointsData[0].emoji} {pointsData[0].label}</Badge>}
+                  {pointsData.length > 0 && <Badge variant="outline" className="text-[10px] ml-auto flex items-center gap-1"><pointsData[0].Icon className="h-3 w-3" /> {pointsData[0].label}</Badge>}
                 </div>
               </AccordionTrigger>
               <AccordionContent className="px-4 pb-4">

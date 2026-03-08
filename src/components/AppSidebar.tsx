@@ -39,6 +39,7 @@ import { Button } from "@/components/ui/button";
 
 const mainLinks = [
   { to: "/taken", icon: ClipboardList, label: "Taken" },
+  { to: "/reisplanner", icon: Sparkles, label: "Planner" },
   { to: "/info", icon: Info, label: "Info" },
   { to: "/uitslag", icon: BarChart3, label: "Uitslag" },
 ];

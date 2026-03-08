@@ -1,6 +1,6 @@
 /**
  * Trip Configuration
- * 
+ *
  * Centraal config-object dat alle trip-type-specifieke labels, categorieën,
  * vereisten en vote-topics bevat. Momenteel hardcoded voor "golf",
  * maar voorbereid om later per trip-type te switchen.

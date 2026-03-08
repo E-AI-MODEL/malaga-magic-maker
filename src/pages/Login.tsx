@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,21 +15,34 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const playAttempted = useRef(false);
 
   const handleVideoEnd = () => {
     setShowForm(true);
   };
 
-  // Force autoplay on mobile — some browsers block autoplay even with muted
-  const handleVideoMount = () => {
+  // Try to play the video — called from multiple events for robustness
+  const tryPlay = () => {
+    if (playAttempted.current) return;
     const video = videoRef.current;
-    if (video) {
-      video.play().catch(() => {
-        // Autoplay blocked — show form immediately
-        setShowForm(true);
-      });
-    }
+    if (!video) return;
+    playAttempted.current = true;
+    video.play().catch(() => {
+      // Autoplay truly blocked — show form
+      setShowForm(true);
+    });
   };
+
+  // Fallback: if video hasn't started after 3s, show form anyway
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const video = videoRef.current;
+      if (video && video.paused && !showForm) {
+        setShowForm(true);
+      }
+    }, 3000);
+    return () => clearTimeout(timer);
+  }, [showForm]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -82,7 +95,8 @@ export default function Login() {
         // @ts-ignore — webkit prefix for older iOS
         webkit-playsinline="true"
         onEnded={handleVideoEnd}
-        onLoadedData={handleVideoMount}
+        onCanPlayThrough={tryPlay}
+        onLoadedData={tryPlay}
         className="absolute inset-0 w-full h-full object-contain sm:object-cover"
       />
 

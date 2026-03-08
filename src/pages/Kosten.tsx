@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo, useCallback } from "react";
 import { AppLayout } from "@/components/AppLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
+import { useTrip } from "@/contexts/TripContext";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Receipt, Users, ArrowRight, Wallet, Plus, Trash2, CheckCircle } from "lucide-react";
 import heroKosten from "@/assets/hero-kosten.jpg";
 import { toast } from "sonner";
+import { HeroSkeleton, CardSkeleton } from "@/components/PageSkeleton";
 
 interface Profile { id: string; username: string; display_name: string; }
 interface TaskWithCost {
@@ -26,6 +28,7 @@ interface Expense {
 
 export default function Kosten() {
   const { user } = useAuth();
+  const { activeTrip } = useTrip();
   const [tasks, setTasks] = useState<TaskWithCost[]>([]);
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [profiles, setProfiles] = useState<Profile[]>([]);
@@ -38,17 +41,20 @@ export default function Kosten() {
   const [newPaidBy, setNewPaidBy] = useState("");
   const [newSplitAmong, setNewSplitAmong] = useState<string[]>([]);
 
+  const tripId = activeTrip?.id;
+
   const loadData = useCallback(async () => {
+    if (!tripId) return;
     const [t, e, p] = await Promise.all([
-      supabase.from("tasks").select("id, title, section, cost, paid_by, assigned_to, cost_split_among"),
-      supabase.from("expenses").select("*").order("created_at", { ascending: false }),
+      supabase.from("tasks").select("id, title, section, cost, paid_by, assigned_to, cost_split_among").eq("trip_id", tripId),
+      supabase.from("expenses").select("*").eq("trip_id", tripId).order("created_at", { ascending: false }),
       supabase.from("profiles").select("*"),
     ]);
     setTasks((t.data as any[]) || []);
     setExpenses((e.data as any[]) || []);
     setProfiles((p.data as any[]) || []);
     setLoading(false);
-  }, []);
+  }, [tripId]);
 
   useEffect(() => { loadData(); }, [loadData]);
 
@@ -145,6 +151,7 @@ export default function Kosten() {
       paid_by: newPaidBy,
       split_among: newSplitAmong,
       created_by: user.id,
+      trip_id: tripId,
     } as any);
     if (error) {
       toast.error("Kon uitgave niet toevoegen");
@@ -165,7 +172,23 @@ export default function Kosten() {
     transport: "Vervoer", accommodatie: "Accommodatie", golf: "Golf", strand: "Strand",
   };
 
-  if (loading) return <AppLayout><div className="flex justify-center py-12 text-sm text-muted-foreground">Laden...</div></AppLayout>;
+  if (loading) {
+    return (
+      <AppLayout>
+        <div>
+          <HeroSkeleton />
+          <div className="px-6 py-6 space-y-4">
+            <div className="grid grid-cols-2 gap-3">
+              <CardSkeleton />
+              <CardSkeleton />
+            </div>
+            <CardSkeleton />
+            <CardSkeleton />
+          </div>
+        </div>
+      </AppLayout>
+    );
+  }
 
   return (
     <AppLayout>

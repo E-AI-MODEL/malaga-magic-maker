@@ -8,8 +8,10 @@ import { Car, Home, UtensilsCrossed, Dumbbell, BarChart3, Users, CheckCircle2, X
 import { VoteOverviewTable } from "@/components/VoteOverviewTable";
 import { POIMatrix } from "@/components/POIMatrix";
 import { useAuth } from "@/lib/auth";
+import { useTrip } from "@/contexts/TripContext";
 import { ReactionBar } from "@/components/ReactionBar";
 import { SectionComments } from "@/components/SectionComments";
+import { HeroSkeleton, CardSkeleton } from "@/components/PageSkeleton";
 
 interface Profile { id: string; username: string; display_name: string; }
 interface Reaction { id: string; user_id: string; section: string; emoji: string; }
@@ -17,18 +19,22 @@ interface Comment { id: string; user_id: string; section: string; message: strin
 
 export default function Uitslag() {
   const { user } = useAuth();
+  const { activeTrip } = useTrip();
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [reactions, setReactions] = useState<Reaction[]>([]);
   const [comments, setComments] = useState<Comment[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const tripId = activeTrip?.id;
+
   useEffect(() => {
+    if (!tripId) return;
     Promise.all([
-      supabase.from("submissions").select("*"),
+      supabase.from("submissions").select("*").eq("trip_id", tripId),
       supabase.from("profiles").select("*"),
-      supabase.from("reactions").select("*"),
-      supabase.from("comments").select("*"),
+      supabase.from("reactions").select("*").eq("trip_id", tripId),
+      supabase.from("comments").select("*").eq("trip_id", tripId),
     ]).then(([s, p, r, c]) => {
       setSubmissions((s.data as any[]) || []);
       setProfiles((p.data as any[]) || []);
@@ -40,30 +46,30 @@ export default function Uitslag() {
     const channel = supabase
       .channel("uitslag-social")
       .on("postgres_changes", { event: "*", schema: "public", table: "reactions" }, () => {
-        supabase.from("reactions").select("*").then(r => setReactions((r.data as any[]) || []));
+        supabase.from("reactions").select("*").eq("trip_id", tripId).then(r => setReactions((r.data as any[]) || []));
       })
       .on("postgres_changes", { event: "*", schema: "public", table: "comments" }, () => {
-        supabase.from("comments").select("*").then(c => setComments((c.data as any[]) || []));
+        supabase.from("comments").select("*").eq("trip_id", tripId).then(c => setComments((c.data as any[]) || []));
       })
       .subscribe();
 
     return () => { supabase.removeChannel(channel); };
-  }, []);
+  }, [tripId]);
 
   const handleToggleReaction = useCallback(async (section: string, emoji: string) => {
-    if (!user) return;
+    if (!user || !tripId) return;
     const existing = reactions.find(r => r.user_id === user.id && r.section === section && r.emoji === emoji);
     if (existing) {
       await supabase.from("reactions").delete().eq("id", existing.id);
     } else {
-      await supabase.from("reactions").insert({ user_id: user.id, section, emoji });
+      await supabase.from("reactions").insert({ user_id: user.id, section, emoji, trip_id: tripId });
     }
-  }, [user, reactions]);
+  }, [user, reactions, tripId]);
 
   const handleAddComment = useCallback(async (section: string, message: string) => {
-    if (!user) return;
-    await supabase.from("comments").insert({ user_id: user.id, section, message });
-  }, [user]);
+    if (!user || !tripId) return;
+    await supabase.from("comments").insert({ user_id: user.id, section, message, trip_id: tripId });
+  }, [user, tripId]);
 
   const handleDeleteComment = useCallback(async (commentId: string) => {
     await supabase.from("comments").delete().eq("id", commentId);
@@ -99,7 +105,20 @@ export default function Uitslag() {
   const budgets = lockedSubs.map(s => s.budget_cap_total).filter((b): b is number => b !== null && b > 0);
   const budgetMedian = budgets.length > 0 ? budgets.sort((a, b) => a - b)[Math.floor(budgets.length / 2)] : null;
 
-  if (loading) return <AppLayout><div className="flex justify-center py-12 text-sm text-muted-foreground">Laden...</div></AppLayout>;
+  if (loading) {
+    return (
+      <AppLayout>
+        <div>
+          <HeroSkeleton />
+          <div className="px-6 py-6 space-y-4">
+            <CardSkeleton />
+            <CardSkeleton />
+            <CardSkeleton />
+          </div>
+        </div>
+      </AppLayout>
+    );
+  }
 
   if (lockedSubs.length === 0) {
     return (
@@ -197,7 +216,7 @@ export default function Uitslag() {
             {/* Locatie & prijs */}
             <div className="space-y-4 mb-6">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">📍 Locatie & prijs</p>
+                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">Locatie & prijs</p>
                 <div className="rounded-xl overflow-hidden border border-border">
                   <img src="/images/villa-mercedes-locatie.png" alt="Locatie Villa Mercedes" className="w-full" />
                 </div>
@@ -206,7 +225,7 @@ export default function Uitslag() {
                 </p>
               </div>
               <div>
-                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">⛳ Reistijd naar La Cala Golf</p>
+                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">Reistijd naar La Cala Golf</p>
                 <div className="rounded-xl overflow-hidden border border-border">
                   <img src="/images/villa-mercedes-reistijd-golf.png" alt="Reistijd villa naar La Cala Golf" className="w-full" />
                 </div>
@@ -215,7 +234,7 @@ export default function Uitslag() {
                 </p>
               </div>
               <div>
-                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">🗺️ Golfbanen in de omgeving</p>
+                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">Golfbanen in de omgeving</p>
                 <div className="rounded-xl overflow-hidden border border-border">
                   <img src="/images/villa-mercedes-golfbanen.png" alt="Golfbanen rondom Fuengirola" className="w-full" />
                 </div>
@@ -225,35 +244,35 @@ export default function Uitslag() {
 
                 <Accordion type="multiple" className="mt-3">
                   <AccordionItem value="lacala" className="border-border/50">
-                    <AccordionTrigger className="text-sm font-semibold py-2 hover:no-underline">⛳ La Cala Golf & Country Club</AccordionTrigger>
+                    <AccordionTrigger className="text-sm font-semibold py-2 hover:no-underline">La Cala Golf & Country Club</AccordionTrigger>
                     <AccordionContent className="text-xs text-muted-foreground space-y-1.5 pb-3">
                       <p>3 banen van 18 holes. ~27 min rijden.</p>
                       <a href="https://www.lacala.com" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-primary font-semibold hover:underline">lacala.com <ExternalLink className="h-3 w-3" /></a>
                     </AccordionContent>
                   </AccordionItem>
                   <AccordionItem value="chaparral" className="border-border/50">
-                    <AccordionTrigger className="text-sm font-semibold py-2 hover:no-underline">⛳ Chaparral Golf Club</AccordionTrigger>
+                    <AccordionTrigger className="text-sm font-semibold py-2 hover:no-underline">Chaparral Golf Club</AccordionTrigger>
                     <AccordionContent className="text-xs text-muted-foreground space-y-1.5 pb-3">
                       <p>Direct bij het strand. ~15 min rijden. Green fee €80–€110.</p>
                       <a href="https://golfelchaparral.com/en/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-primary font-semibold hover:underline">golfelchaparral.com <ExternalLink className="h-3 w-3" /></a>
                     </AccordionContent>
                   </AccordionItem>
                   <AccordionItem value="santana" className="border-border/50">
-                    <AccordionTrigger className="text-sm font-semibold py-2 hover:no-underline">⛳ Santana Golf</AccordionTrigger>
+                    <AccordionTrigger className="text-sm font-semibold py-2 hover:no-underline">Santana Golf</AccordionTrigger>
                     <AccordionContent className="text-xs text-muted-foreground space-y-1.5 pb-3">
                       <p>Par 72. ~20 min rijden.</p>
                       <a href="https://santanagolf.com" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-primary font-semibold hover:underline">santanagolf.com <ExternalLink className="h-3 w-3" /></a>
                     </AccordionContent>
                   </AccordionItem>
                   <AccordionItem value="calanova" className="border-border/50">
-                    <AccordionTrigger className="text-sm font-semibold py-2 hover:no-underline">⛳ Calanova Golf Club</AccordionTrigger>
+                    <AccordionTrigger className="text-sm font-semibold py-2 hover:no-underline">Calanova Golf Club</AccordionTrigger>
                     <AccordionContent className="text-xs text-muted-foreground space-y-1.5 pb-3">
                       <p>18 holes, par 72. ~25 min rijden.</p>
                       <a href="https://calanovagolf.es" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-primary font-semibold hover:underline">calanovagolf.es <ExternalLink className="h-3 w-3" /></a>
                     </AccordionContent>
                   </AccordionItem>
                   <AccordionItem value="miraflores" className="border-border/50">
-                    <AccordionTrigger className="text-sm font-semibold py-2 hover:no-underline">⛳ Miraflores Golf Club</AccordionTrigger>
+                    <AccordionTrigger className="text-sm font-semibold py-2 hover:no-underline">Miraflores Golf Club</AccordionTrigger>
                     <AccordionContent className="text-xs text-muted-foreground space-y-1.5 pb-3">
                       <p>18 holes, heuvels van Calahonda. ~20 min rijden.</p>
                       <a href="https://www.mirafloresgolf.es" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-primary font-semibold hover:underline">mirafloresgolf.es <ExternalLink className="h-3 w-3" /></a>
@@ -282,7 +301,7 @@ export default function Uitslag() {
                   <div className="h-7 w-7 rounded-full bg-primary/10 flex items-center justify-center text-primary font-display font-extrabold text-xs">📊</div>
                   <Table2 className="h-4 w-4 text-primary" />
                   <span className="font-display font-bold text-sm">Stemoverzicht</span>
-                  <Badge variant="outline" className="text-[10px] ml-auto">{lockedSubs.length}/{6} intakes</Badge>
+                  <Badge variant="outline" className="text-[10px] ml-auto">{lockedSubs.length}/{activeTrip?.group_size || 6} intakes</Badge>
                 </div>
               </AccordionTrigger>
               <AccordionContent className="px-4 pb-4">
@@ -484,7 +503,7 @@ export default function Uitslag() {
         {/* Opmerkingen */}
         {allRemarks.length > 0 && (
           <section className="px-6 py-8 border-t">
-            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-4">💬 Opmerkingen van deelnemers</p>
+            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-4">Opmerkingen van deelnemers</p>
             <div className="space-y-2">
               {allRemarks.map((r, i) => (
                 <div key={i} className="bg-secondary rounded-lg p-3 text-sm">
@@ -497,7 +516,7 @@ export default function Uitslag() {
 
         {/* Footer */}
         <section className="bg-foreground px-6 py-8 text-center">
-          <p className="text-white/40 text-xs">Resultaten op basis van {lockedSubs.length} van 6 intakes</p>
+          <p className="text-white/40 text-xs">Resultaten op basis van {lockedSubs.length} van {activeTrip?.group_size || 6} intakes</p>
         </section>
       </div>
     </AppLayout>

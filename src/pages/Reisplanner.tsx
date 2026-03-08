@@ -207,7 +207,7 @@ function AssistantMessage({ content, isStreaming }: { content: string; isStreami
       <Accordion type="multiple" className="space-y-1">
         {sections.items.map((item, idx) => (
           <AccordionItem key={idx} value={`s-${idx}`} className="border border-border/60 rounded-lg px-3 overflow-hidden">
-            <AccordionTrigger className="text-sm font-semibold py-2.5 hover:no-underline">
+            <AccordionTrigger className="text-sm font-semibold py-2.5 hover:no-underline text-left">
               {item.title}
             </AccordionTrigger>
             <AccordionContent className="pb-3">

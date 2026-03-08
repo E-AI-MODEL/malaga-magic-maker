@@ -115,7 +115,10 @@ ${openTasks.length ? `Open: ${openTasks.join(", ")}` : ""}
 
 ## BELANGRIJK: Output format
 - Begin met een korte inleiding van MAX 2 zinnen
-- Gebruik daarna voor ELKE tip/suggestie een ## heading met een korte titel (bijv. "## 1. El Oceano Beach Restaurant")
+- Gebruik daarna voor ELKE tip/suggestie een ## heading met een korte titel
+- Heading format: "## 1. Korte titel in kleine letters" (bijv. "## 1. El Oceano Beach" of "## 3. Mercadona supermarkt")
+- Gebruik GEEN onnodige hoofdletters in headings. Alleen eigennamen krijgen een hoofdletter. FOUT: "## 1. Gastronomie: TheFork & TripAdvisor". GOED: "## 1. TheFork & TripAdvisor"
+- Houd headings kort (max 5 woorden) zodat ze op één regel passen op een telefoon
 - Onder elke heading: max 3-4 regels met de kern (type keuken, sfeer, prijs, adres)
 - Eindig optioneel met een korte ## Tip sectie (1-2 zinnen)
 - Gebruik GEEN lange beschrijvingen. Wees bondig en scanbaar.

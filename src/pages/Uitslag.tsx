@@ -4,7 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { computeGroupRules, computeAvgPoints, type Submission } from "@/lib/scoring";
 import { Badge } from "@/components/ui/badge";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Car, Home, UtensilsCrossed, Dumbbell, BarChart3, Users, CheckCircle2, XCircle, Star, ExternalLink, Bed, Bath, Waves, ParkingCircle, Wind, Wifi, MapPin } from "lucide-react";
+import { Car, Home, UtensilsCrossed, Dumbbell, BarChart3, Users, CheckCircle2, XCircle, Star, ExternalLink, Bed, Bath, Waves, ParkingCircle, Wind, Wifi, MapPin, Table2 } from "lucide-react";
+import { VoteOverviewTable } from "@/components/VoteOverviewTable";
 import { useAuth } from "@/lib/auth";
 import { ReactionBar } from "@/components/ReactionBar";
 import { SectionComments } from "@/components/SectionComments";
@@ -272,6 +273,23 @@ export default function Uitslag() {
         {/* ═══════════ SECTIES IN ACCORDION ═══════════ */}
         <div className="px-6 py-6 pb-24">
           <Accordion type="multiple" defaultValue={[]} className="space-y-3">
+
+            {/* STEMOVERZICHT */}
+            <AccordionItem value="stemoverzicht" className="border rounded-lg border-border/60 overflow-hidden">
+              <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-accent/5">
+                <div className="flex items-center gap-2">
+                  <div className="h-7 w-7 rounded-full bg-primary/10 flex items-center justify-center text-primary font-display font-extrabold text-xs">📊</div>
+                  <Table2 className="h-4 w-4 text-primary" />
+                  <span className="font-display font-bold text-sm">Stemoverzicht</span>
+                  <Badge variant="outline" className="text-[10px] ml-auto">{lockedSubs.length}/{6} intakes</Badge>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="px-4 pb-4">
+                <VoteOverviewTable submissions={submissions} rules={rules} profiles={profiles} />
+                <ReactionBar section="stemoverzicht" reactions={reactions} profiles={profiles} onToggle={handleToggleReaction} />
+                <SectionComments section="stemoverzicht" comments={comments} profiles={profiles} onAdd={handleAddComment} onDelete={handleDeleteComment} />
+              </AccordionContent>
+            </AccordionItem>
             
             {/* VERVOER */}
             <AccordionItem value="vervoer" className="border rounded-lg border-border/60 overflow-hidden">

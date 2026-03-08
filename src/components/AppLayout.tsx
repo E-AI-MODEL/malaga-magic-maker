@@ -1,5 +1,6 @@
 import { ReactNode } from "react";
 import { BottomNav } from "./BottomNav";
+import { NotificationCenter } from "./NotificationCenter";
 import { useAuth } from "@/lib/auth";
 import { useTrip } from "@/contexts/TripContext";
 import { Button } from "@/components/ui/button";

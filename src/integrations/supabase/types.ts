@@ -43,6 +43,7 @@ export type Database = {
           tags: string[]
           total_price_3_nights: number | null
           transparent_price_confirmed: boolean
+          trip_id: string | null
           type: string
           updated_at: string
         }
@@ -74,6 +75,7 @@ export type Database = {
           tags?: string[]
           total_price_3_nights?: number | null
           transparent_price_confirmed?: boolean
+          trip_id?: string | null
           type?: string
           updated_at?: string
         }
@@ -105,10 +107,19 @@ export type Database = {
           tags?: string[]
           total_price_3_nights?: number | null
           transparent_price_confirmed?: boolean
+          trip_id?: string | null
           type?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "accommodations_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "trip"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       activity_log: {
         Row: {
@@ -117,6 +128,7 @@ export type Database = {
           event_type: string
           id: string
           page: string
+          trip_id: string | null
           user_id: string
         }
         Insert: {
@@ -125,6 +137,7 @@ export type Database = {
           event_type: string
           id?: string
           page: string
+          trip_id?: string | null
           user_id: string
         }
         Update: {
@@ -133,9 +146,18 @@ export type Database = {
           event_type?: string
           id?: string
           page?: string
+          trip_id?: string | null
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "activity_log_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "trip"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       admin_overrides: {
         Row: {
@@ -191,6 +213,7 @@ export type Database = {
           id: string
           message: string
           section: string
+          trip_id: string | null
           user_id: string
         }
         Insert: {
@@ -198,6 +221,7 @@ export type Database = {
           id?: string
           message: string
           section: string
+          trip_id?: string | null
           user_id: string
         }
         Update: {
@@ -205,9 +229,18 @@ export type Database = {
           id?: string
           message?: string
           section?: string
+          trip_id?: string | null
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "comments_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "trip"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       expenses: {
         Row: {
@@ -218,6 +251,7 @@ export type Database = {
           id: string
           paid_by: string
           split_among: string[]
+          trip_id: string | null
         }
         Insert: {
           amount: number
@@ -227,6 +261,7 @@ export type Database = {
           id?: string
           paid_by: string
           split_among?: string[]
+          trip_id?: string | null
         }
         Update: {
           amount?: number
@@ -236,8 +271,17 @@ export type Database = {
           id?: string
           paid_by?: string
           split_among?: string[]
+          trip_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "expenses_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "trip"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       notifications: {
         Row: {
@@ -247,6 +291,7 @@ export type Database = {
           message: string
           read: boolean
           task_id: string | null
+          trip_id: string | null
           user_id: string
         }
         Insert: {
@@ -256,6 +301,7 @@ export type Database = {
           message: string
           read?: boolean
           task_id?: string | null
+          trip_id?: string | null
           user_id: string
         }
         Update: {
@@ -265,6 +311,7 @@ export type Database = {
           message?: string
           read?: boolean
           task_id?: string | null
+          trip_id?: string | null
           user_id?: string
         }
         Relationships: [
@@ -273,6 +320,13 @@ export type Database = {
             columns: ["task_id"]
             isOneToOne: false
             referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "trip"
             referencedColumns: ["id"]
           },
         ]
@@ -304,6 +358,7 @@ export type Database = {
           emoji: string
           id: string
           section: string
+          trip_id: string | null
           user_id: string
         }
         Insert: {
@@ -311,6 +366,7 @@ export type Database = {
           emoji: string
           id?: string
           section: string
+          trip_id?: string | null
           user_id: string
         }
         Update: {
@@ -318,9 +374,18 @@ export type Database = {
           emoji?: string
           id?: string
           section?: string
+          trip_id?: string | null
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "reactions_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "trip"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       submissions: {
         Row: {
@@ -354,6 +419,7 @@ export type Database = {
           require_transparent_price: boolean
           require_wifi: boolean
           top_accommodations: string[] | null
+          trip_id: string | null
           updated_at: string
           user_id: string
         }
@@ -388,6 +454,7 @@ export type Database = {
           require_transparent_price?: boolean
           require_wifi?: boolean
           top_accommodations?: string[] | null
+          trip_id?: string | null
           updated_at?: string
           user_id: string
         }
@@ -422,10 +489,19 @@ export type Database = {
           require_transparent_price?: boolean
           require_wifi?: boolean
           top_accommodations?: string[] | null
+          trip_id?: string | null
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "submissions_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "trip"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       task_votes: {
         Row: {
@@ -476,6 +552,7 @@ export type Database = {
           sort_order: number
           status: string
           title: string
+          trip_id: string | null
           voting_closed: boolean
         }
         Insert: {
@@ -494,6 +571,7 @@ export type Database = {
           sort_order?: number
           status?: string
           title: string
+          trip_id?: string | null
           voting_closed?: boolean
         }
         Update: {
@@ -512,9 +590,18 @@ export type Database = {
           sort_order?: number
           status?: string
           title?: string
+          trip_id?: string | null
           voting_closed?: boolean
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "tasks_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "trip"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       travel_legs: {
         Row: {
@@ -526,6 +613,7 @@ export type Database = {
           passengers: string[]
           sort_order: number
           travel_date: string | null
+          trip_id: string | null
         }
         Insert: {
           arrival_time?: string | null
@@ -536,6 +624,7 @@ export type Database = {
           passengers?: string[]
           sort_order?: number
           travel_date?: string | null
+          trip_id?: string | null
         }
         Update: {
           arrival_time?: string | null
@@ -546,41 +635,100 @@ export type Database = {
           passengers?: string[]
           sort_order?: number
           travel_date?: string | null
+          trip_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "travel_legs_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "trip"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       trip: {
         Row: {
+          cover_image_url: string | null
           created_at: string
+          created_by: string | null
+          description: string | null
           end_date: string
           flights_note: string
           golf_max: number
           golf_min: number
           group_size: number
           id: string
+          invite_code: string | null
+          name: string
           start_date: string
+          status: string
         }
         Insert: {
+          cover_image_url?: string | null
           created_at?: string
+          created_by?: string | null
+          description?: string | null
           end_date?: string
           flights_note?: string
           golf_max?: number
           golf_min?: number
           group_size?: number
           id?: string
+          invite_code?: string | null
+          name?: string
           start_date?: string
+          status?: string
         }
         Update: {
+          cover_image_url?: string | null
           created_at?: string
+          created_by?: string | null
+          description?: string | null
           end_date?: string
           flights_note?: string
           golf_max?: number
           golf_min?: number
           group_size?: number
           id?: string
+          invite_code?: string | null
+          name?: string
           start_date?: string
+          status?: string
         }
         Relationships: []
+      }
+      trip_members: {
+        Row: {
+          id: string
+          joined_at: string | null
+          role: string
+          trip_id: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          joined_at?: string | null
+          role?: string
+          trip_id: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          joined_at?: string | null
+          role?: string
+          trip_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trip_members_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "trip"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {

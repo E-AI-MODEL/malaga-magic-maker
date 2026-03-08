@@ -1,8 +1,9 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { AppLayout } from "@/components/AppLayout";
 import { useTrip } from "@/contexts/TripContext";
 import { useAuth } from "@/lib/auth";
 import ReactMarkdown from "react-markdown";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Send, Sparkles, Loader2, UtensilsCrossed, Map, Flag, Moon, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";

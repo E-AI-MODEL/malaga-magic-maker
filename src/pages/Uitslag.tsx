@@ -308,7 +308,7 @@ export default function Uitslag() {
               </AccordionTrigger>
               <AccordionContent className="px-4 pb-4">
                 <div className="flex items-center gap-3 mb-4">
-                  <span className="text-3xl">{mobilityWinner.icon}</span>
+                  <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center"><mobilityWinner.Icon className="h-6 w-6 text-primary" /></div>
                   <div>
                     <p className="font-display font-extrabold text-lg">{mobilityWinner.label}</p>
                     <p className="text-xs text-muted-foreground">Meerderheidsuitslag</p>

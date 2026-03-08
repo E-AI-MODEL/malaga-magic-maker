@@ -108,7 +108,6 @@ export default function Login() {
       <video
         ref={videoRef}
         src="/videos/boot-sequence.mp4"
-        src="/videos/boot-sequence.mp4"
         autoPlay
         muted
         playsInline

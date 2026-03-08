@@ -300,7 +300,7 @@ function ActivitiesSection({ subs, n }: { subs: Submission[]; n: number }) {
           <tbody>
             {sorted.map(([act, count]) => (
               <tr key={act} className="border-t border-border/40">
-                <td className="px-3 py-2 font-medium">{act}</td>
+                <td className="px-3 py-2 font-medium">{translateLabel(ACTIVITY_LABELS, act)}</td>
                 <td className="text-center px-2 py-2 font-bold tabular-nums">{count}×</td>
                 <td className="px-2 py-2 text-muted-foreground">{popularityLabel(count)}</td>
               </tr>

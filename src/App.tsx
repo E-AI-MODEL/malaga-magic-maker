@@ -20,6 +20,7 @@ const Accommodations = lazy(() => import("./pages/Accommodations"));
 const AccommodationDetail = lazy(() => import("./pages/AccommodationDetail"));
 const Admin = lazy(() => import("./pages/Admin"));
 const Taken = lazy(() => import("./pages/Taken"));
+const Reisplanner = lazy(() => import("./pages/Reisplanner"));
 const TaskContext = lazy(() => import("./pages/TaskContext"));
 const Kosten = lazy(() => import("./pages/Kosten"));
 const Wensen = lazy(() => import("./pages/Wensen"));

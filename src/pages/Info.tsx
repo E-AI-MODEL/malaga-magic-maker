@@ -59,9 +59,9 @@ export default function Info() {
               <span className="text-white/50 flex items-center gap-2"><Plane className="h-3.5 w-3.5" /> Terug zo ochtend</span>
               <span className="font-semibold">Allen</span>
             </div>
-            <div className="flex justify-between">
-              <span className="text-white/50">Golf</span>
-              <span className="font-semibold">Min. 2x, max 3x 18 holes (La Cala Golf) <span className="italic text-white/40">(m.u.v. Pieter &amp; Edwin)</span></span>
+            <div className="flex gap-4">
+              <span className="text-white/50 shrink-0">Golf</span>
+              <span className="font-semibold text-right">Min. 2×, max 3× 18 holes (La Cala Golf) <span className="italic text-white/40">(m.u.v. Pieter &amp; Edwin)</span></span>
             </div>
           </div>
           <p className="text-white/40 text-xs mt-5 leading-relaxed">

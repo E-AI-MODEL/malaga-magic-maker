@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import heroImg from "@/assets/hero-costa-del-sol.jpg";
 import logo from "@/assets/vakansie-logo.png";
 
 export default function Login() {
@@ -51,29 +50,44 @@ export default function Login() {
   };
 
   return (
-    <div className="relative min-h-screen flex items-end sm:items-center justify-center">
-      <img src={heroImg} alt="" className="absolute inset-0 w-full h-full object-cover" />
-      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20" />
+    <div className="relative min-h-screen flex items-center justify-center overflow-hidden">
+      {/* Video background — same as boot sequence for seamless transition */}
+      <video
+        src="/videos/boot-sequence.mp4"
+        autoPlay
+        muted
+        loop
+        playsInline
+        className="absolute inset-0 w-full h-full object-cover"
+      />
+      <div className="absolute inset-0 bg-black/50" />
 
-      <div className="relative z-10 w-full max-w-sm mx-auto px-6 pb-12 sm:pb-0">
-        <div className="text-center mb-8">
-          <img src={logo} alt="Vakansie" className="h-16 w-16 mx-auto mb-3 drop-shadow-lg rounded-xl" />
-          <h1 className="font-display text-4xl font-extrabold text-white tracking-tight leading-none">
-            VAKANSIE
-          </h1>
-          <p className="text-white/70 text-sm mt-3 font-medium">
-            {isRegister ? "Maak een account aan" : "Plan je vakantie met Hansie... wel zo makkelijk."}
-          </p>
-        </div>
+      <div className="relative z-10 w-full max-w-xs mx-auto px-6 flex flex-col items-center">
+        {/* Logo + title */}
+        <img
+          src={logo}
+          alt="Vakansie"
+          className="h-20 w-20 mb-4 drop-shadow-2xl rounded-2xl"
+        />
+        <h1 className="font-display text-3xl font-extrabold text-white tracking-tight leading-none mb-1">
+          VAKANSIE
+        </h1>
+        <p className="text-white/50 text-xs mb-8 font-medium">
+          {isRegister ? "Maak een account aan" : "Plan je vakantie met Hansie…"}
+        </p>
 
-        <form onSubmit={handleSubmit} className="space-y-3">
+        {/* Form card — subtle glass */}
+        <form
+          onSubmit={handleSubmit}
+          className="w-full space-y-2.5 rounded-2xl bg-black/30 backdrop-blur-xl border border-white/10 p-5"
+        >
           {isRegister && (
             <Input
               value={displayName}
               onChange={(e) => setDisplayName(e.target.value)}
               placeholder="Je naam"
               autoComplete="name"
-              className="h-12 bg-white/10 border-white/20 text-white placeholder:text-white/40 backdrop-blur-sm focus:bg-white/15"
+              className="h-11 bg-white/8 border-white/10 text-white placeholder:text-white/30 text-sm rounded-xl focus:bg-white/12 focus:border-white/20"
             />
           )}
           <Input
@@ -81,7 +95,7 @@ export default function Login() {
             onChange={(e) => setEmailOrUsername(e.target.value)}
             placeholder={isRegister ? "E-mailadres" : "E-mail of username"}
             autoComplete={isRegister ? "email" : "username"}
-            className="h-12 bg-white/10 border-white/20 text-white placeholder:text-white/40 backdrop-blur-sm focus:bg-white/15"
+            className="h-11 bg-white/8 border-white/10 text-white placeholder:text-white/30 text-sm rounded-xl focus:bg-white/12 focus:border-white/20"
           />
           <Input
             type="password"
@@ -89,11 +103,15 @@ export default function Login() {
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Wachtwoord"
             autoComplete={isRegister ? "new-password" : "current-password"}
-            className="h-12 bg-white/10 border-white/20 text-white placeholder:text-white/40 backdrop-blur-sm focus:bg-white/15"
+            className="h-11 bg-white/8 border-white/10 text-white placeholder:text-white/30 text-sm rounded-xl focus:bg-white/12 focus:border-white/20"
           />
-          {error && <p className="text-sm text-red-400 font-medium">{error}</p>}
-          {success && <p className="text-sm text-green-400 font-medium">{success}</p>}
-          <Button type="submit" className="w-full h-12 font-bold text-base" disabled={loading}>
+          {error && <p className="text-xs text-red-400 font-medium pt-0.5">{error}</p>}
+          {success && <p className="text-xs text-green-400 font-medium pt-0.5">{success}</p>}
+          <Button
+            type="submit"
+            className="w-full h-11 font-bold text-sm rounded-xl mt-1"
+            disabled={loading}
+          >
             {loading ? "Even wachten..." : isRegister ? "Registreren" : "Inloggen"}
           </Button>
         </form>
@@ -101,7 +119,7 @@ export default function Login() {
         <button
           type="button"
           onClick={() => { setIsRegister(!isRegister); setError(""); setSuccess(""); }}
-          className="w-full text-center text-white/60 text-sm mt-4 hover:text-white/80 transition-colors"
+          className="text-white/40 text-xs mt-4 hover:text-white/60 transition-colors"
         >
           {isRegister ? "Al een account? Inloggen" : "Nog geen account? Registreren"}
         </button>

@@ -15,6 +15,7 @@ import Admin from "./pages/Admin";
 import Taken from "./pages/Taken";
 import TaskContext from "./pages/TaskContext";
 import Kosten from "./pages/Kosten";
+import Wensen from "./pages/Wensen";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();

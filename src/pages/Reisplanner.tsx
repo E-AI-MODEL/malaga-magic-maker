@@ -175,7 +175,7 @@ async function streamChat({
   onDone();
 }
 /** Split assistant markdown into intro + accordion sections by ## headers */
-function AssistantMessage({ content, isStreaming, proseSize = "prose-sm" }: { content: string; isStreaming: boolean; proseSize?: string }) {
+function AssistantMessage({ content, isStreaming, proseSizeClass }: { content: string; isStreaming: boolean; proseSizeClass: string }) {
   const sections = useMemo(() => {
     const parts = content.split(/^## /m);
     const intro = parts[0]?.trim() || "";

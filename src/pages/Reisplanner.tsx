@@ -4,7 +4,7 @@ import { useTrip } from "@/contexts/TripContext";
 import { useAuth } from "@/lib/auth";
 import ReactMarkdown from "react-markdown";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Send, Loader2, UtensilsCrossed, Map, Flag, Moon, ShoppingCart, Menu, Trash2, ChevronRight, ArrowLeft, Sun, Waves, Car, Wine, Music, Utensils, Beer, Palmtree } from "lucide-react";
+import { Send, Loader2, UtensilsCrossed, Map, Flag, Moon, ShoppingCart, Menu, Trash2, ChevronRight, ArrowLeft, Sun, Waves, Car, Wine, Music, Utensils, Beer, Palmtree, Plus, Minus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import vakansielogo from "@/assets/vakansie-logo.png";
@@ -175,7 +175,7 @@ async function streamChat({
   onDone();
 }
 /** Split assistant markdown into intro + accordion sections by ## headers */
-function AssistantMessage({ content, isStreaming }: { content: string; isStreaming: boolean }) {
+function AssistantMessage({ content, isStreaming, proseSize = "prose-sm" }: { content: string; isStreaming: boolean; proseSize?: string }) {
   const sections = useMemo(() => {
     const parts = content.split(/^## /m);
     const intro = parts[0]?.trim() || "";
@@ -191,7 +191,7 @@ function AssistantMessage({ content, isStreaming }: { content: string; isStreami
   // While streaming or if no sections found, show plain markdown
   if (isStreaming || sections.items.length === 0) {
     return (
-      <div className="prose prose-sm dark:prose-invert max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
+      <div className={`prose ${proseSize} dark:prose-invert max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0`}>
         <ReactMarkdown>{content}</ReactMarkdown>
       </div>
     );
@@ -200,18 +200,18 @@ function AssistantMessage({ content, isStreaming }: { content: string; isStreami
   return (
     <div className="space-y-3">
       {sections.intro && (
-        <div className="prose prose-sm dark:prose-invert max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
+        <div className={`prose ${proseSize} dark:prose-invert max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0`}>
           <ReactMarkdown>{sections.intro}</ReactMarkdown>
         </div>
       )}
       <Accordion type="multiple" className="space-y-1">
         {sections.items.map((item, idx) => (
           <AccordionItem key={idx} value={`s-${idx}`} className="border border-border/60 rounded-lg px-3 overflow-hidden">
-            <AccordionTrigger className="text-sm font-semibold py-2.5 hover:no-underline text-left">
+            <AccordionTrigger className="text-xs font-semibold py-2.5 hover:no-underline text-left">
               {item.title}
             </AccordionTrigger>
             <AccordionContent className="pb-3">
-              <div className="prose prose-sm dark:prose-invert max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
+              <div className={`prose ${proseSize} dark:prose-invert max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0`}>
                 <ReactMarkdown>{item.body}</ReactMarkdown>
               </div>
             </AccordionContent>
@@ -230,8 +230,23 @@ export default function Reisplanner() {
   const [isLoading, setIsLoading] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState<MenuCategory | null>(null);
+  const [fontSize, setFontSize] = useState(() => {
+    const saved = localStorage.getItem("ai-guide-fontsize");
+    return saved ? Number(saved) : 1; // 0=xs, 1=sm(default), 2=base
+  });
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  const fontSizeClass = ["text-[11px] leading-[1.5]", "text-xs leading-[1.6]", "text-sm leading-[1.6]"][fontSize] || "text-xs leading-[1.6]";
+  const proseSize = ["prose-xs", "prose-sm", "prose-sm"][fontSize] || "prose-sm";
+
+  const adjustFontSize = (delta: number) => {
+    setFontSize((prev) => {
+      const next = Math.max(0, Math.min(2, prev + delta));
+      localStorage.setItem("ai-guide-fontsize", String(next));
+      return next;
+    });
+  };
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
@@ -283,6 +298,24 @@ export default function Reisplanner() {
           <p className="text-[11px] font-semibold uppercase tracking-[0.15em] text-white/40 mb-1">Reisplanner</p>
           <h1 className="font-display text-xl font-extrabold text-white">AI Assistent</h1>
           <p className="text-xs text-white/50 mt-0.5">Kent jullie groepsvoorkeuren en geeft concrete tips</p>
+          {/* Font size controls */}
+          <div className="flex items-center gap-1 mt-2">
+            <span className="text-[10px] text-white/30 mr-1">Tekst</span>
+            <button
+              onClick={() => adjustFontSize(-1)}
+              disabled={fontSize === 0}
+              className="h-6 w-6 rounded-md bg-white/10 flex items-center justify-center text-white/60 hover:bg-white/20 disabled:opacity-30 transition-colors"
+            >
+              <Minus className="h-3 w-3" />
+            </button>
+            <button
+              onClick={() => adjustFontSize(1)}
+              disabled={fontSize === 2}
+              className="h-6 w-6 rounded-md bg-white/10 flex items-center justify-center text-white/60 hover:bg-white/20 disabled:opacity-30 transition-colors"
+            >
+              <Plus className="h-3 w-3" />
+            </button>
+          </div>
         </div>
 
         {/* Chat area */}
@@ -299,14 +332,14 @@ export default function Reisplanner() {
           {messages.map((msg, i) => (
             <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
               <div
-                className={`max-w-[85%] md:max-w-[70%] rounded-2xl px-4 py-3 text-sm ${
+                className={`max-w-[85%] md:max-w-[70%] rounded-2xl px-4 py-3 ${fontSizeClass} ${
                   msg.role === "user"
                     ? "bg-primary text-primary-foreground rounded-br-md"
                     : "bg-card border border-border rounded-bl-md"
                 }`}
               >
                 {msg.role === "assistant" ? (
-                  <AssistantMessage content={msg.content} isStreaming={isLoading && i === messages.length - 1} />
+                  <AssistantMessage content={msg.content} isStreaming={isLoading && i === messages.length - 1} proseSize={proseSize} />
                 ) : (
                   <p>{msg.content}</p>
                 )}

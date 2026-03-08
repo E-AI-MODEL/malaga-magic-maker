@@ -13,12 +13,14 @@ interface AuthContextType {
   profile: Profile | null;
   isAdmin: boolean;
   loading: boolean;
-  signIn: (username: string, password: string) => Promise<{ error?: string }>;
+  signIn: (emailOrUsername: string, password: string) => Promise<{ error?: string }>;
+  signUp: (email: string, password: string, displayName: string) => Promise<{ error?: string }>;
   signOut: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
+// Legacy username→email map for backwards compatibility
 const USERNAME_EMAIL_MAP: Record<string, string> = {
   robin: "robin@local.app",
   mark: "mark@local.app",
@@ -58,7 +60,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       async (_event, session) => {
         if (session?.user) {
           setUser(session.user);
-          // Use setTimeout to avoid Supabase deadlock
           setTimeout(() => fetchProfile(session.user.id), 0);
         } else {
           setUser(null);
@@ -80,16 +81,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => subscription.unsubscribe();
   }, []);
 
-  const signIn = async (username: string, password: string) => {
-    const email = USERNAME_EMAIL_MAP[username.toLowerCase()];
-    if (!email) {
-      return { error: "Onbekende gebruiker" };
+  const signIn = async (emailOrUsername: string, password: string) => {
+    // Support both legacy usernames and email login
+    let email = emailOrUsername;
+    if (!emailOrUsername.includes("@")) {
+      const mapped = USERNAME_EMAIL_MAP[emailOrUsername.toLowerCase()];
+      if (mapped) {
+        email = mapped;
+      } else {
+        return { error: "Onbekende gebruiker" };
+      }
     }
+
     const { error, data } = await supabase.auth.signInWithPassword({ email, password });
     if (error) {
-      return { error: "Verkeerde wachtwoord" };
+      return { error: "Verkeerd e-mailadres of wachtwoord" };
     }
-    // Log login event
     if (data.user) {
       supabase.from("activity_log").insert({
         user_id: data.user.id,
@@ -100,12 +107,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return {};
   };
 
+  const signUp = async (email: string, password: string, displayName: string) => {
+    const username = displayName.toLowerCase().replace(/\s+/g, "");
+    const { error, data } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: { username, display_name: displayName },
+        emailRedirectTo: window.location.origin,
+      },
+    });
+    if (error) {
+      if (error.message.includes("already registered")) {
+        return { error: "Dit e-mailadres is al geregistreerd" };
+      }
+      return { error: error.message };
+    }
+    return {};
+  };
+
   const signOut = async () => {
     await supabase.auth.signOut();
   };
 
   return (
-    <AuthContext.Provider value={{ user, profile, isAdmin, loading, signIn, signOut }}>
+    <AuthContext.Provider value={{ user, profile, isAdmin, loading, signIn, signUp, signOut }}>
       {children}
     </AuthContext.Provider>
   );

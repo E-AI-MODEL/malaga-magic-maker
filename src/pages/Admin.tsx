@@ -83,11 +83,20 @@ export default function Admin() {
     await supabase.from("admin_overrides").insert({ admin_user_id: user.id, field, old_value: oldValue, new_value: newValue, reason });
   };
 
+  const [eliminateTarget, setEliminateTarget] = useState<string | null>(null);
+  const [eliminateReason, setEliminateReason] = useState("");
+
   const handleEliminate = async (accId: string) => {
-    const reason = prompt("Reden voor eliminatie:");
-    if (!reason) return;
-    await supabase.from("accommodations").update({ status: "eliminated", eliminated_reason: reason }).eq("id", accId);
-    await logOverride("status", "active", "eliminated", reason);
+    setEliminateTarget(accId);
+    setEliminateReason("");
+  };
+
+  const confirmEliminate = async () => {
+    if (!eliminateTarget || !eliminateReason.trim()) return;
+    await supabase.from("accommodations").update({ status: "eliminated", eliminated_reason: eliminateReason }).eq("id", eliminateTarget);
+    await logOverride("status", "active", "eliminated", eliminateReason);
+    setEliminateTarget(null);
+    setEliminateReason("");
     fetchAll(); toast.success("Geëlimineerd");
   };
 

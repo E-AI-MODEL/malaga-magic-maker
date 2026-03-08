@@ -108,7 +108,7 @@ function VoteDistribution({ subs, config, n }: { subs: Submission[]; config: Tri
   return (
     <div>
       <p className="text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground mb-3">
-        🗳️ Stemverdeling
+        Stemverdeling
       </p>
       <div className="border rounded-lg overflow-hidden">
         <table className="w-full text-xs">

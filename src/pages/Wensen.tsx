@@ -14,7 +14,7 @@ import {
   Dumbbell, Star, Waves, Wind, Wifi, ParkingCircle, MapPin, DollarSign,
   BarChart3, Palmtree, Mountain, Sparkles, Zap
 } from "lucide-react";
-import { HeroSkeleton, CardSkeleton } from "@/components/PageSkeleton";
+import { HeroSkeleton, CardSkeleton, PageTransition } from "@/components/PageSkeleton";
 
 interface Profile { id: string; username: string; display_name: string; }
 

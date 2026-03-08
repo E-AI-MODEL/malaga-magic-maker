@@ -43,6 +43,7 @@ function AppRoutes() {
       <Route path="/taken" element={<ProtectedRoute><Taken /></ProtectedRoute>} />
       <Route path="/taken/:section" element={<ProtectedRoute><TaskContext /></ProtectedRoute>} />
       <Route path="/kosten" element={<ProtectedRoute><Kosten /></ProtectedRoute>} />
+      <Route path="/wensen" element={<ProtectedRoute><Wensen /></ProtectedRoute>} />
       <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
       <Route path="*" element={<NotFound />} />
     </Routes>

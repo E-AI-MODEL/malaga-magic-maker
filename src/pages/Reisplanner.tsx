@@ -4,10 +4,11 @@ import { useTrip } from "@/contexts/TripContext";
 import { useAuth } from "@/lib/auth";
 import ReactMarkdown from "react-markdown";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Send, Sparkles, Loader2, UtensilsCrossed, Map, Flag, Moon, ShoppingCart } from "lucide-react";
+import { Send, Loader2, UtensilsCrossed, Map, Flag, Moon, ShoppingCart, Menu, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import vakansielogo from "@/assets/vakansie-logo.png";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 type Msg = { role: "user" | "assistant"; content: string };
 
@@ -265,22 +266,7 @@ export default function Reisplanner() {
           )}
         </div>
 
-        {/* Chips — always visible as horizontal scroll above input */}
-        <div className="flex gap-2 px-4 py-2 overflow-x-auto scrollbar-none">
-          {CHIPS.map((chip) => (
-            <button
-              key={chip.label}
-              onClick={() => send(chip.prompt)}
-              disabled={isLoading}
-              className="flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1.5 rounded-full border border-border bg-card hover:bg-secondary transition-colors whitespace-nowrap disabled:opacity-50"
-            >
-              <chip.icon className="h-3 w-3 text-primary" />
-              {chip.label}
-            </button>
-          ))}
-        </div>
-
-        {/* Input */}
+        {/* Input bar */}
         <div className="border-t border-border bg-background px-4 py-3">
           <form
             onSubmit={(e) => {
@@ -289,6 +275,40 @@ export default function Reisplanner() {
             }}
             className="flex items-center gap-2 max-w-2xl mx-auto"
           >
+            {/* Burger menu with chips + wis */}
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button type="button" variant="ghost" size="icon" className="rounded-xl h-10 w-10 shrink-0 text-muted-foreground">
+                  <Menu className="h-4 w-4" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent side="top" align="start" className="w-56 p-2 space-y-1">
+                {CHIPS.map((chip) => (
+                  <button
+                    key={chip.label}
+                    onClick={() => send(chip.prompt)}
+                    disabled={isLoading}
+                    className="flex items-center gap-2.5 w-full text-left text-sm font-medium px-3 py-2.5 rounded-lg hover:bg-secondary/80 transition-colors disabled:opacity-50"
+                  >
+                    <chip.icon className="h-4 w-4 text-primary shrink-0" />
+                    {chip.label}
+                  </button>
+                ))}
+                {messages.length > 0 && (
+                  <>
+                    <div className="border-t border-border my-1" />
+                    <button
+                      onClick={() => setMessages([])}
+                      className="flex items-center gap-2.5 w-full text-left text-sm font-medium px-3 py-2.5 rounded-lg hover:bg-destructive/10 transition-colors text-destructive"
+                    >
+                      <Trash2 className="h-4 w-4 shrink-0" />
+                      Gesprek wissen
+                    </button>
+                  </>
+                )}
+              </PopoverContent>
+            </Popover>
+
             <input
               ref={inputRef}
               value={input}

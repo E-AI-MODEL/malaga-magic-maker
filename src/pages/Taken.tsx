@@ -10,7 +10,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { CheckCircle2, Plus } from "lucide-react";
-import { HeroSkeleton, CardSkeleton } from "@/components/PageSkeleton";
+import { HeroSkeleton, CardSkeleton, PageTransition } from "@/components/PageSkeleton";
 
 import { TripHero } from "@/components/taken/TripHero";
 import { FlightSection } from "@/components/taken/FlightSection";
@@ -205,7 +205,7 @@ export default function Taken() {
 
   return (
     <AppLayout>
-      <div>
+      <PageTransition>
         <TripHero tasks={tasks} />
         <FlightSection travelLegs={travelLegs} isAdmin={isAdmin} onLegUpdate={handleLegUpdate} />
 
@@ -333,7 +333,7 @@ export default function Taken() {
             {lightboxUrl && <img src={lightboxUrl} alt="" className="w-full h-full object-contain rounded-lg" />}
           </DialogContent>
         </Dialog>
-      </div>
+      </PageTransition>
     </AppLayout>
   );
 }

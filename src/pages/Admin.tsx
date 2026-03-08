@@ -135,12 +135,12 @@ export default function Admin() {
         count++;
       }
     }
-    await logOverride("round_1_sloperhamer", "", `${count} eliminated`, "Ronde 1 uitgevoerd");
+    await logOverride("round_1_filter", "", `${count} eliminated`, "Ronde 1 uitgevoerd");
     fetchAll(); toast.success(`Ronde 1: ${count} accommodaties geëlimineerd`);
   };
 
   const handleRunRound2 = async () => {
-    await logOverride("round_2_scorebord", "", "Ranking berekend", "Ronde 2 uitgevoerd");
+    await logOverride("round_2_ranking", "", "Ranking berekend", "Ronde 2 uitgevoerd");
     toast.success("Ronde 2: Ranking is zichtbaar in de lijst");
   };
 
@@ -354,23 +354,26 @@ export default function Admin() {
               <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-accent/5">
                 <div className="flex items-center gap-2 w-full">
                   <TrendingUp className="h-4 w-4 text-primary" />
-                  <span className="font-display font-bold text-sm">Selectieronde</span>
+                  <span className="font-display font-bold text-sm">Selectie</span>
                 </div>
               </AccordionTrigger>
               <AccordionContent className="px-4 pb-4 space-y-3">
+                <p className="text-xs text-muted-foreground mb-1">
+                  Gebruik deze stappen om accommodaties te beoordelen op basis van de groepseisen.
+                </p>
                 <div className="grid grid-cols-2 gap-3">
                   <button onClick={handleRunRound1} className="rounded-xl border-2 border-destructive/20 bg-destructive/5 p-4 text-center hover:bg-destructive/10 transition-colors">
                     <Trash2 className="h-5 w-5 text-destructive mx-auto mb-2" />
-                    <p className="font-display font-bold text-sm">Ronde 1</p>
-                    <p className="text-[10px] text-muted-foreground mt-0.5">Sloperhamer — elimineer niet-geschikt</p>
+                    <p className="font-display font-bold text-sm">Filteren</p>
+                    <p className="text-[10px] text-muted-foreground mt-0.5">Verwijder accommodaties die niet aan de eisen voldoen</p>
                   </button>
                   <button onClick={handleRunRound2} className="rounded-xl border-2 border-primary/20 bg-primary/5 p-4 text-center hover:bg-primary/10 transition-colors">
                     <BarChart3 className="h-5 w-5 text-primary mx-auto mb-2" />
-                    <p className="font-display font-bold text-sm">Ronde 2</p>
-                    <p className="text-[10px] text-muted-foreground mt-0.5">Scorebord — ranking berekenen</p>
+                    <p className="font-display font-bold text-sm">Rangschikken</p>
+                    <p className="text-[10px] text-muted-foreground mt-0.5">Bereken de score en volgorde op basis van voorkeuren</p>
                   </button>
                 </div>
-                <p className="text-[10px] text-muted-foreground text-center">Ronde 3: selecteer finalisten bij de accommodaties hieronder</p>
+                <p className="text-[10px] text-muted-foreground text-center">Stap 3: kies finalisten bij de accommodatielijst hieronder</p>
               </AccordionContent>
             </AccordionItem>
 

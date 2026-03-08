@@ -14,7 +14,7 @@ import {
   Dumbbell, Star, Waves, Wind, Wifi, ParkingCircle, MapPin, DollarSign,
   BarChart3, Palmtree, Mountain, Sparkles, Zap
 } from "lucide-react";
-import { HeroSkeleton, CardSkeleton } from "@/components/PageSkeleton";
+import { HeroSkeleton, CardSkeleton, PageTransition } from "@/components/PageSkeleton";
 
 interface Profile { id: string; username: string; display_name: string; }
 
@@ -154,7 +154,7 @@ export default function Wensen() {
 
   return (
     <AppLayout>
-      <div>
+      <PageTransition>
         {/* Header */}
         <section className="bg-foreground text-white px-6 py-8">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/40 mb-2">Overzicht</p>
@@ -415,7 +415,7 @@ export default function Wensen() {
             )}
           </Accordion>
         </section>
-      </div>
+      </PageTransition>
     </AppLayout>
   );
 }

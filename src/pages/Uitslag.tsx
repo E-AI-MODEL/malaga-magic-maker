@@ -11,7 +11,7 @@ import { useAuth } from "@/lib/auth";
 import { useTrip } from "@/contexts/TripContext";
 import { ReactionBar } from "@/components/ReactionBar";
 import { SectionComments } from "@/components/SectionComments";
-import { HeroSkeleton, CardSkeleton } from "@/components/PageSkeleton";
+import { HeroSkeleton, CardSkeleton, PageTransition } from "@/components/PageSkeleton";
 
 interface Profile { id: string; username: string; display_name: string; }
 interface Reaction { id: string; user_id: string; section: string; emoji: string; }
@@ -156,7 +156,7 @@ export default function Uitslag() {
 
   return (
     <AppLayout>
-      <div>
+      <PageTransition>
         {/* Header */}
         <section className="bg-foreground text-white px-6 py-10">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/40 mb-2">Gezamenlijke uitslag</p>
@@ -578,7 +578,7 @@ export default function Uitslag() {
         <section className="bg-foreground px-6 py-8 text-center">
           <p className="text-white/40 text-xs">Resultaten op basis van {lockedSubs.length} van {activeTrip?.group_size || 6} intakes</p>
         </section>
-      </div>
+      </PageTransition>
     </AppLayout>
   );
 }

@@ -12,12 +12,55 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 
 type Msg = { role: "user" | "assistant"; content: string };
 
-const CHIPS = [
-  { label: "Restaurant tips", icon: UtensilsCrossed, prompt: "Geef me 3-5 goede restauranttips in de buurt van onze accommodatie, passend bij ons groepsprofiel." },
-  { label: "Dagtripjes", icon: Map, prompt: "Wat zijn leuke dagtripjes vanuit onze locatie voor onze groep?" },
-  { label: "Golfbanen", icon: Flag, prompt: "Welke golfbanen in de buurt zijn het beste voor onze groep qua prijs en kwaliteit?" },
-  { label: "Avondprogramma", icon: Moon, prompt: "Wat kunnen we 's avonds doen in de buurt? Denk aan bars, livemuziek, etc." },
-  { label: "Boodschappen", icon: ShoppingCart, prompt: "Waar kunnen we het beste boodschappen doen en wat moeten we zeker kopen voor de groep?" },
+type MenuCategory = {
+  label: string;
+  icon: any;
+  desc: string;
+  items: { label: string; prompt: string }[];
+};
+
+const MENU: MenuCategory[] = [
+  {
+    label: "Eten & drinken", icon: UtensilsCrossed, desc: "Restaurants, bars en boodschappen",
+    items: [
+      { label: "Restaurants voor groepen", prompt: "Geef 3-5 restaurants in de buurt van onze accommodatie die geschikt zijn voor een groep van 6 personen. Noem per restaurant: naam, type keuken, sfeer, prijs p.p. en adres. Houd rekening met ons budget en eventuele dieetwensen." },
+      { label: "Tapas & casual spots", prompt: "Wat zijn de beste tapas-bars en casual eetplekken in de buurt? Noem naam, specialiteit, prijs-indicatie en adres. Focus op authentiek Spaans." },
+      { label: "Supermarkten & boodschappen", prompt: "Waar kunnen we het beste boodschappen doen bij onze accommodatie? Noem de dichtstbijzijnde supermarkten met afstand, en geef tips voor typisch Spaanse producten die we moeten proberen." },
+    ],
+  },
+  {
+    label: "Golf", icon: Flag, desc: "Banen, boekingen en tips",
+    items: [
+      { label: "Beste golfbanen in de buurt", prompt: "Welke golfbanen liggen het dichtst bij onze accommodatie? Noem per baan: naam, afstand, greenfee, kwaliteit (rating) en boekingstips. We willen 2-3 rondes spelen." },
+      { label: "Prijs-kwaliteit vergelijking", prompt: "Vergelijk de 4 beste golfbanen in de regio op prijs-kwaliteit. Maak een ranking met greenfee, baanconditie en bereikbaarheid vanaf onze accommodatie." },
+      { label: "Boekingstips & etiquette", prompt: "Geef praktische tips voor het boeken van golftijden in april aan de Costa del Sol. Denk aan: hoe ver vooruit boeken, dresscode, en groepskorting-mogelijkheden." },
+    ],
+  },
+  {
+    label: "Activiteiten overdag", icon: Sun, desc: "Strand, cultuur en uitstapjes",
+    items: [
+      { label: "Stranden in de buurt", prompt: "Wat zijn de 3-5 beste stranden bij onze accommodatie? Noem per strand: naam, afstand, type (rustig/levendig), voorzieningen en parkeermogelijkheden." },
+      { label: "Cultuur & bezienswaardigheden", prompt: "Welke culturele bezienswaardigheden en dorpjes zijn de moeite waard in de buurt? Denk aan: oude stadjes, markten, musea. Noem naam, afstand en bezoektijd." },
+      { label: "Dagtripjes vanuit de accommodatie", prompt: "Stel 3 concrete dagtripjes voor vanuit onze accommodatie. Per trip: bestemming, reistijd, wat te doen, kosten en lunchplek." },
+      { label: "Sport & outdoor", prompt: "Welke sportieve activiteiten (behalve golf) kunnen we doen? Denk aan padel, wandelen, watersport. Noem locaties, prijzen en of je moet reserveren." },
+    ],
+  },
+  {
+    label: "Avond & uitgaan", icon: Moon, desc: "Bars, muziek en entertainment",
+    items: [
+      { label: "Bars & cocktails", prompt: "Waar kunnen we 's avonds goed een drankje doen met de groep? Noem 3-5 bars met sfeer, type (rooftop/beach/lounge), locatie en prijsindicatie." },
+      { label: "Live muziek & entertainment", prompt: "Waar is er live muziek of entertainment in de buurt in april? Noem locaties, type muziek, avonden en of je moet reserveren." },
+      { label: "Avondplanning per dag", prompt: "Stel voor elke avond van ons verblijf een concreet avondprogramma voor. Mix rustige en uitgaansavonden, passend bij onze groep." },
+    ],
+  },
+  {
+    label: "Praktisch", icon: Car, desc: "Vervoer, winkels en tips",
+    items: [
+      { label: "Vervoer & parkeren", prompt: "Hoe verplaatsen we ons het beste? Geef tips over huurauto, taxi-apps, parkeren bij de accommodatie en bij populaire bestemmingen." },
+      { label: "Nuttige apps & nummers", prompt: "Welke apps en telefoonnummers zijn handig voor onze reis naar de Costa del Sol? Denk aan taxi, restaurants, vertaling, noodgevallen." },
+      { label: "Weer & inpaktips april", prompt: "Wat is het typische weer in april aan de Costa del Sol? Geef concrete inpaktips voor onze groep, inclusief voor golf en strand." },
+    ],
+  },
 ];
 
 import { supabase } from "@/integrations/supabase/client";

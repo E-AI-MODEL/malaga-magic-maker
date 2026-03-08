@@ -1,5 +1,5 @@
 import { NavLink, useNavigate } from "react-router-dom";
-import { BarChart3, Info, ClipboardList, MoreHorizontal, Home, Receipt, FileText, Settings } from "lucide-react";
+import { BarChart3, Info, ClipboardList, MoreHorizontal, Home, Receipt, FileText, Settings, ListChecks } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -34,6 +34,7 @@ export function BottomNav() {
   const inactive = "text-muted-foreground/60";
 
   const moreLinks = [
+    { to: "/wensen", icon: ListChecks, label: "Wensen", desc: "Alle wensen & voorwaarden" },
     { to: "/accommodations", icon: Home, label: "Verblijven", desc: "Bekijk alle accommodaties" },
     { to: "/kosten", icon: Receipt, label: "Kosten", desc: "Uitgaven & verrekeningen" },
     { to: "/intake", icon: FileText, label: "Intake", desc: "Jouw voorkeuren invullen" },

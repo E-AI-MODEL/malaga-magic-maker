@@ -13,6 +13,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Switch } from "@/components/ui/switch";
 import { ReactionBar } from "@/components/ReactionBar";
 import { SectionComments } from "@/components/SectionComments";
 import { toast } from "sonner";
@@ -20,7 +21,7 @@ import { useNavigate } from "react-router-dom";
 import {
   Plane, ChevronDown, CheckCircle2, Upload, User, Shield, X,
   Globe, MapPin, Clock, Calendar, Pencil, Save, ChevronRight, Info,
-  Plus, Trash2, Settings2
+  Plus, Trash2, Settings2, Link2, FileText, Vote, Image as ImageIcon
 } from "lucide-react";
 import {
   Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription
@@ -29,6 +30,7 @@ import {
 interface Profile { id: string; username: string; display_name: string; }
 interface InfoDetails {
   url?: string;
+  urls?: string[];
   activity_date?: string;
   activity_time?: string;
   location?: string;
@@ -53,6 +55,14 @@ const SECTION_CONTEXT: Record<string, string> = {
   accommodatie: "Bekijk context & info",
   golf: "Bekijk context & info",
   strand: "Bekijk context & info",
+};
+
+const ALL_SECTIONS = ["transport", "accommodatie", "golf", "strand"];
+const SECTION_LABELS: Record<string, string> = {
+  transport: "Vervoer",
+  accommodatie: "Accommodatie",
+  golf: "Golf",
+  strand: "Strand & omgeving",
 };
 
 export default function Taken() {
@@ -174,18 +184,24 @@ export default function Taken() {
     setEditingTaskId(null);
   };
 
-  const handleImageUpload = async (taskId: string, file: File) => {
+  const handleImageUpload = async (taskId: string, files: FileList) => {
     setUploading(true);
-    const ext = file.name.split(".").pop();
-    const path = `${user!.id}/${taskId}/${Date.now()}.${ext}`;
-    const { error } = await supabase.storage.from("task-attachments").upload(path, file);
-    if (!error) {
-      const { data: urlData } = supabase.storage.from("task-attachments").getPublicUrl(path);
-      const task = tasks.find(t => t.id === taskId);
-      const urls = [...(task?.info_image_urls || []), urlData.publicUrl];
-      await supabase.from("tasks").update({ info_image_urls: urls }).eq("id", taskId);
+    const task = tasks.find(t => t.id === taskId);
+    const currentUrls = [...(task?.info_image_urls || [])];
+
+    for (const file of Array.from(files)) {
+      const ext = file.name.split(".").pop();
+      const path = `${user!.id}/${taskId}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+      const { error } = await supabase.storage.from("task-attachments").upload(path, file);
+      if (!error) {
+        const { data: urlData } = supabase.storage.from("task-attachments").getPublicUrl(path);
+        currentUrls.push(urlData.publicUrl);
+      }
     }
+
+    await supabase.from("tasks").update({ info_image_urls: currentUrls }).eq("id", taskId);
     setUploading(false);
+    if (files.length > 1) toast.success(`${files.length} bestanden geüpload`);
   };
 
   const handleRemoveImage = async (taskId: string, url: string) => {
@@ -196,6 +212,11 @@ export default function Taken() {
 
   const handleAssign = async (taskId: string, field: "assigned_to" | "backup_to", value: string) => {
     await supabase.from("tasks").update({ [field]: value || null }).eq("id", taskId);
+  };
+
+  const handleToggleVoting = async (taskId: string, closed: boolean) => {
+    await supabase.from("tasks").update({ voting_closed: closed }).eq("id", taskId);
+    toast.success(closed ? "Stemming gesloten" : "Stemming geopend");
   };
 
   const handleLegUpdate = async (legId: string, updates: Partial<TravelLeg>) => {
@@ -236,6 +257,12 @@ export default function Taken() {
     return date.toLocaleDateString("nl-NL", { day: "numeric", month: "long" });
   };
 
+  // All sections (including those without tasks yet)
+  const existingSections = [...new Set(tasks.map(t => t.section))];
+  const allSections = ALL_SECTIONS.filter(s => existingSections.includes(s) || isAdmin);
+  // Add any existing sections not in ALL_SECTIONS
+  existingSections.forEach(s => { if (!allSections.includes(s)) allSections.push(s); });
+
   return (
     <AppLayout>
       <div>
@@ -273,7 +300,7 @@ export default function Taken() {
         {/* ═══ VLUCHTGEGEVENS (uitklapbaar) ═══ */}
         <Collapsible open={flightsOpen} onOpenChange={setFlightsOpen}>
           <section className="border-b border-border px-6 py-4">
-      <CollapsibleTrigger className="flex items-center justify-between w-full bg-secondary/50 rounded-lg px-3 py-2.5 hover:bg-secondary/80 transition-colors">
+            <CollapsibleTrigger className="flex items-center justify-between w-full bg-secondary/50 rounded-lg px-3 py-2.5 hover:bg-secondary/80 transition-colors">
               <div className="flex items-center gap-2">
                 <Plane className="h-4 w-4 text-primary" />
                 <p className="text-sm font-semibold text-foreground">Vluchtgegevens</p>
@@ -323,23 +350,22 @@ export default function Taken() {
           </div>
 
           <Accordion type="multiple" defaultValue={[]} className="space-y-4">
-            {[...new Set(tasks.map(t => t.section))].map(section => {
-              const sectionLabels: Record<string, string> = {
-                transport: "Vervoer",
-                accommodatie: "Accommodatie",
-                golf: "Golf",
-                strand: "Strand & omgeving",
-              };
+            {allSections.map(section => {
               const sectionTasks = tasks.filter(t => t.section === section);
 
               return (
                 <AccordionItem key={section} value={section} className="border rounded-lg border-border/60 overflow-hidden">
                   <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-accent/5">
                     <div className="flex items-center gap-2">
-                      <span className="font-display font-bold text-sm">{sectionLabels[section] || section}</span>
-                      <Badge variant="outline" className="text-[10px] font-mono tabular-nums border-primary/30 text-primary ml-auto">
-                        {Math.round(sectionTasks.reduce((a, t) => a + t.progress, 0) / sectionTasks.length)}%
-                      </Badge>
+                      <span className="font-display font-bold text-sm">{SECTION_LABELS[section] || section}</span>
+                      {sectionTasks.length > 0 && (
+                        <Badge variant="outline" className="text-[10px] font-mono tabular-nums border-primary/30 text-primary ml-auto">
+                          {Math.round(sectionTasks.reduce((a, t) => a + t.progress, 0) / sectionTasks.length)}%
+                        </Badge>
+                      )}
+                      {sectionTasks.length === 0 && (
+                        <Badge variant="outline" className="text-[10px] text-muted-foreground ml-auto">Leeg</Badge>
+                      )}
                     </div>
                   </AccordionTrigger>
                   <AccordionContent className="px-0 pb-0">
@@ -347,8 +373,6 @@ export default function Taken() {
                       {sectionTasks.map(task => {
                         const isOpen = openTask === task.id;
                         const editable = canEditTask(task);
-                        
-                        const contextLabel = SECTION_CONTEXT[task.section];
                         const details: InfoDetails = (task.info_details as any) || {};
 
                         return (
@@ -384,6 +408,11 @@ export default function Taken() {
                                         {task.paid_by && <span className="ml-1 text-muted-foreground">· {task.paid_by}</span>}
                                       </Badge>
                                     )}
+                                    {!task.voting_closed && (
+                                      <Badge className="bg-accent text-accent-foreground text-[10px]">
+                                        <Vote className="h-3 w-3 mr-1" />Stemming open
+                                      </Badge>
+                                    )}
                                   </div>
                                   <Progress value={task.progress} className="h-2 rounded-full" />
                                 </CardContent>
@@ -406,7 +435,7 @@ export default function Taken() {
                                     </div>
                                   )}
 
-                                  {/* Gear icon — only for owner/backup/admin */}
+                                  {/* Beheren button — only for owner/backup/admin */}
                                   {editable && (
                                     <div className="pt-2 border-t border-border/40">
                                       <Button
@@ -482,11 +511,12 @@ export default function Taken() {
           </Accordion>
         </section>
 
-        {/* ═══ TASK EDIT DRAWER ═══ */}
+        {/* ═══ TASK MANAGEMENT DRAWER ═══ */}
         {(() => {
           const drawerTask = tasks.find(t => t.id === drawerTaskId);
           if (!drawerTask) return null;
           const drawerDetails: InfoDetails = (drawerTask.info_details as any) || {};
+          const canEdit = canEditTask(drawerTask);
           return (
             <Drawer open={!!drawerTaskId} onOpenChange={(open) => { if (!open) { setDrawerTaskId(null); setEditingTaskId(null); } }}>
               <DrawerContent className="max-h-[85vh]">
@@ -494,7 +524,8 @@ export default function Taken() {
                   <DrawerTitle className="font-display text-base">{drawerTask.title}</DrawerTitle>
                   <DrawerDescription className="text-xs text-muted-foreground">Beheer voortgang, details en instellingen</DrawerDescription>
                 </DrawerHeader>
-                <div className="px-4 pb-6 space-y-4 overflow-y-auto">
+                <div className="px-4 pb-6 space-y-5 overflow-y-auto">
+                  
                   {/* Context link */}
                   {SECTION_CONTEXT[drawerTask.section] && (
                     <button
@@ -505,76 +536,111 @@ export default function Taken() {
                     </button>
                   )}
 
-                  {/* Progress — canEditTask */}
-                  <div className="bg-secondary/50 rounded-lg p-3">
-                    <label className="text-xs font-semibold text-muted-foreground mb-2 block">Voortgang</label>
-                    <div className="flex gap-1.5">
-                      {[0, 25, 50, 75, 100].map(step => (
-                        <button
-                          key={step}
-                          onClick={() => handleProgressChange(drawerTask.id, [step])}
-                          className={`flex-1 h-8 rounded-md text-xs font-semibold transition-colors ${
-                            drawerTask.progress >= step
-                              ? "bg-primary text-primary-foreground"
-                              : "bg-secondary text-muted-foreground hover:bg-secondary/80"
-                          }`}
-                        >
-                          {step}%
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Details editor — canEditTask */}
-                  {editingTaskId === drawerTask.id ? (
-                    <TaskDetailsEditor
-                      details={drawerDetails}
-                      infoText={drawerTask.info_text || ""}
-                      onSave={(d, t) => handleDetailsSave(drawerTask.id, d, t)}
-                    />
-                  ) : (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="h-8 text-xs gap-1.5 w-full"
-                      onClick={() => setEditingTaskId(drawerTask.id)}
-                    >
-                      <Pencil className="h-3 w-3" />
-                      Details bewerken
-                    </Button>
-                  )}
-
-                  {/* Photo management — canEditTask */}
-                  <div>
-                    {drawerTask.info_image_urls.length > 0 && (
-                      <div className="grid grid-cols-3 gap-2 mb-2">
-                        {drawerTask.info_image_urls.map((url, i) => (
-                          <div key={i} className="relative group rounded-lg overflow-hidden border border-border">
-                            <img src={url} alt="" className="w-full h-20 object-cover" />
-                            <button
-                              onClick={() => handleRemoveImage(drawerTask.id, url)}
-                              className="absolute top-1 right-1 bg-destructive text-destructive-foreground rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
-                            >
-                              <X className="h-3 w-3" />
-                            </button>
-                          </div>
+                  {/* ── Voortgang ── */}
+                  {canEdit && (
+                    <div className="bg-secondary/50 rounded-lg p-3">
+                      <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2 block">Voortgang</label>
+                      <div className="flex gap-1.5">
+                        {[0, 25, 50, 75, 100].map(step => (
+                          <button
+                            key={step}
+                            onClick={() => handleProgressChange(drawerTask.id, [step])}
+                            className={`flex-1 h-8 rounded-md text-xs font-semibold transition-colors ${
+                              drawerTask.progress >= step
+                                ? "bg-primary text-primary-foreground"
+                                : "bg-secondary text-muted-foreground hover:bg-secondary/80"
+                            }`}
+                          >
+                            {step}%
+                          </button>
                         ))}
                       </div>
-                    )}
-                    <label className="inline-flex items-center gap-1.5 text-xs text-primary cursor-pointer hover:underline">
-                      <Upload className="h-3 w-3" />
-                      {uploading ? "Uploaden..." : "Foto toevoegen"}
-                      <input
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={(e) => e.target.files?.[0] && handleImageUpload(drawerTask.id, e.target.files[0])}
-                        disabled={uploading}
-                      />
-                    </label>
-                  </div>
+                    </div>
+                  )}
 
-                  {/* Admin-only section */}
+                  {/* ── Stemming toggle ── */}
+                  {canEdit && (
+                    <div className="bg-secondary/50 rounded-lg p-3">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Vote className="h-3.5 w-3.5 text-muted-foreground" />
+                          <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Stemming</label>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-[10px] text-muted-foreground">{drawerTask.voting_closed ? "Gesloten" : "Open"}</span>
+                          <Switch
+                            checked={!drawerTask.voting_closed}
+                            onCheckedChange={(checked) => handleToggleVoting(drawerTask.id, !checked)}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* ── Details editor ── */}
+                  {canEdit && (
+                    editingTaskId === drawerTask.id ? (
+                      <TaskDetailsEditor
+                        details={drawerDetails}
+                        infoText={drawerTask.info_text || ""}
+                        onSave={(d, t) => handleDetailsSave(drawerTask.id, d, t)}
+                      />
+                    ) : (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-8 text-xs gap-1.5 w-full"
+                        onClick={() => setEditingTaskId(drawerTask.id)}
+                      >
+                        <Pencil className="h-3 w-3" />
+                        Details bewerken
+                      </Button>
+                    )
+                  )}
+
+                  {/* ── Foto's & bestanden ── */}
+                  {canEdit && (
+                    <div className="bg-secondary/50 rounded-lg p-3 space-y-3">
+                      <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground block">
+                        <div className="flex items-center gap-1.5">
+                          <ImageIcon className="h-3.5 w-3.5" />
+                          Foto's & bestanden ({drawerTask.info_image_urls.length})
+                        </div>
+                      </label>
+                      
+                      {drawerTask.info_image_urls.length > 0 && (
+                        <div className="grid grid-cols-3 gap-2">
+                          {drawerTask.info_image_urls.map((url, i) => (
+                            <div key={i} className="relative group rounded-lg overflow-hidden border border-border">
+                              <img src={url} alt="" className="w-full h-20 object-cover cursor-pointer" onClick={() => setLightboxUrl(url)} />
+                              <button
+                                onClick={() => handleRemoveImage(drawerTask.id, url)}
+                                className="absolute top-1 right-1 bg-destructive text-destructive-foreground rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                              >
+                                <X className="h-3 w-3" />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      
+                      <label className="inline-flex items-center gap-2 text-xs bg-primary/10 text-primary rounded-lg px-3 py-2 cursor-pointer hover:bg-primary/20 transition-colors w-full justify-center font-medium">
+                        <Upload className="h-3.5 w-3.5" />
+                        {uploading ? "Uploaden..." : "Foto's / bestanden uploaden"}
+                        <input
+                          type="file"
+                          accept="image/*,.pdf,.doc,.docx"
+                          multiple
+                          className="hidden"
+                          onChange={(e) => e.target.files && e.target.files.length > 0 && handleImageUpload(drawerTask.id, e.target.files)}
+                          disabled={uploading}
+                        />
+                      </label>
+                      <p className="text-[9px] text-muted-foreground text-center">Meerdere bestanden tegelijk selecteren mogelijk</p>
+                    </div>
+                  )}
+
+                  {/* ── Admin-only section ── */}
                   {isAdmin && (
                     <div className="space-y-3 pt-3 border-t border-border/40">
                       <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Admin</p>
@@ -690,35 +756,62 @@ export default function Taken() {
   );
 }
 
-/* ── Structured details editor with Save button ── */
+/* ── Structured details editor with multiple links + Save ── */
 function TaskDetailsEditor({ details, infoText, onSave }: {
   details: InfoDetails;
   infoText: string;
   onSave: (details: InfoDetails, infoText: string) => void;
 }) {
-  const [url, setUrl] = useState(details.url || "");
+  const existingUrls = details.urls || (details.url ? [details.url] : []);
+  const [urls, setUrls] = useState<string[]>(existingUrls.length > 0 ? existingUrls : [""]);
   const [date, setDate] = useState(details.activity_date || "");
   const [time, setTime] = useState(details.activity_time || "");
   const [location, setLocation] = useState(details.location || "");
   const [notes, setNotes] = useState(infoText);
 
+  const addUrlField = () => setUrls([...urls, ""]);
+  const updateUrl = (i: number, v: string) => { const n = [...urls]; n[i] = v; setUrls(n); };
+  const removeUrl = (i: number) => { const n = urls.filter((_, idx) => idx !== i); setUrls(n.length > 0 ? n : [""]); };
+
   const save = () => {
+    const cleanUrls = urls.filter(u => u.trim());
     onSave(
-      { url: url || undefined, activity_date: date || undefined, activity_time: time || undefined, location: location || undefined },
+      {
+        url: cleanUrls[0] || undefined,
+        urls: cleanUrls.length > 0 ? cleanUrls : undefined,
+        activity_date: date || undefined,
+        activity_time: time || undefined,
+        location: location || undefined,
+      },
       notes
     );
   };
 
   return (
     <div className="space-y-3">
-      <label className="text-xs font-semibold text-muted-foreground block">Details</label>
+      <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground block">Details bewerken</label>
       
+      {/* Multiple links */}
       <div className="bg-secondary/50 rounded-lg p-3 space-y-2">
-        <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Link</label>
-        <div className="relative">
-          <Globe className="absolute left-2.5 top-2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
-          <Input value={url} onChange={e => setUrl(e.target.value)} placeholder="Link / URL" className="text-xs h-8 pl-8" />
+        <div className="flex items-center justify-between">
+          <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Links</label>
+          <button onClick={addUrlField} className="text-[10px] text-primary font-medium hover:underline flex items-center gap-1">
+            <Plus className="h-3 w-3" />Link toevoegen
+          </button>
         </div>
+        {urls.map((url, i) => (
+          <div key={i} className="flex gap-1.5">
+            <div className="relative flex-1 min-w-0">
+              <Link2 className="absolute left-2.5 top-2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
+              <Input value={url} onChange={e => updateUrl(i, e.target.value)} placeholder="https://..." className="text-xs h-8 pl-8 w-full" />
+            </div>
+            {urls.length > 1 && (
+              <button onClick={() => removeUrl(i)} className="text-muted-foreground hover:text-destructive p-1">
+                <X className="h-3.5 w-3.5" />
+              </button>
+            )}
+          </div>
+        ))}
       </div>
 
       <div className="bg-secondary/50 rounded-lg p-3 space-y-2 overflow-hidden">
@@ -763,7 +856,8 @@ function TaskDetailsEditor({ details, infoText, onSave }: {
 
 /* ── Structured details read-only (styled card) ── */
 function TaskDetailsReadonly({ details, infoText }: { details: InfoDetails; infoText: string | null }) {
-  const hasAny = details.url || details.activity_date || details.activity_time || details.location || infoText;
+  const allUrls = details.urls || (details.url ? [details.url] : []);
+  const hasAny = allUrls.length > 0 || details.activity_date || details.activity_time || details.location || infoText;
   if (!hasAny) return null;
 
   const formatDate = (d: string) => {
@@ -773,12 +867,12 @@ function TaskDetailsReadonly({ details, infoText }: { details: InfoDetails; info
 
   return (
     <div className="bg-primary/5 border border-primary/20 rounded-lg p-3 space-y-1.5">
-      {details.url && (
-        <div className="flex items-center gap-2 text-xs">
-          <Globe className="h-3.5 w-3.5 text-primary shrink-0" />
-          <a href={details.url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline truncate">{details.url}</a>
+      {allUrls.map((url, i) => (
+        <div key={i} className="flex items-center gap-2 text-xs">
+          <Link2 className="h-3.5 w-3.5 text-primary shrink-0" />
+          <a href={url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline truncate">{url}</a>
         </div>
-      )}
+      ))}
       {details.activity_date && (
         <div className="flex items-center gap-2 text-xs text-foreground">
           <Calendar className="h-3.5 w-3.5 text-primary shrink-0" />

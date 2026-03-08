@@ -210,22 +210,20 @@ export default function Reisplanner() {
           )}
         </div>
 
-        {/* Chips when chat is active */}
-        {!isEmpty && (
-          <div className="flex gap-2 px-4 py-2 overflow-x-auto scrollbar-none">
-            {CHIPS.map((chip) => (
-              <button
-                key={chip.label}
-                onClick={() => send(chip.prompt)}
-                disabled={isLoading}
-                className="flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1.5 rounded-full border border-border bg-card hover:bg-secondary transition-colors whitespace-nowrap disabled:opacity-50"
-              >
-                <chip.icon className="h-3 w-3 text-primary" />
-                {chip.label}
-              </button>
-            ))}
-          </div>
-        )}
+        {/* Chips — always visible as horizontal scroll above input */}
+        <div className="flex gap-2 px-4 py-2 overflow-x-auto scrollbar-none">
+          {CHIPS.map((chip) => (
+            <button
+              key={chip.label}
+              onClick={() => send(chip.prompt)}
+              disabled={isLoading}
+              className="flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1.5 rounded-full border border-border bg-card hover:bg-secondary transition-colors whitespace-nowrap disabled:opacity-50"
+            >
+              <chip.icon className="h-3 w-3 text-primary" />
+              {chip.label}
+            </button>
+          ))}
+        </div>
 
         {/* Input */}
         <div className="border-t border-border bg-background px-4 py-3">

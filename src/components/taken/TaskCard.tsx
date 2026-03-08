@@ -7,7 +7,7 @@ import { SectionComments } from "@/components/SectionComments";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  ChevronDown, User, Shield, Vote, Settings2, Link2, Calendar, Clock, MapPin
+  ChevronDown, User, Shield, Vote, Settings2, Link2, Calendar, Clock, MapPin, CheckCircle2, Circle
 } from "lucide-react";
 import type { Task, InfoDetails, Profile, Reaction, Comment } from "./types";
 

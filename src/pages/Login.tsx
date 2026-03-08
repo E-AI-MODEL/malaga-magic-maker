@@ -17,7 +17,6 @@ export default function Login() {
   const videoRef = useRef<HTMLVideoElement>(null);
 
   const handleVideoEnd = () => {
-    // Video stays on last frame, then show the login form
     setShowForm(true);
   };
 
@@ -59,6 +58,10 @@ export default function Login() {
   return (
     <div className="relative min-h-screen flex items-end justify-center overflow-hidden bg-black">
       {/* Video background — plays once, freezes on last frame */}
+      {/* 
+        Mobile: use object-contain so the full video is visible (letterboxed).
+        Desktop: use object-cover for cinematic fill.
+      */}
       <video
         ref={videoRef}
         src="/videos/boot-sequence.mp4"
@@ -66,13 +69,17 @@ export default function Login() {
         muted
         playsInline
         onEnded={handleVideoEnd}
-        className="absolute inset-0 w-full h-full object-cover"
+        className="absolute inset-0 w-full h-full object-contain sm:object-cover"
       />
+
+      {/* Gradient overlay — always present for readability on mobile */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/40 sm:from-black/40 sm:via-transparent sm:to-transparent" />
 
       {/* Darken overlay — appears with form */}
       <AnimatePresence>
         {showForm && (
           <motion.div
+            key="overlay"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.8 }}
@@ -85,6 +92,7 @@ export default function Login() {
       <AnimatePresence>
         {showForm && (
           <motion.div
+            key="form"
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.3, ease: "easeOut" }}
@@ -100,7 +108,7 @@ export default function Login() {
                   onChange={(e) => setDisplayName(e.target.value)}
                   placeholder="Je naam"
                   autoComplete="name"
-                  className="h-11 bg-black/40 border-white/15 text-white placeholder:text-white/40 text-sm rounded-xl backdrop-blur-md focus:bg-black/50 focus:border-white/30"
+                  className="h-11 bg-black/40 border-white/15 text-white placeholder:text-white/40 text-[16px] sm:text-sm rounded-xl backdrop-blur-md focus:bg-black/50 focus:border-white/30"
                 />
               )}
               <Input
@@ -108,7 +116,7 @@ export default function Login() {
                 onChange={(e) => setEmailOrUsername(e.target.value)}
                 placeholder={isRegister ? "E-mailadres" : "E-mail of username"}
                 autoComplete={isRegister ? "email" : "username"}
-                className="h-11 bg-black/40 border-white/15 text-white placeholder:text-white/40 text-sm rounded-xl backdrop-blur-md focus:bg-black/50 focus:border-white/30"
+                className="h-11 bg-black/40 border-white/15 text-white placeholder:text-white/40 text-[16px] sm:text-sm rounded-xl backdrop-blur-md focus:bg-black/50 focus:border-white/30"
               />
               <Input
                 type="password"
@@ -116,7 +124,7 @@ export default function Login() {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Wachtwoord"
                 autoComplete={isRegister ? "new-password" : "current-password"}
-                className="h-11 bg-black/40 border-white/15 text-white placeholder:text-white/40 text-sm rounded-xl backdrop-blur-md focus:bg-black/50 focus:border-white/30"
+                className="h-11 bg-black/40 border-white/15 text-white placeholder:text-white/40 text-[16px] sm:text-sm rounded-xl backdrop-blur-md focus:bg-black/50 focus:border-white/30"
               />
               {error && <p className="text-xs text-red-400 font-medium pt-0.5">{error}</p>}
               {success && <p className="text-xs text-green-400 font-medium pt-0.5">{success}</p>}

@@ -108,7 +108,7 @@ export default function Login() {
       <video
         ref={videoRef}
         src="/videos/boot-sequence.mp4"
-        poster="/images/villa-mercedes-1.png"
+        src="/videos/boot-sequence.mp4"
         autoPlay
         muted
         playsInline

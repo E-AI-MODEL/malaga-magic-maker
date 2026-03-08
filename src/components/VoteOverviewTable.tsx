@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { CheckCircle2, XCircle } from "lucide-react";
 import type { Submission, GroupRules } from "@/lib/scoring";
 import { getTripConfig, type TripConfig } from "@/lib/tripConfig";
+import { DIET_LABELS, ACTIVITY_LABELS, translateLabel } from "@/lib/labelMaps";
 
 interface Profile {
   id: string;

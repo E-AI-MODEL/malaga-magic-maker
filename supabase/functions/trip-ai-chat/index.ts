@@ -44,18 +44,20 @@ serve(async (req) => {
     // Fetch group context using service role
     const db = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
-    const [tripRes, subsRes, accomRes, tasksRes, profilesRes] = await Promise.all([
+    const [tripRes, subsRes, accomRes, tasksRes, profilesRes, locationRes] = await Promise.all([
       db.from("trip").select("*").eq("id", tripId).single(),
       db.from("submissions").select("*").eq("trip_id", tripId),
-      db.from("accommodations").select("name, location_label, status, tags, type, total_price_3_nights, bedrooms, max_guests").eq("trip_id", tripId).eq("status", "active"),
+      db.from("accommodations").select("name, location_label, status, tags, type, total_price_3_nights, bedrooms, max_guests, golf_km, golf_minutes, beach_meters, agp_minutes").eq("trip_id", tripId).eq("status", "active"),
       db.from("tasks").select("title, section, progress, assigned_to, status").eq("trip_id", tripId),
       db.from("trip_members").select("user_id").eq("trip_id", tripId),
+      db.from("app_settings").select("value").eq("key", "ai_guide_location").single(),
     ]);
 
     const trip = tripRes.data;
     const submissions = subsRes.data || [];
     const accommodations = accomRes.data || [];
     const tasks = tasksRes.data || [];
+    const chosenLocation = locationRes.data?.value || null;
 
     // Build context summary
     const budgets = submissions.map((s: any) => s.budget_cap_total).filter(Boolean);
@@ -72,22 +74,32 @@ serve(async (req) => {
     const completedTasks = tasks.filter((t: any) => t.progress === 100).map((t: any) => t.title);
     const openTasks = tasks.filter((t: any) => t.progress < 100).map((t: any) => t.title);
 
-    const systemPrompt = `Je bent de AI Reisplanner van Vakansie, een slimme assistent voor groepsreizen. Je helpt een groep van ${trip?.group_size || "?"} personen die naar de Costa del Sol (Málaga regio) gaan.
+    // Mobility preferences
+    const mobilityCounts: Record<string, number> = {};
+    submissions.forEach((s: any) => { mobilityCounts[s.mobility_choice] = (mobilityCounts[s.mobility_choice] || 0) + 1; });
+    const mobilityPref = Object.entries(mobilityCounts).sort((a, b) => b[1] - a[1]).map(([k, v]) => `${k} (${v}x)`).join(", ");
+
+    const locationBlock = chosenLocation
+      ? `\n## Verblijflocatie (door admin ingesteld)\n${chosenLocation}\nGebruik deze locatie als uitgangspunt voor ALLE aanbevelingen: restaurants, stranden, vervoer, golfbanen, activiteiten. Bereken afstanden en reistijden altijd vanaf deze locatie.\n`
+      : "";
+
+    const systemPrompt = `Je bent de AI Reisgids van Vakansie, een slimme assistent voor groepsreizen. Je helpt een groep van ${trip?.group_size || "?"} personen die naar de Costa del Sol (Málaga regio) gaan.
 
 ## Tripgegevens
 - Naam: ${trip?.name || "Onbekend"}
 - Data: ${trip?.start_date} t/m ${trip?.end_date}
 - Groepsgrootte: ${trip?.group_size || "?"}
 - Golf: ${trip?.golf_min}-${trip?.golf_max} rondes gepland
-
+${locationBlock}
 ## Groepsvoorkeuren
 - Gemiddeld budget: ${avgBudget ? `€${avgBudget} totaal` : "Niet opgegeven"}
 - Dieetwensen: ${uniqueDiets.length ? uniqueDiets.join(", ") : "Geen bijzonderheden"}
 - Populaire activiteiten: ${topActivities.length ? topActivities.join(", ") : "Niet opgegeven"}
+- Vervoersvoorkeur: ${mobilityPref || "Niet opgegeven"}
 - Aantal ingevulde intakes: ${submissions.length}
 
 ## Accommodaties (actief)
-${accommodations.length ? accommodations.map((a: any) => `- ${a.name} (${a.location_label}, ${a.type}, ${a.bedrooms} slaapkamers, max ${a.max_guests} gasten${a.total_price_3_nights ? `, €${a.total_price_3_nights}/3 nachten` : ""})`).join("\n") : "Nog geen accommodaties geselecteerd"}
+${accommodations.length ? accommodations.map((a: any) => `- ${a.name} (${a.location_label}, ${a.type}, ${a.bedrooms} slaapkamers, max ${a.max_guests} gasten${a.total_price_3_nights ? `, €${a.total_price_3_nights}/3 nachten` : ""}${a.golf_minutes ? `, golf ${a.golf_minutes} min` : ""}${a.beach_meters ? `, strand ${a.beach_meters}m` : ""}${a.agp_minutes ? `, vliegveld ${a.agp_minutes} min` : ""})`).join("\n") : "Nog geen accommodaties geselecteerd"}
 
 ## Takenstatus
 ${completedTasks.length ? `Afgerond: ${completedTasks.join(", ")}` : "Nog niets afgerond"}
@@ -97,7 +109,8 @@ ${openTasks.length ? `Open: ${openTasks.join(", ")}` : ""}
 - Antwoord ALTIJD in het Nederlands
 - Wees concreet: noem specifieke restaurants, stranden, golfbanen, activiteiten met namen, adressen en geschatte prijzen
 - Focus op de Costa del Sol regio (Málaga, Mijas, Fuengirola, Marbella, Benalmádena, Nerja, etc.)
-- Houd rekening met het groepsprofiel (budget, dieet, activiteiten)
+- Houd rekening met het groepsprofiel (budget, dieet, activiteiten, vervoersvoorkeur)
+- Als de verblijflocatie is ingesteld, gebruik die als basis voor afstanden en aanbevelingen
 - Als je iets niet zeker weet, zeg dat eerlijk
 
 ## BELANGRIJK: Output format

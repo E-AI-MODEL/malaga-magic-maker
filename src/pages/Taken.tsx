@@ -27,6 +27,7 @@ export default function Taken() {
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [reactions, setReactions] = useState<Reaction[]>([]);
   const [comments, setComments] = useState<Comment[]>([]);
+  const [taskVotes, setTaskVotes] = useState<TaskVote[]>([]);
   const [openTask, setOpenTask] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);

@@ -20,6 +20,17 @@ export default function Login() {
     setShowForm(true);
   };
 
+  // Force autoplay on mobile — some browsers block autoplay even with muted
+  const handleVideoMount = () => {
+    const video = videoRef.current;
+    if (video) {
+      video.play().catch(() => {
+        // Autoplay blocked — show form immediately
+        setShowForm(true);
+      });
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
@@ -68,7 +79,10 @@ export default function Login() {
         autoPlay
         muted
         playsInline
+        // @ts-ignore — webkit prefix for older iOS
+        webkit-playsinline="true"
         onEnded={handleVideoEnd}
+        onLoadedData={handleVideoMount}
         className="absolute inset-0 w-full h-full object-contain sm:object-cover"
       />
 

@@ -171,7 +171,7 @@ function PrioritiesSection({ subs, config, n }: { subs: Submission[]; config: Tr
   return (
     <div>
       <p className="text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground mb-3">
-        📊 Prioriteiten — Gemiddelde punten (max {config.priorities[0]?.maxPoints ?? 25})
+        Prioriteiten — Gemiddelde punten (max {config.priorities[0]?.maxPoints ?? 25})
       </p>
       <div className="border rounded-lg overflow-hidden">
         <table className="w-full text-xs">

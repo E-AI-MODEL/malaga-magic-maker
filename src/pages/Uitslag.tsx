@@ -85,9 +85,9 @@ export default function Uitslag() {
     const car = countVotes("mobility_choice", "car");
     const taxi = countVotes("mobility_choice", "transfers");
     const neutral = countVotes("mobility_choice", "neutral");
-    if (car > taxi && car > neutral) return { label: "Huurauto", icon: "🚗" };
-    if (taxi > car && taxi > neutral) return { label: "Taxi / transfers", icon: "🚕" };
-    return { label: "Geen voorkeur", icon: "🤷" };
+    if (car > taxi && car > neutral) return { label: "Huurauto", Icon: Car };
+    if (taxi > car && taxi > neutral) return { label: "Taxi / transfers", Icon: CarTaxiFront };
+    return { label: "Geen voorkeur", Icon: Minus };
   })();
 
   const allDietPrefs = lockedSubs.flatMap(s => s.diet_preferences || []);

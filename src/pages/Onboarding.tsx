@@ -10,8 +10,11 @@ import logo from "@/assets/vakansie-logo.png";
 type Step = "choose" | "create" | "join";
 
 export default function Onboarding() {
+  const { createTrip, joinTrip, activeTrip, userTrips, loading: tripLoading } = useTrip();
   const navigate = useNavigate();
-  const { activeTrip, userTrips, loading: tripLoading } = useTrip();
+  const [step, setStep] = useState<Step>("choose");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   // If user already has trips, redirect to dashboard
   useEffect(() => {
@@ -19,11 +22,6 @@ export default function Onboarding() {
       navigate("/taken", { replace: true });
     }
   }, [tripLoading, activeTrip, userTrips, navigate]);
-  const { createTrip, joinTrip } = useTrip();
-  const navigate = useNavigate();
-  const [step, setStep] = useState<Step>("choose");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
 
   // Create trip fields
   const [name, setName] = useState("");

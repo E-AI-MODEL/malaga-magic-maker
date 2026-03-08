@@ -4,8 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { computeGroupRules, computeAvgPoints, type Submission } from "@/lib/scoring";
 import { Badge } from "@/components/ui/badge";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Car, Home, UtensilsCrossed, Dumbbell, BarChart3, Users, CheckCircle2, XCircle, Star, ExternalLink, Bed, Bath, Waves, ParkingCircle, Wind, Wifi, MapPin, Table2, Map } from "lucide-react";
-import { VoteOverviewTable } from "@/components/VoteOverviewTable";
+import { Car, Home, UtensilsCrossed, Dumbbell, BarChart3, Users, CheckCircle2, XCircle, Star, ExternalLink, Bed, Bath, Waves, ParkingCircle, Wind, Wifi, MapPin, Map } from "lucide-react";
 import { POIMatrix } from "@/components/POIMatrix";
 import { useAuth } from "@/lib/auth";
 import { useTrip } from "@/contexts/TripContext";
@@ -93,7 +92,6 @@ export default function Uitslag() {
   const allDietPrefs = lockedSubs.flatMap(s => s.diet_preferences || []);
   const dietCounts: Record<string, number> = {};
   allDietPrefs.forEach(d => { dietCounts[d] = (dietCounts[d] || 0) + 1; });
-
   const allDietRemarks = lockedSubs.filter(s => s.diet_remarks).map(s => ({ user: getName(s.user_id), text: s.diet_remarks! }));
 
   const allActivities = lockedSubs.flatMap(s => s.activities || []);
@@ -102,8 +100,10 @@ export default function Uitslag() {
 
   const allRemarks = lockedSubs.filter(s => s.remarks_a || s.remarks_b).map(s => ({ user: getName(s.user_id), text: [s.remarks_a, s.remarks_b].filter(Boolean).join(" | ") }));
 
-  const budgets = lockedSubs.map(s => s.budget_cap_total).filter((b): b is number => b !== null && b > 0);
+  const budgets = lockedSubs.map(s => s.budget_cap_total).filter((b): b is number => b !== null && b > 0 && b < 100000);
   const budgetMedian = budgets.length > 0 ? budgets.sort((a, b) => a - b)[Math.floor(budgets.length / 2)] : null;
+
+  const formatBudget = (v: number) => v >= 1000 ? `€${(v / 1000).toFixed(v % 1000 === 0 ? 0 : 1)}k` : `€${v}`;
 
   if (loading) {
     return (
@@ -159,7 +159,7 @@ export default function Uitslag() {
         {/* Header */}
         <section className="bg-foreground text-white px-6 py-10">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/40 mb-2">Gezamenlijke uitslag</p>
-          <h1 className="font-display text-2xl font-extrabold">Wat wij willen</h1>
+          <h1 className="font-display text-2xl font-extrabold">Onze besluiten</h1>
           <p className="text-white/60 text-sm mt-2">Op basis van {lockedSubs.length} ingevulde intakes</p>
         </section>
 
@@ -290,48 +290,16 @@ export default function Uitslag() {
           </div>
         </section>
 
-        {/* ═══════════ SECTIES IN ACCORDION ═══════════ */}
+        {/* ═══════════ BESLUITEN ═══════════ */}
         <div className="px-6 py-6 pb-24">
+          <p className="text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground mb-4">Wat hebben we besloten?</p>
+
           <Accordion type="multiple" defaultValue={[]} className="space-y-3">
 
-            {/* STEMOVERZICHT */}
-            <AccordionItem value="stemoverzicht" className="border rounded-lg border-border/60 overflow-hidden">
-              <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-accent/5">
-                <div className="flex items-center gap-2">
-                  <div className="h-7 w-7 rounded-full bg-primary/10 flex items-center justify-center text-primary font-display font-extrabold text-xs">📊</div>
-                  <Table2 className="h-4 w-4 text-primary" />
-                  <span className="font-display font-bold text-sm">Stemoverzicht</span>
-                  <Badge variant="outline" className="text-[10px] ml-auto">{lockedSubs.length}/{activeTrip?.group_size || 6} intakes</Badge>
-                </div>
-              </AccordionTrigger>
-              <AccordionContent className="px-4 pb-4">
-                <VoteOverviewTable submissions={submissions} rules={rules} profiles={profiles} />
-                <ReactionBar section="stemoverzicht" reactions={reactions} profiles={profiles} onToggle={handleToggleReaction} />
-                <SectionComments section="stemoverzicht" comments={comments} profiles={profiles} onAdd={handleAddComment} onDelete={handleDeleteComment} />
-              </AccordionContent>
-            </AccordionItem>
-
-            {/* REISTIJDENMATRIX */}
-            <AccordionItem value="reistijden" className="border rounded-lg border-border/60 overflow-hidden">
-              <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-accent/5">
-                <div className="flex items-center gap-2">
-                  <div className="h-7 w-7 rounded-full bg-primary/10 flex items-center justify-center text-primary font-display font-extrabold text-xs">🗺️</div>
-                  <Map className="h-4 w-4 text-primary" />
-                  <span className="font-display font-bold text-sm">Reistijdenmatrix</span>
-                </div>
-              </AccordionTrigger>
-              <AccordionContent className="px-4 pb-4">
-                <POIMatrix />
-                <ReactionBar section="reistijden" reactions={reactions} profiles={profiles} onToggle={handleToggleReaction} />
-                <SectionComments section="reistijden" comments={comments} profiles={profiles} onAdd={handleAddComment} onDelete={handleDeleteComment} />
-              </AccordionContent>
-            </AccordionItem>
-            
-            {/* VERVOER */}
+            {/* ── VERVOER ── */}
             <AccordionItem value="vervoer" className="border rounded-lg border-border/60 overflow-hidden">
               <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-accent/5">
-                <div className="flex items-center gap-2">
-                  <div className="h-7 w-7 rounded-full bg-primary/10 flex items-center justify-center text-primary font-display font-extrabold text-xs">1</div>
+                <div className="flex items-center gap-2 w-full">
                   <Car className="h-4 w-4 text-primary" />
                   <span className="font-display font-bold text-sm">Vervoer</span>
                   <Badge variant="outline" className="text-[10px] ml-auto">{mobilityWinner.icon} {mobilityWinner.label}</Badge>
@@ -355,13 +323,13 @@ export default function Uitslag() {
               </AccordionContent>
             </AccordionItem>
 
-            {/* ACCOMMODATIE */}
+            {/* ── ACCOMMODATIE EISEN ── */}
             <AccordionItem value="accommodatie" className="border rounded-lg border-border/60 overflow-hidden">
               <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-accent/5">
-                <div className="flex items-center gap-2">
-                  <div className="h-7 w-7 rounded-full bg-primary/10 flex items-center justify-center text-primary font-display font-extrabold text-xs">2</div>
+                <div className="flex items-center gap-2 w-full">
                   <Home className="h-4 w-4 text-primary" />
                   <span className="font-display font-bold text-sm">Accommodatie eisen</span>
+                  <Badge variant="outline" className="text-[10px] ml-auto">{mustHaves.filter(m => m.active).length} vereist</Badge>
                 </div>
               </AccordionTrigger>
               <AccordionContent className="px-4 pb-4">
@@ -396,43 +364,49 @@ export default function Uitslag() {
               </AccordionContent>
             </AccordionItem>
 
-            {/* BUDGET */}
+            {/* ── BUDGET ── */}
             <AccordionItem value="budget" className="border rounded-lg border-border/60 overflow-hidden">
               <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-accent/5">
-                <div className="flex items-center gap-2">
-                  <div className="h-7 w-7 rounded-full bg-primary/10 flex items-center justify-center text-primary font-display font-extrabold text-xs">💰</div>
+                <div className="flex items-center gap-2 w-full">
+                  <BarChart3 className="h-4 w-4 text-primary" />
                   <span className="font-display font-bold text-sm">Budget</span>
-                  {budgetMedian && <Badge variant="outline" className="text-[10px] ml-auto">mediaan €{budgetMedian}</Badge>}
+                  {budgetMedian && <Badge variant="outline" className="text-[10px] ml-auto">mediaan {formatBudget(budgetMedian)}</Badge>}
                 </div>
               </AccordionTrigger>
               <AccordionContent className="px-4 pb-4">
                 {budgets.length > 0 ? (
                   <div className="space-y-4">
-                    <p className="text-sm text-muted-foreground">Wat wil iedereen maximaal uitgeven (totaal p.p.)?</p>
+                    <p className="text-sm text-muted-foreground">Maximaal budget per persoon (totaal)</p>
                     <div className="grid grid-cols-3 gap-3">
                       <div className="bg-secondary rounded-lg p-4 text-center">
-                        <p className="font-display font-extrabold text-xl text-primary">€{Math.min(...budgets)}</p>
+                        <p className="font-display font-extrabold text-xl text-primary">{formatBudget(Math.min(...budgets))}</p>
                         <p className="text-[10px] text-muted-foreground uppercase tracking-wider mt-1">Laagste</p>
                       </div>
                       <div className="bg-primary/10 border border-primary/20 rounded-lg p-4 text-center">
-                        <p className="font-display font-extrabold text-xl text-primary">€{budgetMedian}</p>
+                        <p className="font-display font-extrabold text-xl text-primary">{formatBudget(budgetMedian!)}</p>
                         <p className="text-[10px] text-primary/60 uppercase tracking-wider mt-1">Mediaan</p>
                       </div>
                       <div className="bg-secondary rounded-lg p-4 text-center">
-                        <p className="font-display font-extrabold text-xl">€{Math.round(budgets.reduce((a, b) => a + b, 0) / budgets.length)}</p>
+                        <p className="font-display font-extrabold text-xl">{formatBudget(Math.round(budgets.reduce((a, b) => a + b, 0) / budgets.length))}</p>
                         <p className="text-[10px] text-muted-foreground uppercase tracking-wider mt-1">Gemiddeld</p>
                       </div>
                     </div>
-                    {/* Individual budgets */}
                     <div className="space-y-1.5">
                       <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Per persoon</p>
                       {lockedSubs.map(s => {
                         const b = s.budget_cap_total;
+                        const isOutlier = b !== null && b > 0 && b >= 100000;
                         return (
                           <div key={s.id} className="flex items-center justify-between py-1.5 border-b border-border/40 last:border-0">
                             <span className="text-sm">{getName(s.user_id)}</span>
                             <span className="text-sm font-display font-bold tabular-nums">
-                              {b && b > 0 ? `€${b}` : <span className="text-muted-foreground font-normal italic">Geen limiet</span>}
+                              {isOutlier ? (
+                                <span className="text-muted-foreground font-normal italic">Geen limiet</span>
+                              ) : b && b > 0 ? (
+                                formatBudget(b)
+                              ) : (
+                                <span className="text-muted-foreground font-normal italic">Geen limiet</span>
+                              )}
                             </span>
                           </div>
                         );
@@ -450,13 +424,13 @@ export default function Uitslag() {
               </AccordionContent>
             </AccordionItem>
 
-            {/* PRIORITEITEN */}
+            {/* ── PRIORITEITEN ── */}
             <AccordionItem value="prioriteiten" className="border rounded-lg border-border/60 overflow-hidden">
               <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-accent/5">
-                <div className="flex items-center gap-2">
-                  <div className="h-7 w-7 rounded-full bg-primary/10 flex items-center justify-center text-primary font-display font-extrabold text-xs">3</div>
+                <div className="flex items-center gap-2 w-full">
                   <BarChart3 className="h-4 w-4 text-primary" />
                   <span className="font-display font-bold text-sm">Prioriteiten</span>
+                  {pointsData.length > 0 && <Badge variant="outline" className="text-[10px] ml-auto">{pointsData[0].emoji} {pointsData[0].label}</Badge>}
                 </div>
               </AccordionTrigger>
               <AccordionContent className="px-4 pb-4">
@@ -479,11 +453,10 @@ export default function Uitslag() {
               </AccordionContent>
             </AccordionItem>
 
-            {/* ETEN */}
+            {/* ── ETEN & DRINKEN ── */}
             <AccordionItem value="eten" className="border rounded-lg border-border/60 overflow-hidden">
               <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-accent/5">
-                <div className="flex items-center gap-2">
-                  <div className="h-7 w-7 rounded-full bg-primary/10 flex items-center justify-center text-primary font-display font-extrabold text-xs">🍽️</div>
+                <div className="flex items-center gap-2 w-full">
                   <UtensilsCrossed className="h-4 w-4 text-primary" />
                   <span className="font-display font-bold text-sm">Eten & drinken</span>
                   {Object.keys(dietCounts).length > 0 && (
@@ -531,11 +504,10 @@ export default function Uitslag() {
               </AccordionContent>
             </AccordionItem>
 
-            {/* ACTIVITEITEN */}
+            {/* ── ACTIVITEITEN ── */}
             <AccordionItem value="activiteiten" className="border rounded-lg border-border/60 overflow-hidden">
               <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-accent/5">
-                <div className="flex items-center gap-2">
-                  <div className="h-7 w-7 rounded-full bg-primary/10 flex items-center justify-center text-primary font-display font-extrabold text-xs">5</div>
+                <div className="flex items-center gap-2 w-full">
                   <Dumbbell className="h-4 w-4 text-primary" />
                   <span className="font-display font-bold text-sm">Activiteiten</span>
                 </div>
@@ -565,6 +537,22 @@ export default function Uitslag() {
                 <SectionComments section="activiteiten" comments={comments} profiles={profiles} onAdd={handleAddComment} onDelete={handleDeleteComment} />
               </AccordionContent>
             </AccordionItem>
+
+            {/* ── REISTIJDENMATRIX ── */}
+            <AccordionItem value="reistijden" className="border rounded-lg border-border/60 overflow-hidden">
+              <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-accent/5">
+                <div className="flex items-center gap-2 w-full">
+                  <Map className="h-4 w-4 text-primary" />
+                  <span className="font-display font-bold text-sm">Reistijdenmatrix</span>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="px-4 pb-4">
+                <POIMatrix />
+                <ReactionBar section="reistijden" reactions={reactions} profiles={profiles} onToggle={handleToggleReaction} />
+                <SectionComments section="reistijden" comments={comments} profiles={profiles} onAdd={handleAddComment} onDelete={handleDeleteComment} />
+              </AccordionContent>
+            </AccordionItem>
+
           </Accordion>
         </div>
 

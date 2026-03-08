@@ -70,6 +70,7 @@ export default function Onboarding() {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center px-6">
         <div className="text-center mb-10">
+          <img src={logo} alt="Vakansie" className="h-20 w-20 mx-auto mb-4" />
           <h1 className="font-display text-3xl font-extrabold tracking-tight">
             Welkom bij <span className="text-primary">Vakansie</span>
           </h1>

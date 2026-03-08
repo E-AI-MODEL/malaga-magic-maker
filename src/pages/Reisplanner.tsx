@@ -298,6 +298,24 @@ export default function Reisplanner() {
           <p className="text-[11px] font-semibold uppercase tracking-[0.15em] text-white/40 mb-1">Reisplanner</p>
           <h1 className="font-display text-xl font-extrabold text-white">AI Assistent</h1>
           <p className="text-xs text-white/50 mt-0.5">Kent jullie groepsvoorkeuren en geeft concrete tips</p>
+          {/* Font size controls */}
+          <div className="flex items-center gap-1 mt-2">
+            <span className="text-[10px] text-white/30 mr-1">Tekst</span>
+            <button
+              onClick={() => adjustFontSize(-1)}
+              disabled={fontSize === 0}
+              className="h-6 w-6 rounded-md bg-white/10 flex items-center justify-center text-white/60 hover:bg-white/20 disabled:opacity-30 transition-colors"
+            >
+              <Minus className="h-3 w-3" />
+            </button>
+            <button
+              onClick={() => adjustFontSize(1)}
+              disabled={fontSize === 2}
+              className="h-6 w-6 rounded-md bg-white/10 flex items-center justify-center text-white/60 hover:bg-white/20 disabled:opacity-30 transition-colors"
+            >
+              <Plus className="h-3 w-3" />
+            </button>
+          </div>
         </div>
 
         {/* Chat area */}

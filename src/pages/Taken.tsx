@@ -42,18 +42,20 @@ export default function Taken() {
     if (!tripId) return;
     const load = async () => {
       setLoading(true);
-      const [t, tl, p, r, c] = await Promise.all([
+      const [t, tl, p, r, c, tv] = await Promise.all([
         supabase.from("tasks").select("*").eq("trip_id", tripId).order("sort_order"),
         supabase.from("travel_legs").select("*").eq("trip_id", tripId).order("sort_order"),
         supabase.from("profiles").select("*"),
         supabase.from("reactions").select("*").eq("trip_id", tripId),
         supabase.from("comments").select("*").eq("trip_id", tripId),
+        supabase.from("task_votes").select("*"),
       ]);
       setTasks((t.data as any[]) || []);
       setTravelLegs((tl.data as any[]) || []);
       setProfiles((p.data as any[]) || []);
       setReactions((r.data as any[]) || []);
       setComments((c.data as any[]) || []);
+      setTaskVotes((tv.data as any[]) || []);
       setLoading(false);
     };
     load();

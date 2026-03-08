@@ -379,7 +379,6 @@ export default function Uitslag() {
                 </div>
                 <div className="bg-secondary rounded-lg p-4 space-y-2 text-sm">
                   <div className="flex justify-between"><span className="text-muted-foreground">Max reistijd golf</span><span className="font-display font-bold">{rules.maxGolfMinutes} min</span></div>
-                  {budgetMedian && <div className="flex justify-between"><span className="text-muted-foreground">Budget plafond</span><span className="font-display font-bold">€{budgetMedian}</span></div>}
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Locatievoorkeur</span>
                     <span className="font-display font-bold">{countVotes("base_choice", "golf") > countVotes("base_choice", "beach") ? "Bij golfbaan" : countVotes("base_choice", "beach") > countVotes("base_choice", "golf") ? "Bij strand" : "Neutraal"}</span>
@@ -394,6 +393,60 @@ export default function Uitslag() {
                 </div>
                 <ReactionBar section="accommodatie" reactions={reactions} profiles={profiles} onToggle={handleToggleReaction} />
                 <SectionComments section="accommodatie" comments={comments} profiles={profiles} onAdd={handleAddComment} onDelete={handleDeleteComment} />
+              </AccordionContent>
+            </AccordionItem>
+
+            {/* BUDGET */}
+            <AccordionItem value="budget" className="border rounded-lg border-border/60 overflow-hidden">
+              <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-accent/5">
+                <div className="flex items-center gap-2">
+                  <div className="h-7 w-7 rounded-full bg-primary/10 flex items-center justify-center text-primary font-display font-extrabold text-xs">💰</div>
+                  <span className="font-display font-bold text-sm">Budget</span>
+                  {budgetMedian && <Badge variant="outline" className="text-[10px] ml-auto">mediaan €{budgetMedian}</Badge>}
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="px-4 pb-4">
+                {budgets.length > 0 ? (
+                  <div className="space-y-4">
+                    <p className="text-sm text-muted-foreground">Wat wil iedereen maximaal uitgeven (totaal p.p.)?</p>
+                    <div className="grid grid-cols-3 gap-3">
+                      <div className="bg-secondary rounded-lg p-4 text-center">
+                        <p className="font-display font-extrabold text-xl text-primary">€{Math.min(...budgets)}</p>
+                        <p className="text-[10px] text-muted-foreground uppercase tracking-wider mt-1">Laagste</p>
+                      </div>
+                      <div className="bg-primary/10 border border-primary/20 rounded-lg p-4 text-center">
+                        <p className="font-display font-extrabold text-xl text-primary">€{budgetMedian}</p>
+                        <p className="text-[10px] text-primary/60 uppercase tracking-wider mt-1">Mediaan</p>
+                      </div>
+                      <div className="bg-secondary rounded-lg p-4 text-center">
+                        <p className="font-display font-extrabold text-xl">€{Math.round(budgets.reduce((a, b) => a + b, 0) / budgets.length)}</p>
+                        <p className="text-[10px] text-muted-foreground uppercase tracking-wider mt-1">Gemiddeld</p>
+                      </div>
+                    </div>
+                    {/* Individual budgets */}
+                    <div className="space-y-1.5">
+                      <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Per persoon</p>
+                      {lockedSubs.map(s => {
+                        const b = s.budget_cap_total;
+                        return (
+                          <div key={s.id} className="flex items-center justify-between py-1.5 border-b border-border/40 last:border-0">
+                            <span className="text-sm">{getName(s.user_id)}</span>
+                            <span className="text-sm font-display font-bold tabular-nums">
+                              {b && b > 0 ? `€${b}` : <span className="text-muted-foreground font-normal italic">Geen limiet</span>}
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-center py-6">
+                    <p className="text-3xl mb-2">🤷</p>
+                    <p className="text-sm text-muted-foreground">Niemand heeft een budgetlimiet opgegeven</p>
+                  </div>
+                )}
+                <ReactionBar section="budget" reactions={reactions} profiles={profiles} onToggle={handleToggleReaction} />
+                <SectionComments section="budget" comments={comments} profiles={profiles} onAdd={handleAddComment} onDelete={handleDeleteComment} />
               </AccordionContent>
             </AccordionItem>
 
@@ -430,30 +483,45 @@ export default function Uitslag() {
             <AccordionItem value="eten" className="border rounded-lg border-border/60 overflow-hidden">
               <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-accent/5">
                 <div className="flex items-center gap-2">
-                  <div className="h-7 w-7 rounded-full bg-primary/10 flex items-center justify-center text-primary font-display font-extrabold text-xs">4</div>
+                  <div className="h-7 w-7 rounded-full bg-primary/10 flex items-center justify-center text-primary font-display font-extrabold text-xs">🍽️</div>
                   <UtensilsCrossed className="h-4 w-4 text-primary" />
                   <span className="font-display font-bold text-sm">Eten & drinken</span>
+                  {Object.keys(dietCounts).length > 0 && (
+                    <Badge variant="outline" className="text-[10px] ml-auto">{Object.keys(dietCounts).length} voorkeuren</Badge>
+                  )}
                 </div>
               </AccordionTrigger>
               <AccordionContent className="px-4 pb-4">
                 {Object.keys(dietCounts).length > 0 ? (
-                  <div className="space-y-3">
+                  <div className="space-y-4">
                     <p className="text-sm text-muted-foreground">Eetvoorkeuren binnen de groep</p>
-                    <div className="flex flex-wrap gap-2">
+                    <div className="space-y-2">
                       {Object.entries(dietCounts).sort(([, a], [, b]) => b - a).map(([diet, count]) => (
-                        <Badge key={diet} variant="secondary" className="text-xs py-1 px-3">{diet} <span className="font-bold ml-1.5">{count}×</span></Badge>
+                        <div key={diet} className="flex items-center justify-between py-2 border-b border-border/50 last:border-0">
+                          <span className="text-sm">{diet}</span>
+                          <div className="flex items-center gap-2">
+                            <div className="w-20 bg-secondary rounded-full h-2 overflow-hidden">
+                              <div className="bg-primary h-full rounded-full" style={{ width: `${(count / lockedSubs.length) * 100}%` }} />
+                            </div>
+                            <span className="text-xs font-bold tabular-nums text-muted-foreground">{count}/{lockedSubs.length}</span>
+                          </div>
+                        </div>
                       ))}
                     </div>
                   </div>
                 ) : (
-                  <p className="text-sm text-muted-foreground italic">Geen specifieke eetvoorkeuren</p>
+                  <div className="text-center py-6">
+                    <p className="text-3xl mb-2">🍕</p>
+                    <p className="text-sm text-muted-foreground">Geen specifieke eetvoorkeuren — alles mag!</p>
+                  </div>
                 )}
                 {allDietRemarks.length > 0 && (
                   <div className="mt-4 space-y-2">
                     <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Opmerkingen</p>
                     {allDietRemarks.map((r, i) => (
                       <div key={i} className="bg-secondary rounded-lg p-3 text-sm">
-                        <span className="font-semibold">{r.user}:</span> <span className="text-muted-foreground italic">{r.text}</span>
+                        <span className="font-semibold">{r.user}:</span>{" "}
+                        <span className="text-muted-foreground">{r.text}</span>
                       </div>
                     ))}
                   </div>

@@ -6,6 +6,7 @@ import ReactMarkdown from "react-markdown";
 import { Send, Sparkles, Loader2, UtensilsCrossed, Map, Flag, Moon, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import vakansielogo from "@/assets/vakansie-logo.png";
 
 type Msg = { role: "user" | "assistant"; content: string };
 
@@ -172,27 +173,11 @@ export default function Reisplanner() {
         {/* Chat area */}
         <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-6 space-y-4">
           {isEmpty && (
-            <div className="flex flex-col items-center justify-center h-full text-center gap-6 py-8">
-              <div className="h-14 w-14 rounded-2xl bg-primary/10 flex items-center justify-center">
-                <Sparkles className="h-7 w-7 text-primary" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground max-w-xs mx-auto">
-                  Stel een vraag of kies een onderwerp om te beginnen.
-                </p>
-              </div>
-              <div className="grid grid-cols-2 gap-2 w-full max-w-sm">
-                {CHIPS.map((chip) => (
-                  <button
-                    key={chip.label}
-                    onClick={() => send(chip.prompt)}
-                    className="flex items-center gap-2.5 text-left text-sm font-medium px-4 py-3 rounded-xl border border-border bg-card hover:bg-secondary/80 transition-colors"
-                  >
-                    <chip.icon className="h-4 w-4 text-primary shrink-0" />
-                    <span>{chip.label}</span>
-                  </button>
-                ))}
-              </div>
+            <div className="flex flex-col items-center justify-center h-full text-center gap-4 py-8">
+              <img src={vakansielogo} alt="Vakansie" className="h-12 w-auto opacity-80" />
+              <p className="text-sm text-muted-foreground max-w-xs mx-auto">
+                Stel een vraag of kies een onderwerp om te beginnen.
+              </p>
             </div>
           )}
 
@@ -225,22 +210,20 @@ export default function Reisplanner() {
           )}
         </div>
 
-        {/* Chips when chat is active */}
-        {!isEmpty && (
-          <div className="flex gap-2 px-4 py-2 overflow-x-auto scrollbar-none">
-            {CHIPS.map((chip) => (
-              <button
-                key={chip.label}
-                onClick={() => send(chip.prompt)}
-                disabled={isLoading}
-                className="flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1.5 rounded-full border border-border bg-card hover:bg-secondary transition-colors whitespace-nowrap disabled:opacity-50"
-              >
-                <chip.icon className="h-3 w-3 text-primary" />
-                {chip.label}
-              </button>
-            ))}
-          </div>
-        )}
+        {/* Chips — always visible as horizontal scroll above input */}
+        <div className="flex gap-2 px-4 py-2 overflow-x-auto scrollbar-none">
+          {CHIPS.map((chip) => (
+            <button
+              key={chip.label}
+              onClick={() => send(chip.prompt)}
+              disabled={isLoading}
+              className="flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1.5 rounded-full border border-border bg-card hover:bg-secondary transition-colors whitespace-nowrap disabled:opacity-50"
+            >
+              <chip.icon className="h-3 w-3 text-primary" />
+              {chip.label}
+            </button>
+          ))}
+        </div>
 
         {/* Input */}
         <div className="border-t border-border bg-background px-4 py-3">

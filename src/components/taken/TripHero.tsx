@@ -12,7 +12,7 @@ const statVariants = {
   visible: (i: number) => ({
     opacity: 1,
     scale: 1,
-    transition: { delay: 0.2 + i * 0.1, duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] },
+    transition: { delay: 0.2 + i * 0.1, duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] as [number, number, number, number] },
   }),
 };
 

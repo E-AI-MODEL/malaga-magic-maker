@@ -622,11 +622,11 @@ function UserCard({ profile: p, submission: sub, logs, avgPoints, accommodations
           )}
 
           {/* Activity stats */}
-          <div className="flex gap-4 text-[10px] text-muted-foreground border-t border-border/40 pt-3">
-            <span>{logins} logins</span>
-            <span>{pageViews} pageviews</span>
-            {lastActivity && <span>Laatst: {new Date(lastActivity).toLocaleString("nl-NL", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}</span>}
-          </div>
+          {lastActivity && (
+            <div className="text-[10px] text-muted-foreground border-t border-border/40 pt-3">
+              Laatst actief: {new Date(lastActivity).toLocaleString("nl-NL", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
+            </div>
+          )}
         </div>
       </CollapsibleContent>
     </Collapsible>

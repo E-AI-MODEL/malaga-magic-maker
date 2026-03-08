@@ -41,6 +41,24 @@ export interface TravelTimeDef {
   unit: string;
 }
 
+export interface PointOfInterest {
+  name: string;
+  emoji?: string;
+  url?: string;
+  description?: string;
+  /** Travel times from location labels (accommodation locations) in minutes */
+  travelTimes: Record<string, number>;
+}
+
+export interface POICategoryDef {
+  key: string;
+  label: string;
+  emoji: string;
+  /** Color thresholds: [good, ok] in minutes. ≤good=green, ≤ok=yellow, >ok=red */
+  colorThresholds: [number, number];
+  pois: PointOfInterest[];
+}
+
 export interface TripConfig {
   type: string;
   name: string;
@@ -54,6 +72,8 @@ export interface TripConfig {
   travelTime: TravelTimeDef | null;
   /** Field for preferred rounds/sessions */
   roundsField: { submissionField: string; label: string; options: number[] } | null;
+  /** Points of interest with travel time matrix */
+  poiCategories: POICategoryDef[];
 }
 
 // ─── GOLF TRIP CONFIG ───────────────────────────────────────────────

@@ -34,6 +34,7 @@ export function BottomNav() {
   const inactive = "text-muted-foreground/60";
 
   const moreLinks = [
+    { to: "/profiel", icon: User, label: "Profiel", desc: "Je account en vakanties" },
     { to: "/wensen", icon: ListChecks, label: "Wensen", desc: "Alle wensen & voorwaarden" },
     { to: "/accommodations", icon: Home, label: "Verblijven", desc: "Bekijk alle accommodaties" },
     { to: "/kosten", icon: Receipt, label: "Kosten", desc: "Uitgaven & verrekeningen" },

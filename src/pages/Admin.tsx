@@ -562,6 +562,9 @@ export default function Admin() {
                         <Button size="sm" variant="ghost" className="h-7 text-[11px] px-2" onClick={() => handleTogglePrice(acc.id, acc.transparent_price_confirmed)}>
                           {acc.transparent_price_confirmed ? "✓ Prijs" : "Bevestig prijs"}
                         </Button>
+                        <Button size="sm" variant="outline" className="h-7 text-[11px] px-2" onClick={() => { setEditingAccId(acc.id); setShowAccForm(false); }}>
+                          <Pencil className="h-3 w-3 mr-1" /> Bewerk
+                        </Button>
                       </div>
                     </div>
                   ))}

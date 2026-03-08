@@ -9,6 +9,7 @@ import { ActivityLogProvider } from "@/contexts/ActivityLogContext";
 import Login from "./pages/Login";
 import Onboarding from "./pages/Onboarding";
 import JoinTrip from "./pages/JoinTrip";
+import Profiel from "./pages/Profiel";
 import Info from "./pages/Info";
 import Uitslag from "./pages/Uitslag";
 import Intake from "./pages/Intake";

@@ -1,8 +1,23 @@
 import { Skeleton } from "@/components/ui/skeleton";
+import { motion, AnimatePresence } from "framer-motion";
+import { type ReactNode } from "react";
+
+/** Fade-in wrapper for page content after loading */
+export function PageTransition({ children }: { children: ReactNode }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 6 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.35, ease: [0.25, 0.1, 0.25, 1] }}
+    >
+      {children}
+    </motion.div>
+  );
+}
 
 export function PageSkeleton() {
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-6 p-6 animate-pulse">
       {/* Header skeleton */}
       <div className="space-y-3">
         <Skeleton className="h-4 w-32" />
@@ -40,6 +55,17 @@ export function HeroSkeleton() {
       <Skeleton className="h-3 w-24 bg-white/10" />
       <Skeleton className="h-7 w-56 bg-white/10" />
       <Skeleton className="h-4 w-40 bg-white/10" />
+    </div>
+  );
+}
+
+/** Inline loading skeleton that matches accordion card height */
+export function AccordionSkeleton({ count = 3 }: { count?: number }) {
+  return (
+    <div className="space-y-3 px-6 py-6">
+      {Array.from({ length: count }).map((_, i) => (
+        <Skeleton key={i} className="h-14 w-full rounded-lg" />
+      ))}
     </div>
   );
 }

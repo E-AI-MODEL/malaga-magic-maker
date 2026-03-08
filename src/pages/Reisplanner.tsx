@@ -162,27 +162,34 @@ export default function Reisplanner() {
   return (
     <AppLayout>
       <div className="flex flex-col h-[calc(100vh-8rem)] md:h-[calc(100vh-3rem)]">
+        {/* Hero header */}
+        <div className="bg-foreground px-6 py-5">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.15em] text-white/40 mb-1">Reisplanner</p>
+          <h1 className="font-display text-xl font-extrabold text-white">AI Assistent</h1>
+          <p className="text-xs text-white/50 mt-0.5">Kent jullie groepsvoorkeuren en geeft concrete tips</p>
+        </div>
+
         {/* Chat area */}
         <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-6 space-y-4">
           {isEmpty && (
-            <div className="flex flex-col items-center justify-center h-full text-center gap-4 py-12">
+            <div className="flex flex-col items-center justify-center h-full text-center gap-6 py-8">
               <div className="h-14 w-14 rounded-2xl bg-primary/10 flex items-center justify-center">
                 <Sparkles className="h-7 w-7 text-primary" />
               </div>
               <div>
-                <h2 className="font-display text-lg font-extrabold">AI Reisplanner</h2>
-                <p className="text-sm text-muted-foreground mt-1 max-w-xs mx-auto">
-                  Ik ken jullie groepsvoorkeuren en geef concrete tips voor restaurants, activiteiten en meer.
+                <p className="text-sm text-muted-foreground max-w-xs mx-auto">
+                  Stel een vraag of kies een onderwerp om te beginnen.
                 </p>
               </div>
-              <div className="flex flex-wrap gap-2 justify-center max-w-md">
+              <div className="grid grid-cols-2 gap-2 w-full max-w-sm">
                 {CHIPS.map((chip) => (
                   <button
                     key={chip.label}
                     onClick={() => send(chip.prompt)}
-                    className="text-xs font-medium px-3 py-2 rounded-full border border-border bg-card hover:bg-secondary transition-colors"
+                    className="flex items-center gap-2.5 text-left text-sm font-medium px-4 py-3 rounded-xl border border-border bg-card hover:bg-secondary/80 transition-colors"
                   >
-                    {chip.label}
+                    <chip.icon className="h-4 w-4 text-primary shrink-0" />
+                    <span>{chip.label}</span>
                   </button>
                 ))}
               </div>
@@ -226,8 +233,9 @@ export default function Reisplanner() {
                 key={chip.label}
                 onClick={() => send(chip.prompt)}
                 disabled={isLoading}
-                className="text-[11px] font-medium px-2.5 py-1.5 rounded-full border border-border bg-card hover:bg-secondary transition-colors whitespace-nowrap disabled:opacity-50"
+                className="flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1.5 rounded-full border border-border bg-card hover:bg-secondary transition-colors whitespace-nowrap disabled:opacity-50"
               >
+                <chip.icon className="h-3 w-3 text-primary" />
                 {chip.label}
               </button>
             ))}
@@ -250,6 +258,7 @@ export default function Reisplanner() {
               placeholder="Stel een vraag over jullie reis..."
               disabled={isLoading}
               className="flex-1 bg-secondary rounded-xl px-4 py-2.5 text-sm outline-none placeholder:text-muted-foreground/60 disabled:opacity-50"
+              style={{ fontSize: 16 }}
             />
             <Button type="submit" size="icon" disabled={!input.trim() || isLoading} className="rounded-xl h-10 w-10 shrink-0">
               <Send className="h-4 w-4" />

@@ -166,7 +166,7 @@ function AssistantMessage({ content, isStreaming }: { content: string; isStreami
   );
 }
 
-
+export default function Reisplanner() {
   const { activeTrip } = useTrip();
   const { profile } = useAuth();
   const [messages, setMessages] = useState<Msg[]>([]);

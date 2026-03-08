@@ -1,4 +1,5 @@
 import { ReactNode } from "react";
+import { motion } from "framer-motion";
 import { BottomNav } from "./BottomNav";
 import { NotificationCenter } from "./NotificationCenter";
 import { useAuth } from "@/lib/auth";
@@ -68,9 +69,14 @@ export function AppLayout({ children }: { children: ReactNode }) {
           </div>
         </div>
       </header>
-      <main className="max-w-2xl mx-auto">
+      <motion.main
+        className="max-w-2xl mx-auto"
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] }}
+      >
         {children}
-      </main>
+      </motion.main>
       <BottomNav />
     </div>
   );

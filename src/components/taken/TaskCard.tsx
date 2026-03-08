@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -6,6 +5,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { ReactionBar } from "@/components/ReactionBar";
 import { SectionComments } from "@/components/SectionComments";
 import { Button } from "@/components/ui/button";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   ChevronDown, User, Shield, Vote, Settings2, Link2, Calendar, Clock, MapPin
 } from "lucide-react";
@@ -24,97 +24,124 @@ interface TaskCardProps {
   onDeleteComment: (commentId: string) => void;
   onOpenDrawer: (taskId: string) => void;
   onOpenLightbox: (url: string) => void;
+  index?: number;
 }
 
 export function TaskCard({
   task, isOpen, onToggle, editable, profiles, reactions, comments,
   onToggleReaction, onAddComment, onDeleteComment, onOpenDrawer, onOpenLightbox,
+  index = 0,
 }: TaskCardProps) {
   const details: InfoDetails = (task.info_details as any) || {};
 
   return (
-    <Collapsible open={isOpen} onOpenChange={onToggle}>
-      <Card className="border-border/60 overflow-hidden">
-        <CollapsibleTrigger asChild>
-          <CardContent className="p-4 cursor-pointer hover:bg-accent/5 transition-colors">
-            <div className="flex items-center justify-between gap-2 mb-3">
-              <p className="font-display font-bold text-sm flex-1">{task.title}</p>
-              <div className="flex items-center gap-2">
-                <Badge variant="outline" className="text-[10px] font-mono tabular-nums border-primary/30 text-primary">
-                  {task.progress}%
-                </Badge>
-                <div className="bg-primary/10 rounded-full p-1.5">
-                  <ChevronDown className={`h-4 w-4 text-primary transition-transform ${isOpen ? "rotate-180" : ""}`} />
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{
+        duration: 0.35,
+        delay: index * 0.06,
+        ease: [0.25, 0.46, 0.45, 0.94],
+      }}
+    >
+      <Collapsible open={isOpen} onOpenChange={onToggle}>
+        <Card className="border-border/60 overflow-hidden transition-shadow hover:shadow-md">
+          <CollapsibleTrigger asChild>
+            <CardContent className="p-4 cursor-pointer hover:bg-accent/5 transition-colors">
+              <div className="flex items-center justify-between gap-2 mb-3">
+                <p className="font-display font-bold text-sm flex-1">{task.title}</p>
+                <div className="flex items-center gap-2">
+                  <Badge variant="outline" className="text-[10px] font-mono tabular-nums border-primary/30 text-primary">
+                    {task.progress}%
+                  </Badge>
+                  <motion.div
+                    className="bg-primary/10 rounded-full p-1.5"
+                    animate={{ rotate: isOpen ? 180 : 0 }}
+                    transition={{ duration: 0.25, ease: "easeInOut" }}
+                  >
+                    <ChevronDown className="h-4 w-4 text-primary" />
+                  </motion.div>
                 </div>
               </div>
-            </div>
-            <div className="flex flex-wrap gap-1.5 mb-3">
-              {task.assigned_to && (
-                <Badge className="bg-primary/10 text-primary border-primary/20 text-[10px]">
-                  <User className="h-3 w-3 mr-1" />{task.assigned_to}
-                </Badge>
-              )}
-              {task.backup_to && (
-                <Badge variant="outline" className="text-[10px] text-muted-foreground">
-                  <Shield className="h-3 w-3 mr-1" />{task.backup_to}
-                </Badge>
-              )}
-              {task.cost != null && task.cost > 0 && (
-                <Badge variant="secondary" className="text-[10px] tabular-nums">
-                  €{task.cost.toFixed(0)}
-                  {task.paid_by && <span className="ml-1 text-muted-foreground">· {task.paid_by}</span>}
-                </Badge>
-              )}
-              {!task.voting_closed && (
-                <Badge className="bg-accent text-accent-foreground text-[10px]">
-                  <Vote className="h-3 w-3 mr-1" />Stemming open
-                </Badge>
-              )}
-            </div>
-            <Progress value={task.progress} className="h-2 rounded-full" />
-          </CardContent>
-        </CollapsibleTrigger>
-
-        <CollapsibleContent>
-          <div className="px-4 pb-4 space-y-4 border-t border-border/40 pt-4">
-            <TaskDetailsReadonly details={details} infoText={task.info_text} />
-
-            {task.info_image_urls.length > 0 && (
-              <div className="grid grid-cols-2 gap-2">
-                {task.info_image_urls.map((url, i) => (
-                  <div key={i} className="rounded-lg overflow-hidden border border-border cursor-pointer"
-                    onClick={() => onOpenLightbox(url)}>
-                    <img src={url} alt="" className="w-full h-24 object-cover" />
-                  </div>
-                ))}
+              <div className="flex flex-wrap gap-1.5 mb-3">
+                {task.assigned_to && (
+                  <Badge className="bg-primary/10 text-primary border-primary/20 text-[10px]">
+                    <User className="h-3 w-3 mr-1" />{task.assigned_to}
+                  </Badge>
+                )}
+                {task.backup_to && (
+                  <Badge variant="outline" className="text-[10px] text-muted-foreground">
+                    <Shield className="h-3 w-3 mr-1" />{task.backup_to}
+                  </Badge>
+                )}
+                {task.cost != null && task.cost > 0 && (
+                  <Badge variant="secondary" className="text-[10px] tabular-nums">
+                    €{task.cost.toFixed(0)}
+                    {task.paid_by && <span className="ml-1 text-muted-foreground">· {task.paid_by}</span>}
+                  </Badge>
+                )}
+                {!task.voting_closed && (
+                  <Badge className="bg-accent text-accent-foreground text-[10px]">
+                    <Vote className="h-3 w-3 mr-1" />Stemming open
+                  </Badge>
+                )}
               </div>
-            )}
+              <Progress value={task.progress} className="h-2 rounded-full" />
+            </CardContent>
+          </CollapsibleTrigger>
 
-            {editable && (
-              <div className="pt-2 border-t border-border/40">
-                <Button variant="outline" size="sm" className="h-8 text-xs gap-1.5" onClick={() => onOpenDrawer(task.id)}>
-                  <Settings2 className="h-3.5 w-3.5" />
-                  Beheren
-                </Button>
+          <CollapsibleContent>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.2 }}
+              className="px-4 pb-4 space-y-4 border-t border-border/40 pt-4"
+            >
+              <TaskDetailsReadonly details={details} infoText={task.info_text} />
+
+              {task.info_image_urls.length > 0 && (
+                <div className="grid grid-cols-2 gap-2">
+                  {task.info_image_urls.map((url, i) => (
+                    <motion.div
+                      key={i}
+                      className="rounded-lg overflow-hidden border border-border cursor-pointer"
+                      onClick={() => onOpenLightbox(url)}
+                      whileHover={{ scale: 1.03 }}
+                      whileTap={{ scale: 0.97 }}
+                      transition={{ duration: 0.15 }}
+                    >
+                      <img src={url} alt="" className="w-full h-24 object-cover" />
+                    </motion.div>
+                  ))}
+                </div>
+              )}
+
+              {editable && (
+                <div className="pt-2 border-t border-border/40">
+                  <Button variant="outline" size="sm" className="h-8 text-xs gap-1.5" onClick={() => onOpenDrawer(task.id)}>
+                    <Settings2 className="h-3.5 w-3.5" />
+                    Beheren
+                  </Button>
+                </div>
+              )}
+
+              <div className="pt-3 border-t border-border/40 space-y-2">
+                <ReactionBar section={`task-${task.id}`} reactions={reactions} profiles={profiles} onToggle={onToggleReaction} />
+                <SectionComments
+                  section={`task-${task.id}`}
+                  comments={comments}
+                  profiles={profiles}
+                  onAdd={onAddComment}
+                  onDelete={onDeleteComment}
+                  taskId={task.id}
+                  taskTitle={task.title}
+                />
               </div>
-            )}
-
-            <div className="pt-3 border-t border-border/40 space-y-2">
-              <ReactionBar section={`task-${task.id}`} reactions={reactions} profiles={profiles} onToggle={onToggleReaction} />
-              <SectionComments
-                section={`task-${task.id}`}
-                comments={comments}
-                profiles={profiles}
-                onAdd={onAddComment}
-                onDelete={onDeleteComment}
-                taskId={task.id}
-                taskTitle={task.title}
-              />
-            </div>
-          </div>
-        </CollapsibleContent>
-      </Card>
-    </Collapsible>
+            </motion.div>
+          </CollapsibleContent>
+        </Card>
+      </Collapsible>
+    </motion.div>
   );
 }
 

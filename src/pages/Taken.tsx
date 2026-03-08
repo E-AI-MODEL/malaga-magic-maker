@@ -190,7 +190,7 @@ export default function Taken() {
                   </AccordionTrigger>
                   <AccordionContent className="px-0 pb-0">
                     <div className="space-y-3 px-4 pb-4">
-                      {sectionTasks.map(task => (
+                      {sectionTasks.map((task, idx) => (
                         <TaskCard
                           key={task.id}
                           task={task}
@@ -205,6 +205,7 @@ export default function Taken() {
                           onDeleteComment={handleDeleteComment}
                           onOpenDrawer={setDrawerTaskId}
                           onOpenLightbox={setLightboxUrl}
+                          index={idx}
                         />
                       ))}
 

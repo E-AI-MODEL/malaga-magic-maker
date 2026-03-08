@@ -10,7 +10,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { CheckCircle2, Plus } from "lucide-react";
-import { HeroSkeleton, CardSkeleton, PageTransition } from "@/components/PageSkeleton";
+import { HeroSkeleton, CardSkeleton } from "@/components/PageSkeleton";
 
 import { TripHero } from "@/components/taken/TripHero";
 import { FlightSection } from "@/components/taken/FlightSection";

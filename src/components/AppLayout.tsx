@@ -98,14 +98,9 @@ export function AppLayout({ children }: { children: ReactNode }) {
               <span className="text-xs text-muted-foreground font-medium">{profile?.display_name}</span>
             </div>
           </header>
-          <motion.main
-            className="flex-1 max-w-4xl mx-auto w-full"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.2, ease: "easeOut" }}
-          >
+          <main className="flex-1 max-w-4xl mx-auto w-full">
             {children}
-          </motion.main>
+          </main>
         </div>
       </div>
     </SidebarProvider>

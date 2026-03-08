@@ -147,6 +147,52 @@ export const golfTripConfig: TripConfig = {
     label: "Rondes",
     options: [2, 3],
   },
+
+  poiCategories: [
+    {
+      key: "golf",
+      label: "Golfbanen",
+      emoji: "⛳",
+      colorThresholds: [15, 25],
+      pois: [
+        {
+          name: "La Cala Golf & Country Club",
+          emoji: "⛳",
+          url: "https://www.lacala.com",
+          description: "3 banen van 18 holes",
+          travelTimes: { "Fuengirola": 27, "La Cala de Mijas": 12, "Calahonda": 8, "Mijas": 20, "Torremolinos": 35 },
+        },
+        {
+          name: "Chaparral Golf Club",
+          emoji: "⛳",
+          url: "https://golfelchaparral.com/en/",
+          description: "Direct bij het strand. Green fee €80–€110",
+          travelTimes: { "Fuengirola": 15, "La Cala de Mijas": 8, "Calahonda": 5, "Mijas": 18, "Torremolinos": 25 },
+        },
+        {
+          name: "Santana Golf",
+          emoji: "⛳",
+          url: "https://santanagolf.com",
+          description: "Par 72, goed onderhouden",
+          travelTimes: { "Fuengirola": 20, "La Cala de Mijas": 10, "Calahonda": 12, "Mijas": 15, "Torremolinos": 30 },
+        },
+        {
+          name: "Calanova Golf Club",
+          emoji: "⛳",
+          url: "https://calanovagolf.es",
+          description: "18 holes, par 72",
+          travelTimes: { "Fuengirola": 25, "La Cala de Mijas": 18, "Calahonda": 15, "Mijas": 10, "Torremolinos": 35 },
+        },
+        {
+          name: "Miraflores Golf Club",
+          emoji: "⛳",
+          url: "https://www.mirafloresgolf.es",
+          description: "18 holes, heuvels van Calahonda",
+          travelTimes: { "Fuengirola": 20, "La Cala de Mijas": 10, "Calahonda": 5, "Mijas": 22, "Torremolinos": 30 },
+        },
+      ],
+    },
+  ],
 };
 
 // ─── Get config for current trip (for now always golf) ──────────────

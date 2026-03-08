@@ -248,7 +248,7 @@ function TravelTimeConstraint({ subs, config, n }: { subs: Submission[]; config:
   return (
     <div>
       <p className="text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground mb-3">
-        {config.travelTime.emoji} {config.travelTime.label} constraint
+        {config.travelTime.label}
       </p>
       <div className="border rounded-lg p-4 space-y-2">
         {Object.entries(votes)

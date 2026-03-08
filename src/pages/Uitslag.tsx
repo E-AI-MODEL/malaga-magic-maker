@@ -483,30 +483,45 @@ export default function Uitslag() {
             <AccordionItem value="eten" className="border rounded-lg border-border/60 overflow-hidden">
               <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-accent/5">
                 <div className="flex items-center gap-2">
-                  <div className="h-7 w-7 rounded-full bg-primary/10 flex items-center justify-center text-primary font-display font-extrabold text-xs">4</div>
+                  <div className="h-7 w-7 rounded-full bg-primary/10 flex items-center justify-center text-primary font-display font-extrabold text-xs">🍽️</div>
                   <UtensilsCrossed className="h-4 w-4 text-primary" />
                   <span className="font-display font-bold text-sm">Eten & drinken</span>
+                  {Object.keys(dietCounts).length > 0 && (
+                    <Badge variant="outline" className="text-[10px] ml-auto">{Object.keys(dietCounts).length} voorkeuren</Badge>
+                  )}
                 </div>
               </AccordionTrigger>
               <AccordionContent className="px-4 pb-4">
                 {Object.keys(dietCounts).length > 0 ? (
-                  <div className="space-y-3">
+                  <div className="space-y-4">
                     <p className="text-sm text-muted-foreground">Eetvoorkeuren binnen de groep</p>
-                    <div className="flex flex-wrap gap-2">
+                    <div className="space-y-2">
                       {Object.entries(dietCounts).sort(([, a], [, b]) => b - a).map(([diet, count]) => (
-                        <Badge key={diet} variant="secondary" className="text-xs py-1 px-3">{diet} <span className="font-bold ml-1.5">{count}×</span></Badge>
+                        <div key={diet} className="flex items-center justify-between py-2 border-b border-border/50 last:border-0">
+                          <span className="text-sm">{diet}</span>
+                          <div className="flex items-center gap-2">
+                            <div className="w-20 bg-secondary rounded-full h-2 overflow-hidden">
+                              <div className="bg-primary h-full rounded-full" style={{ width: `${(count / lockedSubs.length) * 100}%` }} />
+                            </div>
+                            <span className="text-xs font-bold tabular-nums text-muted-foreground">{count}/{lockedSubs.length}</span>
+                          </div>
+                        </div>
                       ))}
                     </div>
                   </div>
                 ) : (
-                  <p className="text-sm text-muted-foreground italic">Geen specifieke eetvoorkeuren</p>
+                  <div className="text-center py-6">
+                    <p className="text-3xl mb-2">🍕</p>
+                    <p className="text-sm text-muted-foreground">Geen specifieke eetvoorkeuren — alles mag!</p>
+                  </div>
                 )}
                 {allDietRemarks.length > 0 && (
                   <div className="mt-4 space-y-2">
                     <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Opmerkingen</p>
                     {allDietRemarks.map((r, i) => (
                       <div key={i} className="bg-secondary rounded-lg p-3 text-sm">
-                        <span className="font-semibold">{r.user}:</span> <span className="text-muted-foreground italic">{r.text}</span>
+                        <span className="font-semibold">{r.user}:</span>{" "}
+                        <span className="text-muted-foreground">{r.text}</span>
                       </div>
                     ))}
                   </div>

@@ -231,6 +231,64 @@ export default function Admin() {
               </AccordionContent>
             </AccordionItem>
 
+            {/* ═══ AI-REISGIDS LOCATIE ═══ */}
+            <AccordionItem value="ai-location" className="border rounded-lg border-border/60 overflow-hidden">
+              <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-accent/5">
+                <div className="flex items-center gap-2 w-full">
+                  <MapPin className="h-4 w-4 text-primary" />
+                  <span className="font-display font-bold text-sm">AI-reisgids locatie</span>
+                  <Badge variant="outline" className="text-[10px] ml-auto truncate max-w-[140px]">
+                    {aiLocation || "Niet ingesteld"}
+                  </Badge>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="px-4 pb-4 space-y-3">
+                <p className="text-xs text-muted-foreground">
+                  Stel de verblijflocatie in. De AI-reisgids gebruikt dit als basis voor alle aanbevelingen (restaurants, stranden, vervoer, etc.)
+                </p>
+                {aiLocation && (
+                  <div className="bg-secondary rounded-xl p-4">
+                    <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Huidige locatie</p>
+                    <p className="font-display font-extrabold text-lg">{aiLocation}</p>
+                  </div>
+                )}
+                <div className="flex gap-2">
+                  <Input
+                    value={aiLocationInput}
+                    onChange={(e) => setAiLocationInput(e.target.value)}
+                    placeholder="bijv. La Cala Resort, Mijas Costa"
+                    className="flex-1 h-9"
+                  />
+                  <Button size="sm" className="h-9" onClick={async () => {
+                    if (!aiLocationInput.trim()) return;
+                    const { error } = await supabase.from("app_settings").upsert({ key: "ai_guide_location", value: aiLocationInput.trim(), updated_at: new Date().toISOString() });
+                    if (error) { toast.error("Fout bij opslaan locatie"); return; }
+                    await logOverride("ai_guide_location", aiLocation, aiLocationInput.trim(), "Locatie aangepast");
+                    setAiLocation(aiLocationInput.trim());
+                    toast.success("Locatie bijgewerkt");
+                  }}>Opslaan</Button>
+                </div>
+                {accommodations.filter(a => a.status === "active" || a.status === "finalist").length > 0 && (
+                  <div className="space-y-1">
+                    <p className="text-xs text-muted-foreground font-medium">Snel kiezen uit accommodaties:</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {accommodations.filter(a => a.status === "active" || a.status === "finalist").map(acc => (
+                        <Button
+                          key={acc.id}
+                          variant={aiLocation === `${acc.name}, ${acc.location_label}` ? "default" : "outline"}
+                          size="sm"
+                          className="h-7 text-xs"
+                          onClick={() => setAiLocationInput(`${acc.name}, ${acc.location_label}`)}
+                        >
+                          {acc.name}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </AccordionContent>
+            </AccordionItem>
+
             {/* ═══ GEBRUIKERS & INTAKE ═══ */}
             <AccordionItem value="users" className="border rounded-lg border-border/60 overflow-hidden">
               <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-accent/5">

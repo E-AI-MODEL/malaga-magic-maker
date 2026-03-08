@@ -175,7 +175,7 @@ async function streamChat({
   onDone();
 }
 /** Split assistant markdown into intro + accordion sections by ## headers */
-function AssistantMessage({ content, isStreaming, proseSize = "prose-sm" }: { content: string; isStreaming: boolean; proseSize?: string }) {
+function AssistantMessage({ content, isStreaming, proseSizeClass }: { content: string; isStreaming: boolean; proseSizeClass: string }) {
   const sections = useMemo(() => {
     const parts = content.split(/^## /m);
     const intro = parts[0]?.trim() || "";
@@ -191,7 +191,7 @@ function AssistantMessage({ content, isStreaming, proseSize = "prose-sm" }: { co
   // While streaming or if no sections found, show plain markdown
   if (isStreaming || sections.items.length === 0) {
     return (
-      <div className={`prose ${proseSize} dark:prose-invert max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0`}>
+      <div className={`${proseSizeClass} max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0`}>
         <ReactMarkdown>{content}</ReactMarkdown>
       </div>
     );
@@ -200,7 +200,7 @@ function AssistantMessage({ content, isStreaming, proseSize = "prose-sm" }: { co
   return (
     <div className="space-y-3">
       {sections.intro && (
-        <div className={`prose ${proseSize} dark:prose-invert max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0`}>
+        <div className={`${proseSizeClass} max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0`}>
           <ReactMarkdown>{sections.intro}</ReactMarkdown>
         </div>
       )}
@@ -211,7 +211,7 @@ function AssistantMessage({ content, isStreaming, proseSize = "prose-sm" }: { co
               {item.title}
             </AccordionTrigger>
             <AccordionContent className="pb-3">
-              <div className={`prose ${proseSize} dark:prose-invert max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0`}>
+              <div className={`${proseSizeClass} max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0`}>
                 <ReactMarkdown>{item.body}</ReactMarkdown>
               </div>
             </AccordionContent>
@@ -232,13 +232,18 @@ export default function Reisplanner() {
   const [activeCategory, setActiveCategory] = useState<MenuCategory | null>(null);
   const [fontSize, setFontSize] = useState(() => {
     const saved = localStorage.getItem("ai-guide-fontsize");
-    return saved ? Number(saved) : 1; // 0=xs, 1=sm(default), 2=base
+    return saved ? Number(saved) : 0; // 0=tiny(default), 1=small, 2=medium
   });
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const fontSizeClass = ["text-[11px] leading-[1.5]", "text-xs leading-[1.6]", "text-sm leading-[1.6]"][fontSize] || "text-xs leading-[1.6]";
-  const proseSize = ["prose-xs", "prose-sm", "prose-sm"][fontSize] || "prose-sm";
+  const fontSizeClass = ["text-[10px] leading-[1.5]", "text-[11px] leading-[1.5]", "text-xs leading-[1.6]"][fontSize] || "text-[10px] leading-[1.5]";
+  const PROSE_SIZES = [
+    "prose prose-sm dark:prose-invert [&_p]:text-[10px] [&_p]:leading-[1.5] [&_li]:text-[10px] [&_li]:leading-[1.5] [&_strong]:text-[10px] [&_a]:text-[10px] [&_h3]:text-[11px] [&_h4]:text-[10px]",
+    "prose prose-sm dark:prose-invert [&_p]:text-[11px] [&_p]:leading-[1.5] [&_li]:text-[11px] [&_li]:leading-[1.5] [&_strong]:text-[11px] [&_a]:text-[11px] [&_h3]:text-xs [&_h4]:text-[11px]",
+    "prose prose-sm dark:prose-invert [&_p]:text-xs [&_p]:leading-[1.6] [&_li]:text-xs [&_li]:leading-[1.6] [&_strong]:text-xs [&_a]:text-xs [&_h3]:text-sm [&_h4]:text-xs",
+  ];
+  const proseSizeClass = PROSE_SIZES[fontSize] || PROSE_SIZES[0];
 
   const adjustFontSize = (delta: number) => {
     setFontSize((prev) => {
@@ -339,7 +344,7 @@ export default function Reisplanner() {
                 }`}
               >
                 {msg.role === "assistant" ? (
-                  <AssistantMessage content={msg.content} isStreaming={isLoading && i === messages.length - 1} proseSize={proseSize} />
+                  <AssistantMessage content={msg.content} isStreaming={isLoading && i === messages.length - 1} proseSizeClass={proseSizeClass} />
                 ) : (
                   <p>{msg.content}</p>
                 )}

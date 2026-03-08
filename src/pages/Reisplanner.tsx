@@ -201,9 +201,7 @@ export default function Reisplanner() {
                 }`}
               >
                 {msg.role === "assistant" ? (
-                  <div className="prose prose-sm dark:prose-invert max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
-                    <ReactMarkdown>{msg.content}</ReactMarkdown>
-                  </div>
+                  <AssistantMessage content={msg.content} isStreaming={isLoading && i === messages.length - 1} />
                 ) : (
                   <p>{msg.content}</p>
                 )}

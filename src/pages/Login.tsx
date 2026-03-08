@@ -57,6 +57,7 @@ export default function Login() {
 
       <div className="relative z-10 w-full max-w-sm mx-auto px-6 pb-12 sm:pb-0">
         <div className="text-center mb-8">
+          <img src={logo} alt="Vakansie" className="h-16 w-16 mx-auto mb-3 drop-shadow-lg" />
           <h1 className="font-display text-4xl font-extrabold text-white tracking-tight leading-none">
             VAKANSIE
           </h1>

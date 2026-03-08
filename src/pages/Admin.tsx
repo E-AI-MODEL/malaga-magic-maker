@@ -135,7 +135,7 @@ export default function Admin() {
         count++;
       }
     }
-    await logOverride("round_1_sloperhamer", "", `${count} eliminated`, "Ronde 1 uitgevoerd");
+    await logOverride("round_1_filter", "", `${count} eliminated`, "Ronde 1 uitgevoerd");
     fetchAll(); toast.success(`Ronde 1: ${count} accommodaties geëlimineerd`);
   };
 

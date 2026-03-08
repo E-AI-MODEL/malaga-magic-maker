@@ -17,7 +17,7 @@ import { FlightSection } from "@/components/taken/FlightSection";
 import { TaskCard } from "@/components/taken/TaskCard";
 import { TaskDrawer } from "@/components/taken/TaskDrawer";
 import { ALL_SECTIONS, SECTION_LABELS } from "@/components/taken/types";
-import type { Task, TravelLeg, Profile, Reaction, Comment } from "@/components/taken/types";
+import type { Task, TravelLeg, Profile, Reaction, Comment, TaskVote } from "@/components/taken/types";
 
 export default function Taken() {
   const { user, profile, isAdmin } = useAuth();

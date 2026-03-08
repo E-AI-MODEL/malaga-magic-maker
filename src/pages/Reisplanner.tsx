@@ -230,8 +230,23 @@ export default function Reisplanner() {
   const [isLoading, setIsLoading] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState<MenuCategory | null>(null);
+  const [fontSize, setFontSize] = useState(() => {
+    const saved = localStorage.getItem("ai-guide-fontsize");
+    return saved ? Number(saved) : 1; // 0=xs, 1=sm(default), 2=base
+  });
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  const fontSizeClass = ["text-[11px] leading-[1.5]", "text-xs leading-[1.6]", "text-sm leading-[1.6]"][fontSize] || "text-xs leading-[1.6]";
+  const proseSize = ["prose-xs", "prose-sm", "prose-sm"][fontSize] || "prose-sm";
+
+  const adjustFontSize = (delta: number) => {
+    setFontSize((prev) => {
+      const next = Math.max(0, Math.min(2, prev + delta));
+      localStorage.setItem("ai-guide-fontsize", String(next));
+      return next;
+    });
+  };
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });

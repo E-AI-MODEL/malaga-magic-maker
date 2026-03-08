@@ -124,6 +124,22 @@ export default function Taken() {
     await supabase.from("comments").delete().eq("id", commentId);
   }, []);
 
+  const handleVote = useCallback(async (taskId: string, votedForUserId: string) => {
+    if (!user) return;
+    const existing = taskVotes.find(v => v.task_id === taskId && v.user_id === user.id);
+    if (existing) {
+      if (existing.voted_for_user_id === votedForUserId) {
+        // Remove vote
+        await supabase.from("task_votes").delete().eq("id", existing.id);
+      } else {
+        // Change vote
+        await supabase.from("task_votes").update({ voted_for_user_id: votedForUserId }).eq("id", existing.id);
+      }
+    } else {
+      await supabase.from("task_votes").insert({ task_id: taskId, user_id: user.id, voted_for_user_id: votedForUserId });
+    }
+  }, [user, taskVotes]);
+
   const canEditTask = (task: Task) => {
     if (isAdmin) return true;
     if (!profile) return false;

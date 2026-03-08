@@ -87,8 +87,7 @@ export default function Admin() {
     await supabase.from("admin_overrides").insert({ admin_user_id: user.id, field, old_value: oldValue, new_value: newValue, reason });
   };
 
-  const [eliminateTarget, setEliminateTarget] = useState<string | null>(null);
-  const [eliminateReason, setEliminateReason] = useState("");
+
 
   const handleEliminate = async (accId: string) => {
     setEliminateTarget(accId);

@@ -331,6 +331,94 @@ export type Database = {
           },
         ]
       }
+      poi_categories: {
+        Row: {
+          color_threshold_good: number
+          color_threshold_ok: number
+          created_at: string
+          emoji: string
+          id: string
+          key: string
+          label: string
+          sort_order: number
+          trip_id: string | null
+        }
+        Insert: {
+          color_threshold_good?: number
+          color_threshold_ok?: number
+          created_at?: string
+          emoji?: string
+          id?: string
+          key: string
+          label: string
+          sort_order?: number
+          trip_id?: string | null
+        }
+        Update: {
+          color_threshold_good?: number
+          color_threshold_ok?: number
+          created_at?: string
+          emoji?: string
+          id?: string
+          key?: string
+          label?: string
+          sort_order?: number
+          trip_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "poi_categories_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "trip"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pois: {
+        Row: {
+          category_id: string
+          created_at: string
+          description: string | null
+          emoji: string | null
+          id: string
+          name: string
+          sort_order: number
+          travel_times: Json
+          url: string | null
+        }
+        Insert: {
+          category_id: string
+          created_at?: string
+          description?: string | null
+          emoji?: string | null
+          id?: string
+          name: string
+          sort_order?: number
+          travel_times?: Json
+          url?: string | null
+        }
+        Update: {
+          category_id?: string
+          created_at?: string
+          description?: string | null
+          emoji?: string | null
+          id?: string
+          name?: string
+          sort_order?: number
+          travel_times?: Json
+          url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pois_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "poi_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string

@@ -211,7 +211,7 @@ function AssistantMessage({ content, isStreaming, proseSizeClass }: { content: s
               {item.title}
             </AccordionTrigger>
             <AccordionContent className="pb-3">
-              <div className={`prose ${proseSize} dark:prose-invert max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0`}>
+              <div className={`${proseSizeClass} max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0`}>
                 <ReactMarkdown>{item.body}</ReactMarkdown>
               </div>
             </AccordionContent>

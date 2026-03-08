@@ -191,7 +191,7 @@ function AssistantMessage({ content, isStreaming, proseSize = "prose-sm" }: { co
   // While streaming or if no sections found, show plain markdown
   if (isStreaming || sections.items.length === 0) {
     return (
-      <div className="prose prose-sm dark:prose-invert max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
+      <div className={`prose ${proseSize} dark:prose-invert max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0`}>
         <ReactMarkdown>{content}</ReactMarkdown>
       </div>
     );
@@ -200,18 +200,18 @@ function AssistantMessage({ content, isStreaming, proseSize = "prose-sm" }: { co
   return (
     <div className="space-y-3">
       {sections.intro && (
-        <div className="prose prose-sm dark:prose-invert max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
+        <div className={`prose ${proseSize} dark:prose-invert max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0`}>
           <ReactMarkdown>{sections.intro}</ReactMarkdown>
         </div>
       )}
       <Accordion type="multiple" className="space-y-1">
         {sections.items.map((item, idx) => (
           <AccordionItem key={idx} value={`s-${idx}`} className="border border-border/60 rounded-lg px-3 overflow-hidden">
-            <AccordionTrigger className="text-sm font-semibold py-2.5 hover:no-underline text-left">
+            <AccordionTrigger className="text-xs font-semibold py-2.5 hover:no-underline text-left">
               {item.title}
             </AccordionTrigger>
             <AccordionContent className="pb-3">
-              <div className="prose prose-sm dark:prose-invert max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
+              <div className={`prose ${proseSize} dark:prose-invert max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0`}>
                 <ReactMarkdown>{item.body}</ReactMarkdown>
               </div>
             </AccordionContent>

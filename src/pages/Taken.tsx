@@ -68,6 +68,7 @@ const SECTION_LABELS: Record<string, string> = {
 
 export default function Taken() {
   const { user, profile, isAdmin } = useAuth();
+  const { activeTrip, isOrganizer } = useTrip();
   const navigate = useNavigate();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [travelLegs, setTravelLegs] = useState<TravelLeg[]>([]);

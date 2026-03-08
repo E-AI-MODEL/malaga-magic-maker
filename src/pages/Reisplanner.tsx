@@ -344,7 +344,7 @@ export default function Reisplanner() {
                 }`}
               >
                 {msg.role === "assistant" ? (
-                  <AssistantMessage content={msg.content} isStreaming={isLoading && i === messages.length - 1} proseSize={proseSize} />
+                  <AssistantMessage content={msg.content} isStreaming={isLoading && i === messages.length - 1} proseSizeClass={proseSizeClass} />
                 ) : (
                   <p>{msg.content}</p>
                 )}

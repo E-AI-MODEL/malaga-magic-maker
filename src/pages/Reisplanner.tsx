@@ -320,36 +320,67 @@ export default function Reisplanner() {
             }}
             className="flex items-center gap-2 max-w-2xl mx-auto"
           >
-            {/* Burger menu with chips + wis */}
-            <Popover>
+            {/* Burger menu with categories */}
+            <Popover open={menuOpen} onOpenChange={(open) => { setMenuOpen(open); if (!open) setActiveCategory(null); }}>
               <PopoverTrigger asChild>
                 <Button type="button" variant="ghost" size="icon" className="rounded-xl h-10 w-10 shrink-0 text-muted-foreground">
                   <Menu className="h-4 w-4" />
                 </Button>
               </PopoverTrigger>
-              <PopoverContent side="top" align="start" className="w-56 p-2 space-y-1">
-                {CHIPS.map((chip) => (
-                  <button
-                    key={chip.label}
-                    onClick={() => send(chip.prompt)}
-                    disabled={isLoading}
-                    className="flex items-center gap-2.5 w-full text-left text-sm font-medium px-3 py-2.5 rounded-lg hover:bg-secondary/80 transition-colors disabled:opacity-50"
-                  >
-                    <chip.icon className="h-4 w-4 text-primary shrink-0" />
-                    {chip.label}
-                  </button>
-                ))}
-                {messages.length > 0 && (
-                  <>
-                    <div className="border-t border-border my-1" />
+              <PopoverContent side="top" align="start" className="w-64 p-2">
+                {!activeCategory ? (
+                  <div className="space-y-0.5">
+                    <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground px-3 pt-1 pb-2">Waar kan ik mee helpen?</p>
+                    {MENU.map((cat) => (
+                      <button
+                        key={cat.label}
+                        onClick={() => setActiveCategory(cat)}
+                        className="flex items-center gap-3 w-full text-left px-3 py-2.5 rounded-lg hover:bg-secondary/80 transition-colors"
+                      >
+                        <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                          <cat.icon className="h-4 w-4 text-primary" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm font-semibold">{cat.label}</p>
+                          <p className="text-[11px] text-muted-foreground">{cat.desc}</p>
+                        </div>
+                        <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/40 shrink-0" />
+                      </button>
+                    ))}
+                    {messages.length > 0 && (
+                      <>
+                        <div className="border-t border-border my-1.5" />
+                        <button
+                          onClick={() => { setMessages([]); setMenuOpen(false); }}
+                          className="flex items-center gap-3 w-full text-left px-3 py-2.5 rounded-lg hover:bg-destructive/10 transition-colors text-destructive"
+                        >
+                          <Trash2 className="h-4 w-4 shrink-0" />
+                          <span className="text-sm font-medium">Gesprek wissen</span>
+                        </button>
+                      </>
+                    )}
+                  </div>
+                ) : (
+                  <div className="space-y-0.5">
                     <button
-                      onClick={() => setMessages([])}
-                      className="flex items-center gap-2.5 w-full text-left text-sm font-medium px-3 py-2.5 rounded-lg hover:bg-destructive/10 transition-colors text-destructive"
+                      onClick={() => setActiveCategory(null)}
+                      className="flex items-center gap-2 text-xs font-medium text-muted-foreground px-2 py-1.5 hover:text-foreground transition-colors"
                     >
-                      <Trash2 className="h-4 w-4 shrink-0" />
-                      Gesprek wissen
+                      <ArrowLeft className="h-3 w-3" />
+                      Terug
                     </button>
-                  </>
+                    <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground px-3 pt-1 pb-1.5">{activeCategory.label}</p>
+                    {activeCategory.items.map((item) => (
+                      <button
+                        key={item.label}
+                        onClick={() => { send(item.prompt); setMenuOpen(false); setActiveCategory(null); }}
+                        disabled={isLoading}
+                        className="flex items-center gap-2.5 w-full text-left text-sm font-medium px-3 py-2.5 rounded-lg hover:bg-secondary/80 transition-colors disabled:opacity-50"
+                      >
+                        {item.label}
+                      </button>
+                    ))}
+                  </div>
                 )}
               </PopoverContent>
             </Popover>

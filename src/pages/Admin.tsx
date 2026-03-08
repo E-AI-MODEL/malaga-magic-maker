@@ -650,10 +650,13 @@ function AccommodationRow({ acc, onEliminate, onUndo, onFinalist, onTogglePrice,
             <p className="text-sm font-semibold truncate">{acc.name}</p>
             {acc.status === "finalist" && <Trophy className="h-3.5 w-3.5 text-warning shrink-0" />}
           </div>
-          <p className="text-[11px] text-muted-foreground mt-0.5">
-            {acc.location_label} · {acc.bedrooms}k · {acc.fixed_beds_count}b · {acc.golf_minutes ?? "?"}m golf
-            {acc.total_price_3_nights && ` · €${acc.total_price_3_nights}`}
-          </p>
+          <div className="flex flex-wrap gap-1.5 mt-1">
+            <Badge variant="outline" className="text-[10px] py-0 px-1.5">{acc.location_label}</Badge>
+            <Badge variant="outline" className="text-[10px] py-0 px-1.5">{acc.bedrooms} kamers</Badge>
+            <Badge variant="outline" className="text-[10px] py-0 px-1.5">{acc.fixed_beds_count} bedden</Badge>
+            <Badge variant="outline" className="text-[10px] py-0 px-1.5">{acc.golf_minutes ?? "?"} min golf</Badge>
+            {acc.total_price_3_nights && <Badge variant="outline" className="text-[10px] py-0 px-1.5">€{acc.total_price_3_nights}</Badge>}
+          </div>
           {!acc.eligibility.eligible && <p className="text-[10px] text-destructive mt-1">{acc.eligibility.failures.join(", ")}</p>}
           {acc.eliminated_reason && <p className="text-[10px] text-muted-foreground italic mt-1">{acc.eliminated_reason}</p>}
         </div>

@@ -92,9 +92,9 @@ export default function AccommodationDetail() {
           <p className="text-white/50 text-sm mt-1">{acc.location_label} &middot; {acc.type}</p>
           <div className="flex flex-wrap gap-1.5 mt-3">
             {eligibility?.eligible ? (
-              <Badge className="bg-primary text-primary-foreground text-[10px] font-bold rounded-md">ELIGIBLE</Badge>
+              <Badge className="bg-primary text-primary-foreground text-[10px] font-bold rounded-md">GESCHIKT</Badge>
             ) : (
-              <Badge variant="destructive" className="text-[10px] font-bold rounded-md">NOT ELIGIBLE</Badge>
+              <Badge variant="destructive" className="text-[10px] font-bold rounded-md">NIET GESCHIKT</Badge>
             )}
             {acc.status === "finalist" && <Badge className="bg-warning text-warning-foreground text-[10px] font-bold rounded-md">FINALIST</Badge>}
             {acc.cancellation_type !== "unknown" && (

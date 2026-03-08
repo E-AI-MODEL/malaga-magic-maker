@@ -4,7 +4,7 @@ import { useTrip } from "@/contexts/TripContext";
 import { useAuth } from "@/lib/auth";
 import ReactMarkdown from "react-markdown";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Send, Loader2, UtensilsCrossed, Map, Flag, Moon, ShoppingCart, Menu, Trash2 } from "lucide-react";
+import { Send, Loader2, UtensilsCrossed, Map, Flag, Moon, ShoppingCart, Menu, Trash2, ChevronRight, ArrowLeft, Sun, Waves, Car, Wine, Music, Utensils, Beer, Palmtree } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import vakansielogo from "@/assets/vakansie-logo.png";

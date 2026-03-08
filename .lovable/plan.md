@@ -261,9 +261,9 @@ Stap 4: Eerste taken aanmaken (templates per sectie)
 ## Status
 
 - [x] Plan opgesteld
-- [ ] Fase 1: Database multi-trip model
-- [ ] Fase 2: Auth & registratie
-- [ ] Fase 3: Trip context & navigatie
+- [x] Fase 1: Database multi-trip model ✅ (trips extended, trip_members created, trip_id on all tables, data migrated)
+- [x] Fase 2: Auth & registratie ✅ (signUp added, email+username login, Login page updated to VAKANSIE)
+- [x] Fase 3: Trip context & navigatie ✅ (TripProvider created, switchTrip, createTrip, joinTrip)
 - [ ] Fase 4: Onboarding
 - [ ] Fase 5: Dashboard redesign
 - [ ] Fase 6: Notificaties

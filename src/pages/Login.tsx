@@ -103,12 +103,11 @@ export default function Login() {
   };
 
   return (
-    <div className="relative min-h-screen flex items-end justify-center overflow-hidden bg-black">
+    <div className="relative h-[100dvh] flex items-end justify-center overflow-hidden bg-black">
       {/* Video background — plays once, freezes on last frame */}
       <video
         ref={videoRef}
         src="/videos/boot-sequence.mp4"
-        poster="/images/villa-mercedes-1.png"
         autoPlay
         muted
         playsInline

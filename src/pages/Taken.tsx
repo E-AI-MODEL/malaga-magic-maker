@@ -74,6 +74,9 @@ export default function Taken() {
       .on("postgres_changes", { event: "*", schema: "public", table: "comments" }, () => {
         supabase.from("comments").select("*").eq("trip_id", tripId).then(r => setComments((r.data as any[]) || []));
       })
+      .on("postgres_changes", { event: "*", schema: "public", table: "task_votes" }, () => {
+        supabase.from("task_votes").select("*").then(r => setTaskVotes((r.data as any[]) || []));
+      })
       .subscribe();
 
     return () => { supabase.removeChannel(channel); };

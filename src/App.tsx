@@ -24,7 +24,6 @@ const Reisplanner = lazy(() => import("./pages/Reisplanner"));
 const TaskContext = lazy(() => import("./pages/TaskContext"));
 const Kosten = lazy(() => import("./pages/Kosten"));
 const Wensen = lazy(() => import("./pages/Wensen"));
-const BootSequence = lazy(() => import("./pages/BootSequence"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();

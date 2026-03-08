@@ -58,9 +58,11 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
-          <ActivityLogProvider>
-            <AppRoutes />
-          </ActivityLogProvider>
+          <TripProvider>
+            <ActivityLogProvider>
+              <AppRoutes />
+            </ActivityLogProvider>
+          </TripProvider>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>

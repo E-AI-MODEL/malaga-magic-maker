@@ -41,6 +41,8 @@ export default function Admin() {
   const [editingUserId, setEditingUserId] = useState<string | null>(null);
   const [showAccForm, setShowAccForm] = useState(false);
   const [editingAccId, setEditingAccId] = useState<string | null>(null);
+  const [eliminateTarget, setEliminateTarget] = useState<string | null>(null);
+  const [eliminateReason, setEliminateReason] = useState("");
 
   const tripId = activeTrip?.id;
 

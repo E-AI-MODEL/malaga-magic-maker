@@ -3,84 +3,31 @@ import { AppLayout } from "@/components/AppLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { useTrip } from "@/contexts/TripContext";
-import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
-import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Switch } from "@/components/ui/switch";
-import { ReactionBar } from "@/components/ReactionBar";
-import { SectionComments } from "@/components/SectionComments";
 import { toast } from "sonner";
-import { useNavigate } from "react-router-dom";
-import {
-  Plane, ChevronDown, CheckCircle2, Upload, User, Shield, X,
-  Globe, MapPin, Clock, Calendar, Pencil, Save, ChevronRight, Info,
-  Plus, Trash2, Settings2, Link2, FileText, Vote, Image as ImageIcon
-} from "lucide-react";
-import {
-  Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription
-} from "@/components/ui/drawer";
+import { CheckCircle2, Plus } from "lucide-react";
 
-interface Profile { id: string; username: string; display_name: string; }
-interface InfoDetails {
-  url?: string;
-  urls?: string[];
-  activity_date?: string;
-  activity_time?: string;
-  location?: string;
-}
-interface Task {
-  id: string; title: string; section: string; assigned_to: string | null;
-  backup_to: string | null; status: string; sort_order: number;
-  voting_closed: boolean; progress: number; info_text: string | null;
-  info_image_urls: string[]; info_details: InfoDetails;
-  cost: number | null; paid_by: string | null;
-}
-interface TravelLeg {
-  id: string; passengers: string[]; departure_time: string | null;
-  arrival_time: string | null; travel_date: string | null;
-  note: string | null; sort_order: number;
-}
-interface Reaction { id: string; user_id: string; section: string; emoji: string; }
-interface Comment { id: string; user_id: string; section: string; message: string; created_at: string; }
-
-const SECTION_CONTEXT: Record<string, string> = {
-  transport: "Bekijk context & info",
-  accommodatie: "Bekijk context & info",
-  golf: "Bekijk context & info",
-  strand: "Bekijk context & info",
-};
-
-const ALL_SECTIONS = ["transport", "accommodatie", "golf", "strand"];
-const SECTION_LABELS: Record<string, string> = {
-  transport: "Vervoer",
-  accommodatie: "Accommodatie",
-  golf: "Golf",
-  strand: "Strand & omgeving",
-};
+import { TripHero } from "@/components/taken/TripHero";
+import { FlightSection } from "@/components/taken/FlightSection";
+import { TaskCard } from "@/components/taken/TaskCard";
+import { TaskDrawer } from "@/components/taken/TaskDrawer";
+import { ALL_SECTIONS, SECTION_LABELS } from "@/components/taken/types";
+import type { Task, TravelLeg, Profile, Reaction, Comment } from "@/components/taken/types";
 
 export default function Taken() {
   const { user, profile, isAdmin } = useAuth();
-  const { activeTrip, isOrganizer } = useTrip();
-  const navigate = useNavigate();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [travelLegs, setTravelLegs] = useState<TravelLeg[]>([]);
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [reactions, setReactions] = useState<Reaction[]>([]);
   const [comments, setComments] = useState<Comment[]>([]);
   const [openTask, setOpenTask] = useState<string | null>(null);
-  const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
-  const [editingLeg, setEditingLeg] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
-  const [flightsOpen, setFlightsOpen] = useState(false);
   const [newTaskTitle, setNewTaskTitle] = useState("");
   const [addingToSection, setAddingToSection] = useState<string | null>(null);
   const [drawerTaskId, setDrawerTaskId] = useState<string | null>(null);
@@ -121,7 +68,6 @@ export default function Taken() {
     return () => { supabase.removeChannel(channel); };
   }, []);
 
-  // Notification check on mount
   useEffect(() => {
     if (!user) return;
     const checkNotifications = async () => {
@@ -135,11 +81,7 @@ export default function Taken() {
           action: {
             label: "Gelezen",
             onClick: async () => {
-              await supabase
-                .from("notifications")
-                .update({ read: true } as any)
-                .eq("user_id", user.id)
-                .eq("read", false);
+              await supabase.from("notifications").update({ read: true } as any).eq("user_id", user.id).eq("read", false);
             },
           },
           duration: 8000,
@@ -174,23 +116,10 @@ export default function Taken() {
     return task.assigned_to === profile.display_name || task.backup_to === profile.display_name;
   };
 
-  const handleProgressChange = async (taskId: string, value: number[]) => {
-    await supabase.from("tasks").update({ progress: value[0] }).eq("id", taskId);
-  };
-
-  const handleDetailsSave = async (taskId: string, details: InfoDetails, infoText: string) => {
-    await supabase.from("tasks").update({
-      info_details: details as any,
-      info_text: infoText || null,
-    }).eq("id", taskId);
-    setEditingTaskId(null);
-  };
-
   const handleImageUpload = async (taskId: string, files: FileList) => {
     setUploading(true);
     const task = tasks.find(t => t.id === taskId);
     const currentUrls = [...(task?.info_image_urls || [])];
-
     for (const file of Array.from(files)) {
       const ext = file.name.split(".").pop();
       const path = `${user!.id}/${taskId}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
@@ -200,7 +129,6 @@ export default function Taken() {
         currentUrls.push(urlData.publicUrl);
       }
     }
-
     await supabase.from("tasks").update({ info_image_urls: currentUrls }).eq("id", taskId);
     setUploading(false);
     if (files.length > 1) toast.success(`${files.length} bestanden geüpload`);
@@ -212,169 +140,31 @@ export default function Taken() {
     await supabase.from("tasks").update({ info_image_urls: urls }).eq("id", taskId);
   };
 
-  const handleAssign = async (taskId: string, field: "assigned_to" | "backup_to", value: string) => {
-    await supabase.from("tasks").update({ [field]: value || null }).eq("id", taskId);
-  };
-
-  const handleToggleVoting = async (taskId: string, closed: boolean) => {
-    await supabase.from("tasks").update({ voting_closed: closed }).eq("id", taskId);
-    toast.success(closed ? "Stemming gesloten" : "Stemming geopend");
-  };
-
   const handleLegUpdate = async (legId: string, updates: Partial<TravelLeg>) => {
     await supabase.from("travel_legs").update(updates).eq("id", legId);
-    setEditingLeg(null);
   };
 
   const handleAddTask = async (section: string) => {
     if (!newTaskTitle.trim()) return;
     const maxSort = tasks.filter(t => t.section === section).reduce((m, t) => Math.max(m, t.sort_order), 0);
-    const { error } = await supabase.from("tasks").insert({
-      title: newTaskTitle.trim(),
-      section,
-      sort_order: maxSort + 1,
-    });
-    if (error) {
-      toast.error("Kon taak niet toevoegen");
-    } else {
-      toast.success("Taak toegevoegd");
-      setNewTaskTitle("");
-      setAddingToSection(null);
-    }
+    const { error } = await supabase.from("tasks").insert({ title: newTaskTitle.trim(), section, sort_order: maxSort + 1 });
+    if (error) toast.error("Kon taak niet toevoegen");
+    else { toast.success("Taak toegevoegd"); setNewTaskTitle(""); setAddingToSection(null); }
   };
 
-  const handleDeleteTask = async (taskId: string, title: string) => {
-    if (!confirm(`Weet je zeker dat je "${title}" wilt verwijderen?`)) return;
-    const { error } = await supabase.from("tasks").delete().eq("id", taskId);
-    if (error) {
-      toast.error("Kon taak niet verwijderen");
-    } else {
-      toast.success("Taak verwijderd");
-    }
-  };
-
-  const formatDate = (d: string | null) => {
-    if (!d) return "—";
-    const date = new Date(d);
-    return date.toLocaleDateString("nl-NL", { day: "numeric", month: "long" });
-  };
-
-  // All sections (including those without tasks yet)
   const existingSections = [...new Set(tasks.map(t => t.section))];
   const allSections = ALL_SECTIONS.filter(s => existingSections.includes(s) || isAdmin);
-  // Add any existing sections not in ALL_SECTIONS
   existingSections.forEach(s => { if (!allSections.includes(s)) allSections.push(s); });
+
+  const drawerTask = tasks.find(t => t.id === drawerTaskId) || null;
 
   return (
     <AppLayout>
       <div>
-        {/* ═══ TRIP DASHBOARD HERO ═══ */}
-        {(() => {
-          const trip = activeTrip;
-          const now = new Date();
-          const start = trip ? new Date(trip.start_date) : now;
-          const diffMs = start.getTime() - now.getTime();
-          const daysLeft = Math.max(0, Math.ceil(diffMs / (1000 * 60 * 60 * 24)));
-          const totalTasks = tasks.length;
-          const doneTasks = tasks.filter(t => t.progress === 100).length;
-          const progressPct = totalTasks > 0 ? Math.round((doneTasks / totalTasks) * 100) : 0;
+        <TripHero tasks={tasks} />
+        <FlightSection travelLegs={travelLegs} isAdmin={isAdmin} onLegUpdate={handleLegUpdate} />
 
-          return (
-            <section className="bg-foreground text-white px-6 py-6">
-              <div className="flex items-start justify-between mb-4">
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/40 mb-1">
-                    {trip ? `${new Date(trip.start_date).toLocaleDateString("nl-NL", { day: "numeric", month: "long" })} – ${new Date(trip.end_date).toLocaleDateString("nl-NL", { day: "numeric", month: "long", year: "numeric" })}` : ""}
-                  </p>
-                  <h1 className="font-display text-2xl font-extrabold">{trip?.name || "Takenverdeling"}</h1>
-                </div>
-                {daysLeft > 0 && (
-                  <div className="text-right">
-                    <p className="font-display text-3xl font-extrabold text-primary">{daysLeft}</p>
-                    <p className="text-[10px] uppercase tracking-wider text-white/40">dagen</p>
-                  </div>
-                )}
-              </div>
-
-              {/* Quick stats */}
-              <div className="grid grid-cols-3 gap-3">
-                <div className="bg-white/5 rounded-xl p-3 text-center">
-                  <p className="font-display text-lg font-bold">{progressPct}%</p>
-                  <p className="text-[10px] text-white/50 uppercase tracking-wider">Voortgang</p>
-                </div>
-                <div className="bg-white/5 rounded-xl p-3 text-center">
-                  <p className="font-display text-lg font-bold">{doneTasks}/{totalTasks}</p>
-                  <p className="text-[10px] text-white/50 uppercase tracking-wider">Taken klaar</p>
-                </div>
-                <div className="bg-white/5 rounded-xl p-3 text-center">
-                  <p className="font-display text-lg font-bold">{trip?.group_size || "–"}</p>
-                  <p className="text-[10px] text-white/50 uppercase tracking-wider">Deelnemers</p>
-                </div>
-              </div>
-
-              {/* Invite code for organizers */}
-              {isOrganizer && trip?.invite_code && (
-                <div className="mt-3 flex items-center gap-2 bg-white/5 rounded-lg px-3 py-2">
-                  <span className="text-[10px] text-white/40 uppercase tracking-wider">Code:</span>
-                  <span className="font-mono text-xs text-primary font-bold tracking-wider">{trip.invite_code}</span>
-                  <button
-                    onClick={() => { navigator.clipboard.writeText(trip.invite_code || ""); toast("Gekopieerd!"); }}
-                    className="ml-auto text-[10px] text-white/40 hover:text-white transition-colors"
-                  >
-                    Kopieer
-                  </button>
-                </div>
-              )}
-            </section>
-          );
-        })()}
-
-        {/* ═══ VLUCHTGEGEVENS (uitklapbaar) ═══ */}
-        <Collapsible open={flightsOpen} onOpenChange={setFlightsOpen}>
-          <section className="border-b border-border px-6 py-4">
-            <CollapsibleTrigger className="flex items-center justify-between w-full bg-secondary/50 rounded-lg px-3 py-2.5 hover:bg-secondary/80 transition-colors">
-              <div className="flex items-center gap-2">
-                <Plane className="h-4 w-4 text-primary" />
-                <p className="text-sm font-semibold text-foreground">Vluchtgegevens</p>
-              </div>
-              <ChevronDown className={`h-5 w-5 text-primary transition-transform ${flightsOpen ? "rotate-180" : ""}`} />
-            </CollapsibleTrigger>
-
-            <CollapsibleContent>
-              <div className="space-y-2 mt-4">
-                {travelLegs.map(leg => (
-                  <Card key={leg.id} className="border-border/60">
-                    <CardContent className="p-3">
-                      {editingLeg === leg.id && isAdmin ? (
-                        <TravelLegEditor leg={leg} onSave={(u) => handleLegUpdate(leg.id, u)} onCancel={() => setEditingLeg(null)} />
-                      ) : (
-                        <div className="flex items-center justify-between">
-                          <div className="flex-1">
-                            <p className="font-display font-bold text-sm">{leg.passengers.join(", ")}</p>
-                            {leg.note ? (
-                              <p className="text-xs text-muted-foreground mt-0.5">{leg.note}</p>
-                            ) : (
-                              <p className="text-xs text-muted-foreground mt-0.5">
-                                {formatDate(leg.travel_date)} · {leg.departure_time} → {leg.arrival_time}
-                              </p>
-                            )}
-                          </div>
-                          {isAdmin && (
-                            <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => setEditingLeg(leg.id)}>
-                              Bewerken
-                            </Button>
-                          )}
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </CollapsibleContent>
-          </section>
-        </Collapsible>
-
-        {/* ═══ TAKEN ═══ */}
+        {/* Tasks */}
         <section className="px-6 py-6 pb-24">
           <div className="flex items-center gap-2 mb-4">
             <CheckCircle2 className="h-4 w-4 text-primary" />
@@ -384,137 +174,47 @@ export default function Taken() {
           <Accordion type="multiple" defaultValue={[]} className="space-y-4">
             {allSections.map(section => {
               const sectionTasks = tasks.filter(t => t.section === section);
-
               return (
                 <AccordionItem key={section} value={section} className="border rounded-lg border-border/60 overflow-hidden">
                   <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-accent/5">
                     <div className="flex items-center gap-2">
                       <span className="font-display font-bold text-sm">{SECTION_LABELS[section] || section}</span>
-                      {sectionTasks.length > 0 && (
+                      {sectionTasks.length > 0 ? (
                         <Badge variant="outline" className="text-[10px] font-mono tabular-nums border-primary/30 text-primary ml-auto">
                           {Math.round(sectionTasks.reduce((a, t) => a + t.progress, 0) / sectionTasks.length)}%
                         </Badge>
-                      )}
-                      {sectionTasks.length === 0 && (
+                      ) : (
                         <Badge variant="outline" className="text-[10px] text-muted-foreground ml-auto">Leeg</Badge>
                       )}
                     </div>
                   </AccordionTrigger>
                   <AccordionContent className="px-0 pb-0">
                     <div className="space-y-3 px-4 pb-4">
-                      {sectionTasks.map(task => {
-                        const isOpen = openTask === task.id;
-                        const editable = canEditTask(task);
-                        const details: InfoDetails = (task.info_details as any) || {};
+                      {sectionTasks.map(task => (
+                        <TaskCard
+                          key={task.id}
+                          task={task}
+                          isOpen={openTask === task.id}
+                          onToggle={(o) => setOpenTask(o ? task.id : null)}
+                          editable={canEditTask(task)}
+                          profiles={profiles}
+                          reactions={reactions}
+                          comments={comments}
+                          onToggleReaction={handleToggleReaction}
+                          onAddComment={handleAddComment}
+                          onDeleteComment={handleDeleteComment}
+                          onOpenDrawer={setDrawerTaskId}
+                          onOpenLightbox={setLightboxUrl}
+                        />
+                      ))}
 
-                        return (
-                          <Collapsible key={task.id} open={isOpen} onOpenChange={(o) => setOpenTask(o ? task.id : null)}>
-                            <Card className="border-border/60 overflow-hidden">
-                              <CollapsibleTrigger asChild>
-                                <CardContent className="p-4 cursor-pointer hover:bg-accent/5 transition-colors">
-                                  <div className="flex items-center justify-between gap-2 mb-3">
-                                    <p className="font-display font-bold text-sm flex-1">{task.title}</p>
-                                    <div className="flex items-center gap-2">
-                                      <Badge variant="outline" className="text-[10px] font-mono tabular-nums border-primary/30 text-primary">
-                                        {task.progress}%
-                                      </Badge>
-                                      <div className="bg-primary/10 rounded-full p-1.5">
-                                        <ChevronDown className={`h-4 w-4 text-primary transition-transform ${isOpen ? "rotate-180" : ""}`} />
-                                      </div>
-                                    </div>
-                                  </div>
-                                  <div className="flex flex-wrap gap-1.5 mb-3">
-                                    {task.assigned_to && (
-                                      <Badge className="bg-primary/10 text-primary border-primary/20 text-[10px]">
-                                        <User className="h-3 w-3 mr-1" />{task.assigned_to}
-                                      </Badge>
-                                    )}
-                                    {task.backup_to && (
-                                      <Badge variant="outline" className="text-[10px] text-muted-foreground">
-                                        <Shield className="h-3 w-3 mr-1" />{task.backup_to}
-                                      </Badge>
-                                    )}
-                                    {task.cost != null && task.cost > 0 && (
-                                      <Badge variant="secondary" className="text-[10px] tabular-nums">
-                                        €{task.cost.toFixed(0)}
-                                        {task.paid_by && <span className="ml-1 text-muted-foreground">· {task.paid_by}</span>}
-                                      </Badge>
-                                    )}
-                                    {!task.voting_closed && (
-                                      <Badge className="bg-accent text-accent-foreground text-[10px]">
-                                        <Vote className="h-3 w-3 mr-1" />Stemming open
-                                      </Badge>
-                                    )}
-                                  </div>
-                                  <Progress value={task.progress} className="h-2 rounded-full" />
-                                </CardContent>
-                              </CollapsibleTrigger>
-
-                              <CollapsibleContent>
-                                <div className="px-4 pb-4 space-y-4 border-t border-border/40 pt-4">
-
-                                  {/* Read-only details & photos — visible to everyone */}
-                                  <TaskDetailsReadonly details={details} infoText={task.info_text} />
-
-                                  {task.info_image_urls.length > 0 && (
-                                    <div className="grid grid-cols-2 gap-2">
-                                      {task.info_image_urls.map((url, i) => (
-                                        <div key={i} className="rounded-lg overflow-hidden border border-border cursor-pointer"
-                                          onClick={() => setLightboxUrl(url)}>
-                                          <img src={url} alt="" className="w-full h-24 object-cover" />
-                                        </div>
-                                      ))}
-                                    </div>
-                                  )}
-
-                                  {/* Beheren button — only for owner/backup/admin */}
-                                  {editable && (
-                                    <div className="pt-2 border-t border-border/40">
-                                      <Button
-                                        variant="outline"
-                                        size="sm"
-                                        className="h-8 text-xs gap-1.5"
-                                        onClick={() => setDrawerTaskId(task.id)}
-                                      >
-                                        <Settings2 className="h-3.5 w-3.5" />
-                                        Beheren
-                                      </Button>
-                                    </div>
-                                  )}
-
-                                  {/* Reactions & comments — visible to everyone */}
-                                  <div className="pt-3 border-t border-border/40 space-y-2">
-                                    <ReactionBar section={`task-${task.id}`} reactions={reactions} profiles={profiles} onToggle={handleToggleReaction} />
-                                    <SectionComments
-                                      section={`task-${task.id}`}
-                                      comments={comments}
-                                      profiles={profiles}
-                                      onAdd={handleAddComment}
-                                      onDelete={handleDeleteComment}
-                                      taskId={task.id}
-                                      taskTitle={task.title}
-                                    />
-                                  </div>
-                                </div>
-                              </CollapsibleContent>
-                            </Card>
-                          </Collapsible>
-                        );
-                      })}
-
-                      {/* Admin: taak toevoegen */}
                       {isAdmin && (
                         <div className="pt-2">
                           {addingToSection === section ? (
                             <div className="flex gap-2">
-                              <Input
-                                value={newTaskTitle}
-                                onChange={e => setNewTaskTitle(e.target.value)}
-                                placeholder="Taaknaam..."
-                                className="text-xs h-8 flex-1"
-                                onKeyDown={e => e.key === "Enter" && handleAddTask(section)}
-                                autoFocus
-                              />
+                              <Input value={newTaskTitle} onChange={e => setNewTaskTitle(e.target.value)}
+                                placeholder="Taaknaam..." className="text-xs h-8 flex-1"
+                                onKeyDown={e => e.key === "Enter" && handleAddTask(section)} autoFocus />
                               <Button size="sm" className="h-8 text-xs" onClick={() => handleAddTask(section)}>
                                 <Plus className="h-3 w-3 mr-1" />Toevoegen
                               </Button>
@@ -523,14 +223,9 @@ export default function Taken() {
                               </Button>
                             </div>
                           ) : (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="h-8 text-xs gap-1.5 w-full border-dashed"
-                              onClick={() => setAddingToSection(section)}
-                            >
-                              <Plus className="h-3 w-3" />
-                              Taak toevoegen
+                            <Button variant="outline" size="sm" className="h-8 text-xs gap-1.5 w-full border-dashed"
+                              onClick={() => setAddingToSection(section)}>
+                              <Plus className="h-3 w-3" />Taak toevoegen
                             </Button>
                           )}
                         </div>
@@ -543,424 +238,26 @@ export default function Taken() {
           </Accordion>
         </section>
 
-        {/* ═══ TASK MANAGEMENT DRAWER ═══ */}
-        {(() => {
-          const drawerTask = tasks.find(t => t.id === drawerTaskId);
-          if (!drawerTask) return null;
-          const drawerDetails: InfoDetails = (drawerTask.info_details as any) || {};
-          const canEdit = canEditTask(drawerTask);
-          return (
-            <Drawer open={!!drawerTaskId} onOpenChange={(open) => { if (!open) { setDrawerTaskId(null); setEditingTaskId(null); } }}>
-              <DrawerContent className="max-h-[85vh]">
-                <DrawerHeader className="pb-2">
-                  <DrawerTitle className="font-display text-base">{drawerTask.title}</DrawerTitle>
-                  <DrawerDescription className="text-xs text-muted-foreground">Beheer voortgang, details en instellingen</DrawerDescription>
-                </DrawerHeader>
-                <div className="px-4 pb-6 space-y-5 overflow-y-auto">
-                  
-                  {/* Context link */}
-                  {SECTION_CONTEXT[drawerTask.section] && (
-                    <button
-                      onClick={() => { setDrawerTaskId(null); navigate(`/taken/${drawerTask.section}`); }}
-                      className="inline-flex items-center gap-1.5 text-xs text-primary font-medium hover:underline"
-                    >
-                      {SECTION_CONTEXT[drawerTask.section]} <ChevronRight className="h-3 w-3" />
-                    </button>
-                  )}
-
-                  {/* ── Voortgang ── */}
-                  {canEdit && (
-                    <div className="bg-secondary/50 rounded-lg p-3">
-                      <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2 block">Voortgang</label>
-                      <div className="flex gap-1.5">
-                        {[0, 25, 50, 75, 100].map(step => (
-                          <button
-                            key={step}
-                            onClick={() => handleProgressChange(drawerTask.id, [step])}
-                            className={`flex-1 h-8 rounded-md text-xs font-semibold transition-colors ${
-                              drawerTask.progress >= step
-                                ? "bg-primary text-primary-foreground"
-                                : "bg-secondary text-muted-foreground hover:bg-secondary/80"
-                            }`}
-                          >
-                            {step}%
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* ── Stemming toggle ── */}
-                  {canEdit && (
-                    <div className="bg-secondary/50 rounded-lg p-3">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <Vote className="h-3.5 w-3.5 text-muted-foreground" />
-                          <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Stemming</label>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-[10px] text-muted-foreground">{drawerTask.voting_closed ? "Gesloten" : "Open"}</span>
-                          <Switch
-                            checked={!drawerTask.voting_closed}
-                            onCheckedChange={(checked) => handleToggleVoting(drawerTask.id, !checked)}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* ── Details editor ── */}
-                  {canEdit && (
-                    editingTaskId === drawerTask.id ? (
-                      <TaskDetailsEditor
-                        details={drawerDetails}
-                        infoText={drawerTask.info_text || ""}
-                        onSave={(d, t) => handleDetailsSave(drawerTask.id, d, t)}
-                      />
-                    ) : (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="h-8 text-xs gap-1.5 w-full"
-                        onClick={() => setEditingTaskId(drawerTask.id)}
-                      >
-                        <Pencil className="h-3 w-3" />
-                        Details bewerken
-                      </Button>
-                    )
-                  )}
-
-                  {/* ── Foto's & bestanden ── */}
-                  {canEdit && (
-                    <div className="bg-secondary/50 rounded-lg p-3 space-y-3">
-                      <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground block">
-                        <div className="flex items-center gap-1.5">
-                          <ImageIcon className="h-3.5 w-3.5" />
-                          Foto's & bestanden ({drawerTask.info_image_urls.length})
-                        </div>
-                      </label>
-                      
-                      {drawerTask.info_image_urls.length > 0 && (
-                        <div className="grid grid-cols-3 gap-2">
-                          {drawerTask.info_image_urls.map((url, i) => (
-                            <div key={i} className="relative group rounded-lg overflow-hidden border border-border">
-                              <img src={url} alt="" className="w-full h-20 object-cover cursor-pointer" onClick={() => setLightboxUrl(url)} />
-                              <button
-                                onClick={() => handleRemoveImage(drawerTask.id, url)}
-                                className="absolute top-1 right-1 bg-destructive text-destructive-foreground rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
-                              >
-                                <X className="h-3 w-3" />
-                              </button>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                      
-                      <label className="inline-flex items-center gap-2 text-xs bg-primary/10 text-primary rounded-lg px-3 py-2 cursor-pointer hover:bg-primary/20 transition-colors w-full justify-center font-medium">
-                        <Upload className="h-3.5 w-3.5" />
-                        {uploading ? "Uploaden..." : "Foto's / bestanden uploaden"}
-                        <input
-                          type="file"
-                          accept="image/*,.pdf,.doc,.docx"
-                          multiple
-                          className="hidden"
-                          onChange={(e) => e.target.files && e.target.files.length > 0 && handleImageUpload(drawerTask.id, e.target.files)}
-                          disabled={uploading}
-                        />
-                      </label>
-                      <p className="text-[9px] text-muted-foreground text-center">Meerdere bestanden tegelijk selecteren mogelijk</p>
-                    </div>
-                  )}
-
-                  {/* ── Admin-only section ── */}
-                  {isAdmin && (
-                    <div className="space-y-3 pt-3 border-t border-border/40">
-                      <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Admin</p>
-                      <div className="grid grid-cols-2 gap-2">
-                        <div>
-                          <label className="text-[10px] font-semibold text-muted-foreground mb-1 block">Eigenaar</label>
-                          <Select value={drawerTask.assigned_to || ""} onValueChange={(v) => handleAssign(drawerTask.id, "assigned_to", v)}>
-                            <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Kies..." /></SelectTrigger>
-                            <SelectContent>
-                              {profiles.map(p => <SelectItem key={p.id} value={p.display_name}>{p.display_name}</SelectItem>)}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        <div>
-                          <label className="text-[10px] font-semibold text-muted-foreground mb-1 block">Backup</label>
-                          <Select value={drawerTask.backup_to || ""} onValueChange={(v) => handleAssign(drawerTask.id, "backup_to", v)}>
-                            <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Kies..." /></SelectTrigger>
-                            <SelectContent>
-                              {profiles.map(p => <SelectItem key={p.id} value={p.display_name}>{p.display_name}</SelectItem>)}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </div>
-                      <div className="grid grid-cols-2 gap-2">
-                        <div>
-                          <label className="text-[10px] font-semibold text-muted-foreground mb-1 block">Kosten (€)</label>
-                          <Input
-                            type="number"
-                            placeholder="0"
-                            className="h-8 text-xs"
-                            defaultValue={drawerTask.cost ?? ""}
-                            onBlur={e => {
-                              const val = e.target.value ? parseFloat(e.target.value) : null;
-                              supabase.from("tasks").update({ cost: val } as any).eq("id", drawerTask.id).then(() => {});
-                            }}
-                          />
-                        </div>
-                        <div>
-                          <label className="text-[10px] font-semibold text-muted-foreground mb-1 block">Betaald door</label>
-                          <Select value={drawerTask.paid_by || ""} onValueChange={v => { supabase.from("tasks").update({ paid_by: v || null } as any).eq("id", drawerTask.id); }}>
-                            <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Kies..." /></SelectTrigger>
-                            <SelectContent>
-                              {profiles.map(p => <SelectItem key={p.id} value={p.display_name}>{p.display_name}</SelectItem>)}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </div>
-                      <div>
-                        <label className="text-[10px] font-semibold text-muted-foreground mb-1.5 block">Deelt mee in kosten</label>
-                        <div className="flex flex-wrap gap-1.5">
-                          {profiles.filter(p => p.username !== "admin" && p.username !== "Admin").map(p => {
-                            const splitAmong: string[] = (drawerTask as any).cost_split_among || [];
-                            const allShare = splitAmong.length === 0;
-                            const isSelected = allShare || splitAmong.includes(p.display_name);
-                            return (
-                              <button
-                                key={p.id}
-                                className={`h-7 px-2.5 rounded-md text-xs font-medium border transition-colors ${
-                                  isSelected
-                                    ? "bg-primary text-primary-foreground border-primary"
-                                    : "bg-secondary text-muted-foreground border-border hover:bg-secondary/80"
-                                }`}
-                                onClick={() => {
-                                  let newSplit: string[];
-                                  if (allShare) {
-                                    newSplit = profiles.filter(pp => pp.username !== "admin" && pp.username !== "Admin" && pp.display_name !== p.display_name).map(pp => pp.display_name);
-                                  } else if (isSelected) {
-                                    newSplit = splitAmong.filter(n => n !== p.display_name);
-                                  } else {
-                                    newSplit = [...splitAmong, p.display_name];
-                                  }
-                                  const allParticipants = profiles.filter(pp => pp.username !== "admin" && pp.username !== "Admin");
-                                  if (newSplit.length >= allParticipants.length) newSplit = [];
-                                  supabase.from("tasks").update({ cost_split_among: newSplit.length > 0 ? newSplit : null } as any).eq("id", drawerTask.id);
-                                }}
-                              >
-                                {p.display_name}
-                              </button>
-                            );
-                          })}
-                        </div>
-                        <p className="text-[9px] text-muted-foreground mt-1">
-                          {((drawerTask as any).cost_split_among || []).length === 0 ? "Iedereen deelt mee" : `${((drawerTask as any).cost_split_among || []).length} personen`}
-                        </p>
-                      </div>
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        className="h-7 text-xs gap-1.5"
-                        onClick={() => { handleDeleteTask(drawerTask.id, drawerTask.title); setDrawerTaskId(null); }}
-                      >
-                        <Trash2 className="h-3 w-3" />
-                        Taak verwijderen
-                      </Button>
-                    </div>
-                  )}
-                </div>
-              </DrawerContent>
-            </Drawer>
-          );
-        })()}
+        {/* Task Drawer */}
+        <TaskDrawer
+          task={drawerTask}
+          open={!!drawerTaskId}
+          onClose={() => setDrawerTaskId(null)}
+          profiles={profiles}
+          isAdmin={isAdmin}
+          uploading={uploading}
+          onImageUpload={handleImageUpload}
+          onRemoveImage={handleRemoveImage}
+          onOpenLightbox={setLightboxUrl}
+        />
 
         {/* Lightbox */}
         <Dialog open={!!lightboxUrl} onOpenChange={() => setLightboxUrl(null)}>
           <DialogContent className="max-w-[90vw] max-h-[90vh] p-2 bg-background/95 border-border">
-            {lightboxUrl && (
-              <img src={lightboxUrl} alt="" className="w-full h-full object-contain rounded-lg" />
-            )}
+            {lightboxUrl && <img src={lightboxUrl} alt="" className="w-full h-full object-contain rounded-lg" />}
           </DialogContent>
         </Dialog>
       </div>
     </AppLayout>
-  );
-}
-
-/* ── Structured details editor with multiple links + Save ── */
-function TaskDetailsEditor({ details, infoText, onSave }: {
-  details: InfoDetails;
-  infoText: string;
-  onSave: (details: InfoDetails, infoText: string) => void;
-}) {
-  const existingUrls = details.urls || (details.url ? [details.url] : []);
-  const [urls, setUrls] = useState<string[]>(existingUrls.length > 0 ? existingUrls : [""]);
-  const [date, setDate] = useState(details.activity_date || "");
-  const [time, setTime] = useState(details.activity_time || "");
-  const [location, setLocation] = useState(details.location || "");
-  const [notes, setNotes] = useState(infoText);
-
-  const addUrlField = () => setUrls([...urls, ""]);
-  const updateUrl = (i: number, v: string) => { const n = [...urls]; n[i] = v; setUrls(n); };
-  const removeUrl = (i: number) => { const n = urls.filter((_, idx) => idx !== i); setUrls(n.length > 0 ? n : [""]); };
-
-  const save = () => {
-    const cleanUrls = urls.filter(u => u.trim());
-    onSave(
-      {
-        url: cleanUrls[0] || undefined,
-        urls: cleanUrls.length > 0 ? cleanUrls : undefined,
-        activity_date: date || undefined,
-        activity_time: time || undefined,
-        location: location || undefined,
-      },
-      notes
-    );
-  };
-
-  return (
-    <div className="space-y-3">
-      <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground block">Details bewerken</label>
-      
-      {/* Multiple links */}
-      <div className="bg-secondary/50 rounded-lg p-3 space-y-2">
-        <div className="flex items-center justify-between">
-          <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Links</label>
-          <button onClick={addUrlField} className="text-[10px] text-primary font-medium hover:underline flex items-center gap-1">
-            <Plus className="h-3 w-3" />Link toevoegen
-          </button>
-        </div>
-        {urls.map((url, i) => (
-          <div key={i} className="flex gap-1.5">
-            <div className="relative flex-1 min-w-0">
-              <Link2 className="absolute left-2.5 top-2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
-              <Input value={url} onChange={e => updateUrl(i, e.target.value)} placeholder="https://..." className="text-xs h-8 pl-8 w-full" />
-            </div>
-            {urls.length > 1 && (
-              <button onClick={() => removeUrl(i)} className="text-muted-foreground hover:text-destructive p-1">
-                <X className="h-3.5 w-3.5" />
-              </button>
-            )}
-          </div>
-        ))}
-      </div>
-
-      <div className="bg-secondary/50 rounded-lg p-3 space-y-2 overflow-hidden">
-        <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Datum & tijd</label>
-        <div className="grid grid-cols-2 gap-2">
-          <div className="relative min-w-0">
-            <Calendar className="absolute left-2.5 top-2 h-3.5 w-3.5 text-muted-foreground pointer-events-none z-10" />
-            <Input type="date" value={date} onChange={e => setDate(e.target.value)} className="text-xs h-8 pl-8 w-full" />
-          </div>
-          <div className="relative min-w-0">
-            <Clock className="absolute left-2.5 top-2 h-3.5 w-3.5 text-muted-foreground pointer-events-none z-10" />
-            <Input type="time" value={time} onChange={e => setTime(e.target.value)} className="text-xs h-8 pl-8 w-full" />
-          </div>
-        </div>
-      </div>
-
-      <div className="bg-secondary/50 rounded-lg p-3 space-y-2">
-        <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Locatie</label>
-        <div className="relative">
-          <MapPin className="absolute left-2.5 top-2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
-          <Input value={location} onChange={e => setLocation(e.target.value)} placeholder="Locatie" className="text-xs h-8 pl-8" />
-        </div>
-      </div>
-
-      <div className="bg-secondary/50 rounded-lg p-3 space-y-2">
-        <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Notities</label>
-        <Textarea
-          value={notes}
-          onChange={e => setNotes(e.target.value)}
-          placeholder="Notities..."
-          className="text-xs min-h-[48px]"
-        />
-      </div>
-
-      <Button size="sm" className="h-8 text-xs gap-1.5 w-full" onClick={save}>
-        <Save className="h-3 w-3" />
-        Opslaan
-      </Button>
-    </div>
-  );
-}
-
-/* ── Structured details read-only (styled card) ── */
-function TaskDetailsReadonly({ details, infoText }: { details: InfoDetails; infoText: string | null }) {
-  const allUrls = details.urls || (details.url ? [details.url] : []);
-  const hasAny = allUrls.length > 0 || details.activity_date || details.activity_time || details.location || infoText;
-  if (!hasAny) return null;
-
-  const formatDate = (d: string) => {
-    const date = new Date(d);
-    return date.toLocaleDateString("nl-NL", { day: "numeric", month: "long", year: "numeric" });
-  };
-
-  return (
-    <div className="bg-primary/5 border border-primary/20 rounded-lg p-3 space-y-1.5">
-      {allUrls.map((url, i) => (
-        <div key={i} className="flex items-center gap-2 text-xs">
-          <Link2 className="h-3.5 w-3.5 text-primary shrink-0" />
-          <a href={url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline truncate">{url}</a>
-        </div>
-      ))}
-      {details.activity_date && (
-        <div className="flex items-center gap-2 text-xs text-foreground">
-          <Calendar className="h-3.5 w-3.5 text-primary shrink-0" />
-          <span>{formatDate(details.activity_date)}</span>
-        </div>
-      )}
-      {details.activity_time && (
-        <div className="flex items-center gap-2 text-xs text-foreground">
-          <Clock className="h-3.5 w-3.5 text-primary shrink-0" />
-          <span>{details.activity_time}</span>
-        </div>
-      )}
-      {details.location && (
-        <div className="flex items-center gap-2 text-xs text-foreground">
-          <MapPin className="h-3.5 w-3.5 text-primary shrink-0" />
-          <span>{details.location}</span>
-        </div>
-      )}
-      {infoText && (
-        <p className="text-xs text-muted-foreground pt-1.5 border-t border-primary/10">{infoText}</p>
-      )}
-    </div>
-  );
-}
-
-/* ── Inline travel leg editor ── */
-function TravelLegEditor({ leg, onSave, onCancel }: {
-  leg: TravelLeg;
-  onSave: (updates: Partial<TravelLeg>) => void;
-  onCancel: () => void;
-}) {
-  const [passengers, setPassengers] = useState(leg.passengers.join(", "));
-  const [dep, setDep] = useState(leg.departure_time || "");
-  const [arr, setArr] = useState(leg.arrival_time || "");
-  const [date, setDate] = useState(leg.travel_date || "");
-  const [note, setNote] = useState(leg.note || "");
-
-  return (
-    <div className="space-y-2">
-      <Input value={passengers} onChange={e => setPassengers(e.target.value)} placeholder="Passagiers (komma-gescheiden)" className="text-xs h-8" />
-      <div className="grid grid-cols-3 gap-2">
-        <Input value={dep} onChange={e => setDep(e.target.value)} placeholder="Vertrek" className="text-xs h-8" />
-        <Input value={arr} onChange={e => setArr(e.target.value)} placeholder="Aankomst" className="text-xs h-8" />
-        <Input type="date" value={date} onChange={e => setDate(e.target.value)} className="text-xs h-8" />
-      </div>
-      <Input value={note} onChange={e => setNote(e.target.value)} placeholder="Notitie (optioneel)" className="text-xs h-8" />
-      <div className="flex gap-2">
-        <Button size="sm" className="h-7 text-xs" onClick={() => onSave({
-          passengers: passengers.split(",").map(s => s.trim()).filter(Boolean),
-          departure_time: dep || null,
-          arrival_time: arr || null,
-          travel_date: date || null,
-          note: note || null,
-        })}>Opslaan</Button>
-        <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={onCancel}>Annuleren</Button>
-      </div>
-    </div>
   );
 }

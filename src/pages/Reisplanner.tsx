@@ -200,7 +200,7 @@ function AssistantMessage({ content, isStreaming, proseSizeClass }: { content: s
   return (
     <div className="space-y-3">
       {sections.intro && (
-        <div className={`prose ${proseSize} dark:prose-invert max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0`}>
+        <div className={`${proseSizeClass} max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0`}>
           <ReactMarkdown>{sections.intro}</ReactMarkdown>
         </div>
       )}

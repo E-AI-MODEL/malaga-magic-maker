@@ -383,7 +383,7 @@ export default function Wensen() {
                 {Object.keys(allActivities).length > 0 ? (
                   Object.entries(allActivities).sort(([, a], [, b]) => b - a).map(([act, count]) => (
                     <div key={act} className="flex items-center justify-between py-1">
-                      <span className="text-xs">{act}</span>
+                      <span className="text-xs">{translateLabel(ACTIVITY_LABELS, act)}</span>
                       <Badge variant="outline" className="text-[10px] tabular-nums">{count}x</Badge>
                     </div>
                   ))

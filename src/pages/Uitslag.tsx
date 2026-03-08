@@ -437,10 +437,12 @@ export default function Uitslag() {
               <AccordionContent className="px-4 pb-4">
                 <p className="text-sm text-muted-foreground mb-4">Gemiddelde puntenverdeling van de groep</p>
                 <div className="space-y-3">
-                  {pointsData.map((p, i) => (
+                  {pointsData.map((p, i) => {
+                    const PIcon = p.Icon;
+                    return (
                     <div key={p.label}>
                       <div className="flex items-center justify-between mb-1">
-                        <span className="text-sm flex items-center gap-2"><p.Icon className="h-4 w-4 text-primary" /> {p.label} {i === 0 && <Badge className="text-[9px] ml-1">Hoogste</Badge>}</span>
+                        <span className="text-sm flex items-center gap-2"><PIcon className="h-4 w-4 text-primary" /> {p.label} {i === 0 && <Badge className="text-[9px] ml-1">Hoogste</Badge>}</span>
                         <span className="font-display font-bold text-sm tabular-nums">{p.value.toFixed(0)}</span>
                       </div>
                       <div className="w-full bg-secondary rounded-full h-3 overflow-hidden">

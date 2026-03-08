@@ -86,11 +86,13 @@ export default function Accommodations() {
           </div>
         </div>
 
-        {/* Cards */}
-        <div className="px-4 py-4 space-y-4 bg-background">
-          {filtered.map((acc) => (
-            <AccommodationCard key={acc.id} acc={acc} baseLabel={baseLabel} onDetail={() => navigate(`/accommodations/${acc.id}`)} />
-          ))}
+        {/* Cards — responsive grid on desktop */}
+        <div className="px-4 py-4 bg-background">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {filtered.map((acc) => (
+              <AccommodationCard key={acc.id} acc={acc} baseLabel={baseLabel} onDetail={() => navigate(`/accommodations/${acc.id}`)} />
+            ))}
+          </div>
         </div>
       </div>
     </AppLayout>

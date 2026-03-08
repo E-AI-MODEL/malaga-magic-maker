@@ -8,14 +8,18 @@ import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { computeGroupRules, computeAvgPoints, rankAccommodations, type Accommodation, type Submission, type GroupRules } from "@/lib/scoring";
 import { useTrip } from "@/contexts/TripContext";
-import { CheckCircle2, XCircle, Unlock, Trash2, Undo2, Shield, Trophy, Clock, ChevronDown, Eye, Users, BarChart3, Settings, FileText, Pencil, Plus } from "lucide-react";
+import { VoteOverviewTable } from "@/components/VoteOverviewTable";
+import {
+  CheckCircle2, XCircle, Unlock, Trash2, Undo2, Shield, Trophy, Clock, ChevronDown, Eye, Users,
+  BarChart3, Settings, FileText, Pencil, Plus, MapPin, Table2, TrendingUp, AlertCircle
+} from "lucide-react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { AdminEditSubmission } from "@/components/AdminEditSubmission";
 import { AdminAccommodationForm } from "@/components/AdminAccommodationForm";
 import { BulkImportAccommodations } from "@/components/BulkImportAccommodations";
 import { AdminPOIManager } from "@/components/AdminPOIManager";
-import { MapPin } from "lucide-react";
+import { HeroSkeleton, CardSkeleton } from "@/components/PageSkeleton";
 
 interface Profile { id: string; username: string; display_name: string; }
 interface Override { id: string; field: string; old_value: string | null; new_value: string | null; reason: string | null; created_at: string; }
@@ -65,7 +69,7 @@ export default function Admin() {
   const avgPoints = useMemo(() => lockedSubs.length > 0 ? computeAvgPoints(lockedSubs) : null, [lockedSubs]);
 
   if (!isAdmin) return <AppLayout><p className="py-12 text-center text-destructive font-semibold">Geen toegang</p></AppLayout>;
-  if (loading) return <AppLayout><div className="flex justify-center py-12 text-sm text-muted-foreground">Laden...</div></AppLayout>;
+  if (loading) return <AppLayout><div><HeroSkeleton /><div className="px-6 py-6 space-y-4"><CardSkeleton /><CardSkeleton /></div></div></AppLayout>;
 
   const countVotes = (field: keyof Submission, value: any) => lockedSubs.filter(s => s[field] === value).length;
   const nonAdminProfiles = profiles.filter(p => p.username !== "admin" && p.username !== "Admin");
@@ -108,7 +112,7 @@ export default function Admin() {
   const handleUnlockSubmission = async (subId: string) => {
     await supabase.from("submissions").update({ locked: false }).eq("id", subId);
     await logOverride("submission_locked", "true", "false", "Admin unlock");
-    fetchAll(); toast.success("Submission unlocked");
+    fetchAll(); toast.success("Intake ontgrendeld");
   };
 
   const handleRunRound1 = async () => {
@@ -143,450 +147,292 @@ export default function Admin() {
   };
 
   const countBool = (field: keyof Submission) => ({ yes: countVotes(field, true), no: countVotes(field, false) });
-  const budgets = lockedSubs.map(s => s.budget_cap_total).filter((b): b is number => b !== null && b > 0);
-  const budgetMedian = budgets.length > 0 ? budgets.sort((a, b) => a - b)[Math.floor(budgets.length / 2)] : null;
-  const budgetAvg = budgets.length > 0 ? budgets.reduce((a, b) => a + b, 0) / budgets.length : null;
 
-  const allDietPrefs = lockedSubs.flatMap(s => s.diet_preferences || []);
-  const dietCounts: Record<string, number> = {};
-  allDietPrefs.forEach(d => { dietCounts[d] = (dietCounts[d] || 0) + 1; });
-
-  const allActivities = lockedSubs.flatMap(s => s.activities || []);
-  const activityCounts: Record<string, number> = {};
-  allActivities.forEach(a => { activityCounts[a] = (activityCounts[a] || 0) + 1; });
-
-  const allRemarks = lockedSubs
-    .filter(s => s.remarks_a || s.remarks_b)
-    .map(s => ({ user: getProfileName(s.user_id), text: [s.remarks_a, s.remarks_b].filter(Boolean).join(" | ") }));
-
-  const golfMinVotes: Record<number, number> = {};
-  lockedSubs.forEach(s => { golfMinVotes[s.max_golf_minutes] = (golfMinVotes[s.max_golf_minutes] || 0) + 1; });
+  const activeAccs = ranked.filter(a => a.status === "active");
+  const eliminatedAccs = ranked.filter(a => a.status === "eliminated");
+  const finalistAccs = ranked.filter(a => a.status === "finalist");
+  const deadlineExpired = new Date(deadlineValue) < new Date();
 
   return (
     <AppLayout>
       <div>
         {/* Header */}
-        <section className="bg-foreground text-white px-6 py-10">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/40 mb-2">Beheer</p>
-          <h1 className="font-display text-2xl font-extrabold flex items-center gap-2">
-            <Shield className="h-5 w-5" /> Admin Dashboard
-          </h1>
+        <section className="bg-foreground text-white px-6 py-8">
+          <div className="flex items-center gap-2 mb-1">
+            <Shield className="h-4 w-4 text-white/40" />
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/40">Beheer</p>
+          </div>
+          <h1 className="font-display text-2xl font-extrabold">Admin Dashboard</h1>
+
+          {/* Quick stats */}
+          <div className="grid grid-cols-4 gap-3 mt-6">
+            <QuickStat value={lockedSubs.length} total={nonAdminProfiles.length} label="Intakes" icon={<Users className="h-3.5 w-3.5" />} />
+            <QuickStat value={activeAccs.length} label="Actief" icon={<Home className="h-3.5 w-3.5" />} />
+            <QuickStat value={finalistAccs.length} label="Finalisten" icon={<Trophy className="h-3.5 w-3.5" />} />
+            <QuickStat value={eliminatedAccs.length} label="Afgevallen" icon={<XCircle className="h-3.5 w-3.5" />} />
+          </div>
         </section>
+
+        {/* Deadline banner */}
+        {deadlineExpired && deadlineValue && (
+          <div className="bg-destructive/10 border-b border-destructive/20 px-6 py-3 flex items-center gap-2">
+            <AlertCircle className="h-4 w-4 text-destructive shrink-0" />
+            <p className="text-sm text-destructive font-medium">Deadline verlopen</p>
+            <Button size="sm" variant="outline" className="ml-auto h-7 text-xs" onClick={() => addTime(24)}>+1 dag</Button>
+          </div>
+        )}
 
         <div className="px-6 py-6 pb-24">
           <Accordion type="multiple" defaultValue={[]} className="space-y-3">
-            
-            {/* 1. Deadline beheer */}
+
+            {/* ═══ DEADLINE ═══ */}
             <AccordionItem value="deadline" className="border rounded-lg border-border/60 overflow-hidden">
               <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-accent/5">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 w-full">
                   <Clock className="h-4 w-4 text-primary" />
-                  <span className="font-display font-bold text-sm">Deadline beheer</span>
-                  {new Date(deadlineValue) < new Date() && <Badge variant="destructive" className="text-[9px] ml-2">Verlopen</Badge>}
+                  <span className="font-display font-bold text-sm">Deadline</span>
+                  <Badge variant={deadlineExpired ? "destructive" : "outline"} className="text-[10px] ml-auto">
+                    {deadlineValue ? new Date(deadlineValue).toLocaleDateString("nl-NL", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) : "Niet ingesteld"}
+                  </Badge>
                 </div>
               </AccordionTrigger>
-              <AccordionContent className="px-4 pb-4">
-                <div className="space-y-4">
-                  <div>
-                    <p className="text-sm text-muted-foreground">Huidige deadline:</p>
-                    <p className="font-display font-extrabold text-lg">
-                      {new Date(deadlineValue).toLocaleString("nl-NL", { dateStyle: "full", timeStyle: "short" })}
-                    </p>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button size="sm" variant="outline" onClick={() => addTime(1)}>+1 uur</Button>
-                    <Button size="sm" variant="outline" onClick={() => addTime(6)}>+6 uur</Button>
-                    <Button size="sm" variant="outline" onClick={() => addTime(24)}>+1 dag</Button>
-                  </div>
-                  <div className="flex gap-2">
-                    <Input type="datetime-local" value={deadlineInput ? new Date(deadlineInput).toISOString().slice(0, 16) : ""} onChange={e => setDeadlineInput(new Date(e.target.value).toISOString())} className="flex-1 h-9" />
-                    <Button size="sm" onClick={() => updateDeadline(deadlineInput)}>Opslaan</Button>
-                  </div>
+              <AccordionContent className="px-4 pb-4 space-y-4">
+                <div className="bg-secondary rounded-xl p-4">
+                  <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Huidige deadline</p>
+                  <p className="font-display font-extrabold text-lg">
+                    {deadlineValue ? new Date(deadlineValue).toLocaleString("nl-NL", { dateStyle: "full", timeStyle: "short" }) : "—"}
+                  </p>
+                </div>
+                <div className="flex gap-2">
+                  <Button size="sm" variant="outline" className="flex-1 h-9" onClick={() => addTime(1)}>+1 uur</Button>
+                  <Button size="sm" variant="outline" className="flex-1 h-9" onClick={() => addTime(6)}>+6 uur</Button>
+                  <Button size="sm" variant="outline" className="flex-1 h-9" onClick={() => addTime(24)}>+1 dag</Button>
+                </div>
+                <div className="flex gap-2">
+                  <Input type="datetime-local" value={deadlineInput ? new Date(deadlineInput).toISOString().slice(0, 16) : ""} onChange={e => setDeadlineInput(new Date(e.target.value).toISOString())} className="flex-1 h-9" />
+                  <Button size="sm" className="h-9" onClick={() => updateDeadline(deadlineInput)}>Opslaan</Button>
                 </div>
               </AccordionContent>
             </AccordionItem>
 
-            {/* 2. Gebruikers & Intake */}
+            {/* ═══ GEBRUIKERS & INTAKE ═══ */}
             <AccordionItem value="users" className="border rounded-lg border-border/60 overflow-hidden">
               <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-accent/5">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 w-full">
                   <Users className="h-4 w-4 text-primary" />
                   <span className="font-display font-bold text-sm">Gebruikers & Intake</span>
-                  <Badge variant="outline" className="text-[10px] font-mono ml-auto">{lockedSubs.length}/{profiles.length}</Badge>
+                  <Badge variant="outline" className="text-[10px] font-mono ml-auto">{lockedSubs.length}/{nonAdminProfiles.length} ingediend</Badge>
                 </div>
               </AccordionTrigger>
               <AccordionContent className="px-4 pb-4">
                 <div className="space-y-2">
-                  {nonAdminProfiles.map(p => {
-                    const sub = getSubForUser(p.id);
-                    const logs = getLogsForUser(p.id);
-                    const lastActivity = logs[0]?.created_at;
-                    const pageViews = logs.filter(l => l.event_type === "page_view").length;
-                    const logins = logs.filter(l => l.event_type === "login").length;
-                    const accViews = logs.filter(l => l.event_type === "accommodation_view" || (l.event_type === "click" && l.detail));
-                    const intakeStarted = logs.some(l => l.event_type === "intake_started");
-                    const intakeSubmitted = logs.some(l => l.event_type === "intake_submitted");
-                    const sectionsViewed = [...new Set(logs.filter(l => l.event_type === "intake_section_view").map(l => l.detail))];
-                    const sessionDurations = logs.filter(l => l.event_type === "session_duration");
-                    const totalSessionTime = sessionDurations.reduce((acc, l) => acc + parseInt(l.detail || "0"), 0);
-                    const isOnline = logs[0] ? (Date.now() - new Date(logs[0].created_at).getTime() < 5 * 60 * 1000) : false;
-                    const firstActivity = logs.length > 0 ? logs[logs.length - 1]?.created_at : null;
-                    const pageBreakdown: Record<string, number> = {};
-                    logs.filter(l => l.event_type === "page_view").forEach(l => { pageBreakdown[l.page] = (pageBreakdown[l.page] || 0) + 1; });
-
-                    return (
-                      <Collapsible key={p.id}>
-                        <CollapsibleTrigger className="w-full">
-                          <div className="flex items-center justify-between p-3 border rounded-lg hover:bg-secondary/50 transition-colors">
-                            <div className="flex items-center gap-3">
-                              <span className={`h-2.5 w-2.5 rounded-full ${isOnline ? "bg-green-500 animate-pulse" : "bg-muted-foreground/30"}`} />
-                              <span className="text-sm font-semibold">{p.display_name}</span>
-                              {sub?.locked ? (
-                                <Badge className="text-[10px] bg-primary/10 text-primary border-primary/20">Locked</Badge>
-                              ) : sub ? (
-                                <Badge variant="outline" className="text-[10px]">Bezig</Badge>
-                              ) : (
-                                <Badge variant="destructive" className="text-[10px]">Niet gestart</Badge>
-                              )}
-                            </div>
-                            <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                              {lastActivity && <span>{new Date(lastActivity).toLocaleString("nl-NL", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}</span>}
-                              <ChevronDown className="h-4 w-4" />
-                            </div>
-                          </div>
-                        </CollapsibleTrigger>
-                        <CollapsibleContent>
-                          <div className="border border-t-0 rounded-b-lg p-4 space-y-5 bg-secondary/30">
-                            <div className="flex gap-2">
-                              {sub?.locked && (
-                                <Button size="sm" variant="outline" onClick={() => handleUnlockSubmission(sub.id)}>
-                                  <Unlock className="h-3.5 w-3.5 mr-1" /> Unlock
-                                </Button>
-                              )}
-                              <Button size="sm" variant="outline" onClick={() => setEditingUserId(editingUserId === p.id ? null : p.id)}>
-                                <Pencil className="h-3.5 w-3.5 mr-1" /> {sub ? "Bewerk intake" : "Intake aanmaken"}
-                              </Button>
-                            </div>
-                            {editingUserId === p.id && (
-                              <AdminEditSubmission
-                                submission={sub}
-                                userId={p.id}
-                                displayName={p.display_name}
-                                onSaved={() => { setEditingUserId(null); fetchAll(); }}
-                                onCancel={() => setEditingUserId(null)}
-                              />
-                            )}
-                            {editingUserId !== p.id && sub ? (
-                              <div className="space-y-4">
-                                <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Intake antwoorden</p>
-                                <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
-                                  <LabelValue label="Vervoer" value={mobilityLabel(sub.mobility_choice)} />
-                                  <LabelValue label="Locatie" value={baseLabel(sub.base_choice)} />
-                                  <LabelValue label="Max golf reistijd" value={`${sub.max_golf_minutes} min`} />
-                                  <LabelValue label="Rondes" value={`${sub.preferred_rounds}`} />
-                                  <LabelValue label="Budget cap" value={sub.budget_cap_total ? `€${sub.budget_cap_total}` : "—"} />
-                                  <LabelValue label="Akkoord feiten" value={sub.agreed_facts ? "Ja" : "Nee"} />
-                                </div>
-                                <div>
-                                  <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Must-haves</p>
-                                  <div className="flex flex-wrap gap-1.5">
-                                    <WishBadge label="Vaste bedden" active={sub.require_fixed_beds} />
-                                    <WishBadge label="3 slaapkamers" active={sub.require_bedrooms_3} />
-                                    <WishBadge label="Zwembad" active={sub.require_pool} />
-                                    <WishBadge label="Airco" active={sub.require_airco} />
-                                    <WishBadge label="Wifi" active={sub.require_wifi} />
-                                    <WishBadge label="Parking" active={sub.require_parking} />
-                                    <WishBadge label="Terras" active={sub.require_terrace} />
-                                    <WishBadge label="Transparante prijs" active={sub.require_transparent_price} />
-                                  </div>
-                                </div>
-                                <div>
-                                  <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Puntenverdeling</p>
-                                  <div className="space-y-1.5">
-                                    <MiniBar label="Golf" value={sub.points_golf_ease} avg={avgPoints?.golfEase} />
-                                    <MiniBar label="Strand" value={sub.points_beach_life} avg={avgPoints?.beachLife} />
-                                    <MiniBar label="Omgeving" value={sub.points_exploring} avg={avgPoints?.exploring} />
-                                    <MiniBar label="Luxe" value={sub.points_luxury} avg={avgPoints?.luxury} />
-                                    <MiniBar label="Budget" value={sub.points_budget} avg={avgPoints?.budget} />
-                                    <MiniBar label="Gedoe" value={sub.points_low_hassle} avg={avgPoints?.lowHassle} />
-                                  </div>
-                                </div>
-                                {(sub.diet_preferences?.length ?? 0) > 0 && (
-                                  <div>
-                                    <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">Eetvoorkeuren</p>
-                                    <div className="flex flex-wrap gap-1">{sub.diet_preferences!.map(d => <Badge key={d} variant="outline" className="text-[10px]">{d}</Badge>)}</div>
-                                    {sub.diet_remarks && <p className="text-xs text-muted-foreground mt-1 italic">{sub.diet_remarks}</p>}
-                                  </div>
-                                )}
-                                {(sub.activities?.length ?? 0) > 0 && (
-                                  <div>
-                                    <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">Activiteiten</p>
-                                    <div className="flex flex-wrap gap-1">{sub.activities!.map(a => <Badge key={a} variant="secondary" className="text-[10px]">{a}</Badge>)}</div>
-                                  </div>
-                                )}
-                                {(sub.remarks_a || sub.remarks_b) && (
-                                  <div>
-                                    <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">Opmerkingen</p>
-                                    <p className="text-xs text-muted-foreground italic">{[sub.remarks_a, sub.remarks_b].filter(Boolean).join(" | ")}</p>
-                                  </div>
-                                )}
-                              </div>
-                            ) : !sub ? (
-                              <p className="text-xs text-muted-foreground italic">Nog geen intake ingevuld</p>
-                            ) : null}
-                            <div className="space-y-3 border-t pt-3">
-                              <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Gedrag</p>
-                              <div className="grid grid-cols-4 gap-2">
-                                <StatBlock value={logins} label="Logins" />
-                                <StatBlock value={pageViews} label="Pageviews" />
-                                <StatBlock value={accViews.length} label="Acc. bekeken" />
-                                <StatBlock value={totalSessionTime > 0 ? `${Math.round(totalSessionTime / 60)}m` : "—"} label="Sessietijd" />
-                              </div>
-                              <div className="grid grid-cols-2 gap-2 text-xs">
-                                <div className="bg-secondary rounded-lg p-2">
-                                  <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Eerste activiteit</p>
-                                  <p className="font-medium">{firstActivity ? new Date(firstActivity).toLocaleString("nl-NL", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) : "—"}</p>
-                                </div>
-                                <div className="bg-secondary rounded-lg p-2">
-                                  <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Laatste activiteit</p>
-                                  <p className="font-medium">{lastActivity ? new Date(lastActivity).toLocaleString("nl-NL", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) : "—"}</p>
-                                </div>
-                              </div>
-                              <div className="bg-secondary rounded-lg p-3">
-                                <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Intake voortgang</p>
-                                <div className="flex flex-wrap gap-1.5">
-                                  <Badge variant={intakeStarted ? "default" : "outline"} className={`text-[10px] ${!intakeStarted ? "opacity-40" : ""}`}>{intakeStarted ? "✓" : "✗"} Gestart</Badge>
-                                  {sectionsViewed.map(s => <Badge key={s} variant="secondary" className="text-[10px]">Sectie {s}</Badge>)}
-                                  <Badge variant={intakeSubmitted ? "default" : "outline"} className={`text-[10px] ${!intakeSubmitted ? "opacity-40" : ""}`}>{intakeSubmitted ? "✓" : "✗"} Ingediend</Badge>
-                                </div>
-                              </div>
-                              {Object.keys(pageBreakdown).length > 0 && (
-                                <div>
-                                  <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Pagina breakdown</p>
-                                  <div className="space-y-1">
-                                    {Object.entries(pageBreakdown).sort(([, a], [, b]) => b - a).map(([page, count]) => (
-                                      <div key={page} className="flex items-center justify-between text-xs py-1 border-b border-border/30 last:border-0">
-                                        <span className="text-muted-foreground">{page}</span>
-                                        <span className="font-bold">{count}×</span>
-                                      </div>
-                                    ))}
-                                  </div>
-                                </div>
-                              )}
-                              {accViews.length > 0 && (
-                                <div>
-                                  <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Bekeken accommodaties</p>
-                                  <div className="flex flex-wrap gap-1">
-                                    {Object.entries(accViews.reduce<Record<string, number>>((acc, l) => { const key = l.detail || "?"; acc[key] = (acc[key] || 0) + 1; return acc; }, {})).map(([accId, count]) => (
-                                      <Badge key={accId} variant="secondary" className="text-[10px]">{getAccName(accId)} <span className="font-bold ml-1">{count}×</span></Badge>
-                                    ))}
-                                  </div>
-                                </div>
-                              )}
-                              {logs.length > 0 && <EventTimeline logs={logs} getAccName={getAccName} />}
-                            </div>
-                          </div>
-                        </CollapsibleContent>
-                      </Collapsible>
-                    );
-                  })}
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-
-            {/* 3. Groepsresultaten */}
-            {lockedSubs.length > 0 && (
-              <AccordionItem value="results" className="border rounded-lg border-border/60 overflow-hidden">
-                <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-accent/5">
-                  <div className="flex items-center gap-2">
-                    <BarChart3 className="h-4 w-4 text-primary" />
-                    <span className="font-display font-bold text-sm">Groepsresultaten</span>
-                  </div>
-                </AccordionTrigger>
-                <AccordionContent className="px-4 pb-4">
-                  <div className="space-y-4">
-                    <div className="border rounded-lg p-4 space-y-3">
-                      <p className="text-xs font-semibold text-foreground">Berekende groepsregels (meerderheid)</p>
-                      <div className="flex flex-wrap gap-1.5">
-                        <RuleBadge label="Vaste bedden" active={rules.requireFixedBeds} />
-                        <RuleBadge label="3 slaapkamers" active={rules.requireBedrooms3} />
-                        <RuleBadge label="Annuleerbaar" active={rules.requireCancelable} />
-                        <RuleBadge label="Transparante prijs" active={rules.requireTransparentPrice} />
-                        <RuleBadge label="Zwembad" active={rules.requirePool} />
-                        <RuleBadge label="Airco" active={rules.requireAirco} />
-                        <RuleBadge label="Wifi" active={rules.requireWifi} />
-                        <RuleBadge label="Parking" active={rules.requireParking} />
-                        <RuleBadge label="Terras" active={rules.requireTerrace} />
-                      </div>
-                      <div className="text-xs text-muted-foreground space-y-0.5">
-                        <p>Max golf reistijd: <strong>{rules.maxGolfMinutes} min</strong></p>
-                        <p>Budget cap: <strong>{rules.budgetCap ? `€${rules.budgetCap}` : "Geen"}</strong></p>
-                      </div>
-                    </div>
-                    <div className="space-y-4">
-                      <p className="text-xs font-semibold text-foreground">Stemverdeling</p>
-                      <VoteRow label="Rondes" items={[{ label: "2 rondes", count: countVotes("preferred_rounds", 2) }, { label: "3 rondes", count: countVotes("preferred_rounds", 3) }]} total={lockedSubs.length} />
-                      <VoteRow label="Vervoer" items={[{ label: "Auto", count: countVotes("mobility_choice", "car") }, { label: "Taxi", count: countVotes("mobility_choice", "transfers") }, { label: "Neutraal", count: countVotes("mobility_choice", "neutral") }]} total={lockedSubs.length} />
-                      <VoteRow label="Locatie" items={[{ label: "Golf", count: countVotes("base_choice", "golf") }, { label: "Strand", count: countVotes("base_choice", "beach") }, { label: "Neutraal", count: countVotes("base_choice", "neutral") }]} total={lockedSubs.length} />
-                      {([
-                        ["Vaste bedden", "require_fixed_beds"], ["3 slaapkamers", "require_bedrooms_3"],
-                        ["Zwembad", "require_pool"], ["Airco", "require_airco"], ["Wifi", "require_wifi"],
-                        ["Parking", "require_parking"], ["Terras", "require_terrace"], ["Transparante prijs", "require_transparent_price"],
-                      ] as [string, keyof Submission][]).map(([label, field]) => {
-                        const b = countBool(field);
-                        return <VoteRow key={field} label={label} items={[{ label: "Vereist", count: b.yes }, { label: "Niet", count: b.no }]} total={lockedSubs.length} />;
-                      })}
-                      {Object.keys(golfMinVotes).length > 0 && (
-                        <VoteRow label="Max golf reistijd" items={Object.entries(golfMinVotes).sort(([a], [b]) => Number(a) - Number(b)).map(([min, count]) => ({ label: `${min} min`, count }))} total={lockedSubs.length} />
-                      )}
-                    </div>
-                    {avgPoints && (
-                      <div>
-                        <p className="text-xs font-semibold text-foreground mb-2">Gemiddelde punten</p>
-                        <div className="border rounded-lg p-4 space-y-2">
-                          {([["Golf", avgPoints.golfEase], ["Strand", avgPoints.beachLife], ["Omgeving", avgPoints.exploring], ["Luxe", avgPoints.luxury], ["Budget", avgPoints.budget], ["Gedoe", avgPoints.lowHassle]] as [string, number][]).map(([k, v]) => (
-                            <div key={k} className="flex items-center gap-3">
-                              <span className="text-sm text-muted-foreground w-16">{k}</span>
-                              <div className="flex-1 bg-secondary rounded-full h-2 overflow-hidden">
-                                <div className="bg-primary h-full rounded-full transition-all" style={{ width: `${v}%` }} />
-                              </div>
-                              <span className="text-sm font-display font-bold tabular-nums w-8 text-right">{v.toFixed(0)}</span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                    {budgets.length > 0 && (
-                      <div>
-                        <p className="text-xs font-semibold text-foreground mb-2">Budget overzicht</p>
-                        <div className="border rounded-lg p-4 grid grid-cols-3 gap-3">
-                          <StatBlock value={`€${Math.min(...budgets)}`} label="Laagste" />
-                          <StatBlock value={`€${budgetMedian}`} label="Mediaan" />
-                          <StatBlock value={`€${Math.round(budgetAvg!)}`} label="Gemiddeld" />
-                        </div>
-                      </div>
-                    )}
-                    {Object.keys(dietCounts).length > 0 && (
-                      <div>
-                        <p className="text-xs font-semibold text-foreground mb-2">Eetvoorkeuren</p>
-                        <div className="flex flex-wrap gap-1.5">
-                          {Object.entries(dietCounts).sort(([, a], [, b]) => b - a).map(([diet, count]) => (
-                            <Badge key={diet} variant="secondary" className="text-[10px]">{diet} <span className="font-bold ml-1">{count}×</span></Badge>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                    {Object.keys(activityCounts).length > 0 && (
-                      <div>
-                        <p className="text-xs font-semibold text-foreground mb-2">Activiteiten naast golf</p>
-                        <div className="flex flex-wrap gap-1.5">
-                          {Object.entries(activityCounts).sort(([, a], [, b]) => b - a).map(([act, count]) => (
-                            <Badge key={act} variant="outline" className="text-[10px]">{act} <span className="font-bold ml-1">{count}×</span></Badge>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                    {allRemarks.length > 0 && (
-                      <div>
-                        <p className="text-xs font-semibold text-foreground mb-2">Opmerkingen</p>
-                        <div className="border rounded-lg divide-y">
-                          {allRemarks.map((r, i) => (
-                            <div key={i} className="p-3 text-xs">
-                              <span className="font-semibold">{r.user}:</span> <span className="text-muted-foreground italic">{r.text}</span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </AccordionContent>
-              </AccordionItem>
-            )}
-
-            {/* 4. Selectieronde */}
-            <AccordionItem value="selection" className="border rounded-lg border-border/60 overflow-hidden">
-              <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-accent/5">
-                <div className="flex items-center gap-2">
-                  <Settings className="h-4 w-4 text-primary" />
-                  <span className="font-display font-bold text-sm">Selectieronde</span>
-                </div>
-              </AccordionTrigger>
-              <AccordionContent className="px-4 pb-4">
-                <div className="space-y-2">
-                  <Button onClick={handleRunRound1} variant="destructive" className="w-full font-semibold">Ronde 1: Sloperhamer</Button>
-                  <Button onClick={handleRunRound2} className="w-full font-semibold">Ronde 2: Scorebord</Button>
-                  <p className="text-xs text-muted-foreground text-center">Ronde 3: Selecteer finalisten hieronder</p>
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-
-            {/* 5. Accommodaties */}
-            <AccordionItem value="accommodations" className="border rounded-lg border-border/60 overflow-hidden">
-              <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-accent/5">
-                <div className="flex items-center gap-2">
-                  <FileText className="h-4 w-4 text-primary" />
-                  <span className="font-display font-bold text-sm">Accommodaties</span>
-                  <Badge variant="outline" className="text-[10px] font-mono ml-auto">{ranked.length}</Badge>
-                </div>
-              </AccordionTrigger>
-              <AccordionContent className="px-4 pb-4">
-                <div className="space-y-3">
-                  <div className="flex gap-2">
-                    <Button size="sm" variant="outline" className="flex-1" onClick={() => { setShowAccForm(true); setEditingAccId(null); }}>
-                      <Plus className="h-3.5 w-3.5 mr-1" /> Toevoegen
-                    </Button>
-                  </div>
-                  <BulkImportAccommodations onImported={fetchAll} />
-                  {(showAccForm || editingAccId) && (
-                    <AdminAccommodationForm
-                      editId={editingAccId}
-                      onSaved={() => { setShowAccForm(false); setEditingAccId(null); fetchAll(); }}
-                      onCancel={() => { setShowAccForm(false); setEditingAccId(null); }}
+                  {nonAdminProfiles.map(p => (
+                    <UserCard
+                      key={p.id}
+                      profile={p}
+                      submission={getSubForUser(p.id)}
+                      logs={getLogsForUser(p.id)}
+                      avgPoints={avgPoints}
+                      accommodations={accommodations}
+                      getAccName={getAccName}
+                      editingUserId={editingUserId}
+                      onToggleEdit={(id) => setEditingUserId(editingUserId === id ? null : id)}
+                      onUnlock={handleUnlockSubmission}
+                      onSaved={() => { setEditingUserId(null); fetchAll(); }}
                     />
-                  )}
-                  {ranked.map(acc => (
-                    <div key={acc.id} className={`border rounded-lg p-3 space-y-2 transition-opacity ${acc.status === "eliminated" ? "opacity-40" : ""}`}>
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="min-w-0">
-                          <p className="text-sm font-semibold truncate">{acc.name}</p>
-                          <p className="text-[11px] text-muted-foreground">
-                            {acc.location_label} · {acc.bedrooms}k · {acc.fixed_beds_count}b · {acc.golf_minutes ?? "?"}m golf
-                            {acc.total_price_3_nights && ` · €${acc.total_price_3_nights}`}
-                          </p>
-                          {acc.tags.length > 0 && <div className="flex flex-wrap gap-0.5 mt-1">{acc.tags.map(t => <Badge key={t} variant="outline" className="text-[9px] px-1 py-0">{t}</Badge>)}</div>}
-                          {!acc.eligibility.eligible && <p className="text-[10px] text-destructive mt-1">{acc.eligibility.failures.join(", ")}</p>}
-                        </div>
-                        <div className="flex items-center gap-1.5 shrink-0">
-                          <span className="font-display font-extrabold text-sm text-primary">{acc.totalScore.toFixed(0)}</span>
-                          {acc.eligibility.eligible ? <CheckCircle2 className="h-4 w-4 text-primary" /> : <XCircle className="h-4 w-4 text-destructive" />}
-                          {acc.status === "finalist" && <Trophy className="h-4 w-4 text-warning" />}
-                        </div>
-                      </div>
-                      <div className="flex flex-wrap gap-1">
-                        {acc.status === "active" && (
-                          <>
-                            <Button size="sm" variant="destructive" className="h-7 text-[11px] px-2" onClick={() => handleEliminate(acc.id)}><Trash2 className="h-3 w-3 mr-1" /> Elimineer</Button>
-                            <Button size="sm" variant="outline" className="h-7 text-[11px] px-2" onClick={() => handleFinalist(acc.id)}><Trophy className="h-3 w-3 mr-1" /> Finalist</Button>
-                          </>
-                        )}
-                        {acc.status === "eliminated" && <Button size="sm" variant="outline" className="h-7 text-[11px] px-2" onClick={() => handleUndo(acc.id)}><Undo2 className="h-3 w-3 mr-1" /> Undo</Button>}
-                        <Button size="sm" variant="ghost" className="h-7 text-[11px] px-2" onClick={() => handleTogglePrice(acc.id, acc.transparent_price_confirmed)}>
-                          {acc.transparent_price_confirmed ? "✓ Prijs" : "Bevestig prijs"}
-                        </Button>
-                        <Button size="sm" variant="outline" className="h-7 text-[11px] px-2" onClick={() => { setEditingAccId(acc.id); setShowAccForm(false); }}>
-                          <Pencil className="h-3 w-3 mr-1" /> Bewerk
-                        </Button>
-                      </div>
-                    </div>
                   ))}
                 </div>
               </AccordionContent>
             </AccordionItem>
 
-            {/* 6. POI Beheer */}
+            {/* ═══ STEMOVERZICHT ═══ */}
+            {lockedSubs.length > 0 && (
+              <AccordionItem value="stemoverzicht" className="border rounded-lg border-border/60 overflow-hidden">
+                <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-accent/5">
+                  <div className="flex items-center gap-2 w-full">
+                    <Table2 className="h-4 w-4 text-primary" />
+                    <span className="font-display font-bold text-sm">Stemoverzicht</span>
+                    <Badge variant="outline" className="text-[10px] ml-auto">{lockedSubs.length} intakes</Badge>
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent className="px-4 pb-4">
+                  <VoteOverviewTable submissions={submissions} rules={rules} profiles={profiles} />
+                </AccordionContent>
+              </AccordionItem>
+            )}
+
+            {/* ═══ GROEPSREGELS ═══ */}
+            {lockedSubs.length > 0 && (
+              <AccordionItem value="rules" className="border rounded-lg border-border/60 overflow-hidden">
+                <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-accent/5">
+                  <div className="flex items-center gap-2 w-full">
+                    <BarChart3 className="h-4 w-4 text-primary" />
+                    <span className="font-display font-bold text-sm">Groepsregels & Stemming</span>
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent className="px-4 pb-4 space-y-5">
+                  {/* Computed rules */}
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">Berekende vereisten (meerderheid)</p>
+                    <div className="grid grid-cols-3 gap-2">
+                      {([
+                        ["Vaste bedden", rules.requireFixedBeds], ["3 slaapkamers", rules.requireBedrooms3],
+                        ["Annuleerbaar", rules.requireCancelable], ["Transp. prijs", rules.requireTransparentPrice],
+                        ["Zwembad", rules.requirePool], ["Airco", rules.requireAirco],
+                        ["Wifi", rules.requireWifi], ["Parking", rules.requireParking], ["Terras", rules.requireTerrace],
+                      ] as [string, boolean][]).map(([label, active]) => (
+                        <div key={label} className={`rounded-lg p-2.5 text-center text-xs font-medium border transition-colors ${
+                          active ? "bg-primary/10 text-primary border-primary/20" : "bg-secondary text-muted-foreground border-transparent"
+                        }`}>
+                          {active ? "✓" : "—"} {label}
+                        </div>
+                      ))}
+                    </div>
+                    <div className="grid grid-cols-2 gap-3 mt-3">
+                      <div className="bg-secondary rounded-lg p-3">
+                        <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Max golf reistijd</p>
+                        <p className="font-display font-extrabold text-lg">{rules.maxGolfMinutes} min</p>
+                      </div>
+                      <div className="bg-secondary rounded-lg p-3">
+                        <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Budget cap</p>
+                        <p className="font-display font-extrabold text-lg">{rules.budgetCap ? `€${rules.budgetCap}` : "Geen"}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Vote distribution */}
+                  <div className="space-y-3">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Stemverdeling</p>
+                    <VoteRow label="Rondes" items={[{ label: "2 rondes", count: countVotes("preferred_rounds", 2) }, { label: "3 rondes", count: countVotes("preferred_rounds", 3) }]} total={lockedSubs.length} />
+                    <VoteRow label="Vervoer" items={[{ label: "Auto", count: countVotes("mobility_choice", "car") }, { label: "Taxi", count: countVotes("mobility_choice", "transfers") }, { label: "Neutraal", count: countVotes("mobility_choice", "neutral") }]} total={lockedSubs.length} />
+                    <VoteRow label="Locatie" items={[{ label: "Golf", count: countVotes("base_choice", "golf") }, { label: "Strand", count: countVotes("base_choice", "beach") }, { label: "Neutraal", count: countVotes("base_choice", "neutral") }]} total={lockedSubs.length} />
+                    {([
+                      ["Vaste bedden", "require_fixed_beds"], ["3 slaapkamers", "require_bedrooms_3"],
+                      ["Zwembad", "require_pool"], ["Airco", "require_airco"], ["Wifi", "require_wifi"],
+                      ["Parking", "require_parking"], ["Terras", "require_terrace"], ["Transparante prijs", "require_transparent_price"],
+                    ] as [string, keyof Submission][]).map(([label, field]) => {
+                      const b = countBool(field);
+                      return <VoteRow key={field} label={label} items={[{ label: "Vereist", count: b.yes }, { label: "Niet", count: b.no }]} total={lockedSubs.length} />;
+                    })}
+                  </div>
+
+                  {/* Average points */}
+                  {avgPoints && (
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">Gemiddelde punten</p>
+                      <div className="space-y-2">
+                        {([["Golf", avgPoints.golfEase], ["Strand", avgPoints.beachLife], ["Omgeving", avgPoints.exploring], ["Luxe", avgPoints.luxury], ["Budget", avgPoints.budget], ["Gedoe", avgPoints.lowHassle]] as [string, number][]).map(([k, v]) => (
+                          <div key={k} className="flex items-center gap-3">
+                            <span className="text-xs text-muted-foreground w-16 shrink-0">{k}</span>
+                            <div className="flex-1 bg-secondary rounded-full h-2.5 overflow-hidden">
+                              <div className="bg-primary h-full rounded-full transition-all" style={{ width: `${v}%` }} />
+                            </div>
+                            <span className="text-xs font-display font-bold tabular-nums w-8 text-right">{v.toFixed(0)}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </AccordionContent>
+              </AccordionItem>
+            )}
+
+            {/* ═══ SELECTIERONDE ═══ */}
+            <AccordionItem value="selection" className="border rounded-lg border-border/60 overflow-hidden">
+              <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-accent/5">
+                <div className="flex items-center gap-2 w-full">
+                  <TrendingUp className="h-4 w-4 text-primary" />
+                  <span className="font-display font-bold text-sm">Selectieronde</span>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="px-4 pb-4 space-y-3">
+                <div className="grid grid-cols-2 gap-3">
+                  <button onClick={handleRunRound1} className="rounded-xl border-2 border-destructive/20 bg-destructive/5 p-4 text-center hover:bg-destructive/10 transition-colors">
+                    <Trash2 className="h-5 w-5 text-destructive mx-auto mb-2" />
+                    <p className="font-display font-bold text-sm">Ronde 1</p>
+                    <p className="text-[10px] text-muted-foreground mt-0.5">Sloperhamer — elimineer niet-geschikt</p>
+                  </button>
+                  <button onClick={handleRunRound2} className="rounded-xl border-2 border-primary/20 bg-primary/5 p-4 text-center hover:bg-primary/10 transition-colors">
+                    <BarChart3 className="h-5 w-5 text-primary mx-auto mb-2" />
+                    <p className="font-display font-bold text-sm">Ronde 2</p>
+                    <p className="text-[10px] text-muted-foreground mt-0.5">Scorebord — ranking berekenen</p>
+                  </button>
+                </div>
+                <p className="text-[10px] text-muted-foreground text-center">Ronde 3: selecteer finalisten bij de accommodaties hieronder</p>
+              </AccordionContent>
+            </AccordionItem>
+
+            {/* ═══ ACCOMMODATIES ═══ */}
+            <AccordionItem value="accommodations" className="border rounded-lg border-border/60 overflow-hidden">
+              <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-accent/5">
+                <div className="flex items-center gap-2 w-full">
+                  <FileText className="h-4 w-4 text-primary" />
+                  <span className="font-display font-bold text-sm">Accommodaties</span>
+                  <div className="flex items-center gap-1.5 ml-auto">
+                    {finalistAccs.length > 0 && <Badge className="text-[10px] bg-warning/10 text-warning border-warning/20">{finalistAccs.length} finalist</Badge>}
+                    <Badge variant="outline" className="text-[10px] font-mono">{activeAccs.length} actief</Badge>
+                    {eliminatedAccs.length > 0 && <Badge variant="outline" className="text-[10px] font-mono opacity-50">{eliminatedAccs.length} weg</Badge>}
+                  </div>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="px-4 pb-4 space-y-3">
+                <div className="flex gap-2">
+                  <Button size="sm" variant="outline" className="flex-1 h-9" onClick={() => { setShowAccForm(true); setEditingAccId(null); }}>
+                    <Plus className="h-3.5 w-3.5 mr-1.5" /> Toevoegen
+                  </Button>
+                </div>
+                <BulkImportAccommodations onImported={fetchAll} />
+                {(showAccForm || editingAccId) && (
+                  <AdminAccommodationForm
+                    editId={editingAccId}
+                    onSaved={() => { setShowAccForm(false); setEditingAccId(null); fetchAll(); }}
+                    onCancel={() => { setShowAccForm(false); setEditingAccId(null); }}
+                  />
+                )}
+
+                {/* Finalisten */}
+                {finalistAccs.length > 0 && (
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-wider text-primary mb-2 flex items-center gap-1.5"><Trophy className="h-3.5 w-3.5" /> Finalisten</p>
+                    <div className="space-y-2">
+                      {finalistAccs.map(acc => <AccommodationRow key={acc.id} acc={acc} onEliminate={handleEliminate} onUndo={handleUndo} onFinalist={handleFinalist} onTogglePrice={handleTogglePrice} onEdit={(id) => { setEditingAccId(id); setShowAccForm(false); }} />)}
+                    </div>
+                  </div>
+                )}
+
+                {/* Actief */}
+                {activeAccs.length > 0 && (
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">Actief ({activeAccs.length})</p>
+                    <div className="space-y-2">
+                      {activeAccs.map(acc => <AccommodationRow key={acc.id} acc={acc} onEliminate={handleEliminate} onUndo={handleUndo} onFinalist={handleFinalist} onTogglePrice={handleTogglePrice} onEdit={(id) => { setEditingAccId(id); setShowAccForm(false); }} />)}
+                    </div>
+                  </div>
+                )}
+
+                {/* Geëlimineerd */}
+                {eliminatedAccs.length > 0 && (
+                  <Collapsible>
+                    <CollapsibleTrigger className="w-full">
+                      <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground/50 py-2 hover:text-muted-foreground transition-colors">
+                        <ChevronDown className="h-3.5 w-3.5" />
+                        Geëlimineerd ({eliminatedAccs.length})
+                      </div>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent>
+                      <div className="space-y-2">
+                        {eliminatedAccs.map(acc => <AccommodationRow key={acc.id} acc={acc} onEliminate={handleEliminate} onUndo={handleUndo} onFinalist={handleFinalist} onTogglePrice={handleTogglePrice} onEdit={(id) => { setEditingAccId(id); setShowAccForm(false); }} />)}
+                      </div>
+                    </CollapsibleContent>
+                  </Collapsible>
+                )}
+              </AccordionContent>
+            </AccordionItem>
+
+            {/* ═══ POI BEHEER ═══ */}
             <AccordionItem value="pois" className="border rounded-lg border-border/60 overflow-hidden">
               <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-accent/5">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 w-full">
                   <MapPin className="h-4 w-4 text-primary" />
                   <span className="font-display font-bold text-sm">POI / Reistijden</span>
                 </div>
@@ -596,32 +442,36 @@ export default function Admin() {
               </AccordionContent>
             </AccordionItem>
 
-            {/* 7. Override log */}
+            {/* ═══ OVERRIDE LOG ═══ */}
             {overrides.length > 0 && (
               <AccordionItem value="overrides" className="border rounded-lg border-border/60 overflow-hidden">
                 <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-accent/5">
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 w-full">
                     <Eye className="h-4 w-4 text-primary" />
-                    <span className="font-display font-bold text-sm">Override log</span>
+                    <span className="font-display font-bold text-sm">Audit log</span>
                     <Badge variant="outline" className="text-[10px] font-mono ml-auto">{overrides.length}</Badge>
                   </div>
                 </AccordionTrigger>
                 <AccordionContent className="px-4 pb-4">
-                  <div className="border rounded-lg divide-y">
+                  <div className="space-y-1">
                     {overrides.slice(0, 20).map(o => (
-                      <div key={o.id} className="p-3 text-xs space-y-0.5">
-                        <div className="flex items-center justify-between gap-2">
-                          <span className="font-semibold">{o.field}</span>
-                          <span className="text-muted-foreground">{new Date(o.created_at).toLocaleString("nl-NL")}</span>
+                      <div key={o.id} className="flex items-start gap-3 py-2 border-b border-border/30 last:border-0">
+                        <div className="h-2 w-2 rounded-full bg-primary/30 mt-1.5 shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="text-xs font-semibold">{o.field}</span>
+                            <span className="text-[10px] text-muted-foreground shrink-0">{new Date(o.created_at).toLocaleString("nl-NL", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}</span>
+                          </div>
+                          {o.old_value && <p className="text-[10px] text-muted-foreground">{o.old_value} → {o.new_value}</p>}
+                          {o.reason && <p className="text-[10px] text-muted-foreground italic">{o.reason}</p>}
                         </div>
-                        <p className="text-muted-foreground">{o.old_value} → {o.new_value}</p>
-                        {o.reason && <p className="text-muted-foreground italic">{o.reason}</p>}
                       </div>
                     ))}
                   </div>
                 </AccordionContent>
               </AccordionItem>
             )}
+
           </Accordion>
         </div>
       </div>
@@ -629,7 +479,172 @@ export default function Admin() {
   );
 }
 
-// --- Helper components ---
+// ─── Sub-components ─────────────────────────────────────────────
+
+function QuickStat({ value, total, label, icon }: { value: number; total?: number; label: string; icon: React.ReactNode }) {
+  return (
+    <div className="bg-white/5 rounded-lg p-3 text-center">
+      <div className="flex items-center justify-center gap-1.5 text-white/40 mb-1">{icon}</div>
+      <p className="font-display font-extrabold text-lg text-white">
+        {value}{total !== undefined && <span className="text-white/30 text-sm">/{total}</span>}
+      </p>
+      <p className="text-[10px] text-white/40 uppercase tracking-wider">{label}</p>
+    </div>
+  );
+}
+
+function Home({ className }: { className?: string }) {
+  return <svg className={className} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>;
+}
+
+function UserCard({ profile: p, submission: sub, logs, avgPoints, accommodations, getAccName, editingUserId, onToggleEdit, onUnlock, onSaved }: {
+  profile: Profile; submission: Submission | undefined; logs: ActivityEvent[];
+  avgPoints: any; accommodations: Accommodation[]; getAccName: (id: string) => string;
+  editingUserId: string | null; onToggleEdit: (id: string) => void;
+  onUnlock: (subId: string) => void; onSaved: () => void;
+}) {
+  const lastActivity = logs[0]?.created_at;
+  const isOnline = logs[0] ? (Date.now() - new Date(logs[0].created_at).getTime() < 5 * 60 * 1000) : false;
+  const logins = logs.filter(l => l.event_type === "login").length;
+  const pageViews = logs.filter(l => l.event_type === "page_view").length;
+
+  return (
+    <Collapsible>
+      <CollapsibleTrigger className="w-full">
+        <div className="flex items-center justify-between p-3 rounded-xl border border-border/60 hover:bg-accent/5 transition-colors">
+          <div className="flex items-center gap-3">
+            <span className={`h-2.5 w-2.5 rounded-full shrink-0 ${isOnline ? "bg-green-500 animate-pulse" : "bg-muted-foreground/20"}`} />
+            <span className="text-sm font-semibold">{p.display_name}</span>
+            {sub?.locked ? (
+              <Badge className="text-[10px] bg-primary/10 text-primary border-primary/20">Ingediend</Badge>
+            ) : sub ? (
+              <Badge variant="outline" className="text-[10px]">Bezig</Badge>
+            ) : (
+              <Badge variant="destructive" className="text-[10px]">Niet gestart</Badge>
+            )}
+          </div>
+          <div className="flex items-center gap-2">
+            {lastActivity && <span className="text-[10px] text-muted-foreground">{new Date(lastActivity).toLocaleDateString("nl-NL", { day: "numeric", month: "short" })}</span>}
+            <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
+          </div>
+        </div>
+      </CollapsibleTrigger>
+      <CollapsibleContent>
+        <div className="border border-t-0 border-border/60 rounded-b-xl p-4 space-y-4 -mt-1 bg-secondary/20">
+          {/* Actions */}
+          <div className="flex gap-2">
+            {sub?.locked && (
+              <Button size="sm" variant="outline" className="h-8 text-xs" onClick={() => onUnlock(sub.id)}>
+                <Unlock className="h-3 w-3 mr-1" /> Ontgrendel
+              </Button>
+            )}
+            <Button size="sm" variant="outline" className="h-8 text-xs" onClick={() => onToggleEdit(p.id)}>
+              <Pencil className="h-3 w-3 mr-1" /> {sub ? "Bewerk" : "Aanmaken"}
+            </Button>
+          </div>
+
+          {/* Edit form */}
+          {editingUserId === p.id && (
+            <AdminEditSubmission
+              submission={sub}
+              userId={p.id}
+              displayName={p.display_name}
+              onSaved={onSaved}
+              onCancel={() => onToggleEdit(p.id)}
+            />
+          )}
+
+          {/* Intake summary */}
+          {editingUserId !== p.id && sub && (
+            <div className="space-y-3">
+              <div className="grid grid-cols-3 gap-2 text-xs">
+                <div className="bg-background rounded-lg p-2.5 border border-border/40">
+                  <p className="text-[10px] text-muted-foreground">Vervoer</p>
+                  <p className="font-semibold">{mobilityLabel(sub.mobility_choice)}</p>
+                </div>
+                <div className="bg-background rounded-lg p-2.5 border border-border/40">
+                  <p className="text-[10px] text-muted-foreground">Locatie</p>
+                  <p className="font-semibold">{baseLabel(sub.base_choice)}</p>
+                </div>
+                <div className="bg-background rounded-lg p-2.5 border border-border/40">
+                  <p className="text-[10px] text-muted-foreground">Budget</p>
+                  <p className="font-semibold">{sub.budget_cap_total ? `€${sub.budget_cap_total}` : "—"}</p>
+                </div>
+              </div>
+              <div className="flex flex-wrap gap-1">
+                {(["require_fixed_beds", "require_bedrooms_3", "require_pool", "require_airco", "require_wifi", "require_parking", "require_terrace", "require_transparent_price"] as (keyof Submission)[]).map(field => {
+                  const active = (sub as any)[field];
+                  const labels: Record<string, string> = {
+                    require_fixed_beds: "Bedden", require_bedrooms_3: "3 kamers", require_pool: "Zwembad",
+                    require_airco: "Airco", require_wifi: "Wifi", require_parking: "Parking",
+                    require_terrace: "Terras", require_transparent_price: "Transp. prijs",
+                  };
+                  return active ? <Badge key={field} className="text-[9px] bg-primary/10 text-primary border-primary/20">{labels[field]}</Badge> : null;
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Activity stats */}
+          <div className="flex gap-4 text-[10px] text-muted-foreground border-t border-border/40 pt-3">
+            <span>{logins} logins</span>
+            <span>{pageViews} pageviews</span>
+            {lastActivity && <span>Laatst: {new Date(lastActivity).toLocaleString("nl-NL", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}</span>}
+          </div>
+        </div>
+      </CollapsibleContent>
+    </Collapsible>
+  );
+}
+
+function AccommodationRow({ acc, onEliminate, onUndo, onFinalist, onTogglePrice, onEdit }: {
+  acc: any; onEliminate: (id: string) => void; onUndo: (id: string) => void;
+  onFinalist: (id: string) => void; onTogglePrice: (id: string, current: boolean) => void;
+  onEdit: (id: string) => void;
+}) {
+  return (
+    <div className={`rounded-xl border p-3 space-y-2 transition-all ${
+      acc.status === "eliminated" ? "border-border/30 opacity-50" :
+      acc.status === "finalist" ? "border-warning/30 bg-warning/5" :
+      "border-border/60"
+    }`}>
+      <div className="flex items-start justify-between gap-2">
+        <div className="min-w-0">
+          <div className="flex items-center gap-1.5">
+            <p className="text-sm font-semibold truncate">{acc.name}</p>
+            {acc.status === "finalist" && <Trophy className="h-3.5 w-3.5 text-warning shrink-0" />}
+          </div>
+          <p className="text-[11px] text-muted-foreground mt-0.5">
+            {acc.location_label} · {acc.bedrooms}k · {acc.fixed_beds_count}b · {acc.golf_minutes ?? "?"}m golf
+            {acc.total_price_3_nights && ` · €${acc.total_price_3_nights}`}
+          </p>
+          {!acc.eligibility.eligible && <p className="text-[10px] text-destructive mt-1">{acc.eligibility.failures.join(", ")}</p>}
+          {acc.eliminated_reason && <p className="text-[10px] text-muted-foreground italic mt-1">{acc.eliminated_reason}</p>}
+        </div>
+        <div className="flex items-center gap-1.5 shrink-0">
+          <span className="font-display font-extrabold text-sm text-primary">{acc.totalScore.toFixed(0)}</span>
+          {acc.eligibility.eligible ? <CheckCircle2 className="h-4 w-4 text-primary" /> : <XCircle className="h-4 w-4 text-destructive" />}
+        </div>
+      </div>
+      <div className="flex flex-wrap gap-1.5">
+        {acc.status === "active" && (
+          <>
+            <Button size="sm" variant="destructive" className="h-7 text-[11px] px-2.5 rounded-lg" onClick={() => onEliminate(acc.id)}>Elimineer</Button>
+            <Button size="sm" variant="outline" className="h-7 text-[11px] px-2.5 rounded-lg" onClick={() => onFinalist(acc.id)}><Trophy className="h-3 w-3 mr-1" /> Finalist</Button>
+          </>
+        )}
+        {acc.status === "eliminated" && <Button size="sm" variant="outline" className="h-7 text-[11px] px-2.5 rounded-lg" onClick={() => onUndo(acc.id)}><Undo2 className="h-3 w-3 mr-1" /> Herstel</Button>}
+        <Button size="sm" variant="ghost" className="h-7 text-[11px] px-2.5 rounded-lg" onClick={() => onTogglePrice(acc.id, acc.transparent_price_confirmed)}>
+          {acc.transparent_price_confirmed ? "✓ Prijs" : "Bevestig prijs"}
+        </Button>
+        <Button size="sm" variant="ghost" className="h-7 text-[11px] px-2.5 rounded-lg" onClick={() => onEdit(acc.id)}>
+          <Pencil className="h-3 w-3 mr-1" /> Bewerk
+        </Button>
+      </div>
+    </div>
+  );
+}
+
 function VoteRow({ label, items, total }: { label: string; items: { label: string; count: number }[]; total: number }) {
   return (
     <div>
@@ -638,7 +653,9 @@ function VoteRow({ label, items, total }: { label: string; items: { label: strin
         {items.map(item => {
           const isMajority = item.count >= Math.ceil(total / 2);
           return (
-            <div key={item.label} className={`flex-1 text-center rounded-md py-1.5 text-xs font-medium transition-colors ${isMajority ? "bg-primary/10 text-primary border border-primary/20" : "bg-secondary text-muted-foreground"}`}>
+            <div key={item.label} className={`flex-1 text-center rounded-lg py-1.5 text-xs font-medium transition-colors ${
+              isMajority ? "bg-primary/10 text-primary border border-primary/20" : "bg-secondary text-muted-foreground"
+            }`}>
               {item.label} <span className="font-bold">{item.count}</span>/{total}
             </div>
           );
@@ -648,77 +665,5 @@ function VoteRow({ label, items, total }: { label: string; items: { label: strin
   );
 }
 
-function LabelValue({ label, value }: { label: string; value: string }) {
-  return (
-    <div>
-      <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{label}</p>
-      <p className="text-sm font-medium">{value}</p>
-    </div>
-  );
-}
-
-function WishBadge({ label, active }: { label: string; active: boolean }) {
-  return <Badge variant={active ? "default" : "outline"} className={`text-[10px] ${active ? "" : "opacity-40"}`}>{active ? "✓" : "✗"} {label}</Badge>;
-}
-
-function RuleBadge({ label, active }: { label: string; active: boolean }) {
-  return <Badge variant={active ? "default" : "outline"} className={`text-[10px] ${active ? "bg-primary text-primary-foreground" : "opacity-50"}`}>{active ? "✓" : "—"} {label}</Badge>;
-}
-
-function MiniBar({ label, value, avg }: { label: string; value: number; avg?: number }) {
-  return (
-    <div className="flex items-center gap-2">
-      <span className="text-[10px] text-muted-foreground w-14 shrink-0">{label}</span>
-      <div className="flex-1 bg-secondary rounded-full h-2 overflow-hidden relative">
-        <div className="bg-primary h-full rounded-full" style={{ width: `${value}%` }} />
-        {avg !== undefined && <div className="absolute top-0 h-full w-0.5 bg-destructive/60" style={{ left: `${avg}%` }} title={`Gem: ${avg.toFixed(0)}`} />}
-      </div>
-      <span className="text-[10px] font-bold tabular-nums w-6 text-right">{value}</span>
-    </div>
-  );
-}
-
-function StatBlock({ value, label }: { value: string | number; label: string }) {
-  return (
-    <div className="text-center">
-      <p className="font-display font-extrabold text-lg">{value}</p>
-      <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{label}</p>
-    </div>
-  );
-}
-
-function mobilityLabel(v: string) { return v === "car" ? "Huurauto" : v === "transfers" ? "Taxi/transfers" : "Neutraal"; }
-function baseLabel(v: string) { return v === "golf" ? "Dicht bij golf" : v === "beach" ? "Dicht bij strand" : "Neutraal"; }
-
-function EventTimeline({ logs, getAccName }: { logs: { id: string; user_id: string; event_type: string; page: string; detail: string | null; created_at: string }[]; getAccName: (id: string) => string }) {
-  const [showAll, setShowAll] = useState(false);
-  const displayed = showAll ? logs : logs.slice(0, 30);
-
-  const eventColor = (type: string) => {
-    if (type === "login") return "default" as const;
-    if (type === "intake_submitted") return "default" as const;
-    if (type === "accommodation_view") return "secondary" as const;
-    return "outline" as const;
-  };
-
-  return (
-    <div>
-      <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Volledige tijdlijn ({logs.length} events)</p>
-      <div className="space-y-1 max-h-60 overflow-y-auto">
-        {displayed.map(l => (
-          <div key={l.id} className="flex items-center justify-between text-xs py-0.5 border-b border-border/30 last:border-0">
-            <div className="flex items-center gap-1.5 min-w-0">
-              <Badge variant={eventColor(l.event_type)} className="text-[9px] px-1 py-0 shrink-0">{l.event_type}</Badge>
-              <span className="text-muted-foreground truncate">{l.page}</span>
-              {l.detail && <span className="text-muted-foreground truncate max-w-[120px]">({l.event_type === "accommodation_view" || l.event_type === "click" ? getAccName(l.detail) : l.detail})</span>}
-            </div>
-            <span className="text-muted-foreground text-[10px] shrink-0 ml-2">{new Date(l.created_at).toLocaleString("nl-NL", { hour: "2-digit", minute: "2-digit", day: "numeric", month: "short" })}</span>
-          </div>
-        ))}
-      </div>
-      {logs.length > 30 && !showAll && (
-        <button onClick={() => setShowAll(true)} className="text-xs text-primary font-semibold mt-2 hover:underline">Toon alle {logs.length} events</button>
-      )}
-    </div>
-  );
-}
+function mobilityLabel(v: string) { return v === "car" ? "Huurauto" : v === "transfers" ? "Taxi" : "Neutraal"; }
+function baseLabel(v: string) { return v === "golf" ? "Golf" : v === "beach" ? "Strand" : "Neutraal"; }

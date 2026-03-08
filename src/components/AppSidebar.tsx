@@ -2,7 +2,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/lib/auth";
 import { useTrip } from "@/contexts/TripContext";
 import {
-  Sparkles,
+  Compass,
   ClipboardList,
   Info,
   BarChart3,

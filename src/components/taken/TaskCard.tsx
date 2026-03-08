@@ -9,7 +9,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   ChevronDown, User, Shield, Vote, Settings2, Link2, Calendar, Clock, MapPin, CheckCircle2, Circle
 } from "lucide-react";
-import type { Task, InfoDetails, Profile, Reaction, Comment } from "./types";
+import type { Task, InfoDetails, Profile, Reaction, Comment, TaskVote } from "./types";
 
 interface TaskCardProps {
   task: Task;
@@ -19,17 +19,20 @@ interface TaskCardProps {
   profiles: Profile[];
   reactions: Reaction[];
   comments: Comment[];
+  votes: TaskVote[];
+  currentUserId?: string;
   onToggleReaction: (section: string, emoji: string) => void;
   onAddComment: (section: string, message: string) => void;
   onDeleteComment: (commentId: string) => void;
+  onVote: (taskId: string, votedForUserId: string) => void;
   onOpenDrawer: (taskId: string) => void;
   onOpenLightbox: (url: string) => void;
   index?: number;
 }
 
 export function TaskCard({
-  task, isOpen, onToggle, editable, profiles, reactions, comments,
-  onToggleReaction, onAddComment, onDeleteComment, onOpenDrawer, onOpenLightbox,
+  task, isOpen, onToggle, editable, profiles, reactions, comments, votes, currentUserId,
+  onToggleReaction, onAddComment, onDeleteComment, onVote, onOpenDrawer, onOpenLightbox,
   index = 0,
 }: TaskCardProps) {
   const details: InfoDetails = (task.info_details as any) || {};

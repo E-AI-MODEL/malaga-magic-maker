@@ -19,6 +19,7 @@ export interface TravelLeg {
   arrival_time: string | null; travel_date: string | null;
   note: string | null; sort_order: number;
 }
+export interface TaskVote { id: string; task_id: string; user_id: string; voted_for_user_id: string; }
 export interface Reaction { id: string; user_id: string; section: string; emoji: string; }
 export interface Comment { id: string; user_id: string; section: string; message: string; created_at: string; }
 

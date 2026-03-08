@@ -348,7 +348,7 @@ export default function Wensen() {
                 {Object.keys(allDiets).length > 0 ? (
                   Object.entries(allDiets).sort(([, a], [, b]) => b - a).map(([diet, count]) => (
                     <div key={diet} className="flex items-center justify-between py-1">
-                      <span className="text-xs">{diet}</span>
+                      <span className="text-xs">{translateLabel(DIET_LABELS, diet)}</span>
                       <Badge variant="outline" className="text-[10px] tabular-nums">{count}x</Badge>
                     </div>
                   ))

@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { CheckCircle2, XCircle } from "lucide-react";
 import type { Submission, GroupRules } from "@/lib/scoring";
 import { getTripConfig, type TripConfig } from "@/lib/tripConfig";
+import { DIET_LABELS, ACTIVITY_LABELS, translateLabel } from "@/lib/labelMaps";
 
 interface Profile {
   id: string;
@@ -52,7 +53,7 @@ function RequirementsSection({ subs, config, rules, n }: { subs: Submission[]; c
   return (
     <div>
       <p className="text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground mb-3">
-        ✅ Vereisten (meerderheid)
+        Vereisten (meerderheid)
       </p>
       <div className="border rounded-lg overflow-hidden">
         <table className="w-full text-xs">
@@ -107,7 +108,7 @@ function VoteDistribution({ subs, config, n }: { subs: Submission[]; config: Tri
   return (
     <div>
       <p className="text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground mb-3">
-        🗳️ Stemverdeling
+        Stemverdeling
       </p>
       <div className="border rounded-lg overflow-hidden">
         <table className="w-full text-xs">
@@ -170,7 +171,7 @@ function PrioritiesSection({ subs, config, n }: { subs: Submission[]; config: Tr
   return (
     <div>
       <p className="text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground mb-3">
-        📊 Prioriteiten — Gemiddelde punten (max {config.priorities[0]?.maxPoints ?? 25})
+        Prioriteiten — Gemiddelde punten (max {config.priorities[0]?.maxPoints ?? 25})
       </p>
       <div className="border rounded-lg overflow-hidden">
         <table className="w-full text-xs">
@@ -186,7 +187,7 @@ function PrioritiesSection({ subs, config, n }: { subs: Submission[]; config: Tr
               const pct = Math.round((p.score / p.maxPoints) * 100);
               return (
                 <tr key={p.key} className="border-t border-border/40">
-                  <td className="px-3 py-2 font-medium">{p.emoji} {p.label}</td>
+                  <td className="px-3 py-2 font-medium">{p.label}</td>
                   <td className="text-center px-2 py-2 font-bold tabular-nums">{p.score.toFixed(0)}</td>
                   <td className="px-2 py-2">
                     <div className="flex items-center gap-2">
@@ -211,7 +212,7 @@ function BudgetSection({ subs, n }: { subs: Submission[]; n: number }) {
 
   return (
     <div>
-      <p className="text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground mb-3">💰 Budget</p>
+      <p className="text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground mb-3">Budget</p>
       <div className="border rounded-lg p-4">
         {budgets.length > 0 ? (
           <div className="grid grid-cols-3 gap-3 text-center">
@@ -247,7 +248,7 @@ function TravelTimeConstraint({ subs, config, n }: { subs: Submission[]; config:
   return (
     <div>
       <p className="text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground mb-3">
-        {config.travelTime.emoji} {config.travelTime.label} constraint
+        {config.travelTime.label}
       </p>
       <div className="border rounded-lg p-4 space-y-2">
         {Object.entries(votes)
@@ -286,7 +287,7 @@ function ActivitiesSection({ subs, n }: { subs: Submission[]; n: number }) {
 
   return (
     <div>
-      <p className="text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground mb-3">🏄 Activiteiten</p>
+      <p className="text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground mb-3">Activiteiten</p>
       <div className="border rounded-lg overflow-hidden">
         <table className="w-full text-xs">
           <thead>
@@ -299,7 +300,7 @@ function ActivitiesSection({ subs, n }: { subs: Submission[]; n: number }) {
           <tbody>
             {sorted.map(([act, count]) => (
               <tr key={act} className="border-t border-border/40">
-                <td className="px-3 py-2 font-medium">{act}</td>
+                <td className="px-3 py-2 font-medium">{translateLabel(ACTIVITY_LABELS, act)}</td>
                 <td className="text-center px-2 py-2 font-bold tabular-nums">{count}×</td>
                 <td className="px-2 py-2 text-muted-foreground">{popularityLabel(count)}</td>
               </tr>
@@ -321,7 +322,7 @@ function DietSection({ subs, n }: { subs: Submission[]; n: number }) {
 
   return (
     <div>
-      <p className="text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground mb-3">🍽️ Eetvoorkeuren</p>
+      <p className="text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground mb-3">Eetvoorkeuren</p>
       <div className="border rounded-lg overflow-hidden">
         <table className="w-full text-xs">
           <thead>
@@ -334,7 +335,7 @@ function DietSection({ subs, n }: { subs: Submission[]; n: number }) {
           <tbody>
             {Object.entries(counts).sort(([, a], [, b]) => b - a).map(([diet, count]) => (
               <tr key={diet} className="border-t border-border/40">
-                <td className="px-3 py-2 font-medium">{diet}</td>
+                <td className="px-3 py-2 font-medium">{translateLabel(DIET_LABELS, diet)}</td>
                 <td className="text-center px-2 py-2 font-bold tabular-nums">{count}×</td>
                 <td className="text-center px-2 py-2 tabular-nums text-muted-foreground">{Math.round((count / n) * 100)}%</td>
               </tr>
@@ -360,7 +361,7 @@ function PerPersonSection({ subs, config, profiles }: { subs: Submission[]; conf
 
   return (
     <div>
-      <p className="text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground mb-3">👥 Per persoon</p>
+      <p className="text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground mb-3">Per persoon</p>
       <div className="border rounded-lg overflow-x-auto">
         <table className="w-full text-xs min-w-[600px]">
           <thead>

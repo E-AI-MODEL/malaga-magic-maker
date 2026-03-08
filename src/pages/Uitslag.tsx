@@ -4,7 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { computeGroupRules, computeAvgPoints, type Submission } from "@/lib/scoring";
 import { Badge } from "@/components/ui/badge";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Car, Home, UtensilsCrossed, Dumbbell, BarChart3, Users, CheckCircle2, XCircle, Star, ExternalLink, Bed, Bath, Waves, ParkingCircle, Wind, Wifi, MapPin, Map } from "lucide-react";
+import { Car, CarTaxiFront, Minus, Home, UtensilsCrossed, Dumbbell, BarChart3, Users, CheckCircle2, XCircle, Star, ExternalLink, Bed, Bath, Waves, ParkingCircle, Wind, Wifi, MapPin, Map, Flag, Umbrella, Compass, Gem, Wallet, Heart } from "lucide-react";
+import { DIET_LABELS, ACTIVITY_LABELS, translateLabel } from "@/lib/labelMaps";
 import { POIMatrix } from "@/components/POIMatrix";
 import { useAuth } from "@/lib/auth";
 import { useTrip } from "@/contexts/TripContext";
@@ -84,9 +85,9 @@ export default function Uitslag() {
     const car = countVotes("mobility_choice", "car");
     const taxi = countVotes("mobility_choice", "transfers");
     const neutral = countVotes("mobility_choice", "neutral");
-    if (car > taxi && car > neutral) return { label: "Huurauto", icon: "🚗" };
-    if (taxi > car && taxi > neutral) return { label: "Taxi / transfers", icon: "🚕" };
-    return { label: "Geen voorkeur", icon: "🤷" };
+    if (car > taxi && car > neutral) return { label: "Huurauto", Icon: Car };
+    if (taxi > car && taxi > neutral) return { label: "Taxi / transfers", Icon: CarTaxiFront };
+    return { label: "Geen voorkeur", Icon: Minus };
   })();
 
   const allDietPrefs = lockedSubs.flatMap(s => s.diet_preferences || []);
@@ -145,12 +146,12 @@ export default function Uitslag() {
   ];
 
   const pointsData = avgPoints ? [
-    { label: "Golf gemak", value: avgPoints.golfEase, emoji: "⛳" },
-    { label: "Strandleven", value: avgPoints.beachLife, emoji: "🏖️" },
-    { label: "Omgeving verkennen", value: avgPoints.exploring, emoji: "🗺️" },
-    { label: "Luxe & comfort", value: avgPoints.luxury, emoji: "✨" },
-    { label: "Budget bewust", value: avgPoints.budget, emoji: "💰" },
-    { label: "Minimaal gedoe", value: avgPoints.lowHassle, emoji: "🧘" },
+    { label: "Golf gemak", value: avgPoints.golfEase, Icon: Flag },
+    { label: "Strandleven", value: avgPoints.beachLife, Icon: Umbrella },
+    { label: "Omgeving verkennen", value: avgPoints.exploring, Icon: Compass },
+    { label: "Luxe & comfort", value: avgPoints.luxury, Icon: Gem },
+    { label: "Budget bewust", value: avgPoints.budget, Icon: Wallet },
+    { label: "Minimaal gedoe", value: avgPoints.lowHassle, Icon: Heart },
   ].sort((a, b) => b.value - a.value) : [];
 
   return (
@@ -302,12 +303,12 @@ export default function Uitslag() {
                 <div className="flex items-center gap-2 w-full">
                   <Car className="h-4 w-4 text-primary" />
                   <span className="font-display font-bold text-sm">Vervoer</span>
-                  <Badge variant="outline" className="text-[10px] ml-auto">{mobilityWinner.icon} {mobilityWinner.label}</Badge>
+                  <Badge variant="outline" className="text-[10px] ml-auto flex items-center gap-1"><mobilityWinner.Icon className="h-3 w-3" /> {mobilityWinner.label}</Badge>
                 </div>
               </AccordionTrigger>
               <AccordionContent className="px-4 pb-4">
                 <div className="flex items-center gap-3 mb-4">
-                  <span className="text-3xl">{mobilityWinner.icon}</span>
+                  <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center"><mobilityWinner.Icon className="h-6 w-6 text-primary" /></div>
                   <div>
                     <p className="font-display font-extrabold text-lg">{mobilityWinner.label}</p>
                     <p className="text-xs text-muted-foreground">Meerderheidsuitslag</p>
@@ -430,23 +431,26 @@ export default function Uitslag() {
                 <div className="flex items-center gap-2 w-full">
                   <BarChart3 className="h-4 w-4 text-primary" />
                   <span className="font-display font-bold text-sm">Prioriteiten</span>
-                  {pointsData.length > 0 && <Badge variant="outline" className="text-[10px] ml-auto">{pointsData[0].emoji} {pointsData[0].label}</Badge>}
+                  {pointsData.length > 0 && (() => { const TopIcon = pointsData[0].Icon; return <Badge variant="outline" className="text-[10px] ml-auto flex items-center gap-1"><TopIcon className="h-3 w-3" /> {pointsData[0].label}</Badge>; })()}
                 </div>
               </AccordionTrigger>
               <AccordionContent className="px-4 pb-4">
                 <p className="text-sm text-muted-foreground mb-4">Gemiddelde puntenverdeling van de groep</p>
                 <div className="space-y-3">
-                  {pointsData.map((p, i) => (
+                  {pointsData.map((p, i) => {
+                    const PIcon = p.Icon;
+                    return (
                     <div key={p.label}>
                       <div className="flex items-center justify-between mb-1">
-                        <span className="text-sm flex items-center gap-2"><span>{p.emoji}</span> {p.label} {i === 0 && <Badge className="text-[9px] ml-1">Hoogste</Badge>}</span>
+                        <span className="text-sm flex items-center gap-2"><PIcon className="h-4 w-4 text-primary" /> {p.label} {i === 0 && <Badge className="text-[9px] ml-1">Hoogste</Badge>}</span>
                         <span className="font-display font-bold text-sm tabular-nums">{p.value.toFixed(0)}</span>
                       </div>
                       <div className="w-full bg-secondary rounded-full h-3 overflow-hidden">
                         <div className="bg-primary h-full rounded-full transition-all duration-500" style={{ width: `${Math.min(p.value * 2.5, 100)}%` }} />
                       </div>
                     </div>
-                  ))}
+                    );
+                  })}
                 </div>
                 <ReactionBar section="prioriteiten" reactions={reactions} profiles={profiles} onToggle={handleToggleReaction} />
                 <SectionComments section="prioriteiten" comments={comments} profiles={profiles} onAdd={handleAddComment} onDelete={handleDeleteComment} />
@@ -471,7 +475,7 @@ export default function Uitslag() {
                     <div className="space-y-2">
                       {Object.entries(dietCounts).sort(([, a], [, b]) => b - a).map(([diet, count]) => (
                         <div key={diet} className="flex items-center justify-between py-2 border-b border-border/50 last:border-0">
-                          <span className="text-sm">{diet}</span>
+                          <span className="text-sm">{translateLabel(DIET_LABELS, diet)}</span>
                           <div className="flex items-center gap-2">
                             <div className="w-20 bg-secondary rounded-full h-2 overflow-hidden">
                               <div className="bg-primary h-full rounded-full" style={{ width: `${(count / lockedSubs.length) * 100}%` }} />
@@ -519,7 +523,7 @@ export default function Uitslag() {
                     <div className="space-y-2">
                       {Object.entries(activityCounts).sort(([, a], [, b]) => b - a).map(([act, count]) => (
                         <div key={act} className="flex items-center justify-between py-2 border-b border-border/50 last:border-0">
-                          <span className="text-sm">{act}</span>
+                          <span className="text-sm">{translateLabel(ACTIVITY_LABELS, act)}</span>
                           <div className="flex items-center gap-2">
                             <div className="w-20 bg-secondary rounded-full h-2 overflow-hidden">
                               <div className="bg-primary h-full rounded-full" style={{ width: `${(count / lockedSubs.length) * 100}%` }} />

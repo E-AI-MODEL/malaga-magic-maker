@@ -8,6 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { computeGroupRules, computeAvgPoints, type Submission } from "@/lib/scoring";
+import { DIET_LABELS, ACTIVITY_LABELS, translateLabel } from "@/lib/labelMaps";
 import {
   CheckCircle2, XCircle, Users, Bed, Bath, Car, UtensilsCrossed,
   Dumbbell, Star, Waves, Wind, Wifi, ParkingCircle, MapPin, DollarSign,
@@ -134,7 +135,7 @@ export default function Wensen() {
   });
 
   // Budget caps
-  const budgets = submissions.map(s => s.budget_cap_total).filter((b): b is number => b !== null && b > 0);
+  const budgets = submissions.map(s => s.budget_cap_total).filter((b): b is number => b !== null && b > 0 && b < 100000);
 
   // Remarks
   const allRemarks = submissions
@@ -347,7 +348,7 @@ export default function Wensen() {
                 {Object.keys(allDiets).length > 0 ? (
                   Object.entries(allDiets).sort(([, a], [, b]) => b - a).map(([diet, count]) => (
                     <div key={diet} className="flex items-center justify-between py-1">
-                      <span className="text-xs">{diet}</span>
+                      <span className="text-xs">{translateLabel(DIET_LABELS, diet)}</span>
                       <Badge variant="outline" className="text-[10px] tabular-nums">{count}x</Badge>
                     </div>
                   ))
@@ -382,7 +383,7 @@ export default function Wensen() {
                 {Object.keys(allActivities).length > 0 ? (
                   Object.entries(allActivities).sort(([, a], [, b]) => b - a).map(([act, count]) => (
                     <div key={act} className="flex items-center justify-between py-1">
-                      <span className="text-xs">{act}</span>
+                      <span className="text-xs">{translateLabel(ACTIVITY_LABELS, act)}</span>
                       <Badge variant="outline" className="text-[10px] tabular-nums">{count}x</Badge>
                     </div>
                   ))

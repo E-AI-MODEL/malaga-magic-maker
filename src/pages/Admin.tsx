@@ -11,8 +11,10 @@ import { useTrip } from "@/contexts/TripContext";
 import { VoteOverviewTable } from "@/components/VoteOverviewTable";
 import {
   CheckCircle2, XCircle, Unlock, Trash2, Undo2, Shield, Trophy, Clock, ChevronDown, Eye, Users,
-  BarChart3, Settings, FileText, Pencil, Plus, MapPin, Table2, TrendingUp, AlertCircle
+  BarChart3, Settings, FileText, Pencil, Plus, MapPin, Table2, TrendingUp, AlertCircle, Bed, Timer
 } from "lucide-react";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Textarea } from "@/components/ui/textarea";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { AdminEditSubmission } from "@/components/AdminEditSubmission";
@@ -39,6 +41,8 @@ export default function Admin() {
   const [editingUserId, setEditingUserId] = useState<string | null>(null);
   const [showAccForm, setShowAccForm] = useState(false);
   const [editingAccId, setEditingAccId] = useState<string | null>(null);
+  const [eliminateTarget, setEliminateTarget] = useState<string | null>(null);
+  const [eliminateReason, setEliminateReason] = useState("");
 
   const tripId = activeTrip?.id;
 
@@ -83,11 +87,19 @@ export default function Admin() {
     await supabase.from("admin_overrides").insert({ admin_user_id: user.id, field, old_value: oldValue, new_value: newValue, reason });
   };
 
+
+
   const handleEliminate = async (accId: string) => {
-    const reason = prompt("Reden voor eliminatie:");
-    if (!reason) return;
-    await supabase.from("accommodations").update({ status: "eliminated", eliminated_reason: reason }).eq("id", accId);
-    await logOverride("status", "active", "eliminated", reason);
+    setEliminateTarget(accId);
+    setEliminateReason("");
+  };
+
+  const confirmEliminate = async () => {
+    if (!eliminateTarget || !eliminateReason.trim()) return;
+    await supabase.from("accommodations").update({ status: "eliminated", eliminated_reason: eliminateReason }).eq("id", eliminateTarget);
+    await logOverride("status", "active", "eliminated", eliminateReason);
+    setEliminateTarget(null);
+    setEliminateReason("");
     fetchAll(); toast.success("Geëlimineerd");
   };
 
@@ -474,6 +486,30 @@ export default function Admin() {
 
           </Accordion>
         </div>
+
+        {/* Eliminatie AlertDialog */}
+        <AlertDialog open={!!eliminateTarget} onOpenChange={(open) => !open && setEliminateTarget(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Accommodatie elimineren</AlertDialogTitle>
+              <AlertDialogDescription>
+                Geef een reden op waarom deze accommodatie wordt geëlimineerd. Dit is zichtbaar in het overzicht.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <Textarea
+              placeholder="Reden voor eliminatie..."
+              value={eliminateReason}
+              onChange={e => setEliminateReason(e.target.value)}
+              className="min-h-[80px]"
+            />
+            <AlertDialogFooter>
+              <AlertDialogCancel>Annuleren</AlertDialogCancel>
+              <AlertDialogAction onClick={confirmEliminate} disabled={!eliminateReason.trim()} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                Elimineer
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </AppLayout>
   );
@@ -586,11 +622,11 @@ function UserCard({ profile: p, submission: sub, logs, avgPoints, accommodations
           )}
 
           {/* Activity stats */}
-          <div className="flex gap-4 text-[10px] text-muted-foreground border-t border-border/40 pt-3">
-            <span>{logins} logins</span>
-            <span>{pageViews} pageviews</span>
-            {lastActivity && <span>Laatst: {new Date(lastActivity).toLocaleString("nl-NL", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}</span>}
-          </div>
+          {lastActivity && (
+            <div className="text-[10px] text-muted-foreground border-t border-border/40 pt-3">
+              Laatst actief: {new Date(lastActivity).toLocaleString("nl-NL", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
+            </div>
+          )}
         </div>
       </CollapsibleContent>
     </Collapsible>
@@ -614,10 +650,13 @@ function AccommodationRow({ acc, onEliminate, onUndo, onFinalist, onTogglePrice,
             <p className="text-sm font-semibold truncate">{acc.name}</p>
             {acc.status === "finalist" && <Trophy className="h-3.5 w-3.5 text-warning shrink-0" />}
           </div>
-          <p className="text-[11px] text-muted-foreground mt-0.5">
-            {acc.location_label} · {acc.bedrooms}k · {acc.fixed_beds_count}b · {acc.golf_minutes ?? "?"}m golf
-            {acc.total_price_3_nights && ` · €${acc.total_price_3_nights}`}
-          </p>
+          <div className="flex flex-wrap gap-1.5 mt-1">
+            <Badge variant="outline" className="text-[10px] py-0 px-1.5">{acc.location_label}</Badge>
+            <Badge variant="outline" className="text-[10px] py-0 px-1.5">{acc.bedrooms} kamers</Badge>
+            <Badge variant="outline" className="text-[10px] py-0 px-1.5">{acc.fixed_beds_count} bedden</Badge>
+            <Badge variant="outline" className="text-[10px] py-0 px-1.5">{acc.golf_minutes ?? "?"} min golf</Badge>
+            {acc.total_price_3_nights && <Badge variant="outline" className="text-[10px] py-0 px-1.5">€{acc.total_price_3_nights}</Badge>}
+          </div>
           {!acc.eligibility.eligible && <p className="text-[10px] text-destructive mt-1">{acc.eligibility.failures.join(", ")}</p>}
           {acc.eliminated_reason && <p className="text-[10px] text-muted-foreground italic mt-1">{acc.eliminated_reason}</p>}
         </div>

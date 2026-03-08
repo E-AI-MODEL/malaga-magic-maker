@@ -272,9 +272,12 @@ export default function Taken() {
                           profiles={profiles}
                           reactions={reactions}
                           comments={comments}
+                          votes={taskVotes}
+                          currentUserId={user?.id}
                           onToggleReaction={handleToggleReaction}
                           onAddComment={handleAddComment}
                           onDeleteComment={handleDeleteComment}
+                          onVote={handleVote}
                           onOpenDrawer={setDrawerTaskId}
                           onOpenLightbox={setLightboxUrl}
                           index={idx}

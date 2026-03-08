@@ -60,7 +60,7 @@ export default function Login() {
             VAKANSIE
           </h1>
           <p className="text-white/70 text-sm mt-3 font-medium">
-            {isRegister ? "Maak een account aan" : "Plan je vakantie samen"}
+            {isRegister ? "Maak een account aan" : "Plan je vakansie met Hansie, wel zo makkelijk."}
           </p>
         </div>
 

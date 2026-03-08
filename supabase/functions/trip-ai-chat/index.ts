@@ -98,9 +98,15 @@ ${openTasks.length ? `Open: ${openTasks.join(", ")}` : ""}
 - Wees concreet: noem specifieke restaurants, stranden, golfbanen, activiteiten met namen, adressen en geschatte prijzen
 - Focus op de Costa del Sol regio (Málaga, Mijas, Fuengirola, Marbella, Benalmádena, Nerja, etc.)
 - Houd rekening met het groepsprofiel (budget, dieet, activiteiten)
-- Gebruik markdown formatting voor leesbaarheid (lijsten, kopjes, bold)
 - Als je iets niet zeker weet, zeg dat eerlijk
-- Houd antwoorden beknopt maar informatief (max ~400 woorden)`;
+
+## BELANGRIJK: Output format
+- Begin met een korte inleiding van MAX 2 zinnen
+- Gebruik daarna voor ELKE tip/suggestie een ## heading met een korte titel (bijv. "## 1. El Oceano Beach Restaurant")
+- Onder elke heading: max 3-4 regels met de kern (type keuken, sfeer, prijs, adres)
+- Eindig optioneel met een korte ## Tip sectie (1-2 zinnen)
+- Gebruik GEEN lange beschrijvingen. Wees bondig en scanbaar.
+- Totaal max 300 woorden`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",

@@ -238,11 +238,12 @@ export default function Reisplanner() {
   const inputRef = useRef<HTMLInputElement>(null);
 
   const fontSizeClass = ["text-[10px] leading-[1.5]", "text-[11px] leading-[1.5]", "text-xs leading-[1.6]"][fontSize] || "text-[10px] leading-[1.5]";
-  const proseSizeClass = [
+  const PROSE_SIZES = [
     "prose prose-sm dark:prose-invert [&_p]:text-[10px] [&_p]:leading-[1.5] [&_li]:text-[10px] [&_li]:leading-[1.5] [&_strong]:text-[10px] [&_a]:text-[10px] [&_h3]:text-[11px] [&_h4]:text-[10px]",
     "prose prose-sm dark:prose-invert [&_p]:text-[11px] [&_p]:leading-[1.5] [&_li]:text-[11px] [&_li]:leading-[1.5] [&_strong]:text-[11px] [&_a]:text-[11px] [&_h3]:text-xs [&_h4]:text-[11px]",
     "prose prose-sm dark:prose-invert [&_p]:text-xs [&_p]:leading-[1.6] [&_li]:text-xs [&_li]:leading-[1.6] [&_strong]:text-xs [&_a]:text-xs [&_h3]:text-sm [&_h4]:text-xs",
-  ][fontSize] || proseSizeClass[0];
+  ];
+  const proseSizeClass = PROSE_SIZES[fontSize] || PROSE_SIZES[0];
 
   const adjustFontSize = (delta: number) => {
     setFontSize((prev) => {

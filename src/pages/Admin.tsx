@@ -12,6 +12,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { AdminEditSubmission } from "@/components/AdminEditSubmission";
 import { AdminAccommodationForm } from "@/components/AdminAccommodationForm";
+import { BulkImportAccommodations } from "@/components/BulkImportAccommodations";
 
 interface Profile { id: string; username: string; display_name: string; }
 interface Override { id: string; field: string; old_value: string | null; new_value: string | null; reason: string | null; created_at: string; }
@@ -523,9 +524,12 @@ export default function Admin() {
               </AccordionTrigger>
               <AccordionContent className="px-4 pb-4">
                 <div className="space-y-3">
-                  <Button size="sm" variant="outline" className="w-full" onClick={() => { setShowAccForm(true); setEditingAccId(null); }}>
-                    <Plus className="h-3.5 w-3.5 mr-1" /> Accommodatie toevoegen
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button size="sm" variant="outline" className="flex-1" onClick={() => { setShowAccForm(true); setEditingAccId(null); }}>
+                      <Plus className="h-3.5 w-3.5 mr-1" /> Toevoegen
+                    </Button>
+                  </div>
+                  <BulkImportAccommodations onImported={fetchAll} />
                   {(showAccForm || editingAccId) && (
                     <AdminAccommodationForm
                       editId={editingAccId}

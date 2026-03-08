@@ -4,8 +4,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { computeGroupRules, computeAvgPoints, type Submission } from "@/lib/scoring";
 import { Badge } from "@/components/ui/badge";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Car, Home, UtensilsCrossed, Dumbbell, BarChart3, Users, CheckCircle2, XCircle, Star, ExternalLink, Bed, Bath, Waves, ParkingCircle, Wind, Wifi, MapPin, Table2 } from "lucide-react";
+import { Car, Home, UtensilsCrossed, Dumbbell, BarChart3, Users, CheckCircle2, XCircle, Star, ExternalLink, Bed, Bath, Waves, ParkingCircle, Wind, Wifi, MapPin, Table2, Map } from "lucide-react";
 import { VoteOverviewTable } from "@/components/VoteOverviewTable";
+import { POIMatrix } from "@/components/POIMatrix";
 import { useAuth } from "@/lib/auth";
 import { ReactionBar } from "@/components/ReactionBar";
 import { SectionComments } from "@/components/SectionComments";
@@ -288,6 +289,22 @@ export default function Uitslag() {
                 <VoteOverviewTable submissions={submissions} rules={rules} profiles={profiles} />
                 <ReactionBar section="stemoverzicht" reactions={reactions} profiles={profiles} onToggle={handleToggleReaction} />
                 <SectionComments section="stemoverzicht" comments={comments} profiles={profiles} onAdd={handleAddComment} onDelete={handleDeleteComment} />
+              </AccordionContent>
+            </AccordionItem>
+
+            {/* REISTIJDENMATRIX */}
+            <AccordionItem value="reistijden" className="border rounded-lg border-border/60 overflow-hidden">
+              <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-accent/5">
+                <div className="flex items-center gap-2">
+                  <div className="h-7 w-7 rounded-full bg-primary/10 flex items-center justify-center text-primary font-display font-extrabold text-xs">🗺️</div>
+                  <Map className="h-4 w-4 text-primary" />
+                  <span className="font-display font-bold text-sm">Reistijdenmatrix</span>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="px-4 pb-4">
+                <POIMatrix />
+                <ReactionBar section="reistijden" reactions={reactions} profiles={profiles} onToggle={handleToggleReaction} />
+                <SectionComments section="reistijden" comments={comments} profiles={profiles} onAdd={handleAddComment} onDelete={handleDeleteComment} />
               </AccordionContent>
             </AccordionItem>
             

@@ -191,7 +191,7 @@ function AssistantMessage({ content, isStreaming, proseSizeClass }: { content: s
   // While streaming or if no sections found, show plain markdown
   if (isStreaming || sections.items.length === 0) {
     return (
-      <div className={`prose ${proseSize} dark:prose-invert max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0`}>
+      <div className={`${proseSizeClass} max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0`}>
         <ReactMarkdown>{content}</ReactMarkdown>
       </div>
     );

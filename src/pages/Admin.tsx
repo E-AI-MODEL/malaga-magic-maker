@@ -524,9 +524,12 @@ export default function Admin() {
               </AccordionTrigger>
               <AccordionContent className="px-4 pb-4">
                 <div className="space-y-3">
-                  <Button size="sm" variant="outline" className="w-full" onClick={() => { setShowAccForm(true); setEditingAccId(null); }}>
-                    <Plus className="h-3.5 w-3.5 mr-1" /> Accommodatie toevoegen
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button size="sm" variant="outline" className="flex-1" onClick={() => { setShowAccForm(true); setEditingAccId(null); }}>
+                      <Plus className="h-3.5 w-3.5 mr-1" /> Toevoegen
+                    </Button>
+                  </div>
+                  <BulkImportAccommodations onImported={fetchAll} />
                   {(showAccForm || editingAccId) && (
                     <AdminAccommodationForm
                       editId={editingAccId}

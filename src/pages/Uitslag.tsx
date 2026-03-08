@@ -291,6 +291,22 @@ export default function Uitslag() {
                 <SectionComments section="stemoverzicht" comments={comments} profiles={profiles} onAdd={handleAddComment} onDelete={handleDeleteComment} />
               </AccordionContent>
             </AccordionItem>
+
+            {/* REISTIJDENMATRIX */}
+            <AccordionItem value="reistijden" className="border rounded-lg border-border/60 overflow-hidden">
+              <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-accent/5">
+                <div className="flex items-center gap-2">
+                  <div className="h-7 w-7 rounded-full bg-primary/10 flex items-center justify-center text-primary font-display font-extrabold text-xs">🗺️</div>
+                  <Map className="h-4 w-4 text-primary" />
+                  <span className="font-display font-bold text-sm">Reistijdenmatrix</span>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="px-4 pb-4">
+                <POIMatrix />
+                <ReactionBar section="reistijden" reactions={reactions} profiles={profiles} onToggle={handleToggleReaction} />
+                <SectionComments section="reistijden" comments={comments} profiles={profiles} onAdd={handleAddComment} onDelete={handleDeleteComment} />
+              </AccordionContent>
+            </AccordionItem>
             
             {/* VERVOER */}
             <AccordionItem value="vervoer" className="border rounded-lg border-border/60 overflow-hidden">

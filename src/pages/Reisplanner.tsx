@@ -4,7 +4,7 @@ import { useTrip } from "@/contexts/TripContext";
 import { useAuth } from "@/lib/auth";
 import ReactMarkdown from "react-markdown";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Send, Loader2, UtensilsCrossed, Map, Flag, Moon, ShoppingCart, Menu, Trash2 } from "lucide-react";
+import { Send, Loader2, UtensilsCrossed, Map, Flag, Moon, ShoppingCart, Menu, Trash2, ChevronRight, ArrowLeft, Sun, Waves, Car, Wine, Music, Utensils, Beer, Palmtree } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import vakansielogo from "@/assets/vakansie-logo.png";
@@ -12,12 +12,55 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 
 type Msg = { role: "user" | "assistant"; content: string };
 
-const CHIPS = [
-  { label: "Restaurant tips", icon: UtensilsCrossed, prompt: "Geef me 3-5 goede restauranttips in de buurt van onze accommodatie, passend bij ons groepsprofiel." },
-  { label: "Dagtripjes", icon: Map, prompt: "Wat zijn leuke dagtripjes vanuit onze locatie voor onze groep?" },
-  { label: "Golfbanen", icon: Flag, prompt: "Welke golfbanen in de buurt zijn het beste voor onze groep qua prijs en kwaliteit?" },
-  { label: "Avondprogramma", icon: Moon, prompt: "Wat kunnen we 's avonds doen in de buurt? Denk aan bars, livemuziek, etc." },
-  { label: "Boodschappen", icon: ShoppingCart, prompt: "Waar kunnen we het beste boodschappen doen en wat moeten we zeker kopen voor de groep?" },
+type MenuCategory = {
+  label: string;
+  icon: any;
+  desc: string;
+  items: { label: string; prompt: string }[];
+};
+
+const MENU: MenuCategory[] = [
+  {
+    label: "Eten & drinken", icon: UtensilsCrossed, desc: "Restaurants, bars en boodschappen",
+    items: [
+      { label: "Restaurants voor groepen", prompt: "Geef 3-5 restaurants in de buurt van onze accommodatie die geschikt zijn voor een groep van 6 personen. Noem per restaurant: naam, type keuken, sfeer, prijs p.p. en adres. Houd rekening met ons budget en eventuele dieetwensen." },
+      { label: "Tapas & casual spots", prompt: "Wat zijn de beste tapas-bars en casual eetplekken in de buurt? Noem naam, specialiteit, prijs-indicatie en adres. Focus op authentiek Spaans." },
+      { label: "Supermarkten & boodschappen", prompt: "Waar kunnen we het beste boodschappen doen bij onze accommodatie? Noem de dichtstbijzijnde supermarkten met afstand, en geef tips voor typisch Spaanse producten die we moeten proberen." },
+    ],
+  },
+  {
+    label: "Golf", icon: Flag, desc: "Banen, boekingen en tips",
+    items: [
+      { label: "Beste golfbanen in de buurt", prompt: "Welke golfbanen liggen het dichtst bij onze accommodatie? Noem per baan: naam, afstand, greenfee, kwaliteit (rating) en boekingstips. We willen 2-3 rondes spelen." },
+      { label: "Prijs-kwaliteit vergelijking", prompt: "Vergelijk de 4 beste golfbanen in de regio op prijs-kwaliteit. Maak een ranking met greenfee, baanconditie en bereikbaarheid vanaf onze accommodatie." },
+      { label: "Boekingstips & etiquette", prompt: "Geef praktische tips voor het boeken van golftijden in april aan de Costa del Sol. Denk aan: hoe ver vooruit boeken, dresscode, en groepskorting-mogelijkheden." },
+    ],
+  },
+  {
+    label: "Activiteiten overdag", icon: Sun, desc: "Strand, cultuur en uitstapjes",
+    items: [
+      { label: "Stranden in de buurt", prompt: "Wat zijn de 3-5 beste stranden bij onze accommodatie? Noem per strand: naam, afstand, type (rustig/levendig), voorzieningen en parkeermogelijkheden." },
+      { label: "Cultuur & bezienswaardigheden", prompt: "Welke culturele bezienswaardigheden en dorpjes zijn de moeite waard in de buurt? Denk aan: oude stadjes, markten, musea. Noem naam, afstand en bezoektijd." },
+      { label: "Dagtripjes vanuit de accommodatie", prompt: "Stel 3 concrete dagtripjes voor vanuit onze accommodatie. Per trip: bestemming, reistijd, wat te doen, kosten en lunchplek." },
+      { label: "Sport & outdoor", prompt: "Welke sportieve activiteiten (behalve golf) kunnen we doen? Denk aan padel, wandelen, watersport. Noem locaties, prijzen en of je moet reserveren." },
+    ],
+  },
+  {
+    label: "Avond & uitgaan", icon: Moon, desc: "Bars, muziek en entertainment",
+    items: [
+      { label: "Bars & cocktails", prompt: "Waar kunnen we 's avonds goed een drankje doen met de groep? Noem 3-5 bars met sfeer, type (rooftop/beach/lounge), locatie en prijsindicatie." },
+      { label: "Live muziek & entertainment", prompt: "Waar is er live muziek of entertainment in de buurt in april? Noem locaties, type muziek, avonden en of je moet reserveren." },
+      { label: "Avondplanning per dag", prompt: "Stel voor elke avond van ons verblijf een concreet avondprogramma voor. Mix rustige en uitgaansavonden, passend bij onze groep." },
+    ],
+  },
+  {
+    label: "Praktisch", icon: Car, desc: "Vervoer, winkels en tips",
+    items: [
+      { label: "Vervoer & parkeren", prompt: "Hoe verplaatsen we ons het beste? Geef tips over huurauto, taxi-apps, parkeren bij de accommodatie en bij populaire bestemmingen." },
+      { label: "Nuttige apps & nummers", prompt: "Welke apps en telefoonnummers zijn handig voor onze reis naar de Costa del Sol? Denk aan taxi, restaurants, vertaling, noodgevallen." },
+      { label: "Weer & inpaktips april", prompt: "Wat is het typische weer in april aan de Costa del Sol? Geef concrete inpaktips voor onze groep, inclusief voor golf en strand." },
+    ],
+  },
 ];
 
 import { supabase } from "@/integrations/supabase/client";
@@ -173,6 +216,8 @@ export default function Reisplanner() {
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [activeCategory, setActiveCategory] = useState<MenuCategory | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -275,36 +320,67 @@ export default function Reisplanner() {
             }}
             className="flex items-center gap-2 max-w-2xl mx-auto"
           >
-            {/* Burger menu with chips + wis */}
-            <Popover>
+            {/* Burger menu with categories */}
+            <Popover open={menuOpen} onOpenChange={(open) => { setMenuOpen(open); if (!open) setActiveCategory(null); }}>
               <PopoverTrigger asChild>
                 <Button type="button" variant="ghost" size="icon" className="rounded-xl h-10 w-10 shrink-0 text-muted-foreground">
                   <Menu className="h-4 w-4" />
                 </Button>
               </PopoverTrigger>
-              <PopoverContent side="top" align="start" className="w-56 p-2 space-y-1">
-                {CHIPS.map((chip) => (
-                  <button
-                    key={chip.label}
-                    onClick={() => send(chip.prompt)}
-                    disabled={isLoading}
-                    className="flex items-center gap-2.5 w-full text-left text-sm font-medium px-3 py-2.5 rounded-lg hover:bg-secondary/80 transition-colors disabled:opacity-50"
-                  >
-                    <chip.icon className="h-4 w-4 text-primary shrink-0" />
-                    {chip.label}
-                  </button>
-                ))}
-                {messages.length > 0 && (
-                  <>
-                    <div className="border-t border-border my-1" />
+              <PopoverContent side="top" align="start" className="w-64 p-2">
+                {!activeCategory ? (
+                  <div className="space-y-0.5">
+                    <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground px-3 pt-1 pb-2">Waar kan ik mee helpen?</p>
+                    {MENU.map((cat) => (
+                      <button
+                        key={cat.label}
+                        onClick={() => setActiveCategory(cat)}
+                        className="flex items-center gap-3 w-full text-left px-3 py-2.5 rounded-lg hover:bg-secondary/80 transition-colors"
+                      >
+                        <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                          <cat.icon className="h-4 w-4 text-primary" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm font-semibold">{cat.label}</p>
+                          <p className="text-[11px] text-muted-foreground">{cat.desc}</p>
+                        </div>
+                        <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/40 shrink-0" />
+                      </button>
+                    ))}
+                    {messages.length > 0 && (
+                      <>
+                        <div className="border-t border-border my-1.5" />
+                        <button
+                          onClick={() => { setMessages([]); setMenuOpen(false); }}
+                          className="flex items-center gap-3 w-full text-left px-3 py-2.5 rounded-lg hover:bg-destructive/10 transition-colors text-destructive"
+                        >
+                          <Trash2 className="h-4 w-4 shrink-0" />
+                          <span className="text-sm font-medium">Gesprek wissen</span>
+                        </button>
+                      </>
+                    )}
+                  </div>
+                ) : (
+                  <div className="space-y-0.5">
                     <button
-                      onClick={() => setMessages([])}
-                      className="flex items-center gap-2.5 w-full text-left text-sm font-medium px-3 py-2.5 rounded-lg hover:bg-destructive/10 transition-colors text-destructive"
+                      onClick={() => setActiveCategory(null)}
+                      className="flex items-center gap-2 text-xs font-medium text-muted-foreground px-2 py-1.5 hover:text-foreground transition-colors"
                     >
-                      <Trash2 className="h-4 w-4 shrink-0" />
-                      Gesprek wissen
+                      <ArrowLeft className="h-3 w-3" />
+                      Terug
                     </button>
-                  </>
+                    <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground px-3 pt-1 pb-1.5">{activeCategory.label}</p>
+                    {activeCategory.items.map((item) => (
+                      <button
+                        key={item.label}
+                        onClick={() => { send(item.prompt); setMenuOpen(false); setActiveCategory(null); }}
+                        disabled={isLoading}
+                        className="flex items-center gap-2.5 w-full text-left text-sm font-medium px-3 py-2.5 rounded-lg hover:bg-secondary/80 transition-colors disabled:opacity-50"
+                      >
+                        {item.label}
+                      </button>
+                    ))}
+                  </div>
                 )}
               </PopoverContent>
             </Popover>

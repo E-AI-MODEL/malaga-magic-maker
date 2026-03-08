@@ -50,12 +50,13 @@ export default function Admin() {
 
   const fetchAll = async () => {
     if (!tripId) return;
-    const [p, s, a, o, dl, al] = await Promise.all([
+    const [p, s, a, o, dl, loc, al] = await Promise.all([
       supabase.from("profiles").select("*"),
       supabase.from("submissions").select("*").eq("trip_id", tripId),
       supabase.from("accommodations").select("*").eq("trip_id", tripId),
       supabase.from("admin_overrides").select("*").order("created_at", { ascending: false }),
       supabase.from("app_settings").select("*").eq("key", "intake_deadline").single(),
+      supabase.from("app_settings").select("*").eq("key", "ai_guide_location").single(),
       supabase.from("activity_log").select("*").eq("trip_id", tripId).order("created_at", { ascending: false }).limit(2000),
     ]);
     setProfiles((p.data as any[]) || []);
@@ -64,6 +65,7 @@ export default function Admin() {
     setOverrides((o.data as any[]) || []);
     setActivityLogs((al.data as any[]) || []);
     if (dl.data) { setDeadlineValue(dl.data.value); setDeadlineInput(dl.data.value); }
+    if (loc.data) { setAiLocation(loc.data.value); setAiLocationInput(loc.data.value); }
     setLoading(false);
   };
 

@@ -174,18 +174,45 @@ export default function Taken() {
           <Accordion type="multiple" defaultValue={[]} className="space-y-4">
             {allSections.map(section => {
               const sectionTasks = tasks.filter(t => t.section === section);
+              const avgProgress = sectionTasks.length > 0
+                ? Math.round(sectionTasks.reduce((a, t) => a + t.progress, 0) / sectionTasks.length)
+                : 0;
+              const doneTasks = sectionTasks.filter(t => t.progress === 100).length;
+              const inProgressTasks = sectionTasks.filter(t => t.progress > 0 && t.progress < 100).length;
+
               return (
                 <AccordionItem key={section} value={section} className="border rounded-lg border-border/60 overflow-hidden">
                   <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-accent/5">
-                    <div className="flex items-center gap-2">
-                      <span className="font-display font-bold text-sm">{SECTION_LABELS[section] || section}</span>
-                      {sectionTasks.length > 0 ? (
-                        <Badge variant="outline" className="text-[10px] font-mono tabular-nums border-primary/30 text-primary ml-auto">
-                          {Math.round(sectionTasks.reduce((a, t) => a + t.progress, 0) / sectionTasks.length)}%
-                        </Badge>
-                      ) : (
-                        <Badge variant="outline" className="text-[10px] text-muted-foreground ml-auto">Leeg</Badge>
-                      )}
+                    <div className="flex items-center gap-3 w-full pr-2">
+                      <div className="flex-1 text-left">
+                        <span className="font-display font-bold text-sm">{SECTION_LABELS[section] || section}</span>
+                        {sectionTasks.length > 0 && (
+                          <div className="flex items-center gap-2 mt-1.5">
+                            <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden max-w-[120px]">
+                              <div
+                                className="h-full bg-primary rounded-full transition-all duration-500"
+                                style={{ width: `${avgProgress}%` }}
+                              />
+                            </div>
+                            <span className="text-[10px] text-muted-foreground tabular-nums">{avgProgress}%</span>
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        {doneTasks > 0 && (
+                          <Badge className="bg-primary/10 text-primary border-0 text-[10px] tabular-nums px-1.5">
+                            {doneTasks} klaar
+                          </Badge>
+                        )}
+                        {inProgressTasks > 0 && (
+                          <Badge className="bg-warning/10 text-warning border-0 text-[10px] tabular-nums px-1.5">
+                            {inProgressTasks} bezig
+                          </Badge>
+                        )}
+                        {sectionTasks.length === 0 && (
+                          <Badge variant="outline" className="text-[10px] text-muted-foreground">Leeg</Badge>
+                        )}
+                      </div>
                     </div>
                   </AccordionTrigger>
                   <AccordionContent className="px-0 pb-0">

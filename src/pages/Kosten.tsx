@@ -184,7 +184,7 @@ export default function Kosten() {
 
         <div className="px-6 py-6 pb-24 space-y-6">
           {/* Summary cards */}
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             <Card className="border-primary/20 bg-primary/5">
               <CardContent className="p-4 text-center">
                 <Wallet className="h-5 w-5 text-primary mx-auto mb-1" />
@@ -199,6 +199,20 @@ export default function Kosten() {
                   €{participants.length > 0 ? (totalSpent / participants.length).toFixed(0) : 0}
                 </p>
                 <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Gem. per persoon</p>
+              </CardContent>
+            </Card>
+            <Card className="md:block hidden">
+              <CardContent className="p-4 text-center">
+                <Receipt className="h-5 w-5 text-muted-foreground mx-auto mb-1" />
+                <p className="font-display font-extrabold text-2xl">{allCostItems.length}</p>
+                <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Uitgaven</p>
+              </CardContent>
+            </Card>
+            <Card className="md:block hidden">
+              <CardContent className="p-4 text-center">
+                <Users className="h-5 w-5 text-muted-foreground mx-auto mb-1" />
+                <p className="font-display font-extrabold text-2xl">{participants.length}</p>
+                <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Deelnemers</p>
               </CardContent>
             </Card>
           </div>

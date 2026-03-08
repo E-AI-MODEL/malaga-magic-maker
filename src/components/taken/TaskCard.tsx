@@ -7,7 +7,7 @@ import { SectionComments } from "@/components/SectionComments";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  ChevronDown, User, Shield, Vote, Settings2, Link2, Calendar, Clock, MapPin
+  ChevronDown, User, Shield, Vote, Settings2, Link2, Calendar, Clock, MapPin, CheckCircle2, Circle
 } from "lucide-react";
 import type { Task, InfoDetails, Profile, Reaction, Comment } from "./types";
 
@@ -45,13 +45,36 @@ export function TaskCard({
       }}
     >
       <Collapsible open={isOpen} onOpenChange={onToggle}>
-        <Card className="border-border/60 overflow-hidden transition-shadow hover:shadow-md">
+        <Card className={`border-border/60 overflow-hidden transition-shadow hover:shadow-md ${
+          task.progress === 100 ? "border-l-4 border-l-primary" :
+          task.progress > 0 ? "border-l-4 border-l-warning" :
+          "border-l-4 border-l-muted"
+        }`}>
           <CollapsibleTrigger asChild>
             <CardContent className="p-4 cursor-pointer hover:bg-accent/5 transition-colors">
               <div className="flex items-center justify-between gap-2 mb-3">
-                <p className="font-display font-bold text-sm flex-1">{task.title}</p>
-                <div className="flex items-center gap-2">
-                  <Badge variant="outline" className="text-[10px] font-mono tabular-nums border-primary/30 text-primary">
+                <div className="flex items-center gap-2 flex-1 min-w-0">
+                  {task.progress === 100 ? (
+                    <div className="h-5 w-5 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                      <CheckCircle2 className="h-3.5 w-3.5 text-primary" />
+                    </div>
+                  ) : task.progress > 0 ? (
+                    <div className="h-5 w-5 rounded-full bg-warning/10 flex items-center justify-center shrink-0">
+                      <Clock className="h-3.5 w-3.5 text-warning" />
+                    </div>
+                  ) : (
+                    <div className="h-5 w-5 rounded-full bg-muted flex items-center justify-center shrink-0">
+                      <Circle className="h-3.5 w-3.5 text-muted-foreground" />
+                    </div>
+                  )}
+                  <p className="font-display font-bold text-sm flex-1 truncate">{task.title}</p>
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  <Badge variant="outline" className={`text-[10px] font-mono tabular-nums ${
+                    task.progress === 100 ? "border-primary/30 text-primary" :
+                    task.progress > 0 ? "border-warning/30 text-warning" :
+                    "border-border text-muted-foreground"
+                  }`}>
                     {task.progress}%
                   </Badge>
                   <motion.div

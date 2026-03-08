@@ -20,6 +20,17 @@ export default function Login() {
     setShowForm(true);
   };
 
+  // Force autoplay on mobile — some browsers block autoplay even with muted
+  const handleVideoMount = () => {
+    const video = videoRef.current;
+    if (video) {
+      video.play().catch(() => {
+        // Autoplay blocked — show form immediately
+        setShowForm(true);
+      });
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");

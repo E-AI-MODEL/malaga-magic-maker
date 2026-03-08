@@ -13,6 +13,7 @@ import { BedDouble, Car, Clock, Waves, ArrowRight } from "lucide-react";
 import { rankAccommodations, computeGroupRules, type Accommodation, type Submission, type RankedAccommodation } from "@/lib/scoring";
 import heroVilla from "@/assets/hero-villa.jpg";
 import { useLogEvent } from "@/contexts/ActivityLogContext";
+import { HeroSkeleton, CardSkeleton } from "@/components/PageSkeleton";
 
 export default function Accommodations() {
   const navigate = useNavigate();

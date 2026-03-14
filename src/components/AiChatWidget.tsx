@@ -4,7 +4,8 @@ import { useAuth } from "@/lib/auth";
 import { useIsMobile } from "@/hooks/use-mobile";
 import ReactMarkdown from "react-markdown";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Send, Loader2, UtensilsCrossed, Map, Flag, Moon, ShoppingCart, Menu, Trash2, ChevronRight, ArrowLeft, Sun, Waves, Car, Wine, Music, Utensils, Beer, Palmtree, Plus, Minus, X, MessageCircle, Compass } from "lucide-react";
+import { Send, Loader2, UtensilsCrossed, Map, Flag, Moon, ShoppingCart, Menu, Trash2, ChevronRight, ArrowLeft, Sun, Waves, Car, Wine, Music, Utensils, Beer, Palmtree, Plus, Minus, X, MessageCircle, Compass, Settings2 } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import vakansielogo from "@/assets/vakansie-logo.png";
@@ -21,6 +22,21 @@ type MenuCategory = {
   desc: string;
   items: { label: string; prompt: string }[];
 };
+
+type ContextToggleGroup = {
+  key: string;
+  label: string;
+  desc: string;
+  vars: string[];
+};
+
+const CONTEXT_GROUPS: ContextToggleGroup[] = [
+  { key: "trip", label: "Tripgegevens", desc: "Naam, data, groepsgrootte, golf", vars: ["group_size", "trip_name", "start_date", "end_date", "golf_min", "golf_max"] },
+  { key: "location", label: "Verblijflocatie", desc: "Admin-ingestelde locatie", vars: ["location_block"] },
+  { key: "preferences", label: "Groepsvoorkeuren", desc: "Budget, dieet, activiteiten, vervoer", vars: ["avg_budget", "diets", "activities", "mobility", "submissions_count"] },
+  { key: "accommodations", label: "Accommodaties", desc: "Actieve verblijfsopties", vars: ["accommodations_list"] },
+  { key: "tasks", label: "Takenstatus", desc: "Afgeronde en open taken", vars: ["completed_tasks", "open_tasks"] },
+];
 
 const MENU: MenuCategory[] = [
   {
@@ -83,12 +99,14 @@ const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/trip-ai-chat
 async function streamChat({
   messages,
   tripId,
+  disabledContexts = [],
   onDelta,
   onDone,
   onError,
 }: {
   messages: Msg[];
   tripId: string;
+  disabledContexts?: string[];
   onDelta: (text: string) => void;
   onDone: () => void;
   onError: (msg: string) => void;
@@ -106,7 +124,7 @@ async function streamChat({
       Authorization: `Bearer ${session.access_token}`,
       apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
     },
-    body: JSON.stringify({ messages, tripId }),
+    body: JSON.stringify({ messages, tripId, disabledContexts }),
   });
 
   if (!resp.ok) {
@@ -228,6 +246,13 @@ function ChatContent({ onClose }: { onClose?: () => void }) {
   const [isLoading, setIsLoading] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState<MenuCategory | null>(null);
+  const [showContextSettings, setShowContextSettings] = useState(false);
+  const [disabledContexts, setDisabledContexts] = useState<string[]>(() => {
+    try {
+      const saved = localStorage.getItem("ai-guide-disabled-contexts");
+      return saved ? JSON.parse(saved) : [];
+    } catch { return []; }
+  });
   const [fontSize, setFontSize] = useState(() => {
     const saved = localStorage.getItem("ai-guide-fontsize");
     return saved ? Number(saved) : 0;
@@ -275,9 +300,13 @@ function ChatContent({ onClose }: { onClose?: () => void }) {
     };
 
     try {
+      const activeDisabled = CONTEXT_GROUPS
+        .filter(g => disabledContexts.includes(g.key))
+        .flatMap(g => g.vars);
       await streamChat({
         messages: [...messages, userMsg],
         tripId: activeTrip.id,
+        disabledContexts: activeDisabled,
         onDelta: upsertAssistant,
         onDone: () => setIsLoading(false),
         onError: (msg) => {
@@ -373,14 +402,52 @@ function ChatContent({ onClose }: { onClose?: () => void }) {
           }}
           className="flex items-center gap-2"
         >
-          <Popover open={menuOpen} onOpenChange={(open) => { setMenuOpen(open); if (!open) setActiveCategory(null); }}>
+          <Popover open={menuOpen} onOpenChange={(open) => { setMenuOpen(open); if (!open) { setActiveCategory(null); setShowContextSettings(false); } }}>
             <PopoverTrigger asChild>
               <Button type="button" variant="ghost" size="icon" className="rounded-xl h-9 w-9 shrink-0 text-muted-foreground">
                 <Menu className="h-4 w-4" />
               </Button>
             </PopoverTrigger>
-            <PopoverContent side="top" align="start" className="w-64 p-2">
-              {!activeCategory ? (
+            <PopoverContent side="top" align="start" className="w-72 p-2 max-h-[60vh] overflow-y-auto">
+              {showContextSettings ? (
+                <div className="space-y-1">
+                  <button
+                    onClick={() => setShowContextSettings(false)}
+                    className="flex items-center gap-2 text-xs font-medium text-muted-foreground px-2 py-1.5 hover:text-foreground transition-colors"
+                  >
+                    <ArrowLeft className="h-3 w-3" />
+                    Terug
+                  </button>
+                  <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground px-3 pt-1 pb-1">Context meesturen</p>
+                  <p className="text-[10px] text-muted-foreground px-3 pb-2">Schakel uit wat de AI niet hoeft te weten, voor vrijere gesprekken.</p>
+                  {CONTEXT_GROUPS.map((group) => {
+                    const enabled = !disabledContexts.includes(group.key);
+                    return (
+                      <label
+                        key={group.key}
+                        className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg hover:bg-secondary/50 transition-colors cursor-pointer"
+                      >
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm font-medium">{group.label}</p>
+                          <p className="text-[10px] text-muted-foreground">{group.desc}</p>
+                        </div>
+                        <Switch
+                          checked={enabled}
+                          onCheckedChange={(checked) => {
+                            setDisabledContexts(prev => {
+                              const next = checked
+                                ? prev.filter(k => k !== group.key)
+                                : [...prev, group.key];
+                              localStorage.setItem("ai-guide-disabled-contexts", JSON.stringify(next));
+                              return next;
+                            });
+                          }}
+                        />
+                      </label>
+                    );
+                  })}
+                </div>
+              ) : !activeCategory ? (
                 <div className="space-y-0.5">
                   <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground px-3 pt-1 pb-2">Waar kan ik mee helpen?</p>
                   {MENU.map((cat) => (
@@ -399,17 +466,28 @@ function ChatContent({ onClose }: { onClose?: () => void }) {
                       <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/40 shrink-0" />
                     </button>
                   ))}
+                  <div className="border-t border-border my-1.5" />
+                  <button
+                    onClick={() => setShowContextSettings(true)}
+                    className="flex items-center gap-3 w-full text-left px-3 py-2.5 rounded-lg hover:bg-secondary/80 transition-colors"
+                  >
+                    <Settings2 className="h-4 w-4 text-muted-foreground shrink-0" />
+                    <div className="min-w-0 flex-1">
+                      <span className="text-sm font-medium">Context-instellingen</span>
+                      {disabledContexts.length > 0 && (
+                        <span className="ml-1.5 text-[10px] text-amber-500 font-medium">{disabledContexts.length} uit</span>
+                      )}
+                    </div>
+                    <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/40 shrink-0" />
+                  </button>
                   {messages.length > 0 && (
-                    <>
-                      <div className="border-t border-border my-1.5" />
-                      <button
-                        onClick={() => { setMessages([]); setMenuOpen(false); }}
-                        className="flex items-center gap-3 w-full text-left px-3 py-2.5 rounded-lg hover:bg-destructive/10 transition-colors text-destructive"
-                      >
-                        <Trash2 className="h-4 w-4 shrink-0" />
-                        <span className="text-sm font-medium">Gesprek wissen</span>
-                      </button>
-                    </>
+                    <button
+                      onClick={() => { setMessages([]); setMenuOpen(false); }}
+                      className="flex items-center gap-3 w-full text-left px-3 py-2.5 rounded-lg hover:bg-destructive/10 transition-colors text-destructive"
+                    >
+                      <Trash2 className="h-4 w-4 shrink-0" />
+                      <span className="text-sm font-medium">Gesprek wissen</span>
+                    </button>
                   )}
                 </div>
               ) : (

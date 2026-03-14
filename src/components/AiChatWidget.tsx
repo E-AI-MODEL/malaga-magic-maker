@@ -122,7 +122,7 @@ async function streamChat({
       Authorization: `Bearer ${session.access_token}`,
       apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
     },
-    body: JSON.stringify({ messages, tripId }),
+    body: JSON.stringify({ messages, tripId, disabledContexts }),
   });
 
   if (!resp.ok) {

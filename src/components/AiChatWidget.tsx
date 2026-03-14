@@ -300,9 +300,13 @@ function ChatContent({ onClose }: { onClose?: () => void }) {
     };
 
     try {
+      const activeDisabled = CONTEXT_GROUPS
+        .filter(g => disabledContexts.includes(g.key))
+        .flatMap(g => g.vars);
       await streamChat({
         messages: [...messages, userMsg],
         tripId: activeTrip.id,
+        disabledContexts: activeDisabled,
         onDelta: upsertAssistant,
         onDone: () => setIsLoading(false),
         onError: (msg) => {

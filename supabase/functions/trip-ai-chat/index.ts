@@ -148,10 +148,12 @@ serve(async (req) => {
       open_tasks: openTasks.length ? `Open: ${openTasks.join(", ")}` : "",
     };
 
-    // Use custom prompt or fallback, then interpolate
+    // Use custom prompt or fallback, then interpolate (skip disabled vars)
     let systemPrompt = customPrompt || FALLBACK_PROMPT;
+    const disabledSet = new Set(disabledContexts as string[]);
     for (const [key, value] of Object.entries(vars)) {
-      systemPrompt = systemPrompt.replaceAll(`{{${key}}}`, value);
+      const replacement = disabledSet.has(key) ? "" : value;
+      systemPrompt = systemPrompt.replaceAll(`{{${key}}}`, replacement);
     }
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {

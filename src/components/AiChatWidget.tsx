@@ -99,12 +99,14 @@ const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/trip-ai-chat
 async function streamChat({
   messages,
   tripId,
+  disabledContexts = [],
   onDelta,
   onDone,
   onError,
 }: {
   messages: Msg[];
   tripId: string;
+  disabledContexts?: string[];
   onDelta: (text: string) => void;
   onDone: () => void;
   onError: (msg: string) => void;

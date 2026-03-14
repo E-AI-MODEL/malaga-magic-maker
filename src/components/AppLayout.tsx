@@ -104,6 +104,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
             {children}
           </main>
         </div>
+        <AiChatWidget />
       </div>
     </SidebarProvider>
   );

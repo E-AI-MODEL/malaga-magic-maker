@@ -294,6 +294,105 @@ export default function Admin() {
               </AccordionContent>
             </AccordionItem>
 
+            {/* ═══ AI-REISGIDS PROMPT ═══ */}
+            <AccordionItem value="ai-prompt" className="border rounded-lg border-border/60 overflow-hidden">
+              <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-accent/5">
+                <div className="flex items-center gap-2 w-full">
+                  <FileText className="h-4 w-4 text-primary" />
+                  <span className="font-display font-bold text-sm">AI-reisgids prompt</span>
+                  <Badge variant="outline" className="text-[10px] ml-auto">
+                    {aiPrompt ? `${aiPrompt.length} tekens` : "Niet ingesteld"}
+                  </Badge>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="px-4 pb-4 space-y-3">
+                <p className="text-xs text-muted-foreground">
+                  De volledige systemprompt die de AI-reisgids ontvangt. Gebruik <code className="bg-secondary px-1 rounded text-[10px]">{"{{variabele}}"}</code> placeholders voor dynamische data.
+                </p>
+                <div className="bg-secondary rounded-lg p-3">
+                  <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">Beschikbare variabelen</p>
+                  <div className="flex flex-wrap gap-1">
+                    {["group_size","trip_name","start_date","end_date","golf_min","golf_max","location_block","avg_budget","diets","activities","mobility","submissions_count","accommodations_list","completed_tasks","open_tasks"].map(v => (
+                      <code key={v} className="bg-background border border-border rounded px-1.5 py-0.5 text-[9px] font-mono">{`{{${v}}}`}</code>
+                    ))}
+                  </div>
+                </div>
+                <Textarea
+                  value={aiPromptInput}
+                  onChange={(e) => setAiPromptInput(e.target.value)}
+                  className="font-mono text-[11px] leading-relaxed min-h-[300px]"
+                  placeholder="Systemprompt..."
+                  rows={20}
+                />
+                <div className="flex gap-2">
+                  <Button size="sm" className="h-9" disabled={aiPromptSaving} onClick={async () => {
+                    if (!aiPromptInput.trim()) return;
+                    setAiPromptSaving(true);
+                    const { error } = await supabase.from("app_settings").upsert({ key: "ai_guide_prompt", value: aiPromptInput.trim(), updated_at: new Date().toISOString() });
+                    setAiPromptSaving(false);
+                    if (error) { toast.error("Fout bij opslaan prompt"); return; }
+                    await logOverride("ai_guide_prompt", "...", "...", "Prompt aangepast");
+                    setAiPrompt(aiPromptInput.trim());
+                    toast.success("Prompt bijgewerkt");
+                  }}>
+                    {aiPromptSaving ? "Opslaan..." : "Opslaan"}
+                  </Button>
+                  <Button size="sm" variant="outline" className="h-9" onClick={async () => {
+                    const { data } = await supabase.from("app_settings").select("value").eq("key", "ai_guide_prompt").single();
+                    if (data) { setAiPromptInput(data.value); }
+                  }}>
+                    Herladen
+                  </Button>
+                  <Button size="sm" variant="ghost" className="h-9 text-destructive" onClick={() => {
+                    const DEFAULT = `Je bent de AI Reisgids van Vakansie, een slimme assistent voor groepsreizen. Je helpt een groep van {{group_size}} personen die naar de Costa del Sol (Málaga regio) gaan.
+
+## Tripgegevens
+- Naam: {{trip_name}}
+- Data: {{start_date}} t/m {{end_date}}
+- Groepsgrootte: {{group_size}}
+- Golf: {{golf_min}}-{{golf_max}} rondes gepland
+{{location_block}}
+## Groepsvoorkeuren
+- Gemiddeld budget: {{avg_budget}}
+- Dieetwensen: {{diets}}
+- Populaire activiteiten: {{activities}}
+- Vervoersvoorkeur: {{mobility}}
+- Aantal ingevulde intakes: {{submissions_count}}
+
+## Accommodaties (actief)
+{{accommodations_list}}
+
+## Takenstatus
+{{completed_tasks}}
+{{open_tasks}}
+
+## Instructies
+- Antwoord ALTIJD in het Nederlands
+- Wees concreet: noem specifieke restaurants, stranden, golfbanen, activiteiten met namen, adressen en geschatte prijzen
+- Focus op de Costa del Sol regio (Málaga, Mijas, Fuengirola, Marbella, Benalmádena, Nerja, etc.)
+- Houd rekening met het groepsprofiel (budget, dieet, activiteiten, vervoersvoorkeur)
+- Als de verblijflocatie is ingesteld, gebruik die als basis voor afstanden en aanbevelingen
+- Als je iets niet zeker weet, zeg dat eerlijk
+
+## BELANGRIJK: Output format
+- Begin met een korte inleiding van MAX 2 zinnen
+- Gebruik daarna voor ELKE tip/suggestie een ## heading met een korte titel
+- Heading format: "## 1. Korte titel in kleine letters"
+- Gebruik GEEN onnodige hoofdletters in headings. Alleen eigennamen krijgen een hoofdletter.
+- Houd headings kort (max 5 woorden)
+- Onder elke heading: max 3-4 regels met de kern
+- Eindig optioneel met een korte ## Tip sectie (1-2 zinnen)
+- Gebruik GEEN lange beschrijvingen. Wees bondig en scanbaar.
+- Totaal max 300 woorden`;
+                    setAiPromptInput(DEFAULT);
+                    toast.info("Standaardprompt geladen — klik Opslaan om te bevestigen");
+                  }}>
+                    Reset naar standaard
+                  </Button>
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+
             {/* ═══ GEBRUIKERS & INTAKE ═══ */}
             <AccordionItem value="users" className="border rounded-lg border-border/60 overflow-hidden">
               <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-accent/5">

@@ -53,7 +53,7 @@ export default function Admin() {
 
   const fetchAll = async () => {
     if (!tripId) return;
-    const [p, s, a, o, dl, loc, al] = await Promise.all([
+    const [p, s, a, o, dl, loc, al, promptRes] = await Promise.all([
       supabase.from("profiles").select("*"),
       supabase.from("submissions").select("*").eq("trip_id", tripId),
       supabase.from("accommodations").select("*").eq("trip_id", tripId),
@@ -61,6 +61,7 @@ export default function Admin() {
       supabase.from("app_settings").select("*").eq("key", "intake_deadline").single(),
       supabase.from("app_settings").select("*").eq("key", "ai_guide_location").single(),
       supabase.from("activity_log").select("*").eq("trip_id", tripId).order("created_at", { ascending: false }).limit(2000),
+      supabase.from("app_settings").select("*").eq("key", "ai_guide_prompt").single(),
     ]);
     setProfiles((p.data as any[]) || []);
     setSubmissions((s.data as any[]) || []);

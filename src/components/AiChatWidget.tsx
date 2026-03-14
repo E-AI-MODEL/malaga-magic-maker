@@ -246,6 +246,13 @@ function ChatContent({ onClose }: { onClose?: () => void }) {
   const [isLoading, setIsLoading] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState<MenuCategory | null>(null);
+  const [showContextSettings, setShowContextSettings] = useState(false);
+  const [disabledContexts, setDisabledContexts] = useState<string[]>(() => {
+    try {
+      const saved = localStorage.getItem("ai-guide-disabled-contexts");
+      return saved ? JSON.parse(saved) : [];
+    } catch { return []; }
+  });
   const [fontSize, setFontSize] = useState(() => {
     const saved = localStorage.getItem("ai-guide-fontsize");
     return saved ? Number(saved) : 0;

@@ -402,7 +402,7 @@ function ChatContent({ onClose }: { onClose?: () => void }) {
           }}
           className="flex items-center gap-2"
         >
-          <Popover open={menuOpen} onOpenChange={(open) => { setMenuOpen(open); if (!open) setActiveCategory(null); }}>
+          <Popover open={menuOpen} onOpenChange={(open) => { setMenuOpen(open); if (!open) { setActiveCategory(null); setShowContextSettings(false); } }}>
             <PopoverTrigger asChild>
               <Button type="button" variant="ghost" size="icon" className="rounded-xl h-9 w-9 shrink-0 text-muted-foreground">
                 <Menu className="h-4 w-4" />

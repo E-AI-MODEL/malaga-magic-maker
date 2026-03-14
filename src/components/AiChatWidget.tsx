@@ -23,6 +23,21 @@ type MenuCategory = {
   items: { label: string; prompt: string }[];
 };
 
+type ContextToggleGroup = {
+  key: string;
+  label: string;
+  desc: string;
+  vars: string[];
+};
+
+const CONTEXT_GROUPS: ContextToggleGroup[] = [
+  { key: "trip", label: "Tripgegevens", desc: "Naam, data, groepsgrootte, golf", vars: ["group_size", "trip_name", "start_date", "end_date", "golf_min", "golf_max"] },
+  { key: "location", label: "Verblijflocatie", desc: "Admin-ingestelde locatie", vars: ["location_block"] },
+  { key: "preferences", label: "Groepsvoorkeuren", desc: "Budget, dieet, activiteiten, vervoer", vars: ["avg_budget", "diets", "activities", "mobility", "submissions_count"] },
+  { key: "accommodations", label: "Accommodaties", desc: "Actieve verblijfsopties", vars: ["accommodations_list"] },
+  { key: "tasks", label: "Takenstatus", desc: "Afgeronde en open taken", vars: ["completed_tasks", "open_tasks"] },
+];
+
 const MENU: MenuCategory[] = [
   {
     label: "Eten & drinken", icon: UtensilsCrossed, desc: "Restaurants, bars en boodschappen",

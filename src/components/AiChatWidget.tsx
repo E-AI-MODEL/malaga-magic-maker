@@ -8,7 +8,7 @@ import { Send, Loader2, UtensilsCrossed, Map, Flag, Moon, ShoppingCart, Menu, Tr
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import vakansielogo from "@/assets/vakansie-logo.png";
+
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { supabase } from "@/integrations/supabase/client";

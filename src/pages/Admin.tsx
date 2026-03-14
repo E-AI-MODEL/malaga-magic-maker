@@ -70,6 +70,7 @@ export default function Admin() {
     setActivityLogs((al.data as any[]) || []);
     if (dl.data) { setDeadlineValue(dl.data.value); setDeadlineInput(dl.data.value); }
     if (loc.data) { setAiLocation(loc.data.value); setAiLocationInput(loc.data.value); }
+    if (promptRes.data) { setAiPrompt(promptRes.data.value); setAiPromptInput(promptRes.data.value); }
     setLoading(false);
   };
 

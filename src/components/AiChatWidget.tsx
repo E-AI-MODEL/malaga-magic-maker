@@ -408,8 +408,46 @@ function ChatContent({ onClose }: { onClose?: () => void }) {
                 <Menu className="h-4 w-4" />
               </Button>
             </PopoverTrigger>
-            <PopoverContent side="top" align="start" className="w-64 p-2">
-              {!activeCategory ? (
+            <PopoverContent side="top" align="start" className="w-72 p-2 max-h-[60vh] overflow-y-auto">
+              {showContextSettings ? (
+                <div className="space-y-1">
+                  <button
+                    onClick={() => setShowContextSettings(false)}
+                    className="flex items-center gap-2 text-xs font-medium text-muted-foreground px-2 py-1.5 hover:text-foreground transition-colors"
+                  >
+                    <ArrowLeft className="h-3 w-3" />
+                    Terug
+                  </button>
+                  <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground px-3 pt-1 pb-1">Context meesturen</p>
+                  <p className="text-[10px] text-muted-foreground px-3 pb-2">Schakel uit wat de AI niet hoeft te weten, voor vrijere gesprekken.</p>
+                  {CONTEXT_GROUPS.map((group) => {
+                    const enabled = !disabledContexts.includes(group.key);
+                    return (
+                      <label
+                        key={group.key}
+                        className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg hover:bg-secondary/50 transition-colors cursor-pointer"
+                      >
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm font-medium">{group.label}</p>
+                          <p className="text-[10px] text-muted-foreground">{group.desc}</p>
+                        </div>
+                        <Switch
+                          checked={enabled}
+                          onCheckedChange={(checked) => {
+                            setDisabledContexts(prev => {
+                              const next = checked
+                                ? prev.filter(k => k !== group.key)
+                                : [...prev, group.key];
+                              localStorage.setItem("ai-guide-disabled-contexts", JSON.stringify(next));
+                              return next;
+                            });
+                          }}
+                        />
+                      </label>
+                    );
+                  })}
+                </div>
+              ) : !activeCategory ? (
                 <div className="space-y-0.5">
                   <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground px-3 pt-1 pb-2">Waar kan ik mee helpen?</p>
                   {MENU.map((cat) => (
@@ -428,17 +466,28 @@ function ChatContent({ onClose }: { onClose?: () => void }) {
                       <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/40 shrink-0" />
                     </button>
                   ))}
+                  <div className="border-t border-border my-1.5" />
+                  <button
+                    onClick={() => setShowContextSettings(true)}
+                    className="flex items-center gap-3 w-full text-left px-3 py-2.5 rounded-lg hover:bg-secondary/80 transition-colors"
+                  >
+                    <Settings2 className="h-4 w-4 text-muted-foreground shrink-0" />
+                    <div className="min-w-0 flex-1">
+                      <span className="text-sm font-medium">Context-instellingen</span>
+                      {disabledContexts.length > 0 && (
+                        <span className="ml-1.5 text-[10px] text-amber-500 font-medium">{disabledContexts.length} uit</span>
+                      )}
+                    </div>
+                    <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/40 shrink-0" />
+                  </button>
                   {messages.length > 0 && (
-                    <>
-                      <div className="border-t border-border my-1.5" />
-                      <button
-                        onClick={() => { setMessages([]); setMenuOpen(false); }}
-                        className="flex items-center gap-3 w-full text-left px-3 py-2.5 rounded-lg hover:bg-destructive/10 transition-colors text-destructive"
-                      >
-                        <Trash2 className="h-4 w-4 shrink-0" />
-                        <span className="text-sm font-medium">Gesprek wissen</span>
-                      </button>
-                    </>
+                    <button
+                      onClick={() => { setMessages([]); setMenuOpen(false); }}
+                      className="flex items-center gap-3 w-full text-left px-3 py-2.5 rounded-lg hover:bg-destructive/10 transition-colors text-destructive"
+                    >
+                      <Trash2 className="h-4 w-4 shrink-0" />
+                      <span className="text-sm font-medium">Gesprek wissen</span>
+                    </button>
                   )}
                 </div>
               ) : (

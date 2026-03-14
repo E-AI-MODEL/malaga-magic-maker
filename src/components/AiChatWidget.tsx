@@ -359,12 +359,13 @@ function ChatContent({ onClose }: { onClose?: () => void }) {
       {/* Chat area */}
       <div ref={scrollRef} className="flex-1 overflow-y-auto px-3 py-4 space-y-3">
         {isEmpty && (
-          <div className="flex flex-col items-center justify-center h-full text-center gap-4 py-10">
-            <div className="h-14 w-14 rounded-2xl bg-primary/10 flex items-center justify-center">
-              <Compass className="h-7 w-7 text-primary" />
+          <div className="flex flex-col items-center justify-center h-full text-center gap-5 py-10">
+            <div className="relative">
+              <div className="absolute inset-0 bg-primary/10 rounded-full blur-xl scale-150" />
+              <img src={vakansielogo} alt="Vakansie" className="relative h-16 w-auto drop-shadow-md" />
             </div>
             <div className="space-y-1.5">
-              <h3 className="font-display text-sm font-bold text-foreground">Vraag het de Reisgids</h3>
+              <h3 className="font-display text-sm font-bold text-foreground">AI Reisgids</h3>
               <p className="text-[11px] text-muted-foreground max-w-[220px] mx-auto leading-relaxed">
                 Stel een vraag of kies een onderwerp uit het menu.
               </p>

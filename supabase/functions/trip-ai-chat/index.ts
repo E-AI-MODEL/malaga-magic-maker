@@ -79,7 +79,7 @@ serve(async (req) => {
       });
     }
 
-    const { messages, tripId } = await req.json();
+    const { messages, tripId, disabledContexts = [] } = await req.json();
     if (!tripId) throw new Error("tripId is required");
 
     // Fetch group context using service role

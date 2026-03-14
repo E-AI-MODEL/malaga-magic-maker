@@ -56,17 +56,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   useEffect(() => {
-    // Force logout for existing sessions to ensure users see boot sequence
-    const AUTH_VERSION = "v2-boot";
-    if (localStorage.getItem("auth-version") !== AUTH_VERSION) {
-      localStorage.setItem("auth-version", AUTH_VERSION);
-      sessionStorage.removeItem("boot-shown");
-      supabase.auth.signOut().then(() => {
-        setLoading(false);
-      });
-      return;
-    }
-
+    // Always set up the auth listener first
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (_event, session) => {
         if (session?.user) {
@@ -81,13 +71,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     );
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user) {
-        setUser(session.user);
-        fetchProfile(session.user.id);
-      }
-      setLoading(false);
-    });
+    // Force logout for existing sessions to ensure users see boot sequence
+    const AUTH_VERSION = "v2-boot";
+    if (localStorage.getItem("auth-version") !== AUTH_VERSION) {
+      localStorage.setItem("auth-version", AUTH_VERSION);
+      sessionStorage.removeItem("boot-shown");
+      supabase.auth.signOut(); // listener will handle state update
+    } else {
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        if (session?.user) {
+          setUser(session.user);
+          fetchProfile(session.user.id);
+        }
+        setLoading(false);
+      });
+    }
 
     return () => subscription.unsubscribe();
   }, []);

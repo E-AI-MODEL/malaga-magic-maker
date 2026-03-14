@@ -40,6 +40,9 @@ export default function Admin() {
   const [deadlineInput, setDeadlineInput] = useState("");
   const [aiLocation, setAiLocation] = useState("");
   const [aiLocationInput, setAiLocationInput] = useState("");
+  const [aiPrompt, setAiPrompt] = useState("");
+  const [aiPromptInput, setAiPromptInput] = useState("");
+  const [aiPromptSaving, setAiPromptSaving] = useState(false);
   const [editingUserId, setEditingUserId] = useState<string | null>(null);
   const [showAccForm, setShowAccForm] = useState(false);
   const [editingAccId, setEditingAccId] = useState<string | null>(null);

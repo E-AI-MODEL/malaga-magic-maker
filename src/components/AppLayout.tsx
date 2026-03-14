@@ -76,6 +76,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
           {children}
         </main>
         <BottomNav />
+        <AiChatWidget />
       </div>
     );
   }

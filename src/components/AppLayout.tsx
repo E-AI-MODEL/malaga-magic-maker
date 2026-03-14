@@ -2,6 +2,7 @@ import { ReactNode } from "react";
 import { BottomNav } from "./BottomNav";
 import { AppSidebar } from "./AppSidebar";
 import { NotificationCenter } from "./NotificationCenter";
+import { AiChatWidget } from "./AiChatWidget";
 import { useAuth } from "@/lib/auth";
 import { useTrip } from "@/contexts/TripContext";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -75,6 +76,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
           {children}
         </main>
         <BottomNav />
+        <AiChatWidget />
       </div>
     );
   }
@@ -102,6 +104,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
             {children}
           </main>
         </div>
+        <AiChatWidget />
       </div>
     </SidebarProvider>
   );

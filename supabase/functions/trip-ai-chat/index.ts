@@ -7,6 +7,47 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+const FALLBACK_PROMPT = `Je bent de AI Reisgids van Vakansie, een slimme assistent voor groepsreizen. Je helpt een groep van {{group_size}} personen die naar de Costa del Sol (Málaga regio) gaan.
+
+## Tripgegevens
+- Naam: {{trip_name}}
+- Data: {{start_date}} t/m {{end_date}}
+- Groepsgrootte: {{group_size}}
+- Golf: {{golf_min}}-{{golf_max}} rondes gepland
+{{location_block}}
+## Groepsvoorkeuren
+- Gemiddeld budget: {{avg_budget}}
+- Dieetwensen: {{diets}}
+- Populaire activiteiten: {{activities}}
+- Vervoersvoorkeur: {{mobility}}
+- Aantal ingevulde intakes: {{submissions_count}}
+
+## Accommodaties (actief)
+{{accommodations_list}}
+
+## Takenstatus
+{{completed_tasks}}
+{{open_tasks}}
+
+## Instructies
+- Antwoord ALTIJD in het Nederlands
+- Wees concreet: noem specifieke restaurants, stranden, golfbanen, activiteiten met namen, adressen en geschatte prijzen
+- Focus op de Costa del Sol regio (Málaga, Mijas, Fuengirola, Marbella, Benalmádena, Nerja, etc.)
+- Houd rekening met het groepsprofiel (budget, dieet, activiteiten, vervoersvoorkeur)
+- Als de verblijflocatie is ingesteld, gebruik die als basis voor afstanden en aanbevelingen
+- Als je iets niet zeker weet, zeg dat eerlijk
+
+## BELANGRIJK: Output format
+- Begin met een korte inleiding van MAX 2 zinnen
+- Gebruik daarna voor ELKE tip/suggestie een ## heading met een korte titel
+- Heading format: "## 1. Korte titel in kleine letters" (bijv. "## 1. El Oceano Beach" of "## 3. Mercadona supermarkt")
+- Gebruik GEEN onnodige hoofdletters in headings. Alleen eigennamen krijgen een hoofdletter. FOUT: "## 1. Gastronomie: TheFork & TripAdvisor". GOED: "## 1. TheFork & TripAdvisor"
+- Houd headings kort (max 5 woorden) zodat ze op één regel passen op een telefoon
+- Onder elke heading: max 3-4 regels met de kern (type keuken, sfeer, prijs, adres)
+- Eindig optioneel met een korte ## Tip sectie (1-2 zinnen)
+- Gebruik GEEN lange beschrijvingen. Wees bondig en scanbaar.
+- Totaal max 300 woorden`;
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -44,13 +85,14 @@ serve(async (req) => {
     // Fetch group context using service role
     const db = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
-    const [tripRes, subsRes, accomRes, tasksRes, profilesRes, locationRes] = await Promise.all([
+    const [tripRes, subsRes, accomRes, tasksRes, profilesRes, locationRes, promptRes] = await Promise.all([
       db.from("trip").select("*").eq("id", tripId).single(),
       db.from("submissions").select("*").eq("trip_id", tripId),
       db.from("accommodations").select("name, location_label, status, tags, type, total_price_3_nights, bedrooms, max_guests, golf_km, golf_minutes, beach_meters, agp_minutes").eq("trip_id", tripId).eq("status", "active"),
       db.from("tasks").select("title, section, progress, assigned_to, status").eq("trip_id", tripId),
       db.from("trip_members").select("user_id").eq("trip_id", tripId),
       db.from("app_settings").select("value").eq("key", "ai_guide_location").single(),
+      db.from("app_settings").select("value").eq("key", "ai_guide_prompt").single(),
     ]);
 
     const trip = tripRes.data;
@@ -58,8 +100,9 @@ serve(async (req) => {
     const accommodations = accomRes.data || [];
     const tasks = tasksRes.data || [];
     const chosenLocation = locationRes.data?.value || null;
+    const customPrompt = promptRes.data?.value || null;
 
-    // Build context summary
+    // Build context values
     const budgets = submissions.map((s: any) => s.budget_cap_total).filter(Boolean);
     const avgBudget = budgets.length ? Math.round(budgets.reduce((a: number, b: number) => a + b, 0) / budgets.length) : null;
 
@@ -74,7 +117,6 @@ serve(async (req) => {
     const completedTasks = tasks.filter((t: any) => t.progress === 100).map((t: any) => t.title);
     const openTasks = tasks.filter((t: any) => t.progress < 100).map((t: any) => t.title);
 
-    // Mobility preferences
     const mobilityCounts: Record<string, number> = {};
     submissions.forEach((s: any) => { mobilityCounts[s.mobility_choice] = (mobilityCounts[s.mobility_choice] || 0) + 1; });
     const mobilityPref = Object.entries(mobilityCounts).sort((a, b) => b[1] - a[1]).map(([k, v]) => `${k} (${v}x)`).join(", ");
@@ -83,46 +125,34 @@ serve(async (req) => {
       ? `\n## Verblijflocatie (door admin ingesteld)\n${chosenLocation}\nGebruik deze locatie als uitgangspunt voor ALLE aanbevelingen: restaurants, stranden, vervoer, golfbanen, activiteiten. Bereken afstanden en reistijden altijd vanaf deze locatie.\n`
       : "";
 
-    const systemPrompt = `Je bent de AI Reisgids van Vakansie, een slimme assistent voor groepsreizen. Je helpt een groep van ${trip?.group_size || "?"} personen die naar de Costa del Sol (Málaga regio) gaan.
+    const accommodationsList = accommodations.length
+      ? accommodations.map((a: any) => `- ${a.name} (${a.location_label}, ${a.type}, ${a.bedrooms} slaapkamers, max ${a.max_guests} gasten${a.total_price_3_nights ? `, €${a.total_price_3_nights}/3 nachten` : ""}${a.golf_minutes ? `, golf ${a.golf_minutes} min` : ""}${a.beach_meters ? `, strand ${a.beach_meters}m` : ""}${a.agp_minutes ? `, vliegveld ${a.agp_minutes} min` : ""})`).join("\n")
+      : "Nog geen accommodaties geselecteerd";
 
-## Tripgegevens
-- Naam: ${trip?.name || "Onbekend"}
-- Data: ${trip?.start_date} t/m ${trip?.end_date}
-- Groepsgrootte: ${trip?.group_size || "?"}
-- Golf: ${trip?.golf_min}-${trip?.golf_max} rondes gepland
-${locationBlock}
-## Groepsvoorkeuren
-- Gemiddeld budget: ${avgBudget ? `€${avgBudget} totaal` : "Niet opgegeven"}
-- Dieetwensen: ${uniqueDiets.length ? uniqueDiets.join(", ") : "Geen bijzonderheden"}
-- Populaire activiteiten: ${topActivities.length ? topActivities.join(", ") : "Niet opgegeven"}
-- Vervoersvoorkeur: ${mobilityPref || "Niet opgegeven"}
-- Aantal ingevulde intakes: ${submissions.length}
+    // Template variable replacements
+    const vars: Record<string, string> = {
+      group_size: String(trip?.group_size || "?"),
+      trip_name: trip?.name || "Onbekend",
+      start_date: trip?.start_date || "?",
+      end_date: trip?.end_date || "?",
+      golf_min: String(trip?.golf_min || "?"),
+      golf_max: String(trip?.golf_max || "?"),
+      location_block: locationBlock,
+      avg_budget: avgBudget ? `€${avgBudget} totaal` : "Niet opgegeven",
+      diets: uniqueDiets.length ? uniqueDiets.join(", ") : "Geen bijzonderheden",
+      activities: topActivities.length ? topActivities.join(", ") : "Niet opgegeven",
+      mobility: mobilityPref || "Niet opgegeven",
+      submissions_count: String(submissions.length),
+      accommodations_list: accommodationsList,
+      completed_tasks: completedTasks.length ? `Afgerond: ${completedTasks.join(", ")}` : "Nog niets afgerond",
+      open_tasks: openTasks.length ? `Open: ${openTasks.join(", ")}` : "",
+    };
 
-## Accommodaties (actief)
-${accommodations.length ? accommodations.map((a: any) => `- ${a.name} (${a.location_label}, ${a.type}, ${a.bedrooms} slaapkamers, max ${a.max_guests} gasten${a.total_price_3_nights ? `, €${a.total_price_3_nights}/3 nachten` : ""}${a.golf_minutes ? `, golf ${a.golf_minutes} min` : ""}${a.beach_meters ? `, strand ${a.beach_meters}m` : ""}${a.agp_minutes ? `, vliegveld ${a.agp_minutes} min` : ""})`).join("\n") : "Nog geen accommodaties geselecteerd"}
-
-## Takenstatus
-${completedTasks.length ? `Afgerond: ${completedTasks.join(", ")}` : "Nog niets afgerond"}
-${openTasks.length ? `Open: ${openTasks.join(", ")}` : ""}
-
-## Instructies
-- Antwoord ALTIJD in het Nederlands
-- Wees concreet: noem specifieke restaurants, stranden, golfbanen, activiteiten met namen, adressen en geschatte prijzen
-- Focus op de Costa del Sol regio (Málaga, Mijas, Fuengirola, Marbella, Benalmádena, Nerja, etc.)
-- Houd rekening met het groepsprofiel (budget, dieet, activiteiten, vervoersvoorkeur)
-- Als de verblijflocatie is ingesteld, gebruik die als basis voor afstanden en aanbevelingen
-- Als je iets niet zeker weet, zeg dat eerlijk
-
-## BELANGRIJK: Output format
-- Begin met een korte inleiding van MAX 2 zinnen
-- Gebruik daarna voor ELKE tip/suggestie een ## heading met een korte titel
-- Heading format: "## 1. Korte titel in kleine letters" (bijv. "## 1. El Oceano Beach" of "## 3. Mercadona supermarkt")
-- Gebruik GEEN onnodige hoofdletters in headings. Alleen eigennamen krijgen een hoofdletter. FOUT: "## 1. Gastronomie: TheFork & TripAdvisor". GOED: "## 1. TheFork & TripAdvisor"
-- Houd headings kort (max 5 woorden) zodat ze op één regel passen op een telefoon
-- Onder elke heading: max 3-4 regels met de kern (type keuken, sfeer, prijs, adres)
-- Eindig optioneel met een korte ## Tip sectie (1-2 zinnen)
-- Gebruik GEEN lange beschrijvingen. Wees bondig en scanbaar.
-- Totaal max 300 woorden`;
+    // Use custom prompt or fallback, then interpolate
+    let systemPrompt = customPrompt || FALLBACK_PROMPT;
+    for (const [key, value] of Object.entries(vars)) {
+      systemPrompt = systemPrompt.replaceAll(`{{${key}}}`, value);
+    }
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",

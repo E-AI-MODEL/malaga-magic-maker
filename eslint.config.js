@@ -21,6 +21,10 @@ export default tseslint.config(
       ...reactHooks.configs.recommended.rules,
       "react-refresh/only-export-components": ["warn", { allowConstantExport: true }],
       "@typescript-eslint/no-unused-vars": "off",
+      // The legacy prototype contains explicit any usage across components that will be
+      // removed or typed during the Vakansie rebuild. Keep it visible without blocking
+      // the initial repository baseline.
+      "@typescript-eslint/no-explicit-any": "warn",
     },
   },
 );

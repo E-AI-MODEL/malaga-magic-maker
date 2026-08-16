@@ -9,6 +9,7 @@ function source(path: string) {
 describe("Vakansie BUILD 01 security contract", () => {
   const foundation = source("supabase/migrations/20260816165000_vakansie_security_foundation.sql");
   const hardening = source("supabase/migrations/20260816165100_vakansie_security_policy_hardening.sql");
+  const attachmentLockdown = source("supabase/migrations/20260816165200_disable_public_task_attachment_uploads.sql");
   const hansie = source("supabase/functions/trip-ai-chat/index.ts");
   const firecrawl = source("supabase/functions/firecrawl-scrape/index.ts");
   const seedUsers = source("supabase/functions/seed-users/index.ts");
@@ -66,5 +67,11 @@ describe("Vakansie BUILD 01 security contract", () => {
     expect(hardening).toContain("membership_identity_immutable");
     expect(hardening).toContain("assigned_member_may_only_update_task_progress_and_details");
     expect(hardening).toContain("NEW.trip_id IS DISTINCT FROM OLD.trip_id");
+  });
+
+  it("stops new uploads to the public legacy task attachment bucket", () => {
+    expect(attachmentLockdown).toContain('DROP POLICY IF EXISTS "Authenticated can upload task attachments"');
+    expect(foundation).toContain("'trip-documents'");
+    expect(foundation).toContain("false,");
   });
 });

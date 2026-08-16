@@ -112,7 +112,6 @@ export default function Login() {
         muted
         playsInline
         preload="auto"
-        // @ts-ignore — webkit prefix for older iOS
         webkit-playsinline="true"
         disablePictureInPicture
         onPlay={() => {

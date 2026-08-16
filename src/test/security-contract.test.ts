@@ -42,10 +42,9 @@ describe("Vakansie BUILD 01 security contract", () => {
     const firecrawlCall = firecrawl.indexOf('fetch("https://api.firecrawl.dev');
 
     expect(firecrawl).toContain('eq("role", "admin")');
-    expect(firecrawl).toContain("status: false").not;
     expect(roleCheck).toBeGreaterThan(-1);
     expect(firecrawlCall).toBeGreaterThan(roleCheck);
-    expect(firecrawl).toContain("Forbidden");
+    expect(firecrawl).toContain('return jsonResponse(403, { success: false, error: "Forbidden" })');
   });
 
   it("keeps the legacy account seeder disabled and credential-free", () => {

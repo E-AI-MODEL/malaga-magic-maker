@@ -4,9 +4,11 @@ These rules are authoritative for all code changes in this repository.
 
 ## Before editing
 
-Read this file, the relevant existing code, relevant Supabase migrations, and the current generated Supabase types.
+Read this file, `docs/VAKANSIE_MASTERPLAN.md`, the relevant existing code, relevant Supabase migrations, and the current generated Supabase types.
 
 Do not assume that a feature described in old code is still a product requirement.
+
+For new product work, `docs/VAKANSIE_MASTERPLAN.md` is the executable product and architecture roadmap. Keep each build bounded to the build definition and acceptance criteria rather than attempting an uncontrolled rewrite.
 
 ## Product boundary
 
@@ -17,6 +19,22 @@ The signed-in product is organized around Home, Reis and Samen. Hansie is contex
 The product must support solo travelers and groups, any destination, any vacation type and multiple trips per account.
 
 Do not expand the current product into a travel diary, social feed, post-trip photo product, Google Maps replacement or OTA unless explicitly requested.
+
+## Brand, work names and customer language
+
+Keep four naming layers separate:
+1. brand names
+2. customer-facing product language
+3. internal work names
+4. technical/code/database names
+
+A work name or technical name is never automatically valid frontend copy.
+
+Before implementing a new user-facing concept, define its domain concept, technical name, internal work name and intended customer-facing label.
+
+Do not expose names such as `trip_items`, `decision_options`, `readiness engine`, `context assembler`, `platform ops` or similar implementation language to customers unless an explicit product-copy decision says to do so.
+
+`Vakansie` and `Hansie` are current brand candidates. Do not unnecessarily namespace generic technical entities with those brand names, so a future brand decision does not require architectural renaming.
 
 ## Legacy
 
@@ -72,11 +90,13 @@ Never create public storage for sensitive trip files. Use authorized retrieval a
 
 ## Auth and membership
 
-Do not introduce hardcoded username/email maps.
+Do not introduce hardcoded username/email maps as the permanent product authorization model.
 
 Do not derive relational identity from display names.
 
 Auth flows must support normal signup, normal login, an existing-user invite, a logged-out invite followed by signup/login, and multiple trips per account.
+
+A temporary pre-launch allowlist may restrict access during development, but it must remain replaceable by normal product authentication and must not redefine the multi-user business model.
 
 A user may be organizer in one trip and member in another. Global app admin is for internal Vakansie operations, not normal trip ownership.
 

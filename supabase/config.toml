@@ -1,4 +1,12 @@
 project_id = "wuvmcxjdyxhtqbbqoahy"
 
 [functions.trip-ai-chat]
+# Hansie performs an explicit token + trip-membership check in function code
+# before any service-role trip read.
 verify_jwt = false
+
+[functions.firecrawl-scrape]
+verify_jwt = true
+
+[functions.seed-users]
+verify_jwt = true

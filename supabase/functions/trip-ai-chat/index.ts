@@ -7,6 +7,8 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+const jsonHeaders = { ...corsHeaders, "Content-Type": "application/json" };
+
 const FALLBACK_PROMPT = `Je bent de AI Reisgids van Vakansie, een slimme assistent voor groepsreizen. Je helpt een groep van {{group_size}} personen die naar de Costa del Sol (Málaga regio) gaan.
 
 ## Tripgegevens
@@ -48,6 +50,13 @@ const FALLBACK_PROMPT = `Je bent de AI Reisgids van Vakansie, een slimme assiste
 - Gebruik GEEN lange beschrijvingen. Wees bondig en scanbaar.
 - Totaal max 300 woorden`;
 
+function jsonError(status: number, error: string) {
+  return new Response(JSON.stringify({ error }), {
+    status,
+    headers: jsonHeaders,
+  });
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -58,13 +67,9 @@ serve(async (req) => {
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
-    // Auth check
     const authHeader = req.headers.get("Authorization");
     if (!authHeader?.startsWith("Bearer ")) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return jsonError(401, "Unauthorized");
     }
 
     const anonClient = createClient(SUPABASE_URL, Deno.env.get("SUPABASE_ANON_KEY")!, {
@@ -72,19 +77,38 @@ serve(async (req) => {
     });
     const token = authHeader.replace("Bearer ", "");
     const { data: claimsData, error: claimsError } = await anonClient.auth.getClaims(token);
-    if (claimsError || !claimsData?.claims) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+    const userId = typeof claimsData?.claims?.sub === "string" ? claimsData.claims.sub : null;
+
+    if (claimsError || !userId) {
+      return jsonError(401, "Unauthorized");
     }
 
     const { messages, tripId, disabledContexts = [] } = await req.json();
-    if (!tripId) throw new Error("tripId is required");
+    if (typeof tripId !== "string" || !tripId) {
+      return jsonError(400, "tripId is required");
+    }
 
-    // Fetch group context using service role
     const db = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
+    // SECURITY BOUNDARY: service-role bypasses RLS. The only service-role read
+    // allowed before authorization is the membership lookup itself.
+    const { data: membership, error: membershipError } = await db
+      .from("trip_members")
+      .select("trip_id")
+      .eq("trip_id", tripId)
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    if (membershipError) {
+      console.error("trip-ai-chat membership check failed:", membershipError.message);
+      return jsonError(500, "Authorization check failed");
+    }
+
+    if (!membership) {
+      return jsonError(403, "Forbidden");
+    }
+
+    // From this point on the requested trip is authorized for this user.
     const [tripRes, subsRes, accomRes, tasksRes, profilesRes, locationRes, promptRes] = await Promise.all([
       db.from("trip").select("*").eq("id", tripId).single(),
       db.from("submissions").select("*").eq("trip_id", tripId),
@@ -102,7 +126,8 @@ serve(async (req) => {
     const chosenLocation = locationRes.data?.value || null;
     const customPrompt = promptRes.data?.value || null;
 
-    // Build context values
+    // Keep the legacy Hansie context unchanged in BUILD 01. BUILD 07 replaces
+    // the destination-specific prompt after the generic data model exists.
     const budgets = submissions.map((s: any) => s.budget_cap_total).filter(Boolean);
     const avgBudget = budgets.length ? Math.round(budgets.reduce((a: number, b: number) => a + b, 0) / budgets.length) : null;
 
@@ -129,7 +154,6 @@ serve(async (req) => {
       ? accommodations.map((a: any) => `- ${a.name} (${a.location_label}, ${a.type}, ${a.bedrooms} slaapkamers, max ${a.max_guests} gasten${a.total_price_3_nights ? `, €${a.total_price_3_nights}/3 nachten` : ""}${a.golf_minutes ? `, golf ${a.golf_minutes} min` : ""}${a.beach_meters ? `, strand ${a.beach_meters}m` : ""}${a.agp_minutes ? `, vliegveld ${a.agp_minutes} min` : ""})`).join("\n")
       : "Nog geen accommodaties geselecteerd";
 
-    // Template variable replacements
     const vars: Record<string, string> = {
       group_size: String(trip?.group_size || "?"),
       trip_name: trip?.name || "Onbekend",
@@ -148,7 +172,6 @@ serve(async (req) => {
       open_tasks: openTasks.length ? `Open: ${openTasks.join(", ")}` : "",
     };
 
-    // Use custom prompt or fallback, then interpolate (skip disabled vars)
     let systemPrompt = customPrompt || FALLBACK_PROMPT;
     const disabledSet = new Set(disabledContexts as string[]);
     for (const [key, value] of Object.entries(vars)) {
@@ -174,23 +197,14 @@ serve(async (req) => {
 
     if (!response.ok) {
       if (response.status === 429) {
-        return new Response(JSON.stringify({ error: "Te veel verzoeken, probeer het zo opnieuw." }), {
-          status: 429,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
+        return jsonError(429, "Te veel verzoeken, probeer het zo opnieuw.");
       }
       if (response.status === 402) {
-        return new Response(JSON.stringify({ error: "AI-tegoed op, neem contact op met de beheerder." }), {
-          status: 402,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
+        return jsonError(402, "AI-tegoed op, neem contact op met de beheerder.");
       }
       const t = await response.text();
       console.error("AI gateway error:", response.status, t);
-      return new Response(JSON.stringify({ error: "AI is even niet beschikbaar." }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return jsonError(500, "AI is even niet beschikbaar.");
     }
 
     return new Response(response.body, {
@@ -198,9 +212,6 @@ serve(async (req) => {
     });
   } catch (e) {
     console.error("trip-ai-chat error:", e);
-    return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return jsonError(500, e instanceof Error ? e.message : "Unknown error");
   }
 });

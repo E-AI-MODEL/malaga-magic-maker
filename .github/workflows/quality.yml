@@ -25,11 +25,22 @@ jobs:
           node-version: 20
           cache: npm
 
+      - name: Setup Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: lts
+
       - name: Install dependencies
         run: npm install --legacy-peer-deps
 
       - name: Typecheck
         run: npm run typecheck
+
+      - name: Check Edge Functions
+        run: |
+          deno check supabase/functions/trip-ai-chat/index.ts
+          deno check supabase/functions/firecrawl-scrape/index.ts
+          deno check supabase/functions/seed-users/index.ts
 
       - name: Lint
         run: npm run lint

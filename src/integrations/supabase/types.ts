@@ -250,6 +250,7 @@ export type Database = {
           description: string
           id: string
           paid_by: string
+          paid_by_user_id: string | null
           split_among: string[]
           trip_id: string | null
         }
@@ -260,6 +261,7 @@ export type Database = {
           description: string
           id?: string
           paid_by: string
+          paid_by_user_id?: string | null
           split_among?: string[]
           trip_id?: string | null
         }
@@ -270,6 +272,7 @@ export type Database = {
           description?: string
           id?: string
           paid_by?: string
+          paid_by_user_id?: string | null
           split_among?: string[]
           trip_id?: string | null
         }
@@ -626,7 +629,9 @@ export type Database = {
       tasks: {
         Row: {
           assigned_to: string | null
+          assigned_user_id: string | null
           backup_to: string | null
+          backup_user_id: string | null
           cost: number | null
           cost_split_among: string[] | null
           created_at: string
@@ -645,7 +650,9 @@ export type Database = {
         }
         Insert: {
           assigned_to?: string | null
+          assigned_user_id?: string | null
           backup_to?: string | null
+          backup_user_id?: string | null
           cost?: number | null
           cost_split_among?: string[] | null
           created_at?: string
@@ -664,7 +671,9 @@ export type Database = {
         }
         Update: {
           assigned_to?: string | null
+          assigned_user_id?: string | null
           backup_to?: string | null
+          backup_user_id?: string | null
           cost?: number | null
           cost_split_among?: string[] | null
           created_at?: string
@@ -740,49 +749,61 @@ export type Database = {
           cover_image_url: string | null
           created_at: string
           created_by: string | null
+          currency: string
           description: string | null
-          end_date: string
-          flights_note: string
-          golf_max: number
-          golf_min: number
+          destination_country: string | null
+          destination_name: string | null
+          end_date: string | null
+          flights_note: string | null
+          golf_max: number | null
+          golf_min: number | null
           group_size: number
           id: string
           invite_code: string | null
           name: string
-          start_date: string
+          start_date: string | null
           status: string
+          timezone: string | null
         }
         Insert: {
           cover_image_url?: string | null
           created_at?: string
           created_by?: string | null
+          currency?: string
           description?: string | null
-          end_date?: string
-          flights_note?: string
-          golf_max?: number
-          golf_min?: number
+          destination_country?: string | null
+          destination_name?: string | null
+          end_date?: string | null
+          flights_note?: string | null
+          golf_max?: number | null
+          golf_min?: number | null
           group_size?: number
           id?: string
           invite_code?: string | null
-          name?: string
-          start_date?: string
+          name: string
+          start_date?: string | null
           status?: string
+          timezone?: string | null
         }
         Update: {
           cover_image_url?: string | null
           created_at?: string
           created_by?: string | null
+          currency?: string
           description?: string | null
-          end_date?: string
-          flights_note?: string
-          golf_max?: number
-          golf_min?: number
+          destination_country?: string | null
+          destination_name?: string | null
+          end_date?: string | null
+          flights_note?: string | null
+          golf_max?: number | null
+          golf_min?: number | null
           group_size?: number
           id?: string
           invite_code?: string | null
           name?: string
-          start_date?: string
+          start_date?: string | null
           status?: string
+          timezone?: string | null
         }
         Relationships: []
       }
@@ -841,6 +862,20 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      create_trip_with_owner: {
+        Args: {
+          p_currency?: string
+          p_description?: string
+          p_destination_country?: string
+          p_destination_name?: string
+          p_end_date?: string
+          p_group_size?: number
+          p_name: string
+          p_start_date?: string
+          p_timezone?: string
+        }
+        Returns: string
+      }
       get_username: { Args: { _user_id: string }; Returns: string }
       has_role: {
         Args: {
@@ -855,6 +890,11 @@ export type Database = {
       }
       is_trip_organizer: {
         Args: { _trip_id: string; _user_id: string }
+        Returns: boolean
+      }
+      join_trip_by_code: { Args: { p_invite_code: string }; Returns: string }
+      shares_trip_with: {
+        Args: { _other_id: string; _viewer_id: string }
         Returns: boolean
       }
     }

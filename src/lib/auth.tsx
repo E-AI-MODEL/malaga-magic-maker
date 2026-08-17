@@ -1,6 +1,9 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import type { User } from "@supabase/supabase-js";
+import type { Session, User } from "@supabase/supabase-js";
+
+const ADMIN_USER_ID = "638d717f-4943-4993-9b79-b9a79f6f69ec";
+const ADMIN_EMAIL = "admin@local.app";
 
 interface Profile {
   id: string;
@@ -14,21 +17,10 @@ interface AuthContextType {
   isAdmin: boolean;
   loading: boolean;
   signIn: (emailOrUsername: string, password: string) => Promise<{ error?: string }>;
-  signUp: (email: string, password: string, displayName: string) => Promise<{ error?: string }>;
   signOut: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
-
-// Legacy username→email map for backwards compatibility
-const USERNAME_EMAIL_MAP: Record<string, string> = {
-  robin: "robin@local.app",
-  mark: "mark@local.app",
-  dimitri: "dimitri@local.app",
-  edwin: "edwin@local.app",
-  admin: "admin@local.app",
-  pieter: "pieter@local.app",
-};
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -36,111 +28,127 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  const fetchProfile = async (userId: string) => {
-    const { data: profileData } = await supabase
-      .from("profiles")
-      .select("*")
-      .eq("id", userId)
-      .single();
+  const clearAuthState = () => {
+    setUser(null);
+    setProfile(null);
+    setIsAdmin(false);
+  };
 
-    if (profileData) {
-      setProfile(profileData);
+  const fetchProfile = async (userId: string) => {
+    const [{ data: profileData }, { data: roleData }] = await Promise.all([
+      supabase.from("profiles").select("*").eq("id", userId).single(),
+      supabase.from("user_roles").select("role").eq("user_id", userId),
+    ]);
+
+    const hasAdminRole = roleData?.some((r: { role: string }) => r.role === "admin") ?? false;
+    if (!hasAdminRole) {
+      clearAuthState();
+      await supabase.auth.signOut();
+      return false;
     }
 
-    const { data: roleData } = await supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", userId);
-
-    setIsAdmin(roleData?.some((r: any) => r.role === "admin") ?? false);
+    if (profileData) setProfile(profileData);
+    setIsAdmin(true);
+    return true;
   };
 
   useEffect(() => {
-    // Always set up the auth listener first
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
-        if (session?.user) {
-          setUser(session.user);
-          setTimeout(() => fetchProfile(session.user.id), 0);
-        } else {
-          setUser(null);
-          setProfile(null);
-          setIsAdmin(false);
-        }
-        setLoading(false);
-      }
-    );
+    let active = true;
 
-    // Force logout for existing sessions to ensure users see boot sequence
-    const AUTH_VERSION = "v2-boot";
+    const enforceAdminSession = async (session: Session | null) => {
+      if (!active) return;
+
+      if (!session?.user) {
+        clearAuthState();
+        setLoading(false);
+        return;
+      }
+
+      const email = session.user.email?.toLowerCase();
+      if (session.user.id !== ADMIN_USER_ID || email !== ADMIN_EMAIL) {
+        clearAuthState();
+        await supabase.auth.signOut();
+        setLoading(false);
+        return;
+      }
+
+      setUser(session.user);
+      const allowed = await fetchProfile(session.user.id);
+      if (!active) return;
+      if (!allowed) clearAuthState();
+      setLoading(false);
+    };
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setTimeout(() => void enforceAdminSession(session), 0);
+    });
+
+    const AUTH_VERSION = "v3-admin-only";
     if (localStorage.getItem("auth-version") !== AUTH_VERSION) {
       localStorage.setItem("auth-version", AUTH_VERSION);
       sessionStorage.removeItem("boot-shown");
-      supabase.auth.signOut(); // listener will handle state update
+      supabase.auth.signOut().finally(() => {
+        if (active) setLoading(false);
+      });
     } else {
       supabase.auth.getSession().then(({ data: { session } }) => {
-        if (session?.user) {
-          setUser(session.user);
-          fetchProfile(session.user.id);
-        }
-        setLoading(false);
+        void enforceAdminSession(session);
       });
     }
 
-    return () => subscription.unsubscribe();
+    return () => {
+      active = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const signIn = async (emailOrUsername: string, password: string) => {
-    // Support both legacy usernames and email login
-    let email = emailOrUsername;
-    if (!emailOrUsername.includes("@")) {
-      const mapped = USERNAME_EMAIL_MAP[emailOrUsername.toLowerCase()];
-      if (mapped) {
-        email = mapped;
-      } else {
-        return { error: "Onbekende gebruiker" };
-      }
+    const login = emailOrUsername.trim().toLowerCase();
+    if (login !== "admin" && login !== ADMIN_EMAIL) {
+      return { error: "Geen toegang" };
     }
 
-    const { error, data } = await supabase.auth.signInWithPassword({ email, password });
+    const { error, data } = await supabase.auth.signInWithPassword({
+      email: ADMIN_EMAIL,
+      password,
+    });
+
     if (error) {
       return { error: "Verkeerd e-mailadres of wachtwoord" };
     }
-    if (data.user) {
-      supabase.from("activity_log").insert({
+
+    if (!data.user || data.user.id !== ADMIN_USER_ID || data.user.email?.toLowerCase() !== ADMIN_EMAIL) {
+      await supabase.auth.signOut();
+      clearAuthState();
+      return { error: "Geen toegang" };
+    }
+
+    const allowed = await fetchProfile(data.user.id);
+    if (!allowed) {
+      return { error: "Geen toegang" };
+    }
+
+    supabase
+      .from("activity_log")
+      .insert({
         user_id: data.user.id,
         event_type: "login",
         page: "/login",
-      }).then(() => {});
-    }
-    return {};
-  };
+      })
+      .then(() => {});
 
-  const signUp = async (email: string, password: string, displayName: string) => {
-    const username = displayName.toLowerCase().replace(/\s+/g, "");
-    const { error, data } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: { username, display_name: displayName },
-        emailRedirectTo: window.location.origin,
-      },
-    });
-    if (error) {
-      if (error.message.includes("already registered")) {
-        return { error: "Dit e-mailadres is al geregistreerd" };
-      }
-      return { error: error.message };
-    }
     return {};
   };
 
   const signOut = async () => {
+    clearAuthState();
     await supabase.auth.signOut();
   };
 
   return (
-    <AuthContext.Provider value={{ user, profile, isAdmin, loading, signIn, signUp, signOut }}>
+    <AuthContext.Provider value={{ user, profile, isAdmin, loading, signIn, signOut }}>
       {children}
     </AuthContext.Provider>
   );

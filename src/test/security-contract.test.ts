@@ -31,11 +31,15 @@ describe("Vakansie BUILD 01 security contract", () => {
 
   it("checks Hansie membership before private service-role trip reads", () => {
     const membershipCheck = hansie.indexOf('.from("trip_members")');
-    const privateReads = hansie.indexOf("const [tripRes");
+    const forbiddenReturn = hansie.indexOf('return jsonError(403, "Forbidden")');
+    const privateTripRead = hansie.indexOf('db.from("trip")');
 
     expect(membershipCheck).toBeGreaterThan(-1);
-    expect(privateReads).toBeGreaterThan(membershipCheck);
-    expect(hansie).toContain('return jsonError(403, "Forbidden")');
+    expect(forbiddenReturn).toBeGreaterThan(membershipCheck);
+    expect(privateTripRead).toBeGreaterThan(forbiddenReturn);
+    expect(hansie).not.toContain('db.from("submissions")');
+    expect(hansie).not.toContain('db.from("accommodations")');
+    expect(hansie).not.toContain("Costa del Sol");
   });
 
   it("restricts Firecrawl to authenticated internal admins", () => {

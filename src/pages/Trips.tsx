@@ -1,11 +1,15 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { Archive, ChevronDown, ChevronRight, LogOut, Plus, Sparkles, User } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { AlertCircle, Archive, ChevronDown, ChevronRight, LogOut, MapPin, Plus, User } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { Trip, useTrip } from "@/contexts/TripContext";
 import { tripTimingLabel } from "@/features/trips/presentation";
+import { activeReadinessChecks, getTripReadiness, readinessAction } from "@/features/readiness/data";
+import { NotificationCenter } from "@/components/NotificationCenter";
+import { HansieWidget } from "@/components/HansieWidget";
 import { Button } from "@/components/ui/button";
-import { EmptyLine, RowList, SectionLabel } from "@/components/primitives";
+import { EmptyLine, ReadinessBar, RowItem, RowList, SectionLabel } from "@/components/primitives";
 
 function formatDateRange(startDate: string | null, endDate: string | null) {
   if (!startDate && !endDate) return "Data nog niet gekozen";
@@ -30,23 +34,90 @@ function sortTrips(trips: Trip[]) {
   });
 }
 
-/** Full-bleed hero for the trip that is next up. */
-function TripHero({ trip }: { trip: Trip }) {
-  const timing = tripTimingLabel(trip.start_date, trip.end_date);
+/** Cover for the dominant trip. Uses only a real stored cover image. */
+function TripCover({ trip }: { trip: Trip }) {
+  if (trip.cover_image_url) {
+    return (
+      <img
+        src={trip.cover_image_url}
+        alt={`Omslagfoto van ${trip.name}`}
+        loading="lazy"
+        className="h-36 w-full rounded-xl object-cover sm:h-44"
+      />
+    );
+  }
   return (
-    <Link to={`/trip/${trip.id}`} className="group block overflow-hidden rounded-2xl bg-foreground text-background">
-      <div className="px-5 pb-5 pt-6 sm:px-7 sm:pb-6 sm:pt-7">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/45">{timing}</p>
-        <h2 className="mt-2 truncate font-display text-[26px] font-extrabold leading-tight tracking-tight sm:text-3xl">{trip.name}</h2>
-        <p className="mt-1.5 text-sm text-white/55">
+    <div className="flex h-20 w-full items-center gap-2 rounded-xl bg-secondary px-4 text-muted-foreground sm:h-24">
+      <MapPin className="h-4 w-4 shrink-0" />
+      <span className="truncate text-sm">{trip.destination_name || "Bestemming nog niet gekozen"}</span>
+    </div>
+  );
+}
+
+/** The single dominant trip object on Mijn reizen. */
+function ActiveTripPanel({ trip }: { trip: Trip }) {
+  const readinessQuery = useQuery({
+    queryKey: ["trip-readiness", trip.id],
+    queryFn: () => getTripReadiness(trip.id),
+  });
+
+  const readiness = readinessQuery.data;
+  const attention = readiness ? activeReadinessChecks(readiness) : [];
+  const attentionTotal = attention.reduce((total, check) => total + check.attention_count, 0);
+  const trackedTotal = (readiness?.checks.length || 0) + attentionTotal;
+  const done = Math.max(0, trackedTotal - attentionTotal);
+
+  const sentence = readinessQuery.isLoading
+    ? "Voorbereiding wordt opgehaald…"
+    : !readiness
+      ? "Status van de voorbereiding is nu niet beschikbaar."
+      : readiness.status === "ready"
+        ? "Alles wat in Vakansie staat, is geregeld."
+        : `${done} van ${trackedTotal} geregeld · ${attentionTotal} ${attentionTotal === 1 ? "punt vraagt" : "punten vragen"} aandacht`;
+
+  return (
+    <section className="mt-5">
+      <TripCover trip={trip} />
+      <Link to={`/trip/${trip.id}`} className="group mt-4 block">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+          {tripTimingLabel(trip.start_date, trip.end_date)}
+        </p>
+        <h2 className="mt-1.5 truncate font-brand text-[27px] font-semibold leading-tight sm:text-3xl">{trip.name}</h2>
+        <p className="mt-1 text-sm text-muted-foreground">
           {formatDateRange(trip.start_date, trip.end_date)}
           {trip.destination_name ? ` · ${trip.destination_name}` : ""}
         </p>
-        <span className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-background">
+        <span className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-primary">
           Reis openen<ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
         </span>
+      </Link>
+
+      <div className="mt-4">
+        <ReadinessBar done={done} total={Math.max(1, trackedTotal)} sentence={sentence} />
       </div>
-    </Link>
+
+      {attention.length > 0 && (
+        <div className="mt-7">
+          <SectionLabel>Nu belangrijk</SectionLabel>
+          <RowList className="mt-1">
+            {attention.slice(0, 4).map((check) => {
+              const action = readinessAction(check, trip.id);
+              return (
+                <RowItem
+                  key={check.key}
+                  icon={AlertCircle}
+                  tone="attention"
+                  title={check.label}
+                  meta={action?.label}
+                  trailing={check.attention_count > 1 ? String(check.attention_count) : undefined}
+                  to={action?.href}
+                />
+              );
+            })}
+          </RowList>
+        </div>
+      )}
+    </section>
   );
 }
 
@@ -80,12 +151,13 @@ export default function Trips() {
   const [heroTrip, ...otherTrips] = activeTrips;
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="sticky top-0 z-40 bg-foreground text-background">
+    <div className="min-h-screen bg-background pb-[calc(4.5rem+env(safe-area-inset-bottom))]">
+      <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur-sm">
         <div className="mx-auto flex h-12 max-w-3xl items-center justify-between px-5">
-          <p className="font-display text-xs font-extrabold uppercase tracking-[0.18em]">Vakansie</p>
+          <p className="font-brand text-lg font-semibold">Vakansie</p>
           <div className="flex items-center gap-1">
-            <Button asChild variant="ghost" size="icon" className="h-8 w-8 text-white/60 hover:bg-white/10 hover:text-white">
+            <NotificationCenter />
+            <Button asChild variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground">
               <Link to="/profiel" aria-label="Profiel en voorkeuren">
                 <User className="h-4 w-4" />
               </Link>
@@ -95,7 +167,7 @@ export default function Trips() {
               size="icon"
               onClick={() => void signOut()}
               aria-label="Uitloggen"
-              className="h-8 w-8 text-white/60 hover:bg-white/10 hover:text-white"
+              className="h-8 w-8 text-muted-foreground"
             >
               <LogOut className="h-4 w-4" />
             </Button>
@@ -104,17 +176,22 @@ export default function Trips() {
       </header>
 
       <main className="mx-auto max-w-3xl px-5 pb-16 pt-6">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-          {profile?.display_name ? `Hoi ${profile.display_name}` : "Welkom"}
-        </p>
-        <h1 className="mt-1.5 font-display text-[28px] font-extrabold leading-tight tracking-tight">Mijn reizen</h1>
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+              {profile?.display_name ? `Hoi ${profile.display_name}` : "Welkom"}
+            </p>
+            <h1 className="mt-1.5 font-brand text-[28px] font-semibold leading-tight">Mijn reizen</h1>
+          </div>
+          <Button asChild variant="outline" size="sm" className="mt-1 shrink-0 rounded-full">
+            <Link to="/new-trip"><Plus className="mr-1.5 h-3.5 w-3.5" />Nieuwe reis</Link>
+          </Button>
+        </div>
 
         {loading ? (
           <div className="mt-5 h-40 animate-pulse rounded-2xl bg-secondary" />
         ) : heroTrip ? (
-          <div className="mt-5">
-            <TripHero trip={heroTrip} />
-          </div>
+          <ActiveTripPanel trip={heroTrip} />
         ) : (
           <EmptyLine
             text="Je hebt nog geen reis. Een naam is genoeg om te beginnen; data en boekingen kunnen later."
@@ -123,30 +200,9 @@ export default function Trips() {
           />
         )}
 
-        {heroTrip && (
-          <section className="mt-8">
-            <SectionLabel>Hansie</SectionLabel>
-            <RowList className="mt-1">
-              <Link to={`/trip/${heroTrip.id}`} className="flex items-center gap-3 py-3.5 transition-opacity hover:opacity-70">
-                <Sparkles className="h-[18px] w-[18px] shrink-0 text-primary" />
-                <span className="min-w-0 flex-1 text-[15px] font-medium">Vraag Hansie wat er nog moet gebeuren</span>
-                <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground/60" />
-              </Link>
-            </RowList>
-          </section>
-        )}
-
         {otherTrips.length > 0 && (
           <section className="mt-8">
-            <SectionLabel
-              action={
-                <Link to="/new-trip" className="text-xs font-semibold text-primary underline-offset-4 hover:underline">
-                  Nieuwe reis
-                </Link>
-              }
-            >
-              Andere reizen
-            </SectionLabel>
+            <SectionLabel>Andere reizen</SectionLabel>
             <RowList className="mt-1">
               {otherTrips.map((trip) => <TripRow key={trip.id} trip={trip} />)}
             </RowList>
@@ -170,12 +226,9 @@ export default function Trips() {
           </section>
         )}
 
-        {activeTrips.length > 0 && otherTrips.length === 0 && (
-          <Button asChild className="mt-8 h-11 w-full rounded-full">
-            <Link to="/new-trip"><Plus className="mr-2 h-4 w-4" />Nieuwe reis</Link>
-          </Button>
-        )}
       </main>
+
+      <HansieWidget trip={heroTrip ? { id: heroTrip.id, name: heroTrip.name } : null} />
     </div>
   );
 }

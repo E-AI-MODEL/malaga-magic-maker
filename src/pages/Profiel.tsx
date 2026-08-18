@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { AppLayout } from "@/components/AppLayout";
 import { useAuth } from "@/lib/auth";
 import { useTrip } from "@/contexts/TripContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -9,14 +8,15 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { NotificationPreferences } from "@/features/notifications/NotificationPreferences";
 import { toast } from "sonner";
-import { Calendar, Settings, User, Users } from "lucide-react";
+import { ArrowLeft, Calendar, Settings, User, Users } from "lucide-react";
 
 export default function Profiel() {
   const { profile, isAdmin, user } = useAuth();
-  const { userTrips, activeTrip } = useTrip();
+  const { userTrips } = useTrip();
   const navigate = useNavigate();
   const [displayName, setDisplayName] = useState(profile?.display_name || "");
   const [saving, setSaving] = useState(false);
+  const activeTrips = userTrips.filter((trip) => trip.status !== "archived");
 
   const handleSave = async () => {
     if (!profile || !displayName.trim()) return;
@@ -34,8 +34,20 @@ export default function Profiel() {
   };
 
   return (
-    <AppLayout>
-      <div className="space-y-8 px-6 py-8">
+    <div className="min-h-screen bg-background">
+      <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur">
+        <div className="mx-auto flex max-w-3xl items-center gap-3 px-5 py-3">
+          <Button variant="ghost" size="icon" onClick={() => navigate("/trips")} aria-label="Terug naar mijn reizen">
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
+          <div>
+            <p className="font-display text-sm font-extrabold">Profiel</p>
+            <p className="text-xs text-muted-foreground">Account en voorkeuren</p>
+          </div>
+        </div>
+      </header>
+
+      <main className="mx-auto max-w-3xl space-y-8 px-5 py-8">
         <div className="flex items-center gap-4">
           <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10">
             <User className="h-8 w-8 text-primary" />
@@ -79,18 +91,22 @@ export default function Profiel() {
           </button>
         )}
 
-        <div>
+        <section>
           <h2 className="mb-3 font-display text-sm font-extrabold uppercase tracking-wider text-muted-foreground">
-            Mijn vakanties ({userTrips.length})
+            Actieve reizen ({activeTrips.length})
           </h2>
-          <div className="space-y-3">
-            {userTrips.map((trip) => (
-              <Card key={trip.id} className={`border-border/60 ${trip.id === activeTrip?.id ? "ring-2 ring-primary/30" : ""}`}>
-                <CardContent className="p-4">
-                  <div className="flex items-start justify-between">
-                    <div>
+          {activeTrips.length === 0 ? (
+            <div className="rounded-2xl border border-dashed border-border p-5 text-sm text-muted-foreground">
+              Je hebt op dit moment geen actieve reis. Gearchiveerde reizen vind je via Mijn reizen.
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {activeTrips.map((trip) => (
+                <Card key={trip.id} className="border-border/60">
+                  <CardContent className="p-4">
+                    <button onClick={() => navigate(`/trip/${trip.id}`)} className="w-full text-left">
                       <p className="font-display font-bold">{trip.name}</p>
-                      <div className="mt-1.5 flex items-center gap-3 text-xs text-muted-foreground">
+                      <div className="mt-1.5 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
                         {trip.start_date && trip.end_date && (
                           <span className="flex items-center gap-1">
                             <Calendar className="h-3 w-3" />
@@ -103,17 +119,14 @@ export default function Profiel() {
                         </span>
                       </div>
                       {trip.description && <p className="mt-1 text-xs text-muted-foreground">{trip.description}</p>}
-                    </div>
-                    {trip.id === activeTrip?.id && (
-                      <span className="rounded-md bg-primary/10 px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-primary">Actief</span>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </div>
-    </AppLayout>
+                    </button>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </section>
+      </main>
+    </div>
   );
 }

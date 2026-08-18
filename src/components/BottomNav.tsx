@@ -6,9 +6,9 @@ export function BottomNav() {
   const { activeTrip } = useTrip();
   if (!activeTrip) return null;
 
-  const base = "flex flex-1 flex-col items-center gap-1 py-2.5 text-[10px] font-semibold uppercase tracking-wider transition-colors";
+  const base = "flex h-14 flex-1 flex-col items-center justify-center gap-1 text-[10px] font-semibold uppercase tracking-[0.12em] transition-colors";
   const active = "text-primary";
-  const inactive = "text-muted-foreground/55";
+  const inactive = "text-white/45";
 
   const links = [
     { to: `/trip/${activeTrip.id}`, icon: Home, label: "Overzicht", end: true },
@@ -26,7 +26,7 @@ export function BottomNav() {
             end={link.end}
             className={({ isActive }) => `${base} ${isActive ? active : inactive}`}
           >
-            <link.icon className="h-5 w-5" />
+            <link.icon className="h-[18px] w-[18px]" strokeWidth={1.75} />
             <span>{link.label}</span>
           </NavLink>
         ))}

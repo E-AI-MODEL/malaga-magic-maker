@@ -148,15 +148,21 @@ export function HansieWidget() {
 
   return (
     <>
-      <button
-        onClick={() => setOpen(true)}
-        className={`fixed z-50 flex items-center justify-center rounded-full bg-primary text-primary-foreground shadow-xl transition-transform hover:scale-105 ${
-          isMobile ? "bottom-24 right-5 h-14 w-14" : "bottom-6 right-6 h-14 w-14"
+      <div
+        className={`fixed z-40 border-t border-white/10 bg-foreground ${
+          isMobile ? "bottom-[calc(3.5rem+env(safe-area-inset-bottom))] left-0 right-0" : "bottom-0 right-0 w-full max-w-md"
         }`}
-        aria-label="Vraag Hansie"
       >
-        <Sparkles className="h-5 w-5" />
-      </button>
+        <button
+          onClick={() => setOpen(true)}
+          className="mx-auto flex h-11 w-full max-w-2xl items-center gap-2.5 px-5 text-left"
+          aria-label="Vraag Hansie"
+        >
+          <Sparkles className="h-4 w-4 shrink-0 text-primary" />
+          <span className="min-w-0 flex-1 truncate text-[13px] text-white/50">Vraag Hansie wat er nog moet gebeuren</span>
+          <Send className="h-3.5 w-3.5 shrink-0 text-white/30" />
+        </button>
+      </div>
 
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetContent

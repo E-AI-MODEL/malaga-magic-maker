@@ -26,7 +26,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
 
   if (isMobile) {
     return (
-      <div className="min-h-screen overflow-x-hidden bg-background pb-20">
+      <div className="min-h-screen overflow-x-hidden bg-background pb-[7.5rem]">
         <header className="sticky top-0 z-40 bg-foreground text-background">
           <div className="mx-auto flex max-w-2xl items-center justify-between px-3 py-2.5">
             <div className="flex min-w-0 items-center gap-1">
@@ -124,7 +124,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
               <span className="text-xs font-medium text-muted-foreground">{profile?.display_name}</span>
             </div>
           </header>
-          <main className="mx-auto w-full max-w-5xl flex-1">{children}</main>
+          <main className="mx-auto w-full max-w-5xl flex-1 pb-16">{children}</main>
         </div>
         <HansieWidget />
       </div>

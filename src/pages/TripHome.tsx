@@ -1,9 +1,11 @@
-import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import { ArrowRight, CalendarDays, ListTodo, MapPin, Route, Users } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
 import { useTrip } from "@/contexts/TripContext";
-import { supabase } from "@/integrations/supabase/client";
+import { activeReadinessChecks, getTripReadiness, readinessHeadline } from "@/features/readiness/data";
+import { listTripItems } from "@/features/travel/data";
+import { formatTripDateTime, getTravelType } from "@/features/travel/presentation";
 
 function formatDateRange(startDate: string | null, endDate: string | null) {
   if (!startDate && !endDate) return "Data nog niet gekozen";
@@ -19,45 +21,29 @@ function formatDateRange(startDate: string | null, endDate: string | null) {
 
 export default function TripHome() {
   const { activeTrip } = useTrip();
-  const [memberCount, setMemberCount] = useState(0);
-  const [openTaskCount, setOpenTaskCount] = useState(0);
-  const [loading, setLoading] = useState(true);
+  const tripId = activeTrip?.id || "";
+  const timezone = activeTrip?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone || "Europe/Amsterdam";
 
-  useEffect(() => {
-    if (!activeTrip) return;
+  const readinessQuery = useQuery({
+    queryKey: ["trip-readiness", tripId],
+    queryFn: () => getTripReadiness(tripId),
+    enabled: Boolean(tripId),
+  });
 
-    let cancelled = false;
-    const load = async () => {
-      setLoading(true);
-      const [membersResult, tasksResult] = await Promise.all([
-        supabase
-          .from("trip_members")
-          .select("id", { count: "exact", head: true })
-          .eq("trip_id", activeTrip.id),
-        supabase
-          .from("tasks")
-          .select("status, progress")
-          .eq("trip_id", activeTrip.id),
-      ]);
-
-      if (cancelled) return;
-
-      setMemberCount(membersResult.count || 0);
-      const open = (tasksResult.data || []).filter((task) => {
-        const status = String(task.status || "").toLowerCase();
-        return status !== "done" && status !== "completed" && Number(task.progress || 0) < 100;
-      }).length;
-      setOpenTaskCount(open);
-      setLoading(false);
-    };
-
-    void load();
-    return () => {
-      cancelled = true;
-    };
-  }, [activeTrip?.id]);
+  const itemsQuery = useQuery({
+    queryKey: ["trip-items", tripId],
+    queryFn: () => listTripItems(tripId),
+    enabled: Boolean(tripId),
+  });
 
   if (!activeTrip) return null;
+
+  const readiness = readinessQuery.data;
+  const attention = readiness ? activeReadinessChecks(readiness) : [];
+  const now = Date.now();
+  const nextItem = (itemsQuery.data || [])
+    .filter((item) => item.start_at && new Date(item.start_at).getTime() >= now)
+    .sort((a, b) => new Date(a.start_at || 0).getTime() - new Date(b.start_at || 0).getTime())[0];
 
   return (
     <AppLayout>
@@ -78,26 +64,56 @@ export default function TripHome() {
         </section>
 
         <section className="mt-8">
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">Nu belangrijk</p>
-          <div className="mt-3 grid gap-3 sm:grid-cols-2">
-            <div className="rounded-2xl border border-border bg-card p-5">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">Voor vertrek</p>
+          <div className="mt-3 rounded-2xl border border-border bg-card p-5">
+            <div className="flex items-start gap-4">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10">
                 <ListTodo className="h-5 w-5 text-primary" />
               </div>
-              <p className="mt-4 text-sm text-muted-foreground">Nog regelen</p>
-              <p className="mt-1 font-display text-2xl font-extrabold">
-                {loading ? "…" : openTaskCount === 0 ? "Geen open taken" : `${openTaskCount} open ${openTaskCount === 1 ? "taak" : "taken"}`}
-              </p>
-            </div>
-            <div className="rounded-2xl border border-border bg-card p-5">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
-                <Users className="h-5 w-5 text-primary" />
+              <div className="min-w-0 flex-1">
+                <p className="text-sm text-muted-foreground">Hoe staat je voorbereiding ervoor?</p>
+                <p className="mt-1 font-display text-2xl font-extrabold">
+                  {readinessQuery.isLoading ? "Even kijken…" : readiness ? readinessHeadline(readiness) : "Status niet beschikbaar"}
+                </p>
+                {readiness?.status === "ready" && (
+                  <p className="mt-2 text-sm text-muted-foreground">Op basis van wat nu in Vakansie staat, zijn er geen open aandachtspunten.</p>
+                )}
+                {attention.length > 0 && (
+                  <div className="mt-4 space-y-2">
+                    {attention.map((check) => (
+                      <div key={check.key} className="flex items-center justify-between gap-3 rounded-xl bg-secondary/55 px-3 py-2.5 text-sm">
+                        <span>{check.label}</span>
+                        <span className="shrink-0 font-semibold text-primary">{check.attention_count}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
-              <p className="mt-4 text-sm text-muted-foreground">Medereizigers</p>
-              <p className="mt-1 font-display text-2xl font-extrabold">
-                {loading ? "…" : `${memberCount} ${memberCount === 1 ? "persoon" : "personen"}`}
-              </p>
             </div>
+          </div>
+        </section>
+
+        <section className="mt-6 grid gap-3 sm:grid-cols-2">
+          <div className="rounded-2xl border border-border bg-card p-5">
+            <p className="text-sm text-muted-foreground">Medereizigers</p>
+            <p className="mt-1 font-display text-2xl font-extrabold">
+              {readinessQuery.isLoading ? "…" : `${readiness?.facts.member_count || 0} ${readiness?.facts.member_count === 1 ? "persoon" : "personen"}`}
+            </p>
+            <p className="mt-2 text-xs text-muted-foreground">{readiness?.facts.document_count || 0} documenten · {readiness?.facts.trip_item_count || 0} reisonderdelen</p>
+          </div>
+
+          <div className="rounded-2xl border border-border bg-card p-5">
+            <p className="text-sm text-muted-foreground">Eerstvolgende</p>
+            {itemsQuery.isLoading ? (
+              <p className="mt-1 font-display text-2xl font-extrabold">…</p>
+            ) : nextItem ? (
+              <>
+                <p className="mt-1 font-display text-lg font-extrabold">{getTravelType(nextItem.type).icon} {nextItem.title}</p>
+                <p className="mt-2 text-xs text-muted-foreground">{formatTripDateTime(nextItem.start_at, nextItem.timezone || timezone)}</p>
+              </>
+            ) : (
+              <p className="mt-1 text-sm font-semibold">Nog niets gepland</p>
+            )}
           </div>
         </section>
 
@@ -111,7 +127,7 @@ export default function TripHome() {
             </div>
             <div className="min-w-0 flex-1">
               <p className="font-display font-extrabold">Reis</p>
-              <p className="mt-1 text-xs leading-relaxed text-muted-foreground">Je route, boekingen en reisonderdelen op één plek.</p>
+              <p className="mt-1 text-xs leading-relaxed text-muted-foreground">Je route, boekingen, documenten en reisonderdelen op één plek.</p>
             </div>
             <ArrowRight className="h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
           </Link>

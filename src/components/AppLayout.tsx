@@ -26,15 +26,15 @@ export function AppLayout({ children }: { children: ReactNode }) {
 
   if (isMobile) {
     return (
-      <div className="min-h-screen overflow-x-hidden bg-background pb-[7.5rem]">
-        <header className="sticky top-0 z-40 bg-foreground text-background">
+      <div className="min-h-screen overflow-x-hidden bg-background pb-[calc(7.5rem+env(safe-area-inset-bottom))]">
+        <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur-sm">
           <div className="mx-auto flex max-w-2xl items-center justify-between px-3 py-2.5">
             <div className="flex min-w-0 items-center gap-1">
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={() => navigate("/trips")}
-                className="h-8 w-8 shrink-0 text-white/55 hover:bg-white/10 hover:text-white"
+                className="h-8 w-8 shrink-0 text-muted-foreground"
                 aria-label="Terug naar mijn reizen"
               >
                 <ArrowLeft className="h-4 w-4" />
@@ -44,7 +44,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <button className="flex min-w-0 items-center gap-1.5 px-1 text-left transition-opacity hover:opacity-80">
-                      <h1 className="truncate font-display text-xs font-extrabold uppercase tracking-[0.15em]">
+                      <h1 className="truncate text-[15px] font-semibold leading-tight">
                         {activeTrip.name}
                       </h1>
                       <ChevronDown className="h-3 w-3 shrink-0 opacity-50" />
@@ -77,18 +77,18 @@ export function AppLayout({ children }: { children: ReactNode }) {
                   </DropdownMenuContent>
                 </DropdownMenu>
               ) : (
-                <span className="font-display text-xs font-extrabold uppercase tracking-[0.15em]">Vakansie</span>
+                <span className="font-brand text-lg font-semibold">Vakansie</span>
               )}
             </div>
 
             <div className="flex shrink-0 items-center gap-1">
               <NotificationCenter />
-              <span className="ml-1 hidden text-[11px] font-medium text-white/50 min-[390px]:inline">{profile?.display_name}</span>
+              <span className="ml-1 hidden text-[11px] font-medium text-muted-foreground min-[390px]:inline">{profile?.display_name}</span>
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={() => void signOut()}
-                className="h-7 w-7 text-white/50 hover:bg-white/10 hover:text-white"
+                className="h-7 w-7 text-muted-foreground"
                 aria-label="Uitloggen"
               >
                 <LogOut className="h-3.5 w-3.5" />
@@ -99,7 +99,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
 
         <main className="mx-auto max-w-2xl">{children}</main>
         <BottomNav />
-        <HansieWidget />
+        <HansieWidget trip={activeTrip ? { id: activeTrip.id, name: activeTrip.name } : null} />
       </div>
     );
   }
@@ -114,9 +114,9 @@ export function AppLayout({ children }: { children: ReactNode }) {
               <SidebarTrigger className="text-muted-foreground" />
               <button
                 onClick={() => navigate("/trips")}
-                className="truncate text-xs font-display font-extrabold uppercase tracking-[0.15em] text-muted-foreground transition-colors hover:text-foreground"
+                className="truncate text-sm font-semibold text-muted-foreground transition-colors hover:text-foreground"
               >
-                {activeTrip?.name || "Vakansie"}
+                {activeTrip?.name || <span className="font-brand text-base">Vakansie</span>}
               </button>
             </div>
             <div className="flex items-center gap-2">
@@ -124,9 +124,9 @@ export function AppLayout({ children }: { children: ReactNode }) {
               <span className="text-xs font-medium text-muted-foreground">{profile?.display_name}</span>
             </div>
           </header>
-          <main className="mx-auto w-full max-w-5xl flex-1 pb-16">{children}</main>
+          <main className="mx-auto w-full max-w-5xl flex-1 pb-24">{children}</main>
         </div>
-        <HansieWidget />
+        <HansieWidget trip={activeTrip ? { id: activeTrip.id, name: activeTrip.name } : null} />
       </div>
     </SidebarProvider>
   );

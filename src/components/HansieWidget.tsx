@@ -1,7 +1,6 @@
-import { FormEvent, useMemo, useRef, useState } from "react";
+import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import { Loader2, Send, Sparkles } from "lucide-react";
-import { useTrip } from "@/contexts/TripContext";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -83,8 +82,9 @@ async function streamHansie({
   }
 }
 
-export function HansieWidget() {
-  const { activeTrip } = useTrip();
+export type HansieTrip = { id: string; name: string };
+
+export function HansieWidget({ trip }: { trip: HansieTrip | null }) {
   const isMobile = useIsMobile();
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
@@ -92,20 +92,29 @@ export function HansieWidget() {
   const [loading, setLoading] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
 
+  // Authoritative reference to the trip context currently visible to the user.
+  const currentTripIdRef = useRef<string | null>(trip?.id ?? null);
+  const tripId = trip?.id ?? null;
+
+  useEffect(() => {
+    currentTripIdRef.current = tripId;
+    setMessages([]);
+    setInput("");
+    setLoading(false);
+    setOpen(false);
+  }, [tripId]);
+
   const suggestions = useMemo(
-    () => [
-      "Wat staat er al vast voor deze reis?",
-      "Wat moet ik nog regelen?",
-      "Waar zitten nog open punten?",
-    ],
+    () => ["Wat moet deze week?", "Wat ontbreekt nog?", "Zijn we klaar voor vertrek?"],
     [],
   );
 
-  if (!activeTrip) return null;
-
   const send = async (text: string) => {
     const trimmed = text.trim();
-    if (!trimmed || loading) return;
+    if (!trimmed || loading || !trip) return;
+
+    // Every request is bound to exactly one concrete, authorized trip.
+    const requestTripId = trip.id;
 
     const userMessage: ChatMessage = { role: "user", content: trimmed };
     const nextMessages = [...messages, userMessage];
@@ -117,9 +126,11 @@ export function HansieWidget() {
 
     try {
       await streamHansie({
-        tripId: activeTrip.id,
+        tripId: requestTripId,
         messages: nextMessages,
         onDelta: (delta) => {
+          // Ignore stale deltas when the visible trip context has changed.
+          if (currentTripIdRef.current !== requestTripId) return;
           assistantText += delta;
           setMessages((current) => {
             const last = current[current.length - 1];
@@ -135,9 +146,12 @@ export function HansieWidget() {
         },
       });
     } catch (error) {
+      // Ignore stale errors from a trip the user no longer has open.
+      if (currentTripIdRef.current !== requestTripId) return;
       toast.error(error instanceof Error ? error.message : "Hansie is tijdelijk niet bereikbaar.");
     } finally {
-      setLoading(false);
+      // Only the originating trip may clear its own loading state.
+      if (currentTripIdRef.current === requestTripId) setLoading(false);
     }
   };
 
@@ -146,34 +160,38 @@ export function HansieWidget() {
     void send(input);
   };
 
+  if (!trip) return null;
+
   return (
     <>
       <div
-        className={`fixed z-40 border-t border-white/10 bg-foreground ${
-          isMobile ? "bottom-[calc(3.5rem+env(safe-area-inset-bottom))] left-0 right-0" : "bottom-0 right-0 w-full max-w-md"
+        className={`fixed z-40 border-t border-border bg-background/95 backdrop-blur-sm ${
+          isMobile
+            ? "bottom-[calc(3.5rem+env(safe-area-inset-bottom))] left-0 right-0"
+            : "bottom-0 right-0 w-full max-w-md"
         }`}
       >
         <button
           onClick={() => setOpen(true)}
-          className="mx-auto flex h-11 w-full max-w-2xl items-center gap-2.5 px-5 text-left"
+          className="mx-auto flex h-12 w-full max-w-2xl items-center gap-2.5 px-5 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           aria-label="Vraag Hansie"
         >
           <Sparkles className="h-4 w-4 shrink-0 text-primary" />
-          <span className="min-w-0 flex-1 truncate text-[13px] text-white/50">Vraag Hansie wat er nog moet gebeuren</span>
-          <Send className="h-3.5 w-3.5 shrink-0 text-white/30" />
+          <span className="min-w-0 flex-1 truncate text-[13px] text-muted-foreground">Vraag Hansie over deze reis…</span>
+          <Send className="h-3.5 w-3.5 shrink-0 text-muted-foreground/60" />
         </button>
       </div>
 
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetContent
           side={isMobile ? "bottom" : "right"}
-          className={isMobile ? "h-[78vh] rounded-t-2xl p-0" : "w-full sm:max-w-md p-0"}
+          className={isMobile ? "h-[84vh] rounded-t-2xl p-0" : "w-full sm:max-w-md p-0"}
         >
           <div className="flex h-full flex-col">
             <SheetHeader className="border-b border-border px-5 py-4 text-left">
-              <SheetTitle className="font-display text-lg font-extrabold">Hansie</SheetTitle>
+              <SheetTitle className="font-brand text-xl font-semibold">Hansie</SheetTitle>
               <SheetDescription>
-                Vraag wat er voor {activeTrip.name} vaststaat of nog aandacht nodig heeft.
+                Vraag wat er voor {trip.name} vaststaat of nog aandacht nodig heeft.
               </SheetDescription>
             </SheetHeader>
 
@@ -181,7 +199,7 @@ export function HansieWidget() {
               {messages.length === 0 ? (
                 <div className="flex h-full flex-col justify-center gap-5 py-8">
                   <div>
-                    <p className="font-display text-xl font-extrabold">Waar kan ik mee helpen?</p>
+                    <p className="font-brand text-2xl font-semibold">Waar kan ik mee helpen?</p>
                     <p className="mt-1 text-sm text-muted-foreground">
                       Hansie gebruikt alleen de reis die je nu hebt geopend als context.
                     </p>
@@ -199,35 +217,25 @@ export function HansieWidget() {
                   </div>
                 </div>
               ) : (
-                <div className="space-y-3">
+                <div className="space-y-4">
                   {messages.map((message, index) => (
                     <div
                       key={`${message.role}-${index}`}
                       className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
                     >
-                      <div
-                        className={`max-w-[88%] rounded-2xl px-4 py-3 text-sm ${
-                          message.role === "user"
-                            ? "rounded-br-md bg-primary text-primary-foreground"
-                            : "rounded-bl-md border border-border bg-card"
-                        }`}
-                      >
-                        {message.role === "assistant" ? (
-                          <div className="prose prose-sm max-w-none dark:prose-invert [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
-                            <ReactMarkdown>{message.content}</ReactMarkdown>
-                          </div>
-                        ) : (
-                          <p>{message.content}</p>
-                        )}
-                      </div>
+                      {message.role === "assistant" ? (
+                        <div className="prose prose-sm max-w-none text-[15px] leading-relaxed dark:prose-invert [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
+                          <ReactMarkdown>{message.content}</ReactMarkdown>
+                        </div>
+                      ) : (
+                        <p className="max-w-[85%] rounded-2xl rounded-br-md bg-secondary px-3.5 py-2 text-sm font-medium">
+                          {message.content}
+                        </p>
+                      )}
                     </div>
                   ))}
                   {loading && messages[messages.length - 1]?.role !== "assistant" && (
-                    <div className="flex justify-start">
-                      <div className="rounded-2xl rounded-bl-md border border-border bg-card px-4 py-3">
-                        <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-                      </div>
-                    </div>
+                    <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
                   )}
                 </div>
               )}
@@ -237,7 +245,7 @@ export function HansieWidget() {
               <Input
                 value={input}
                 onChange={(event) => setInput(event.target.value)}
-                placeholder="Vraag Hansie..."
+                placeholder="Vraag Hansie over deze reis…"
                 disabled={loading}
                 autoComplete="off"
               />

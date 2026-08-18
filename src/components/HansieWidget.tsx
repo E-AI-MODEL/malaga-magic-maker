@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import { Bot, ChevronDown, Loader2, Send, Sparkles } from "lucide-react";
 import { useLocation } from "react-router-dom";
@@ -108,6 +108,7 @@ export function HansieWidget() {
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [loading, setLoading] = useState(false);
+  const contextIdRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (isTripRoute && activeTrip?.id) {
@@ -128,6 +129,7 @@ export function HansieWidget() {
     : availableTrips.find((trip) => trip.id === selectedTripId) || availableTrips[0];
 
   useEffect(() => {
+    contextIdRef.current = contextTrip?.id || null;
     setMessages([]);
     setInput("");
     setLoading(false);
@@ -148,6 +150,7 @@ export function HansieWidget() {
     const trimmed = text.trim();
     if (!trimmed || loading) return;
 
+    const requestTripId = contextTrip.id;
     const userMessage: ChatMessage = { role: "user", content: trimmed };
     const nextMessages = [...messages, userMessage];
     setMessages(nextMessages);
@@ -158,9 +161,10 @@ export function HansieWidget() {
 
     try {
       await streamHansie({
-        tripId: contextTrip.id,
+        tripId: requestTripId,
         messages: nextMessages,
         onDelta: (delta) => {
+          if (contextIdRef.current !== requestTripId) return;
           assistantText += delta;
           setMessages((current) => {
             const last = current[current.length - 1];
@@ -176,9 +180,11 @@ export function HansieWidget() {
         },
       });
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Hansie is tijdelijk niet bereikbaar.");
+      if (contextIdRef.current === requestTripId) {
+        toast.error(error instanceof Error ? error.message : "Hansie is tijdelijk niet bereikbaar.");
+      }
     } finally {
-      setLoading(false);
+      if (contextIdRef.current === requestTripId) setLoading(false);
     }
   };
 
@@ -229,8 +235,9 @@ export function HansieWidget() {
                   <span className="mb-1.5 block text-[11px] font-bold uppercase tracking-[0.12em] text-muted-foreground">Reiscontext</span>
                   <select
                     value={contextTrip.id}
+                    disabled={loading}
                     onChange={(event) => setSelectedTripId(event.target.value)}
-                    className="h-10 w-full appearance-none rounded-xl border border-border bg-secondary/45 pl-3 pr-9 text-sm font-semibold outline-none focus:ring-2 focus:ring-ring"
+                    className="h-10 w-full appearance-none rounded-xl border border-border bg-secondary/45 pl-3 pr-9 text-sm font-semibold outline-none focus:ring-2 focus:ring-ring disabled:opacity-60"
                   >
                     {availableTrips.map((trip) => (
                       <option key={trip.id} value={trip.id}>{trip.name}</option>

@@ -17,6 +17,7 @@ const TripSamen = lazy(() => import("./pages/TripSamen"));
 const TripSettings = lazy(() => import("./pages/TripSettings"));
 const JoinTrip = lazy(() => import("./pages/JoinTrip"));
 const Profiel = lazy(() => import("./pages/Profiel"));
+const Ops = lazy(() => import("./pages/Ops"));
 
 // Legacy prototype pages remain reachable only through explicit /legacy/:tripId routes
 // while their useful data is migrated to generic product domains in later builds.
@@ -50,6 +51,14 @@ function ProtectedRoute({ children }: { children: ReactNode }) {
   const { user, loading } = useAuth();
   if (loading) return <PageLoader />;
   if (!user) return <Navigate to="/login" replace />;
+  return <>{children}</>;
+}
+
+function PlatformAdminRoute({ children }: { children: ReactNode }) {
+  const { user, isAdmin, loading } = useAuth();
+  if (loading) return <PageLoader />;
+  if (!user) return <Navigate to="/login" replace />;
+  if (!isAdmin) return <Navigate to="/trips" replace />;
   return <>{children}</>;
 }
 
@@ -101,6 +110,7 @@ function AppRoutes() {
         <Route path="/onboarding" element={<Navigate to="/new-trip" replace />} />
         <Route path="/join/:inviteCode" element={<JoinTrip />} />
         <Route path="/profiel" element={<ProtectedRoute><Profiel /></ProtectedRoute>} />
+        <Route path="/ops" element={<PlatformAdminRoute><Ops /></PlatformAdminRoute>} />
 
         <Route path="/trip/:tripId" element={<ProtectedRoute><TripRouteGuard><TripHome /></TripRouteGuard></ProtectedRoute>} />
         <Route path="/trip/:tripId/reis" element={<ProtectedRoute><TripRouteGuard><TripReis /></TripRouteGuard></ProtectedRoute>} />

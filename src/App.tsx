@@ -18,20 +18,6 @@ const TripSettings = lazy(() => import("./pages/TripSettings"));
 const JoinTrip = lazy(() => import("./pages/JoinTrip"));
 const Profiel = lazy(() => import("./pages/Profiel"));
 const Ops = lazy(() => import("./pages/Ops"));
-
-// Legacy prototype pages remain reachable only through explicit /legacy/:tripId routes
-// while their useful data is migrated to generic product domains in later builds.
-const Info = lazy(() => import("./pages/Info"));
-const Uitslag = lazy(() => import("./pages/Uitslag"));
-const Intake = lazy(() => import("./pages/Intake"));
-const Accommodations = lazy(() => import("./pages/Accommodations"));
-const AccommodationDetail = lazy(() => import("./pages/AccommodationDetail"));
-const Admin = lazy(() => import("./pages/Admin"));
-const Taken = lazy(() => import("./pages/Taken"));
-const Reisplanner = lazy(() => import("./pages/Reisplanner"));
-const TaskContext = lazy(() => import("./pages/TaskContext"));
-const Kosten = lazy(() => import("./pages/Kosten"));
-const Wensen = lazy(() => import("./pages/Wensen"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
@@ -117,18 +103,7 @@ function AppRoutes() {
         <Route path="/trip/:tripId/samen" element={<ProtectedRoute><TripRouteGuard><TripSamen /></TripRouteGuard></ProtectedRoute>} />
         <Route path="/trip/:tripId/settings" element={<ProtectedRoute><TripRouteGuard><TripSettings /></TripRouteGuard></ProtectedRoute>} />
 
-        <Route path="/legacy/:tripId/taken" element={<ProtectedRoute><TripRouteGuard><Taken /></TripRouteGuard></ProtectedRoute>} />
-        <Route path="/legacy/:tripId/reisplanner" element={<ProtectedRoute><TripRouteGuard><Reisplanner /></TripRouteGuard></ProtectedRoute>} />
-        <Route path="/legacy/:tripId/info" element={<ProtectedRoute><TripRouteGuard><Info /></TripRouteGuard></ProtectedRoute>} />
-        <Route path="/legacy/:tripId/uitslag" element={<ProtectedRoute><TripRouteGuard><Uitslag /></TripRouteGuard></ProtectedRoute>} />
-        <Route path="/legacy/:tripId/intake" element={<ProtectedRoute><TripRouteGuard><Intake /></TripRouteGuard></ProtectedRoute>} />
-        <Route path="/legacy/:tripId/accommodations" element={<ProtectedRoute><TripRouteGuard><Accommodations /></TripRouteGuard></ProtectedRoute>} />
-        <Route path="/legacy/:tripId/accommodations/:id" element={<ProtectedRoute><TripRouteGuard><AccommodationDetail /></TripRouteGuard></ProtectedRoute>} />
-        <Route path="/legacy/:tripId/taken/:section" element={<ProtectedRoute><TripRouteGuard><TaskContext /></TripRouteGuard></ProtectedRoute>} />
-        <Route path="/legacy/:tripId/kosten" element={<ProtectedRoute><TripRouteGuard><Kosten /></TripRouteGuard></ProtectedRoute>} />
-        <Route path="/legacy/:tripId/wensen" element={<ProtectedRoute><TripRouteGuard><Wensen /></TripRouteGuard></ProtectedRoute>} />
-        <Route path="/legacy/:tripId/admin" element={<ProtectedRoute><TripRouteGuard><Admin /></TripRouteGuard></ProtectedRoute>} />
-
+        <Route path="/legacy/:tripId/*" element={<Navigate to="/trips" replace />} />
         {[
           "/taken",
           "/reisplanner",

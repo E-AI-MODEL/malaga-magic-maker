@@ -99,7 +99,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
 
         <main className="mx-auto max-w-2xl">{children}</main>
         <BottomNav />
-        <HansieWidget trip={activeTrip ? { id: activeTrip.id, name: activeTrip.name } : null} />
+        <HansieWidget trip={activeTrip ? { id: activeTrip.id, name: activeTrip.name } : null} floating />
       </div>
     );
   }
@@ -126,7 +126,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
           </header>
           <main className="mx-auto w-full max-w-5xl flex-1 pb-24">{children}</main>
         </div>
-        <HansieWidget trip={activeTrip ? { id: activeTrip.id, name: activeTrip.name } : null} />
+        <HansieWidget trip={activeTrip ? { id: activeTrip.id, name: activeTrip.name } : null} floating={false} />
       </div>
     </SidebarProvider>
   );

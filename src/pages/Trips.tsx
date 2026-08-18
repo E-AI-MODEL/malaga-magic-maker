@@ -1,8 +1,8 @@
 import { useMemo } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, CalendarDays, LogOut, MapPin, Plane, Plus } from "lucide-react";
+import { Archive, ArrowRight, CalendarDays, LogOut, MapPin, Plane, Plus } from "lucide-react";
 import { useAuth } from "@/lib/auth";
-import { useTrip } from "@/contexts/TripContext";
+import { Trip, useTrip } from "@/contexts/TripContext";
 import { Button } from "@/components/ui/button";
 
 function formatDateRange(startDate: string | null, endDate: string | null) {
@@ -19,20 +19,59 @@ function formatDateRange(startDate: string | null, endDate: string | null) {
   return format(startDate || endDate || "");
 }
 
+function sortTrips(trips: Trip[]) {
+  return [...trips].sort((a, b) => {
+    if (!a.start_date && !b.start_date) return a.name.localeCompare(b.name);
+    if (!a.start_date) return 1;
+    if (!b.start_date) return -1;
+    return a.start_date.localeCompare(b.start_date);
+  });
+}
+
+function TripCard({ trip }: { trip: Trip }) {
+  const archived = trip.status === "archived";
+
+  return (
+    <Link
+      to={`/trip/${trip.id}`}
+      className="group rounded-2xl border border-border bg-card p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-md"
+    >
+      <div className="flex items-start justify-between gap-4">
+        <div className="min-w-0">
+          <p className={`text-[10px] font-bold uppercase tracking-[0.15em] ${archived ? "text-muted-foreground" : "text-primary"}`}>
+            {archived ? "Gearchiveerd" : "Reis"}
+          </p>
+          <h2 className="mt-2 truncate font-display text-xl font-extrabold">{trip.name}</h2>
+        </div>
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-secondary transition-colors group-hover:bg-primary/10">
+          <ArrowRight className="h-4 w-4 text-muted-foreground transition-colors group-hover:text-primary" />
+        </div>
+      </div>
+
+      <div className="mt-6 space-y-2 text-sm text-muted-foreground">
+        <div className="flex items-center gap-2">
+          <CalendarDays className="h-4 w-4 shrink-0" />
+          <span>{formatDateRange(trip.start_date, trip.end_date)}</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <MapPin className="h-4 w-4 shrink-0" />
+          <span>{trip.destination_name || "Bestemming nog niet ingevuld"}</span>
+        </div>
+      </div>
+    </Link>
+  );
+}
+
 export default function Trips() {
   const { profile, signOut } = useAuth();
   const { userTrips, loading } = useTrip();
 
-  const trips = useMemo(
-    () =>
-      [...userTrips].sort((a, b) => {
-        if (!a.start_date && !b.start_date) return a.name.localeCompare(b.name);
-        if (!a.start_date) return 1;
-        if (!b.start_date) return -1;
-        return a.start_date.localeCompare(b.start_date);
-      }),
-    [userTrips],
-  );
+  const { activeTrips, archivedTrips } = useMemo(() => ({
+    activeTrips: sortTrips(userTrips.filter((trip) => trip.status !== "archived")),
+    archivedTrips: sortTrips(userTrips.filter((trip) => trip.status === "archived")),
+  }), [userTrips]);
+
+  const hasTrips = activeTrips.length + archivedTrips.length > 0;
 
   return (
     <div className="min-h-screen bg-background">
@@ -61,19 +100,15 @@ export default function Trips() {
             </p>
           </div>
           <Button asChild className="hidden sm:inline-flex">
-            <Link to="/new-trip">
-              <Plus className="mr-2 h-4 w-4" />Nieuwe reis
-            </Link>
+            <Link to="/new-trip"><Plus className="mr-2 h-4 w-4" />Nieuwe reis</Link>
           </Button>
         </div>
 
         {loading ? (
           <div className="grid gap-4 sm:grid-cols-2">
-            {[0, 1].map((item) => (
-              <div key={item} className="h-48 animate-pulse rounded-2xl border border-border bg-card" />
-            ))}
+            {[0, 1].map((item) => <div key={item} className="h-48 animate-pulse rounded-2xl border border-border bg-card" />)}
           </div>
-        ) : trips.length === 0 ? (
+        ) : !hasTrips ? (
           <div className="flex min-h-[360px] flex-col items-center justify-center rounded-3xl border border-dashed border-border bg-card/40 px-6 text-center">
             <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10">
               <Plane className="h-7 w-7 text-primary" />
@@ -83,51 +118,39 @@ export default function Trips() {
               Begin met een naam. Bestemming, data en de rest kun je daarna rustig aanvullen.
             </p>
             <Button asChild className="mt-6">
-              <Link to="/new-trip">
-                <Plus className="mr-2 h-4 w-4" />Nieuwe reis
-              </Link>
+              <Link to="/new-trip"><Plus className="mr-2 h-4 w-4" />Nieuwe reis</Link>
             </Button>
           </div>
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2">
-            {trips.map((trip) => (
-              <Link
-                key={trip.id}
-                to={`/trip/${trip.id}`}
-                className="group rounded-2xl border border-border bg-card p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-md"
-              >
-                <div className="flex items-start justify-between gap-4">
-                  <div className="min-w-0">
-                    <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-primary">
-                      {trip.status === "archived" ? "Gearchiveerd" : "Reis"}
-                    </p>
-                    <h2 className="mt-2 truncate font-display text-xl font-extrabold">{trip.name}</h2>
-                  </div>
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-secondary transition-colors group-hover:bg-primary/10">
-                    <ArrowRight className="h-4 w-4 text-muted-foreground transition-colors group-hover:text-primary" />
-                  </div>
-                </div>
+          <div className="space-y-10">
+            <section>
+              <div className="mb-4 flex items-center justify-between">
+                <h2 className="font-display text-lg font-extrabold">Actieve reizen</h2>
+                <span className="text-xs text-muted-foreground">{activeTrips.length}</span>
+              </div>
+              {activeTrips.length > 0 ? (
+                <div className="grid gap-4 sm:grid-cols-2">{activeTrips.map((trip) => <TripCard key={trip.id} trip={trip} />)}</div>
+              ) : (
+                <div className="rounded-2xl border border-dashed border-border p-6 text-sm text-muted-foreground">Geen actieve reizen.</div>
+              )}
+            </section>
 
-                <div className="mt-6 space-y-2 text-sm text-muted-foreground">
-                  <div className="flex items-center gap-2">
-                    <CalendarDays className="h-4 w-4 shrink-0" />
-                    <span>{formatDateRange(trip.start_date, trip.end_date)}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <MapPin className="h-4 w-4 shrink-0" />
-                    <span>{trip.destination_name || "Bestemming nog niet ingevuld"}</span>
-                  </div>
+            {archivedTrips.length > 0 && (
+              <section>
+                <div className="mb-4 flex items-center gap-2">
+                  <Archive className="h-4 w-4 text-muted-foreground" />
+                  <h2 className="font-display text-lg font-extrabold">Archief</h2>
+                  <span className="ml-auto text-xs text-muted-foreground">{archivedTrips.length}</span>
                 </div>
-              </Link>
-            ))}
+                <div className="grid gap-4 opacity-80 sm:grid-cols-2">{archivedTrips.map((trip) => <TripCard key={trip.id} trip={trip} />)}</div>
+              </section>
+            )}
           </div>
         )}
 
-        {trips.length > 0 && (
+        {hasTrips && (
           <Button asChild className="mt-6 w-full sm:hidden">
-            <Link to="/new-trip">
-              <Plus className="mr-2 h-4 w-4" />Nieuwe reis
-            </Link>
+            <Link to="/new-trip"><Plus className="mr-2 h-4 w-4" />Nieuwe reis</Link>
           </Button>
         )}
       </main>

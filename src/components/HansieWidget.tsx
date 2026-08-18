@@ -84,7 +84,14 @@ async function streamHansie({
 
 export type HansieTrip = { id: string; name: string };
 
-export function HansieWidget({ trip }: { trip: HansieTrip | null }) {
+export function HansieWidget({
+  trip,
+  floating = true,
+}: {
+  trip: HansieTrip | null;
+  /** true = fixed dock above the trip nav, false = sticky bar inside the current layout */
+  floating?: boolean;
+}) {
   const isMobile = useIsMobile();
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
@@ -93,11 +100,11 @@ export function HansieWidget({ trip }: { trip: HansieTrip | null }) {
   const formRef = useRef<HTMLFormElement>(null);
 
   // Authoritative reference to the trip context currently visible to the user.
-  const currentTripIdRef = useRef<string | null>(trip?.id ?? null);
+  const contextIdRef = useRef<string | null>(trip?.id ?? null);
   const tripId = trip?.id ?? null;
 
   useEffect(() => {
-    currentTripIdRef.current = tripId;
+    contextIdRef.current = tripId;
     setMessages([]);
     setInput("");
     setLoading(false);
@@ -130,7 +137,7 @@ export function HansieWidget({ trip }: { trip: HansieTrip | null }) {
         messages: nextMessages,
         onDelta: (delta) => {
           // Ignore stale deltas when the visible trip context has changed.
-          if (currentTripIdRef.current !== requestTripId) return;
+          if (contextIdRef.current !== requestTripId) return;
           assistantText += delta;
           setMessages((current) => {
             const last = current[current.length - 1];
@@ -147,11 +154,11 @@ export function HansieWidget({ trip }: { trip: HansieTrip | null }) {
       });
     } catch (error) {
       // Ignore stale errors from a trip the user no longer has open.
-      if (currentTripIdRef.current !== requestTripId) return;
+      if (contextIdRef.current !== requestTripId) return;
       toast.error(error instanceof Error ? error.message : "Hansie is tijdelijk niet bereikbaar.");
     } finally {
       // Only the originating trip may clear its own loading state.
-      if (currentTripIdRef.current === requestTripId) setLoading(false);
+      if (contextIdRef.current === requestTripId) setLoading(false);
     }
   };
 
@@ -165,11 +172,15 @@ export function HansieWidget({ trip }: { trip: HansieTrip | null }) {
   return (
     <>
       <div
-        className={`fixed z-40 border-t border-border bg-background/95 backdrop-blur-sm ${
-          isMobile
-            ? "bottom-[calc(3.5rem+env(safe-area-inset-bottom))] left-0 right-0"
-            : "bottom-0 right-0 w-full max-w-md"
-        }`}
+        className={
+          floating
+            ? `fixed z-40 border-t border-border bg-background/95 backdrop-blur-sm ${
+                isMobile
+                  ? "bottom-[calc(3.5rem+env(safe-area-inset-bottom))] left-0 right-0"
+                  : "bottom-0 right-0 w-full max-w-md"
+              }`
+            : "sticky bottom-0 left-0 right-0 z-40 border-t border-border bg-background/95 backdrop-blur-sm safe-area-pb"
+        }
       >
         <button
           onClick={() => setOpen(true)}

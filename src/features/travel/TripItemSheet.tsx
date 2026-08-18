@@ -14,12 +14,13 @@ type Props = {
   timezone: string;
   currency: string;
   item?: TripItemRow | null;
+  initialType?: string;
   onSaved: () => void | Promise<void>;
 };
 
 const currencies = ["EUR", "USD", "GBP", "CHF"];
 
-export function TripItemSheet({ open, onOpenChange, tripId, timezone, currency, item, onSaved }: Props) {
+export function TripItemSheet({ open, onOpenChange, tripId, timezone, currency, item, initialType, onSaved }: Props) {
   const [type, setType] = useState("custom");
   const [title, setTitle] = useState("");
   const [status, setStatus] = useState("planned");
@@ -37,7 +38,7 @@ export function TripItemSheet({ open, onOpenChange, tripId, timezone, currency, 
 
   useEffect(() => {
     if (!open) return;
-    setType(item?.type || "custom");
+    setType(item?.type || initialType || "custom");
     setTitle(item?.title || "");
     setStatus(item?.status || "planned");
     setStartAt(isoToLocalInput(item?.start_at || null, timezone));
@@ -50,7 +51,7 @@ export function TripItemSheet({ open, onOpenChange, tripId, timezone, currency, 
     setItemCurrency(item?.currency || currency || "EUR");
     setNotes(item?.notes || "");
     setError("");
-  }, [open, item, timezone, currency]);
+  }, [open, item, initialType, timezone, currency]);
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
@@ -99,11 +100,15 @@ export function TripItemSheet({ open, onOpenChange, tripId, timezone, currency, 
     }
   };
 
+  const selectedType = travelTypes.find((option) => option.value === type);
+
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="bottom" className="max-h-[92vh] overflow-y-auto rounded-t-2xl px-5 pb-8 sm:left-1/2 sm:max-w-xl sm:-translate-x-1/2">
         <SheetHeader className="text-left">
-          <SheetTitle className="font-display text-xl font-extrabold">{item ? "Reisonderdeel wijzigen" : "Toevoegen aan je reis"}</SheetTitle>
+          <SheetTitle className="font-display text-xl font-extrabold">
+            {item ? "Reisonderdeel wijzigen" : selectedType ? `${selectedType.icon} ${selectedType.label} toevoegen` : "Toevoegen aan je reis"}
+          </SheetTitle>
           <SheetDescription>Vul alleen in wat je al weet. Je kunt dit later altijd aanvullen.</SheetDescription>
         </SheetHeader>
 
@@ -116,7 +121,7 @@ export function TripItemSheet({ open, onOpenChange, tripId, timezone, currency, 
               </select>
             </div>
             <div>
-              <label className="text-sm font-semibold" htmlFor="travel-status">Status</label>
+              <label className="text-sm font-semibold" htmlFor="travel-status">Hoe staat het ervoor?</label>
               <select id="travel-status" value={status} onChange={(event) => setStatus(event.target.value)} className="mt-2 h-11 w-full rounded-md border border-input bg-background px-3 text-sm">
                 {travelStatuses.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
               </select>
@@ -124,7 +129,7 @@ export function TripItemSheet({ open, onOpenChange, tripId, timezone, currency, 
           </div>
 
           <div>
-            <label className="text-sm font-semibold" htmlFor="travel-title">Naam *</label>
+            <label className="text-sm font-semibold" htmlFor="travel-title">Korte naam *</label>
             <Input id="travel-title" value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Bijv. Vlucht naar Rome" className="mt-2 h-11" autoFocus />
           </div>
 
@@ -141,13 +146,13 @@ export function TripItemSheet({ open, onOpenChange, tripId, timezone, currency, 
           <p className="-mt-3 text-xs text-muted-foreground">Tijden worden opgeslagen in de tijdzone van deze reis.</p>
 
           <div>
-            <label className="text-sm font-semibold" htmlFor="travel-location">Locatie</label>
+            <label className="text-sm font-semibold" htmlFor="travel-location">Waar?</label>
             <Input id="travel-location" value={location} onChange={(event) => setLocation(event.target.value)} placeholder="Plaats, luchthaven, adres of locatie" className="mt-2 h-11" />
           </div>
 
           <div className="grid gap-3 sm:grid-cols-2">
             <div>
-              <label className="text-sm font-semibold" htmlFor="travel-provider">Aanbieder</label>
+              <label className="text-sm font-semibold" htmlFor="travel-provider">Bij wie?</label>
               <Input id="travel-provider" value={provider} onChange={(event) => setProvider(event.target.value)} placeholder="Bijv. KLM of Hertz" className="mt-2 h-11" />
             </div>
             <div>
@@ -183,7 +188,7 @@ export function TripItemSheet({ open, onOpenChange, tripId, timezone, currency, 
 
           <Button type="submit" className="h-12 w-full font-bold" disabled={saving}>
             {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            {item ? "Wijzigingen opslaan" : "Toevoegen"}
+            {item ? "Wijzigingen opslaan" : "Toevoegen aan reisplan"}
           </Button>
         </form>
       </SheetContent>

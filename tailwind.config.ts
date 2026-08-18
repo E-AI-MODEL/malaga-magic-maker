@@ -17,6 +17,7 @@ export default {
       fontFamily: {
         sans: ["DM Sans", "sans-serif"],
         display: ["Plus Jakarta Sans", "sans-serif"],
+        brand: ["Fraunces", "Georgia", "serif"],
       },
       colors: {
         border: "hsl(var(--border))",

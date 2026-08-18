@@ -2,13 +2,15 @@ import { Home, Route, Users } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { useTrip } from "@/contexts/TripContext";
 
+/** Exactly three trip destinations. Hansie is never a navigation item. */
 export function BottomNav() {
   const { activeTrip } = useTrip();
   if (!activeTrip) return null;
 
-  const base = "flex h-14 flex-1 flex-col items-center justify-center gap-1 text-[10px] font-semibold uppercase tracking-[0.12em] transition-colors";
+  const base =
+    "flex h-14 flex-1 flex-col items-center justify-center gap-1 text-[10px] font-semibold uppercase tracking-[0.12em] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background";
   const active = "text-primary";
-  const inactive = "text-white/45";
+  const inactive = "text-muted-foreground";
 
   const links = [
     { to: `/trip/${activeTrip.id}`, icon: Home, label: "Overzicht", end: true },
@@ -17,7 +19,10 @@ export function BottomNav() {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-white/5 bg-foreground safe-area-pb">
+    <nav
+      aria-label="Reisnavigatie"
+      className="fixed bottom-0 left-0 right-0 z-40 border-t border-border bg-background/95 backdrop-blur-sm safe-area-pb"
+    >
       <div className="mx-auto flex max-w-lg">
         {links.map((link) => (
           <NavLink

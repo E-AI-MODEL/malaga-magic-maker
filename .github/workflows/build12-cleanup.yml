@@ -1,0 +1,32 @@
+name: BUILD 12 cleanup temporary audit workflows
+
+on:
+  push:
+    branches:
+      - vakansie/build-12-production-hardening
+
+permissions:
+  contents: write
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: vakansie/build-12-production-hardening
+          fetch-depth: 0
+      - name: Remove temporary workflows after zero-critical proof
+        run: |
+          if [ ! -f docs/builds/BUILD_12_DEPENDENCY_AUDIT_PASS.md ]; then
+            echo 'Audit proof not present yet; keep temporary workflows.'
+            exit 0
+          fi
+          git rm -f \
+            .github/workflows/build12-safe-audit-remediation.yml \
+            .github/workflows/build12-audit-proof.yml \
+            .github/workflows/build12-cleanup.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'Remove temporary BUILD 12 audit workflows'
+          git push origin HEAD:vakansie/build-12-production-hardening

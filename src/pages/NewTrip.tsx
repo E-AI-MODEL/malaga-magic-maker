@@ -6,17 +6,22 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
+const currencies = ["EUR", "USD", "GBP", "CHF"];
+
 export default function NewTrip() {
   const { createTrip } = useTrip();
   const navigate = useNavigate();
   const [name, setName] = useState("");
   const [destination, setDestination] = useState("");
+  const [country, setCountry] = useState("");
   const [description, setDescription] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [groupSize, setGroupSize] = useState("1");
+  const [currency, setCurrency] = useState("EUR");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [timezone] = useState(() => Intl.DateTimeFormat().resolvedOptions().timeZone || "Europe/Amsterdam");
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
@@ -37,9 +42,12 @@ export default function NewTrip() {
       name: name.trim(),
       description: description.trim() || undefined,
       destination_name: destination.trim() || undefined,
+      destination_country: country.trim() || undefined,
       start_date: startDate || null,
       end_date: endDate || null,
       group_size: Math.max(1, Number.parseInt(groupSize, 10) || 1),
+      timezone,
+      currency,
     });
     setSubmitting(false);
 
@@ -79,15 +87,27 @@ export default function NewTrip() {
             />
           </div>
 
-          <div>
-            <label className="text-sm font-semibold" htmlFor="destination">Bestemming</label>
-            <Input
-              id="destination"
-              value={destination}
-              onChange={(event) => setDestination(event.target.value)}
-              placeholder="Plaats, regio of land"
-              className="mt-2 h-12"
-            />
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <label className="text-sm font-semibold" htmlFor="destination">Bestemming</label>
+              <Input
+                id="destination"
+                value={destination}
+                onChange={(event) => setDestination(event.target.value)}
+                placeholder="Plaats of regio"
+                className="mt-2 h-12"
+              />
+            </div>
+            <div>
+              <label className="text-sm font-semibold" htmlFor="country">Land</label>
+              <Input
+                id="country"
+                value={country}
+                onChange={(event) => setCountry(event.target.value)}
+                placeholder="Bijv. Italië"
+                className="mt-2 h-12"
+              />
+            </div>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
@@ -113,19 +133,32 @@ export default function NewTrip() {
             </div>
           </div>
 
-          <div>
-            <label className="text-sm font-semibold" htmlFor="group-size">Aantal reizigers</label>
-            <Input
-              id="group-size"
-              type="number"
-              min={1}
-              max={99}
-              value={groupSize}
-              onChange={(event) => setGroupSize(event.target.value)}
-              className="mt-2 h-12"
-            />
-            <p className="mt-1.5 text-xs text-muted-foreground">Ook een soloreis begint gewoon bij 1.</p>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="text-sm font-semibold" htmlFor="group-size">Aantal reizigers</label>
+              <Input
+                id="group-size"
+                type="number"
+                min={1}
+                max={99}
+                value={groupSize}
+                onChange={(event) => setGroupSize(event.target.value)}
+                className="mt-2 h-12"
+              />
+            </div>
+            <div>
+              <label className="text-sm font-semibold" htmlFor="currency">Valuta</label>
+              <select
+                id="currency"
+                value={currency}
+                onChange={(event) => setCurrency(event.target.value)}
+                className="mt-2 h-12 w-full rounded-md border border-input bg-background px-3 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+              >
+                {currencies.map((item) => <option key={item} value={item}>{item}</option>)}
+              </select>
+            </div>
           </div>
+          <p className="-mt-3 text-xs text-muted-foreground">Ook een soloreis begint gewoon bij 1.</p>
 
           <div>
             <label className="text-sm font-semibold" htmlFor="description">Notitie</label>

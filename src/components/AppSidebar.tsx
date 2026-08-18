@@ -1,30 +1,17 @@
-import { useNavigate, useLocation } from "react-router-dom";
+import { ChevronDown, Home, LogOut, Plane, Plus, Route, User, Users } from "lucide-react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/lib/auth";
 import { useTrip } from "@/contexts/TripContext";
 import {
-  Compass,
-  ClipboardList,
-  Info,
-  BarChart3,
-  Home,
-  Receipt,
-  FileText,
-  Settings,
-  ListChecks,
-  User,
-  LogOut,
-  ChevronDown,
-} from "lucide-react";
-import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarFooter,
   useSidebar,
 } from "@/components/ui/sidebar";
 import { NavLink } from "@/components/NavLink";
@@ -37,85 +24,77 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 
-const mainLinks = [
-  { to: "/taken", icon: ClipboardList, label: "Taken" },
-  { to: "/reisplanner", icon: Compass, label: "AI-reisgids" },
-  { to: "/info", icon: Info, label: "Info" },
-  { to: "/uitslag", icon: BarChart3, label: "Uitslag" },
-];
-
-const secondaryLinks = [
-  { to: "/accommodations", icon: Home, label: "Verblijven" },
-  { to: "/kosten", icon: Receipt, label: "Kosten" },
-  { to: "/wensen", icon: ListChecks, label: "Wensen" },
-  { to: "/intake", icon: FileText, label: "Intake" },
-  { to: "/profiel", icon: User, label: "Profiel" },
-];
-
 export function AppSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
-  const { profile, signOut, isAdmin } = useAuth();
-  const { activeTrip, userTrips, switchTrip } = useTrip();
+  const { profile, signOut } = useAuth();
+  const { activeTrip, userTrips } = useTrip();
   const navigate = useNavigate();
   const location = useLocation();
 
-  const isActive = (path: string) => location.pathname === path || location.pathname.startsWith(path + "/");
+  if (!activeTrip) return null;
 
-  const allSecondary = [
-    ...secondaryLinks,
-    ...(isAdmin ? [{ to: "/admin", icon: Settings, label: "Admin" }] : []),
+  const mainLinks = [
+    { to: `/trip/${activeTrip.id}`, icon: Home, label: "Overzicht", end: true },
+    { to: `/trip/${activeTrip.id}/reis`, icon: Route, label: "Reis", end: false },
+    { to: `/trip/${activeTrip.id}/samen`, icon: Users, label: "Samen", end: false },
   ];
+
+  const isActive = (path: string, end = false) =>
+    end ? location.pathname === path : location.pathname === path || location.pathname.startsWith(`${path}/`);
 
   return (
     <Sidebar collapsible="icon" className="border-r border-sidebar-border">
       <SidebarContent className="pt-4">
-        {/* Trip header */}
         <div className="px-4 pb-4">
           {!collapsed && (
-            userTrips.length > 1 ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button className="flex items-center gap-1.5 hover:opacity-80 transition-opacity w-full">
-                    <h1 className="font-display text-xs font-extrabold uppercase tracking-[0.15em] text-sidebar-foreground truncate">
-                      {activeTrip?.name || "Vakansie"}
-                    </h1>
-                    <ChevronDown className="h-3 w-3 text-sidebar-foreground/50 shrink-0" />
-                  </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" className="w-56">
-                  {userTrips.map((trip) => (
-                    <DropdownMenuItem
-                      key={trip.id}
-                      onClick={() => switchTrip(trip.id)}
-                      className={trip.id === activeTrip?.id ? "bg-primary/10 font-semibold" : ""}
-                    >
-                      <span className="truncate">{trip.name}</span>
-                      {trip.id === activeTrip?.id && <span className="ml-auto text-primary text-xs">✓</span>}
-                    </DropdownMenuItem>
-                  ))}
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => navigate("/onboarding")}>+ Nieuwe vakantie</DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            ) : (
-              <h1 className="font-display text-xs font-extrabold uppercase tracking-[0.15em] text-sidebar-foreground truncate">
-                {activeTrip?.name || "Vakansie"}
-              </h1>
-            )
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="flex w-full items-center gap-1.5 text-left transition-opacity hover:opacity-80">
+                  <h1 className="truncate font-display text-xs font-extrabold uppercase tracking-[0.15em] text-sidebar-foreground">
+                    {activeTrip.name}
+                  </h1>
+                  <ChevronDown className="h-3 w-3 shrink-0 text-sidebar-foreground/50" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-64">
+                <DropdownMenuItem onClick={() => navigate("/trips")}>
+                  <Plane className="mr-2 h-4 w-4" />Alle reizen
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                {userTrips.map((trip) => (
+                  <DropdownMenuItem
+                    key={trip.id}
+                    onClick={() => navigate(`/trip/${trip.id}`)}
+                    className={trip.id === activeTrip.id ? "bg-primary/10 font-semibold" : ""}
+                  >
+                    <span className="truncate">{trip.name}</span>
+                    {trip.id === activeTrip.id && <span className="ml-auto text-xs text-primary">✓</span>}
+                  </DropdownMenuItem>
+                ))}
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => navigate("/new-trip")}>
+                  <Plus className="mr-2 h-4 w-4" />Nieuwe reis
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           )}
         </div>
 
-        {/* Main nav */}
         <SidebarGroup>
-          <SidebarGroupLabel className="text-sidebar-foreground/40">Navigatie</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-sidebar-foreground/40">Deze reis</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {mainLinks.map((item) => (
                 <SidebarMenuItem key={item.to}>
-                  <SidebarMenuButton asChild isActive={isActive(item.to)}>
-                    <NavLink to={item.to} end className="hover:bg-sidebar-accent/50" activeClassName="bg-sidebar-accent text-sidebar-primary font-semibold">
-                      <item.icon className="h-4 w-4 mr-2" />
+                  <SidebarMenuButton asChild isActive={isActive(item.to, item.end)}>
+                    <NavLink
+                      to={item.to}
+                      end={item.end}
+                      className="hover:bg-sidebar-accent/50"
+                      activeClassName="bg-sidebar-accent text-sidebar-primary font-semibold"
+                    >
+                      <item.icon className="mr-2 h-4 w-4" />
                       {!collapsed && <span>{item.label}</span>}
                     </NavLink>
                   </SidebarMenuButton>
@@ -125,37 +104,53 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {/* Secondary nav */}
         <SidebarGroup>
-          <SidebarGroupLabel className="text-sidebar-foreground/40">Meer</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-sidebar-foreground/40">Account</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {allSecondary.map((item) => (
-                <SidebarMenuItem key={item.to}>
-                  <SidebarMenuButton asChild isActive={isActive(item.to)}>
-                    <NavLink to={item.to} end className="hover:bg-sidebar-accent/50" activeClassName="bg-sidebar-accent text-sidebar-primary font-semibold">
-                      <item.icon className="h-4 w-4 mr-2" />
-                      {!collapsed && <span>{item.label}</span>}
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild isActive={location.pathname === "/trips"}>
+                  <NavLink to="/trips" end className="hover:bg-sidebar-accent/50" activeClassName="bg-sidebar-accent text-sidebar-primary font-semibold">
+                    <Plane className="mr-2 h-4 w-4" />
+                    {!collapsed && <span>Mijn reizen</span>}
+                  </NavLink>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild isActive={location.pathname === "/profiel"}>
+                  <NavLink to="/profiel" end className="hover:bg-sidebar-accent/50" activeClassName="bg-sidebar-accent text-sidebar-primary font-semibold">
+                    <User className="mr-2 h-4 w-4" />
+                    {!collapsed && <span>Profiel</span>}
+                  </NavLink>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
 
-      {/* Footer with user info */}
       <SidebarFooter className="border-t border-sidebar-border p-3">
         {!collapsed ? (
           <div className="flex items-center justify-between">
-            <span className="text-xs text-sidebar-foreground/50 font-medium truncate">{profile?.display_name}</span>
-            <Button variant="ghost" size="icon" onClick={signOut} className="h-7 w-7 text-sidebar-foreground/50 hover:text-sidebar-foreground hover:bg-sidebar-accent">
+            <span className="truncate text-xs font-medium text-sidebar-foreground/50">{profile?.display_name}</span>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => void signOut()}
+              className="h-7 w-7 text-sidebar-foreground/50 hover:bg-sidebar-accent hover:text-sidebar-foreground"
+              aria-label="Uitloggen"
+            >
               <LogOut className="h-3.5 w-3.5" />
             </Button>
           </div>
         ) : (
-          <Button variant="ghost" size="icon" onClick={signOut} className="h-7 w-7 text-sidebar-foreground/50 hover:text-sidebar-foreground hover:bg-sidebar-accent mx-auto">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => void signOut()}
+            className="mx-auto h-7 w-7 text-sidebar-foreground/50 hover:bg-sidebar-accent hover:text-sidebar-foreground"
+            aria-label="Uitloggen"
+          >
             <LogOut className="h-3.5 w-3.5" />
           </Button>
         )}

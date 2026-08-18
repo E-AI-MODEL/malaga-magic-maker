@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "@/lib/auth";
 import { useTrip } from "@/contexts/TripContext";
 
@@ -15,10 +15,7 @@ export default function JoinTrip() {
     if (authLoading) return;
 
     if (!user) {
-      // Save invite code and redirect to login
-      if (inviteCode) {
-        localStorage.setItem("vakansie_pending_invite", inviteCode);
-      }
+      if (inviteCode) localStorage.setItem("vakansie_pending_invite", inviteCode);
       navigate("/login", { replace: true });
       return;
     }
@@ -29,40 +26,46 @@ export default function JoinTrip() {
       return;
     }
 
+    let cancelled = false;
     joinTrip(inviteCode).then((result) => {
-      if (result.error) {
+      if (cancelled) return;
+      if (result.error || !result.tripId) {
         setStatus("error");
-        setError(result.error);
+        setError(result.error || "De reis kon niet worden geopend");
       } else {
         setStatus("success");
-        setTimeout(() => navigate("/taken", { replace: true }), 1500);
+        window.setTimeout(() => navigate(`/trip/${result.tripId}`, { replace: true }), 900);
       }
     });
-  }, [user, authLoading, inviteCode]);
+
+    return () => {
+      cancelled = true;
+    };
+  }, [user, authLoading, inviteCode, joinTrip, navigate]);
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center px-6">
+    <div className="flex min-h-screen items-center justify-center bg-background px-6">
       <div className="text-center">
         {status === "loading" && (
           <>
-            <div className="h-10 w-10 rounded-full border-2 border-primary border-t-transparent animate-spin mx-auto mb-4" />
-            <p className="text-muted-foreground">Deelnemen aan vakantie...</p>
+            <div className="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+            <p className="text-muted-foreground">Uitnodiging controleren...</p>
           </>
         )}
         {status === "success" && (
           <>
-            <div className="text-4xl mb-4">🎉</div>
-            <p className="font-bold text-lg">Welkom!</p>
-            <p className="text-muted-foreground text-sm mt-1">Je wordt doorgestuurd...</p>
+            <div className="mb-4 text-4xl">✓</div>
+            <p className="text-lg font-bold">Je doet mee</p>
+            <p className="mt-1 text-sm text-muted-foreground">De reis wordt geopend...</p>
           </>
         )}
         {status === "error" && (
           <>
-            <div className="text-4xl mb-4">😕</div>
-            <p className="font-bold text-lg">Oeps</p>
-            <p className="text-muted-foreground text-sm mt-1">{error}</p>
-            <button onClick={() => navigate("/taken")} className="text-primary text-sm font-semibold mt-4 hover:underline">
-              Ga naar home
+            <div className="mb-4 text-4xl">!</div>
+            <p className="text-lg font-bold">Uitnodiging werkt niet</p>
+            <p className="mt-1 text-sm text-muted-foreground">{error}</p>
+            <button onClick={() => navigate("/trips")} className="mt-4 text-sm font-semibold text-primary hover:underline">
+              Naar mijn reizen
             </button>
           </>
         )}

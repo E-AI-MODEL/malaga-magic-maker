@@ -1,6 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 
-type ReadinessCheck = {
+export type ReadinessCheck = {
   key: "dates" | "destination" | "tasks" | "decisions" | "bookings";
   attention_count: number;
 };
@@ -78,4 +78,18 @@ export function activeReadinessChecks(readiness: TripReadiness) {
   return readiness.checks
     .filter((check) => check.attention_count > 0)
     .map((check) => ({ ...check, label: checkLabels[check.key] }));
+}
+
+export function readinessAction(check: ReadinessCheck, tripId: string) {
+  switch (check.key) {
+    case "dates":
+    case "destination":
+      return { href: `/trip/${tripId}/settings`, label: "Reisgegevens aanvullen" };
+    case "tasks":
+      return { href: `/trip/${tripId}/samen`, label: "Open taken bekijken" };
+    case "decisions":
+      return { href: `/trip/${tripId}/samen`, label: "Keuzes bekijken" };
+    case "bookings":
+      return { href: `/trip/${tripId}/reis`, label: "Reis bekijken" };
+  }
 }

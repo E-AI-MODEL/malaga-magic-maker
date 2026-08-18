@@ -2,9 +2,9 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getNotificationPreferences, saveNotificationPreferences } from "./data";
 
 const options = [
-  { key: "task_assignments" as const, label: "Taaktoewijzingen", description: "Als een taak aan jou wordt toegewezen of een relevante taak is afgerond." },
-  { key: "decisions" as const, label: "Keuzes", description: "Als er een gezamenlijke keuze start of sluit." },
-  { key: "trip_updates" as const, label: "Reiswijzigingen", description: "Bij belangrijke wijzigingen en wanneer een medereiziger aansluit." },
+  { key: "task_assignments" as const, label: "Taken", description: "Als een taak aan jou wordt toegewezen of een relevante taak wordt afgerond." },
+  { key: "decisions" as const, label: "Keuzes", description: "Als een gezamenlijke keuze start of wordt gesloten." },
+  { key: "trip_updates" as const, label: "Reiswijzigingen", description: "Bij belangrijke wijzigingen en wanneer iemand bij de reis aansluit." },
 ];
 
 export function NotificationPreferences({ userId }: { userId: string }) {
@@ -20,22 +20,20 @@ export function NotificationPreferences({ userId }: { userId: string }) {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["notification-preferences", userId] }),
   });
 
-  if (query.isLoading) return <div className="h-28 animate-pulse rounded-2xl border border-border bg-card" />;
+  if (query.isLoading) return <div className="h-36 animate-pulse rounded-2xl bg-secondary/40" />;
   if (query.isError || !query.data) return <p className="text-sm text-destructive">Meldingsvoorkeuren konden niet worden geladen.</p>;
 
   const preferences = query.data;
 
   return (
-    <section>
-      <h2 className="font-display text-sm font-extrabold uppercase tracking-wider text-muted-foreground">Meldingen</h2>
-      <p className="mt-1 text-xs leading-relaxed text-muted-foreground">Kies welke in-app meldingen je wilt ontvangen. Belangrijke account- en beveiligingsmeldingen staan hier los van.</p>
-      <div className="mt-3 overflow-hidden rounded-2xl border border-border bg-card">
-        {options.map((option, index) => (
-          <label key={option.key} className={`flex cursor-pointer items-start gap-4 px-4 py-4 ${index > 0 ? "border-t border-border" : ""}`}>
-            <div className="min-w-0 flex-1">
-              <p className="text-sm font-semibold">{option.label}</p>
-              <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{option.description}</p>
-            </div>
+    <div className="divide-y divide-border/70 border-y border-border/70">
+      {options.map((option) => (
+        <label key={option.key} className="flex cursor-pointer items-center gap-5 py-4">
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-bold">{option.label}</p>
+            <p className="mt-1 max-w-xl text-xs leading-relaxed text-muted-foreground">{option.description}</p>
+          </div>
+          <span className="relative inline-flex h-7 w-12 shrink-0 items-center">
             <input
               type="checkbox"
               checked={preferences[option.key]}
@@ -48,13 +46,15 @@ export function NotificationPreferences({ userId }: { userId: string }) {
                   [option.key]: event.target.checked,
                 });
               }}
-              className="mt-1 h-5 w-5 rounded border-border accent-primary"
+              className="peer sr-only"
               aria-label={option.label}
             />
-          </label>
-        ))}
-      </div>
-      {mutation.isError && <p className="mt-2 text-xs font-medium text-destructive">Opslaan is niet gelukt. Probeer het opnieuw.</p>}
-    </section>
+            <span className="absolute inset-0 rounded-full bg-secondary transition-colors peer-checked:bg-primary peer-disabled:opacity-50" />
+            <span className="absolute left-1 h-5 w-5 rounded-full bg-background shadow-sm transition-transform peer-checked:translate-x-5" />
+          </span>
+        </label>
+      ))}
+      {mutation.isError && <p className="py-3 text-xs font-medium text-destructive">Opslaan is niet gelukt. Probeer het opnieuw.</p>}
+    </div>
   );
 }

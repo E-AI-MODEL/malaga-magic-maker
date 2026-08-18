@@ -1,6 +1,6 @@
 // Runtime client for the connected Supabase project.
 import { createClient } from '@supabase/supabase-js';
-import type { Database } from './database';
+import type { Database } from './database.live';
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;

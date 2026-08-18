@@ -7,6 +7,7 @@ import { useAuth } from "@/lib/auth";
 import { useTrip } from "@/contexts/TripContext";
 import { deleteTripItem, listLegacyTravelItems, listTripItems, TripItemRow } from "@/features/travel/data";
 import { TripItemSheet } from "@/features/travel/TripItemSheet";
+import { DocumentsSection } from "@/features/documents/DocumentsSection";
 import {
   formatTripDateTime,
   formatTripDay,
@@ -200,6 +201,14 @@ export default function TripReis() {
             </div>
           )}
         </div>
+
+        <DocumentsSection
+          tripId={activeTrip.id}
+          items={itemsQuery.data || []}
+          currentUserId={user?.id}
+          isOrganizer={isOrganizer}
+          readOnly={readOnly}
+        />
 
         {(legacyQuery.data?.length || 0) > 0 && (
           <section className="mt-10 border-t border-border pt-8">

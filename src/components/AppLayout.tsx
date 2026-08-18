@@ -1,5 +1,5 @@
 import { ReactNode } from "react";
-import { ArrowLeft, ChevronDown, LogOut, Plus, Suitcase } from "lucide-react";
+import { ArrowLeft, ChevronDown, LogOut, Plane, Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { BottomNav } from "./BottomNav";
 import { AppSidebar } from "./AppSidebar";
@@ -52,7 +52,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="start" className="w-64">
                     <DropdownMenuItem onClick={() => navigate("/trips")}>
-                      <Suitcase className="mr-2 h-4 w-4" />Alle reizen
+                      <Plane className="mr-2 h-4 w-4" />Alle reizen
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     {userTrips.map((trip) => (

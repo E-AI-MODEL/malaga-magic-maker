@@ -2,6 +2,7 @@ import { lazy, ReactNode, Suspense, useEffect, useState } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { HansieWidget } from "@/components/HansieWidget";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Navigate, Route, Routes, useParams } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/lib/auth";
@@ -138,6 +139,7 @@ const App = () => (
             <ClientErrorReporter />
             <ActivityLogProvider>
               <AppRoutes />
+              <HansieWidget />
             </ActivityLogProvider>
           </TripProvider>
         </AuthProvider>

@@ -20,6 +20,13 @@ interface AuthContextType {
   isAdmin: boolean;
   loading: boolean;
   signIn: (emailOrUsername: string, password: string) => Promise<{ error?: string }>;
+  signUp: (
+    email: string,
+    password: string,
+    displayName: string,
+  ) => Promise<{ error?: string; needsEmailConfirmation?: boolean }>;
+  requestPasswordReset: (email: string) => Promise<{ error?: string }>;
+  updatePassword: (password: string) => Promise<{ error?: string }>;
   signOut: () => Promise<void>;
 }
 
@@ -145,8 +152,44 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await supabase.auth.signOut();
   };
 
+  const signUp = async (email: string, password: string, displayName: string) => {
+    const { data, error } = await supabase.auth.signUp({
+      email: email.trim().toLowerCase(),
+      password,
+      options: {
+        emailRedirectTo: `${window.location.origin}/`,
+        data: { display_name: displayName.trim() },
+      },
+    });
+
+    if (error) return { error: "Account maken is niet gelukt." };
+    if (!data.session) return { needsEmailConfirmation: true };
+
+    if (data.user) {
+      setUser(data.user);
+      await fetchProfile(data.user.id);
+    }
+    return {};
+  };
+
+  const requestPasswordReset = async (email: string) => {
+    const { error } = await supabase.auth.resetPasswordForEmail(email.trim().toLowerCase(), {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    if (error) return { error: "Herstelmail versturen is niet gelukt." };
+    return {};
+  };
+
+  const updatePassword = async (password: string) => {
+    const { error } = await supabase.auth.updateUser({ password });
+    if (error) return { error: "Wachtwoord opslaan is niet gelukt." };
+    return {};
+  };
+
   return (
-    <AuthContext.Provider value={{ user, profile, isAdmin, loading, signIn, signOut }}>
+    <AuthContext.Provider
+      value={{ user, profile, isAdmin, loading, signIn, signUp, requestPasswordReset, updatePassword, signOut }}
+    >
       {children}
     </AuthContext.Provider>
   );

@@ -23,22 +23,7 @@ type TripDocumentsTable = {
   Row: TripDocumentRow;
   Insert: never;
   Update: never;
-  Relationships: [
-    {
-      foreignKeyName: "trip_documents_trip_id_fkey";
-      columns: ["trip_id"];
-      isOneToOne: false;
-      referencedRelation: "trip";
-      referencedColumns: ["id"];
-    },
-    {
-      foreignKeyName: "trip_documents_trip_item_id_fkey";
-      columns: ["trip_item_id"];
-      isOneToOne: false;
-      referencedRelation: "trip_items";
-      referencedColumns: ["id"];
-    },
-  ];
+  Relationships: [];
 };
 
 export type AdminAuditRow = {
@@ -58,11 +43,81 @@ type AdminAuditTable = {
   Relationships: [];
 };
 
+export type ActivityEventRow = {
+  id: string;
+  trip_id: string;
+  actor_user_id: string | null;
+  event_type: string;
+  entity_type: string | null;
+  entity_id: string | null;
+  message: string;
+  metadata: Json;
+  created_at: string;
+};
+
+type ActivityEventsTable = {
+  Row: ActivityEventRow;
+  Insert: never;
+  Update: never;
+  Relationships: [];
+};
+
+export type NotificationRow = {
+  id: string;
+  user_id: string;
+  from_user_id: string;
+  task_id: string | null;
+  message: string;
+  read: boolean;
+  created_at: string;
+  trip_id: string | null;
+  event_type: string;
+  entity_type: string | null;
+  entity_id: string | null;
+  payload: Json;
+};
+
+type NotificationsTable = {
+  Row: NotificationRow;
+  Insert: never;
+  Update: { read?: boolean };
+  Relationships: [];
+};
+
+export type NotificationPreferencesRow = {
+  user_id: string;
+  task_assignments: boolean;
+  decisions: boolean;
+  trip_updates: boolean;
+  updated_at: string;
+};
+
+type NotificationPreferencesTable = {
+  Row: NotificationPreferencesRow;
+  Insert: {
+    user_id: string;
+    task_assignments?: boolean;
+    decisions?: boolean;
+    trip_updates?: boolean;
+    updated_at?: string;
+  };
+  Update: {
+    task_assignments?: boolean;
+    decisions?: boolean;
+    trip_updates?: boolean;
+    updated_at?: string;
+  };
+  Relationships: [];
+};
+
 export type Database = Omit<Build06Database, "public"> & {
   public: Omit<Build06Database["public"], "Tables" | "Functions"> & {
-    Tables: ExistingTables & {
+    Tables: Omit<ExistingTables, "notifications"> & {
       trip_documents: TripDocumentsTable;
       admin_audit_log: AdminAuditTable;
+      activity_events: ActivityEventsTable;
+      notifications: NotificationsTable;
+      notification_preferences: NotificationPreferencesTable;
     };
     Functions: ExistingFunctions & {
       reserve_trip_document: {

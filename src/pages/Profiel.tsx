@@ -7,11 +7,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
+import { NotificationPreferences } from "@/features/notifications/NotificationPreferences";
 import { toast } from "sonner";
 import { Calendar, Copy, Settings, User, Users } from "lucide-react";
 
 export default function Profiel() {
-  const { profile, isAdmin } = useAuth();
+  const { profile, isAdmin, user } = useAuth();
   const { userTrips, activeTrip } = useTrip();
   const navigate = useNavigate();
   const [displayName, setDisplayName] = useState(profile?.display_name || "");
@@ -60,6 +61,8 @@ export default function Profiel() {
             </Button>
           </div>
         </div>
+
+        {user && <NotificationPreferences userId={user.id} />}
 
         {isAdmin && (
           <button

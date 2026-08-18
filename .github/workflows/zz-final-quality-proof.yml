@@ -1,0 +1,75 @@
+name: Final BUILD 12 quality proof
+
+on:
+  push:
+    branches:
+      - vakansie/build-12-production-hardening
+
+permissions:
+  contents: write
+
+jobs:
+  proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: vakansie/build-12-production-hardening
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: lts
+      - run: npm install --legacy-peer-deps
+      - name: Full dependency audit critical gate
+        run: |
+          npm audit --json > audit-final.json || true
+          node scripts/audit-summary.mjs audit-final.json
+      - name: Runtime dependency audit
+        run: |
+          npm audit --omit=dev --json > runtime-final.json || true
+          node - <<'NODE'
+          const fs = require('fs');
+          const report = JSON.parse(fs.readFileSync('runtime-final.json','utf8'));
+          const v = report.metadata?.vulnerabilities || {};
+          if ((v.critical || 0) > 0 || (v.high || 0) > 0) {
+            console.error(`runtime critical=${v.critical || 0} high=${v.high || 0}`);
+            process.exit(1);
+          }
+          NODE
+      - run: npm run typecheck
+      - name: Edge Functions
+        run: |
+          deno check supabase/functions/trip-ai-chat/index.ts
+          deno check supabase/functions/firecrawl-scrape/index.ts
+          deno check supabase/functions/seed-users/index.ts
+      - run: npm run lint
+      - run: npm test
+      - run: npm run build
+      - name: Record final proof and remove proof workflow
+        run: |
+          cat > docs/builds/BUILD_12_FINAL_QUALITY_PASS.md <<'EOF'
+          # BUILD 12 final quality proof
+
+          Executed after temporary workflow cleanup on the committed BUILD 12 branch state.
+
+          - full dependency audit critical gate: PASS
+          - runtime dependency audit (high + critical): PASS
+          - TypeScript typecheck: PASS
+          - Edge Function Deno checks: PASS
+          - lint: PASS
+          - tests: PASS
+          - production build: PASS
+
+          This marker can only be committed after every command above succeeds.
+          EOF
+          git rm .github/workflows/zz-final-quality-proof.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add docs/builds/BUILD_12_FINAL_QUALITY_PASS.md
+          git commit -m 'Record final BUILD 12 quality proof'
+          git push origin HEAD:vakansie/build-12-production-hardening

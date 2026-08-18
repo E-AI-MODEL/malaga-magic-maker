@@ -7,6 +7,7 @@ import { BrowserRouter, Navigate, Route, Routes, useParams } from "react-router-
 import { AuthProvider, useAuth } from "@/lib/auth";
 import { TripProvider, useTrip } from "@/contexts/TripContext";
 import { ActivityLogProvider } from "@/contexts/ActivityLogContext";
+import { ClientErrorReporter } from "@/features/observability/ClientErrorReporter";
 import Login from "./pages/Login";
 
 const Trips = lazy(() => import("./pages/Trips"));
@@ -18,6 +19,7 @@ const TripSettings = lazy(() => import("./pages/TripSettings"));
 const JoinTrip = lazy(() => import("./pages/JoinTrip"));
 const Profiel = lazy(() => import("./pages/Profiel"));
 const Ops = lazy(() => import("./pages/Ops"));
+const OpsErrors = lazy(() => import("./pages/OpsErrors"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
@@ -97,6 +99,7 @@ function AppRoutes() {
         <Route path="/join/:inviteCode" element={<JoinTrip />} />
         <Route path="/profiel" element={<ProtectedRoute><Profiel /></ProtectedRoute>} />
         <Route path="/ops" element={<PlatformAdminRoute><Ops /></PlatformAdminRoute>} />
+        <Route path="/ops/errors" element={<PlatformAdminRoute><OpsErrors /></PlatformAdminRoute>} />
 
         <Route path="/trip/:tripId" element={<ProtectedRoute><TripRouteGuard><TripHome /></TripRouteGuard></ProtectedRoute>} />
         <Route path="/trip/:tripId/reis" element={<ProtectedRoute><TripRouteGuard><TripReis /></TripRouteGuard></ProtectedRoute>} />
@@ -132,6 +135,7 @@ const App = () => (
       <BrowserRouter>
         <AuthProvider>
           <TripProvider>
+            <ClientErrorReporter />
             <ActivityLogProvider>
               <AppRoutes />
             </ActivityLogProvider>

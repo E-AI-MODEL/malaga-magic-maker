@@ -33,6 +33,11 @@ jobs:
       - name: Install dependencies
         run: npm install --legacy-peer-deps
 
+      - name: Dependency audit
+        run: |
+          npm audit --json > audit.json || true
+          node scripts/audit-summary.mjs audit.json
+
       - name: Typecheck
         run: npm run typecheck
 

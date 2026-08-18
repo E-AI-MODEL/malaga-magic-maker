@@ -19,12 +19,7 @@ export type TripDocumentRow = {
   ready_at: string | null;
 };
 
-type TripDocumentsTable = {
-  Row: TripDocumentRow;
-  Insert: never;
-  Update: never;
-  Relationships: [];
-};
+type TripDocumentsTable = { Row: TripDocumentRow; Insert: never; Update: never; Relationships: [] };
 
 export type AdminAuditRow = {
   id: string;
@@ -36,12 +31,7 @@ export type AdminAuditRow = {
   created_at: string;
 };
 
-type AdminAuditTable = {
-  Row: AdminAuditRow;
-  Insert: never;
-  Update: never;
-  Relationships: [];
-};
+type AdminAuditTable = { Row: AdminAuditRow; Insert: never; Update: never; Relationships: [] };
 
 export type ActivityEventRow = {
   id: string;
@@ -55,12 +45,7 @@ export type ActivityEventRow = {
   created_at: string;
 };
 
-type ActivityEventsTable = {
-  Row: ActivityEventRow;
-  Insert: never;
-  Update: never;
-  Relationships: [];
-};
+type ActivityEventsTable = { Row: ActivityEventRow; Insert: never; Update: never; Relationships: [] };
 
 export type NotificationRow = {
   id: string;
@@ -110,6 +95,28 @@ type NotificationPreferencesTable = {
   Relationships: [];
 };
 
+export type AiUsageEventRow = {
+  id: string;
+  user_id: string;
+  trip_id: string;
+  feature: "hansie";
+  created_at: string;
+};
+
+type AiUsageEventsTable = { Row: AiUsageEventRow; Insert: never; Update: never; Relationships: [] };
+
+export type ClientErrorEventRow = {
+  id: string;
+  user_id: string | null;
+  trip_id: string | null;
+  area: string;
+  message: string;
+  context: Json;
+  created_at: string;
+};
+
+type ClientErrorEventsTable = { Row: ClientErrorEventRow; Insert: never; Update: never; Relationships: [] };
+
 export type Database = Omit<Build06Database, "public"> & {
   public: Omit<Build06Database["public"], "Tables" | "Functions"> & {
     Tables: Omit<ExistingTables, "notifications"> & {
@@ -118,6 +125,8 @@ export type Database = Omit<Build06Database, "public"> & {
       activity_events: ActivityEventsTable;
       notifications: NotificationsTable;
       notification_preferences: NotificationPreferencesTable;
+      ai_usage_events: AiUsageEventsTable;
+      client_error_events: ClientErrorEventsTable;
     };
     Functions: ExistingFunctions & {
       reserve_trip_document: {
@@ -133,6 +142,10 @@ export type Database = Omit<Build06Database, "public"> & {
       ops_get_trip_overview: { Args: { p_trip_id: string }; Returns: Json };
       ops_set_trip_status: { Args: { p_trip_id: string; p_status: string }; Returns: boolean };
       ops_revoke_trip_invite: { Args: { p_invite_id: string }; Returns: boolean };
+      record_client_error: {
+        Args: { p_area: string; p_message: string; p_trip_id?: string | null; p_context?: Json };
+        Returns: boolean;
+      };
     };
   };
 };

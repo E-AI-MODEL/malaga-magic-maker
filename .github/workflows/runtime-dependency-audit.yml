@@ -1,0 +1,42 @@
+name: Runtime dependency audit
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - "vakansie/**"
+
+permissions:
+  contents: read
+
+jobs:
+  runtime-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm install --legacy-peer-deps
+      - name: Audit production dependencies
+        run: |
+          npm audit --omit=dev --json > runtime-audit.json || true
+          node - <<'NODE'
+          const fs = require('fs');
+          const report = JSON.parse(fs.readFileSync('runtime-audit.json','utf8'));
+          const v = report.metadata?.vulnerabilities || {};
+          console.log(`Runtime audit: critical=${v.critical || 0} high=${v.high || 0} moderate=${v.moderate || 0} low=${v.low || 0}`);
+          const findings = Object.entries(report.vulnerabilities || {})
+            .filter(([,value]) => value.severity === 'critical' || value.severity === 'high');
+          for (const [name,value] of findings) {
+            const via = Array.isArray(value.via) ? value.via.map((item) => typeof item === 'string' ? item : item.title || item.name || 'advisory').slice(0,3).join('; ') : '';
+            console.log(`${value.severity.toUpperCase()} | ${name} | direct=${Boolean(value.isDirect)} | ${via}`);
+          }
+          if ((v.critical || 0) > 0 || (v.high || 0) > 0) {
+            console.error('High/critical runtime vulnerability blocks launch.');
+            process.exit(1);
+          }
+          NODE

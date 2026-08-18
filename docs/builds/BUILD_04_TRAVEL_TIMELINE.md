@@ -63,6 +63,19 @@ Target `trip_items` fields:
 - created_by
 - created_at / updated_at
 
+## Type synchronization strategy
+
+The connected Supabase Management API account does not have permission to generate types for the Lovable-owned project. Do not forge or hand-label `types.ts` as generated output.
+
+Until the canonical generator becomes available:
+- keep the last authentic generated `src/integrations/supabase/types.ts` intact
+- maintain an explicit, narrowly scoped `src/integrations/supabase/database.ts` overlay for schema changes already proven live
+- type the single central Supabase runtime client against that current Database type
+- do not use `any` or feature-local client casts
+- remove the overlay entry immediately after canonical regeneration includes the same table
+
+This makes the application's type graph match the live database while preserving provenance of generated output.
+
 ## Acceptance criteria
 
 ### Database
@@ -72,7 +85,7 @@ Target `trip_items` fields:
 - updated_at trigger
 - immutable identity trigger
 - migration registered in Supabase migration history
-- generated TypeScript schema representation synchronized
+- application TypeScript database representation matches the verified live schema through canonical generated types or the documented exact-schema overlay
 
 ### Authorization tests
 - organizer/member of a trip can read its items
@@ -96,4 +109,4 @@ Target `trip_items` fields:
 
 ## Merge rule
 
-Do not merge frontend code until the production database migration has been applied and authorization tests pass. Do not weaken RLS to make the UI work.
+Do not merge frontend code until the production database migration has been applied, authorization tests pass and the central application database type matches the verified live schema. Do not weaken RLS to make the UI work.

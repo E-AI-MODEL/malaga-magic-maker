@@ -1,7 +1,9 @@
-import { FormEvent, useMemo, useRef, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 import ReactMarkdown from "react-markdown";
-import { Loader2, Send, Sparkles } from "lucide-react";
+import { Bot, ChevronDown, Loader2, Send, Sparkles } from "lucide-react";
+import { useLocation } from "react-router-dom";
 import { useTrip } from "@/contexts/TripContext";
+import { useAuth } from "@/lib/auth";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -84,24 +86,63 @@ async function streamHansie({
 }
 
 export function HansieWidget() {
-  const { activeTrip } = useTrip();
+  const { user } = useAuth();
+  const { activeTrip, userTrips } = useTrip();
+  const location = useLocation();
   const isMobile = useIsMobile();
+  const isTripRoute = location.pathname.startsWith("/trip/");
+  const isOpsRoute = location.pathname.startsWith("/ops");
+
+  const availableTrips = useMemo(
+    () => [...userTrips].sort((a, b) => {
+      const aArchived = a.status === "archived" ? 1 : 0;
+      const bArchived = b.status === "archived" ? 1 : 0;
+      if (aArchived !== bArchived) return aArchived - bArchived;
+      return a.name.localeCompare(b.name);
+    }),
+    [userTrips],
+  );
+
+  const [selectedTripId, setSelectedTripId] = useState("");
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [loading, setLoading] = useState(false);
-  const formRef = useRef<HTMLFormElement>(null);
+
+  useEffect(() => {
+    if (isTripRoute && activeTrip?.id) {
+      setSelectedTripId(activeTrip.id);
+      return;
+    }
+
+    const currentStillAvailable = availableTrips.some((trip) => trip.id === selectedTripId);
+    if (!currentStillAvailable) {
+      setSelectedTripId(activeTrip?.id && availableTrips.some((trip) => trip.id === activeTrip.id)
+        ? activeTrip.id
+        : availableTrips[0]?.id || "");
+    }
+  }, [activeTrip?.id, availableTrips, isTripRoute, selectedTripId]);
+
+  const contextTrip = isTripRoute && activeTrip
+    ? activeTrip
+    : availableTrips.find((trip) => trip.id === selectedTripId) || availableTrips[0];
+
+  useEffect(() => {
+    setMessages([]);
+    setInput("");
+    setLoading(false);
+  }, [contextTrip?.id]);
 
   const suggestions = useMemo(
     () => [
       "Wat staat er al vast voor deze reis?",
-      "Wat moet ik nog regelen?",
-      "Waar zitten nog open punten?",
+      "Wat moet ik nu nog regelen?",
+      "Welke open punten verdienen eerst aandacht?",
     ],
     [],
   );
 
-  if (!activeTrip) return null;
+  if (!user || isOpsRoute || !contextTrip) return null;
 
   const send = async (text: string) => {
     const trimmed = text.trim();
@@ -117,7 +158,7 @@ export function HansieWidget() {
 
     try {
       await streamHansie({
-        tripId: activeTrip.id,
+        tripId: contextTrip.id,
         messages: nextMessages,
         onDelta: (delta) => {
           assistantText += delta;
@@ -146,46 +187,76 @@ export function HansieWidget() {
     void send(input);
   };
 
+  const triggerPosition = isMobile
+    ? isTripRoute
+      ? "bottom-24 right-4"
+      : "bottom-5 right-4"
+    : "bottom-6 right-6";
+
   return (
     <>
       <button
+        type="button"
         onClick={() => setOpen(true)}
-        className={`fixed z-50 flex items-center justify-center rounded-full bg-primary text-primary-foreground shadow-xl transition-transform hover:scale-105 ${
-          isMobile ? "bottom-24 right-5 h-14 w-14" : "bottom-6 right-6 h-14 w-14"
-        }`}
-        aria-label="Vraag Hansie"
+        className={`fixed z-50 inline-flex h-12 items-center gap-2 rounded-full border border-primary/20 bg-primary px-4 text-sm font-bold text-primary-foreground shadow-[0_12px_30px_-12px_hsl(var(--primary)/0.75)] transition-transform hover:-translate-y-0.5 ${triggerPosition}`}
+        aria-label={`Vraag Hansie over ${contextTrip.name}`}
       >
-        <Sparkles className="h-5 w-5" />
+        <Sparkles className="h-4 w-4" />
+        <span>Hansie</span>
       </button>
 
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetContent
           side={isMobile ? "bottom" : "right"}
-          className={isMobile ? "h-[78vh] rounded-t-2xl p-0" : "w-full sm:max-w-md p-0"}
+          className={isMobile ? "h-[82vh] rounded-t-3xl p-0" : "w-full p-0 sm:max-w-md"}
         >
           <div className="flex h-full flex-col">
-            <SheetHeader className="border-b border-border px-5 py-4 text-left">
-              <SheetTitle className="font-display text-lg font-extrabold">Hansie</SheetTitle>
-              <SheetDescription>
-                Vraag wat er voor {activeTrip.name} vaststaat of nog aandacht nodig heeft.
-              </SheetDescription>
+            <SheetHeader className="border-b border-border px-5 pb-4 pt-5 text-left">
+              <div className="flex items-center gap-3 pr-8">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                  <Bot className="h-5 w-5" />
+                </div>
+                <div className="min-w-0">
+                  <SheetTitle className="font-display text-lg font-extrabold">Hansie</SheetTitle>
+                  <SheetDescription className="mt-0.5 truncate">
+                    Voor {contextTrip.name}
+                  </SheetDescription>
+                </div>
+              </div>
+
+              {!isTripRoute && availableTrips.length > 1 && (
+                <label className="relative mt-3 block">
+                  <span className="mb-1.5 block text-[11px] font-bold uppercase tracking-[0.12em] text-muted-foreground">Reiscontext</span>
+                  <select
+                    value={contextTrip.id}
+                    onChange={(event) => setSelectedTripId(event.target.value)}
+                    className="h-10 w-full appearance-none rounded-xl border border-border bg-secondary/45 pl-3 pr-9 text-sm font-semibold outline-none focus:ring-2 focus:ring-ring"
+                  >
+                    {availableTrips.map((trip) => (
+                      <option key={trip.id} value={trip.id}>{trip.name}</option>
+                    ))}
+                  </select>
+                  <ChevronDown className="pointer-events-none absolute bottom-3 right-3 h-4 w-4 text-muted-foreground" />
+                </label>
+              )}
             </SheetHeader>
 
             <div className="flex-1 overflow-y-auto px-4 py-4">
               {messages.length === 0 ? (
-                <div className="flex h-full flex-col justify-center gap-5 py-8">
+                <div className="flex h-full flex-col justify-center gap-6 py-8">
                   <div>
-                    <p className="font-display text-xl font-extrabold">Waar kan ik mee helpen?</p>
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      Hansie gebruikt alleen de reis die je nu hebt geopend als context.
+                    <p className="font-display text-2xl font-extrabold tracking-tight">Wat wil je weten?</p>
+                    <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                      Hansie kijkt alleen naar <strong className="font-semibold text-foreground">{contextTrip.name}</strong> en helpt je bepalen wat vaststaat en wat nog aandacht vraagt.
                     </p>
                   </div>
                   <div className="space-y-2">
                     {suggestions.map((suggestion) => (
                       <button
                         key={suggestion}
+                        type="button"
                         onClick={() => void send(suggestion)}
-                        className="w-full rounded-xl border border-border bg-card px-4 py-3 text-left text-sm font-medium transition-colors hover:bg-secondary/60"
+                        className="w-full rounded-2xl border border-border bg-card px-4 py-3.5 text-left text-sm font-semibold transition-colors hover:border-primary/30 hover:bg-secondary/40"
                       >
                         {suggestion}
                       </button>
@@ -195,14 +266,11 @@ export function HansieWidget() {
               ) : (
                 <div className="space-y-3">
                   {messages.map((message, index) => (
-                    <div
-                      key={`${message.role}-${index}`}
-                      className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
-                    >
+                    <div key={`${message.role}-${index}`} className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}>
                       <div
-                        className={`max-w-[88%] rounded-2xl px-4 py-3 text-sm ${
+                        className={`max-w-[90%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
                           message.role === "user"
-                            ? "rounded-br-md bg-primary text-primary-foreground"
+                            ? "rounded-br-md bg-foreground text-background"
                             : "rounded-bl-md border border-border bg-card"
                         }`}
                       >
@@ -227,15 +295,16 @@ export function HansieWidget() {
               )}
             </div>
 
-            <form ref={formRef} onSubmit={handleSubmit} className="flex gap-2 border-t border-border p-4">
+            <form onSubmit={handleSubmit} className="flex gap-2 border-t border-border bg-background p-4 safe-area-pb">
               <Input
                 value={input}
                 onChange={(event) => setInput(event.target.value)}
                 placeholder="Vraag Hansie..."
                 disabled={loading}
                 autoComplete="off"
+                className="h-11 rounded-xl"
               />
-              <Button type="submit" size="icon" disabled={loading || !input.trim()} aria-label="Verstuur vraag">
+              <Button type="submit" size="icon" className="h-11 w-11 rounded-xl" disabled={loading || !input.trim()} aria-label="Verstuur vraag">
                 {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
               </Button>
             </form>

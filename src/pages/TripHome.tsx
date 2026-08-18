@@ -6,6 +6,7 @@ import { useTrip } from "@/contexts/TripContext";
 import { activeReadinessChecks, getTripReadiness, readinessHeadline } from "@/features/readiness/data";
 import { listTripItems } from "@/features/travel/data";
 import { formatTripDateTime, getTravelType } from "@/features/travel/presentation";
+import { RecentActivity } from "@/features/notifications/RecentActivity";
 
 function formatDateRange(startDate: string | null, endDate: string | null) {
   if (!startDate && !endDate) return "Data nog niet gekozen";
@@ -116,6 +117,8 @@ export default function TripHome() {
             )}
           </div>
         </section>
+
+        <RecentActivity tripId={activeTrip.id} />
 
         <section className="mt-8 grid gap-3 sm:grid-cols-2">
           <Link

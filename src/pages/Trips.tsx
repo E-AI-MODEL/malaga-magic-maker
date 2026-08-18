@@ -228,7 +228,7 @@ export default function Trips() {
 
       </main>
 
-      <HansieWidget trip={heroTrip ? { id: heroTrip.id, name: heroTrip.name } : null} />
+      <HansieWidget trip={heroTrip ? { id: heroTrip.id, name: heroTrip.name } : null} floating={false} />
     </div>
   );
 }

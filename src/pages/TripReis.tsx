@@ -5,7 +5,7 @@ import { AppLayout } from "@/components/AppLayout";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth";
 import { useTrip } from "@/contexts/TripContext";
-import { deleteTripItem, listLegacyTravelItems, listTripItems, TripItemRow } from "@/features/travel/data";
+import { deleteTripItem, listTripItems, TripItemRow } from "@/features/travel/data";
 import { TripItemSheet } from "@/features/travel/TripItemSheet";
 import { DocumentsSection } from "@/features/documents/DocumentsSection";
 import {
@@ -44,12 +44,6 @@ export default function TripReis() {
   const itemsQuery = useQuery({
     queryKey: ["trip-items", tripId],
     queryFn: () => listTripItems(tripId),
-    enabled: Boolean(tripId),
-  });
-
-  const legacyQuery = useQuery({
-    queryKey: ["legacy-travel-items", tripId],
-    queryFn: () => listLegacyTravelItems(tripId),
     enabled: Boolean(tripId),
   });
 
@@ -209,25 +203,6 @@ export default function TripReis() {
           isOrganizer={isOrganizer}
           readOnly={readOnly}
         />
-
-        {(legacyQuery.data?.length || 0) > 0 && (
-          <section className="mt-10 border-t border-border pt-8">
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">Uit een eerdere versie</p>
-            <h2 className="mt-2 font-display text-lg font-extrabold">Nog te controleren reisgegevens</h2>
-            <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-              Deze oude gegevens worden niet automatisch als boeking beschouwd. Ze blijven zichtbaar totdat we ze gecontroleerd naar de nieuwe tijdlijn overzetten of verwijderen.
-            </p>
-            <div className="mt-4 space-y-2">
-              {legacyQuery.data?.map((legacy) => (
-                <div key={legacy.id} className="rounded-xl border border-dashed border-border px-4 py-3 text-sm text-muted-foreground">
-                  <span className="font-semibold text-foreground">{legacy.date || "Datum onbekend"}</span>
-                  {(legacy.departureTime || legacy.arrivalTime) && <span> · {legacy.departureTime || "?"} → {legacy.arrivalTime || "?"}</span>}
-                  {legacy.note && <p className="mt-1 text-xs">{legacy.note}</p>}
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
       </div>
 
       <TripItemSheet

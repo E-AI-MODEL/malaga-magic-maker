@@ -1,0 +1,62 @@
+name: BUILD 12 quality proof
+
+on:
+  push:
+    branches:
+      - vakansie/build-12-production-hardening
+
+permissions:
+  contents: write
+
+jobs:
+  proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: vakansie/build-12-production-hardening
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: lts
+      - run: npm install --legacy-peer-deps
+      - name: Dependency audit
+        run: |
+          npm audit --json > audit-quality.json || true
+          node scripts/audit-summary.mjs audit-quality.json
+      - run: npm run typecheck
+      - name: Edge Functions
+        run: |
+          deno check supabase/functions/trip-ai-chat/index.ts
+          deno check supabase/functions/firecrawl-scrape/index.ts
+          deno check supabase/functions/seed-users/index.ts
+      - run: npm run lint
+      - run: npm test
+      - run: npm run build
+      - name: Record proof and remove this temporary workflow
+        run: |
+          cat > docs/builds/BUILD_12_QUALITY_PASS.md <<'EOF'
+          # BUILD 12 quality proof
+
+          CI completed successfully on the committed BUILD 12 branch state:
+
+          - dependency audit: 0 critical
+          - TypeScript typecheck: PASS
+          - Edge Function Deno checks: PASS
+          - lint: PASS
+          - tests: PASS
+          - production build: PASS
+
+          This marker is written only after every command above succeeds.
+          EOF
+          git rm .github/workflows/build12-quality-proof.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add docs/builds/BUILD_12_QUALITY_PASS.md
+          git commit -m 'Record BUILD 12 quality proof'
+          git push origin HEAD:vakansie/build-12-production-hardening

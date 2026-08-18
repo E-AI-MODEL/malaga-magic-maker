@@ -3,14 +3,6 @@ import type { TripItemInsert, TripItemRow, TripItemUpdate } from "@/integrations
 
 export type { TripItemInsert, TripItemRow, TripItemUpdate };
 
-export type LegacyTravelItem = {
-  id: string;
-  date: string | null;
-  departureTime: string | null;
-  arrivalTime: string | null;
-  note: string | null;
-};
-
 export async function listTripItems(tripId: string) {
   const { data, error } = await supabase
     .from("trip_items")
@@ -55,21 +47,4 @@ export async function deleteTripItem(tripId: string, itemId: string) {
     .eq("id", itemId);
 
   if (error) throw error;
-}
-
-export async function listLegacyTravelItems(tripId: string): Promise<LegacyTravelItem[]> {
-  const { data, error } = await supabase
-    .from("travel_legs")
-    .select("id, travel_date, departure_time, arrival_time, note, sort_order")
-    .eq("trip_id", tripId)
-    .order("sort_order", { ascending: true });
-
-  if (error) throw error;
-  return (data || []).map((row) => ({
-    id: row.id,
-    date: row.travel_date,
-    departureTime: row.departure_time,
-    arrivalTime: row.arrival_time,
-    note: row.note,
-  }));
 }

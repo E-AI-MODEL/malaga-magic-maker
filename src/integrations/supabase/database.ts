@@ -283,6 +283,22 @@ export type Database = Omit<GeneratedDatabase, "public"> & {
       expense_splits: ExpenseSplitsTable;
     };
     Functions: GeneratedFunctions & {
+      create_decision_with_options: {
+        Args: {
+          p_description: string;
+          p_options: Json;
+          p_title: string;
+          p_trip_id: string;
+        };
+        Returns: string;
+      };
+      set_decision_vote: {
+        Args: {
+          p_decision_id: string;
+          p_option_id: string;
+        };
+        Returns: string;
+      };
       create_expense_with_splits: {
         Args: {
           p_amount: number;

@@ -2,6 +2,7 @@ import { type ReactNode, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Archive,
+  ArrowRight,
   CalendarClock,
   Check,
   CheckCircle2,
@@ -39,13 +40,14 @@ import { TaskSheet } from "@/features/together/TaskSheet";
 import { DecisionSheet } from "@/features/together/DecisionSheet";
 import { ExpenseSheet } from "@/features/together/ExpenseSheet";
 
-type Section = "members" | "tasks" | "decisions" | "expenses";
+type Section = "overview" | "members" | "tasks" | "decisions" | "expenses";
 
 const sectionLabels: Array<{ id: Section; label: string; icon: typeof Users }> = [
-  { id: "members", label: "Medereizigers", icon: Users },
+  { id: "overview", label: "Overzicht", icon: CheckCircle2 },
   { id: "tasks", label: "Taken", icon: CheckCircle2 },
   { id: "decisions", label: "Keuzes", icon: ListChecks },
   { id: "expenses", label: "Kosten", icon: Receipt },
+  { id: "members", label: "Mensen", icon: Users },
 ];
 
 function formatMoney(amount: number, currency: string) {
@@ -56,7 +58,7 @@ export default function TripSamen() {
   const { user } = useAuth();
   const { activeTrip, isOrganizer } = useTrip();
   const queryClient = useQueryClient();
-  const [section, setSection] = useState<Section>("tasks");
+  const [section, setSection] = useState<Section>("overview");
   const [taskSheetOpen, setTaskSheetOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<TaskRow | null>(null);
   const [decisionSheetOpen, setDecisionSheetOpen] = useState(false);
@@ -188,19 +190,34 @@ export default function TripSamen() {
     }
   };
 
-  const openTaskCount = tasks.filter((task) => task.status !== "done" && task.progress < 100).length;
-  const openDecisionCount = decisions.filter((decision) => decision.status === "open").length;
+  const openTasks = tasks.filter((task) => task.status !== "done" && task.progress < 100);
+  const openTaskCount = openTasks.length;
+  const openDecisions = decisions.filter((decision) => decision.status === "open");
+  const openDecisionCount = openDecisions.length;
+  const myTasks = openTasks.filter((task) => task.assigned_user_id === user.id || task.backup_user_id === user.id);
+  const myPendingDecisions = openDecisions.filter(
+    (decision) => !decision.options.some((option) => option.votes.some((vote) => vote.user_id === user.id)),
+  );
+  const personalAttentionCount = myTasks.length + myPendingDecisions.length;
 
   return (
     <AppLayout>
       <div className="px-5 py-7 sm:px-8 sm:py-10">
-        <div>
+        <section className="rounded-3xl border border-border bg-card p-5 sm:p-7">
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">Samen</p>
-          <h1 className="mt-2 font-display text-3xl font-extrabold tracking-tight">Regel het met elkaar</h1>
+          <h1 className="mt-2 font-display text-3xl font-extrabold tracking-tight">Regel de reis zonder losse lijstjes</h1>
           <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted-foreground">
-            Mensen, taken, keuzes en gedeelde kosten horen bij dezelfde reis, maar hebben ieder hun eigen duidelijke plek.
+            Zie wat jij moet doen, wat jullie nog moeten kiezen en welke kosten bij de reis horen.
           </p>
-        </div>
+
+          {!readOnly && (
+            <div className="mt-6 flex flex-wrap gap-2">
+              <Button size="sm" onClick={openNewTask}><Plus className="mr-1 h-4 w-4" />Nieuwe taak</Button>
+              <Button size="sm" variant="outline" onClick={() => setDecisionSheetOpen(true)}><Plus className="mr-1 h-4 w-4" />Nieuwe keuze</Button>
+              <Button size="sm" variant="outline" onClick={openNewExpense}><Plus className="mr-1 h-4 w-4" />Kosten toevoegen</Button>
+            </div>
+          )}
+        </section>
 
         {readOnly && (
           <div className="mt-5 flex items-center gap-2 rounded-xl border border-border bg-secondary/50 px-4 py-3 text-sm text-muted-foreground">
@@ -208,42 +225,89 @@ export default function TripSamen() {
           </div>
         )}
 
-        <div className="mt-7 grid grid-cols-2 gap-2 sm:grid-cols-4">
+        <nav className="-mx-5 mt-6 flex gap-2 overflow-x-auto px-5 pb-1 sm:mx-0 sm:px-0" aria-label="Samen onderdelen">
           {sectionLabels.map((item) => {
             const Icon = item.icon;
-            const count = item.id === "members"
-              ? members.length
-              : item.id === "tasks"
-                ? openTaskCount
-                : item.id === "decisions"
-                  ? openDecisionCount
-                  : expenses.length;
             return (
               <button
                 key={item.id}
+                type="button"
                 onClick={() => {
                   setSection(item.id);
                   setActionError("");
                 }}
-                className={`rounded-2xl border px-3 py-3 text-left transition-colors ${
-                  section === item.id ? "border-primary bg-primary/10" : "border-border bg-card hover:border-primary/30"
+                aria-pressed={section === item.id}
+                className={`inline-flex shrink-0 items-center gap-2 rounded-full border px-3.5 py-2 text-sm font-semibold transition-colors ${
+                  section === item.id ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card text-muted-foreground hover:text-foreground"
                 }`}
               >
-                <div className="flex items-center justify-between gap-2">
-                  <Icon className={`h-4 w-4 ${section === item.id ? "text-primary" : "text-muted-foreground"}`} />
-                  <span className="text-xs font-bold text-muted-foreground">{count}</span>
-                </div>
-                <p className={`mt-2 text-sm font-bold ${section === item.id ? "text-primary" : "text-foreground"}`}>{item.label}</p>
+                <Icon className="h-4 w-4" />{item.label}
               </button>
             );
           })}
-        </div>
+        </nav>
 
         {actionError && (
           <p className="mt-5 rounded-xl bg-destructive/10 px-4 py-3 text-sm font-medium text-destructive">{actionError}</p>
         )}
 
         <section className="mt-8">
+          {section === "overview" && (
+            <div className="space-y-9">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">Voor jou</p>
+                <div className="mt-3 rounded-3xl border border-border bg-card p-5">
+                  {tasksQuery.isLoading || decisionsQuery.isLoading ? (
+                    <div className="h-28 animate-pulse rounded-2xl bg-secondary/70" />
+                  ) : personalAttentionCount === 0 ? (
+                    <div className="flex items-start gap-3">
+                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10">
+                        <CheckCircle2 className="h-5 w-5 text-primary" />
+                      </div>
+                      <div>
+                        <h2 className="font-display text-lg font-extrabold">Voor jou is alles bijgewerkt</h2>
+                        <p className="mt-1 text-sm text-muted-foreground">Je hebt geen open toegewezen taak en geen keuze waarop je nog moet stemmen.</p>
+                      </div>
+                    </div>
+                  ) : (
+                    <div>
+                      <h2 className="font-display text-xl font-extrabold">{personalAttentionCount} {personalAttentionCount === 1 ? "ding" : "dingen"} voor jou</h2>
+                      <p className="mt-1 text-sm text-muted-foreground">Pak eerst op wat direct bij jou ligt.</p>
+                      <div className="mt-4 space-y-2">
+                        {myTasks.slice(0, 3).map((task) => (
+                          <button key={task.id} type="button" onClick={() => setSection("tasks")} className="flex w-full items-center gap-3 rounded-xl bg-secondary/60 px-3 py-3 text-left hover:bg-secondary">
+                            <Circle className="h-5 w-5 shrink-0 text-muted-foreground" />
+                            <span className="min-w-0 flex-1 truncate text-sm font-semibold">{task.title}</span>
+                            <span className="shrink-0 text-xs text-muted-foreground">Taak</span>
+                            <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground" />
+                          </button>
+                        ))}
+                        {myPendingDecisions.slice(0, Math.max(0, 3 - myTasks.length)).map((decision) => (
+                          <button key={decision.id} type="button" onClick={() => setSection("decisions")} className="flex w-full items-center gap-3 rounded-xl bg-secondary/60 px-3 py-3 text-left hover:bg-secondary">
+                            <ListChecks className="h-5 w-5 shrink-0 text-muted-foreground" />
+                            <span className="min-w-0 flex-1 truncate text-sm font-semibold">{decision.title}</span>
+                            <span className="shrink-0 text-xs text-muted-foreground">Keuze</span>
+                            <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground" />
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">Samen regelen</p>
+                <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
+                  <SummaryCard icon={Users} value={members.length} label="Mensen" onClick={() => setSection("members")} />
+                  <SummaryCard icon={CheckCircle2} value={openTaskCount} label="Open taken" onClick={() => setSection("tasks")} />
+                  <SummaryCard icon={ListChecks} value={openDecisionCount} label="Open keuzes" onClick={() => setSection("decisions")} />
+                  <SummaryCard icon={Receipt} value={expenses.length} label="Kostenregels" onClick={() => setSection("expenses")} />
+                </div>
+              </div>
+            </div>
+          )}
+
           {section === "members" && <MembersSection members={members} loading={membersQuery.isLoading} />}
 
           {section === "tasks" && (
@@ -251,7 +315,7 @@ export default function TripSamen() {
               <SectionHeading
                 title="Taken"
                 description="Wat moet nog gebeuren en wie pakt het op?"
-                action={!readOnly ? <Button size="sm" onClick={openNewTask}><Plus className="mr-1 h-4 w-4" />Taak</Button> : null}
+                action={!readOnly ? <Button size="sm" onClick={openNewTask}><Plus className="mr-1 h-4 w-4" />Nieuwe taak</Button> : null}
               />
               {tasksQuery.isLoading ? (
                 <LoadingCards />
@@ -308,7 +372,7 @@ export default function TripSamen() {
               <SectionHeading
                 title="Keuzes"
                 description="Leg een duidelijke vraag voor en kies samen."
-                action={!readOnly ? <Button size="sm" onClick={() => setDecisionSheetOpen(true)}><Plus className="mr-1 h-4 w-4" />Keuze</Button> : null}
+                action={!readOnly ? <Button size="sm" onClick={() => setDecisionSheetOpen(true)}><Plus className="mr-1 h-4 w-4" />Nieuwe keuze</Button> : null}
               />
               {decisionsQuery.isLoading ? (
                 <LoadingCards />
@@ -371,7 +435,7 @@ export default function TripSamen() {
               <SectionHeading
                 title="Kosten"
                 description="Wie betaalde wat, en hoe verdelen jullie het?"
-                action={!readOnly ? <Button size="sm" onClick={openNewExpense}><Plus className="mr-1 h-4 w-4" />Kosten</Button> : null}
+                action={!readOnly ? <Button size="sm" onClick={openNewExpense}><Plus className="mr-1 h-4 w-4" />Kosten toevoegen</Button> : null}
               />
               {expensesQuery.isLoading ? (
                 <LoadingCards />
@@ -408,7 +472,7 @@ export default function TripSamen() {
                           </div>
                         ) : (
                           <p className="mt-4 rounded-xl bg-secondary/60 px-3 py-2 text-xs text-muted-foreground">
-                            Deze oude kostenregel heeft nog geen UUID-verdeling. Open wijzigen om hem bewust te koppelen.
+                            Verdeling nog niet ingevuld. Open wijzigen om deelnemers aan deze kosten te koppelen.
                           </p>
                         )}
                       </article>
@@ -452,13 +516,26 @@ export default function TripSamen() {
   );
 }
 
+function SummaryCard({ icon: Icon, value, label, onClick }: { icon: typeof Users; value: number; label: string; onClick: () => void }) {
+  return (
+    <button type="button" onClick={onClick} className="rounded-2xl border border-border bg-card p-4 text-left transition-colors hover:border-primary/30">
+      <div className="flex items-center justify-between gap-2">
+        <Icon className="h-4 w-4 text-primary" />
+        <ArrowRight className="h-3.5 w-3.5 text-muted-foreground" />
+      </div>
+      <p className="mt-3 font-display text-2xl font-extrabold">{value}</p>
+      <p className="mt-1 text-xs text-muted-foreground">{label}</p>
+    </button>
+  );
+}
+
 function MembersSection({ members, loading }: { members: TripMemberView[]; loading: boolean }) {
   if (loading) return <LoadingCards />;
   return (
     <div>
-      <SectionHeading title="Medereizigers" description="Wie hoort bij deze reis en wie organiseert hem?" />
+      <SectionHeading title="Mensen" description="Wie hoort bij deze reis en wie organiseert hem?" />
       {members.length === 0 ? (
-        <EmptyCard icon={Users} title="Nog geen medereizigers" text="Deze reis heeft nog geen zichtbare memberships." />
+        <EmptyCard icon={Users} title="Nog geen medereizigers" text="Er zijn nog geen andere mensen aan deze reis gekoppeld." />
       ) : (
         <div className="grid gap-3 sm:grid-cols-2">
           {members.map((member) => (

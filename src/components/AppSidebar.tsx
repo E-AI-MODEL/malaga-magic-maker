@@ -1,4 +1,4 @@
-import { ChevronDown, Home, LogOut, Plus, Route, Suitcase, User, Users } from "lucide-react";
+import { ChevronDown, Home, LogOut, Plane, Plus, Route, User, Users } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/lib/auth";
 import { useTrip } from "@/contexts/TripContext";
@@ -59,7 +59,7 @@ export function AppSidebar() {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start" className="w-64">
                 <DropdownMenuItem onClick={() => navigate("/trips")}>
-                  <Suitcase className="mr-2 h-4 w-4" />Alle reizen
+                  <Plane className="mr-2 h-4 w-4" />Alle reizen
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 {userTrips.map((trip) => (
@@ -111,7 +111,7 @@ export function AppSidebar() {
               <SidebarMenuItem>
                 <SidebarMenuButton asChild isActive={location.pathname === "/trips"}>
                   <NavLink to="/trips" end className="hover:bg-sidebar-accent/50" activeClassName="bg-sidebar-accent text-sidebar-primary font-semibold">
-                    <Suitcase className="mr-2 h-4 w-4" />
+                    <Plane className="mr-2 h-4 w-4" />
                     {!collapsed && <span>Mijn reizen</span>}
                   </NavLink>
                 </SidebarMenuButton>

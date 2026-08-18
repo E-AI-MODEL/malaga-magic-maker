@@ -1,10 +1,9 @@
 import { ReactNode } from "react";
-import { ArrowLeft, ChevronDown, LogOut, Plane, Plus, Settings } from "lucide-react";
+import { ArrowLeft, ChevronDown, Plane, Plus, Settings, User } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { BottomNav } from "./BottomNav";
 import { AppSidebar } from "./AppSidebar";
 import { NotificationCenter } from "./NotificationCenter";
-import { HansieWidget } from "./HansieWidget";
 import { useAuth } from "@/lib/auth";
 import { useTrip } from "@/contexts/TripContext";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -19,22 +18,22 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 export function AppLayout({ children }: { children: ReactNode }) {
-  const { profile, signOut } = useAuth();
+  const { profile } = useAuth();
   const { activeTrip, userTrips, isOrganizer } = useTrip();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
 
   if (isMobile) {
     return (
-      <div className="min-h-screen overflow-x-hidden bg-background pb-20">
-        <header className="sticky top-0 z-40 bg-foreground text-background">
-          <div className="mx-auto flex max-w-2xl items-center justify-between px-3 py-2.5">
-            <div className="flex min-w-0 items-center gap-1">
+      <div className="min-h-screen overflow-x-hidden bg-background pb-28">
+        <header className="sticky top-0 z-40 border-b border-border/70 bg-background/92 backdrop-blur-xl">
+          <div className="mx-auto flex h-14 max-w-2xl items-center justify-between px-3">
+            <div className="flex min-w-0 items-center gap-1.5">
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={() => navigate("/trips")}
-                className="h-8 w-8 shrink-0 text-white/55 hover:bg-white/10 hover:text-white"
+                className="h-9 w-9 shrink-0 rounded-xl text-muted-foreground"
                 aria-label="Terug naar mijn reizen"
               >
                 <ArrowLeft className="h-4 w-4" />
@@ -43,26 +42,27 @@ export function AppLayout({ children }: { children: ReactNode }) {
               {activeTrip ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <button className="flex min-w-0 items-center gap-1.5 px-1 text-left transition-opacity hover:opacity-80">
-                      <h1 className="truncate font-display text-xs font-extrabold uppercase tracking-[0.15em]">
-                        {activeTrip.name}
-                      </h1>
-                      <ChevronDown className="h-3 w-3 shrink-0 opacity-50" />
+                    <button className="flex min-w-0 items-center gap-2 rounded-xl px-2 py-1.5 text-left transition-colors hover:bg-secondary/60">
+                      <div className="min-w-0">
+                        <p className="truncate text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground">Deze reis</p>
+                        <p className="truncate font-display text-sm font-extrabold leading-tight">{activeTrip.name}</p>
+                      </div>
+                      <ChevronDown className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
                     </button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="start" className="w-64">
+                  <DropdownMenuContent align="start" className="w-72">
                     <DropdownMenuItem onClick={() => navigate("/trips")}>
-                      <Plane className="mr-2 h-4 w-4" />Alle reizen
+                      <Plane className="mr-2 h-4 w-4" />Mijn reizen
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     {userTrips.map((trip) => (
                       <DropdownMenuItem
                         key={trip.id}
                         onClick={() => navigate(`/trip/${trip.id}`)}
-                        className={trip.id === activeTrip.id ? "bg-primary/10 font-semibold" : ""}
+                        className={trip.id === activeTrip.id ? "bg-secondary font-semibold" : ""}
                       >
                         <span className="truncate">{trip.name}</span>
-                        {trip.id === activeTrip.id && <span className="ml-auto text-xs text-primary">✓</span>}
+                        {trip.id === activeTrip.id && <span className="ml-auto text-xs text-primary">Actief</span>}
                       </DropdownMenuItem>
                     ))}
                     <DropdownMenuSeparator />
@@ -77,21 +77,20 @@ export function AppLayout({ children }: { children: ReactNode }) {
                   </DropdownMenuContent>
                 </DropdownMenu>
               ) : (
-                <span className="font-display text-xs font-extrabold uppercase tracking-[0.15em]">Vakansie</span>
+                <span className="font-display text-sm font-extrabold">Vakansie</span>
               )}
             </div>
 
             <div className="flex shrink-0 items-center gap-1">
               <NotificationCenter />
-              <span className="ml-1 hidden text-[11px] font-medium text-white/50 min-[390px]:inline">{profile?.display_name}</span>
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => void signOut()}
-                className="h-7 w-7 text-white/50 hover:bg-white/10 hover:text-white"
-                aria-label="Uitloggen"
+                onClick={() => navigate("/profiel")}
+                className="h-9 w-9 rounded-xl"
+                aria-label="Profiel"
               >
-                <LogOut className="h-3.5 w-3.5" />
+                <User className="h-4 w-4" />
               </Button>
             </div>
           </div>
@@ -99,7 +98,6 @@ export function AppLayout({ children }: { children: ReactNode }) {
 
         <main className="mx-auto max-w-2xl">{children}</main>
         <BottomNav />
-        <HansieWidget />
       </div>
     );
   }
@@ -109,24 +107,25 @@ export function AppLayout({ children }: { children: ReactNode }) {
       <div className="flex min-h-screen w-full bg-background">
         <AppSidebar />
         <div className="flex min-w-0 flex-1 flex-col">
-          <header className="sticky top-0 z-40 flex h-12 items-center justify-between border-b border-border bg-background/85 px-4 backdrop-blur-sm">
+          <header className="sticky top-0 z-40 flex h-14 items-center justify-between border-b border-border/70 bg-background/88 px-4 backdrop-blur-xl">
             <div className="flex min-w-0 items-center gap-2">
               <SidebarTrigger className="text-muted-foreground" />
               <button
                 onClick={() => navigate("/trips")}
-                className="truncate text-xs font-display font-extrabold uppercase tracking-[0.15em] text-muted-foreground transition-colors hover:text-foreground"
+                className="truncate text-sm font-display font-extrabold text-foreground transition-colors hover:text-primary"
               >
                 {activeTrip?.name || "Vakansie"}
               </button>
             </div>
             <div className="flex items-center gap-2">
               <NotificationCenter />
-              <span className="text-xs font-medium text-muted-foreground">{profile?.display_name}</span>
+              <button onClick={() => navigate("/profiel")} className="text-xs font-semibold text-muted-foreground hover:text-foreground">
+                {profile?.display_name}
+              </button>
             </div>
           </header>
           <main className="mx-auto w-full max-w-5xl flex-1">{children}</main>
         </div>
-        <HansieWidget />
       </div>
     </SidebarProvider>
   );

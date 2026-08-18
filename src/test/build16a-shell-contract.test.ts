@@ -16,9 +16,14 @@ describe("Hansie trip scoping", () => {
   });
 
   it("ignores stale stream context", () => {
-    expect(hansie).toContain("currentTripIdRef");
-    expect(hansie.match(/currentTripIdRef\.current !== requestTripId/g)?.length).toBeGreaterThanOrEqual(2);
-    expect(hansie).toContain("currentTripIdRef.current === requestTripId");
+    expect(hansie).toContain("contextIdRef");
+    expect(hansie.match(/contextIdRef\.current !== requestTripId/g)?.length).toBeGreaterThanOrEqual(2);
+    expect(hansie).toContain("contextIdRef.current === requestTripId");
+  });
+
+  it("receives its placement explicitly instead of deriving a hidden context", () => {
+    expect(hansie).toContain("floating = true");
+    expect(trips).toContain("floating={false}");
   });
 
   it("resets its state when the trip changes", () => {

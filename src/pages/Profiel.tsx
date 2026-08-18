@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { NotificationPreferences } from "@/features/notifications/NotificationPreferences";
 import { toast } from "sonner";
-import { Calendar, Copy, Settings, User, Users } from "lucide-react";
+import { Calendar, Settings, User, Users } from "lucide-react";
 
 export default function Profiel() {
   const { profile, isAdmin, user } = useAuth();
@@ -108,18 +108,6 @@ export default function Profiel() {
                       <span className="rounded-md bg-primary/10 px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-primary">Actief</span>
                     )}
                   </div>
-                  {trip.invite_code && (
-                    <button
-                      onClick={() => {
-                        navigator.clipboard.writeText(trip.invite_code || "");
-                        toast("Code gekopieerd!");
-                      }}
-                      className="mt-3 flex items-center gap-1.5 text-xs text-muted-foreground transition-colors hover:text-foreground"
-                    >
-                      <Copy className="h-3 w-3" />
-                      <span className="font-mono tracking-wider">{trip.invite_code}</span>
-                    </button>
-                  )}
                 </CardContent>
               </Card>
             ))}

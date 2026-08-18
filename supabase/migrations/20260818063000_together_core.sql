@@ -6,6 +6,11 @@
 -- Tasks: add generic product fields and remove display-name authorization.
 -- ---------------------------------------------------------------------------
 
+-- The previous trigger rejects privileged migration sessions because auth.uid()
+-- is null. Drop it inside the migration transaction, backfill, then recreate the
+-- stricter UUID-only trigger before commit. DDL locks prevent a visible gap.
+DROP TRIGGER IF EXISTS enforce_task_member_update_scope ON public.tasks;
+
 ALTER TABLE public.tasks
   ADD COLUMN IF NOT EXISTS created_by uuid REFERENCES auth.users(id) ON DELETE SET NULL DEFAULT auth.uid(),
   ADD COLUMN IF NOT EXISTS description text,
@@ -39,6 +44,9 @@ CREATE INDEX IF NOT EXISTS tasks_assigned_user_id_idx ON public.tasks (assigned_
 DROP POLICY IF EXISTS "Trip organizers can insert tasks" ON public.tasks;
 DROP POLICY IF EXISTS "Trip task owners can update tasks" ON public.tasks;
 DROP POLICY IF EXISTS "Trip organizers can delete tasks" ON public.tasks;
+DROP POLICY IF EXISTS "Trip members can create safe tasks" ON public.tasks;
+DROP POLICY IF EXISTS "Task participants can update tasks" ON public.tasks;
+DROP POLICY IF EXISTS "Task creators and organizers can delete tasks" ON public.tasks;
 
 CREATE POLICY "Trip members can create safe tasks"
 ON public.tasks
@@ -178,6 +186,10 @@ BEGIN
 END;
 $$;
 
+CREATE TRIGGER enforce_task_member_update_scope
+BEFORE UPDATE ON public.tasks
+FOR EACH ROW EXECUTE FUNCTION public.enforce_task_member_update_scope();
+
 -- ---------------------------------------------------------------------------
 -- Generic group decisions.
 -- ---------------------------------------------------------------------------
@@ -240,13 +252,13 @@ LANGUAGE plpgsql
 SET search_path = ''
 AS $$
 BEGIN
-  IF auth.uid() IS NOT NULL THEN
-    IF NEW.id IS DISTINCT FROM OLD.id
-       OR NEW.trip_id IS DISTINCT FROM OLD.trip_id
-       OR NEW.created_by IS DISTINCT FROM OLD.created_by
-       OR NEW.created_at IS DISTINCT FROM OLD.created_at THEN
-      RAISE EXCEPTION 'decision_identity_immutable' USING ERRCODE = '42501';
-    END IF;
+  IF auth.uid() IS NOT NULL AND (
+    NEW.id IS DISTINCT FROM OLD.id
+    OR NEW.trip_id IS DISTINCT FROM OLD.trip_id
+    OR NEW.created_by IS DISTINCT FROM OLD.created_by
+    OR NEW.created_at IS DISTINCT FROM OLD.created_at
+  ) THEN
+    RAISE EXCEPTION 'decision_identity_immutable' USING ERRCODE = '42501';
   END IF;
   RETURN NEW;
 END;
@@ -330,14 +342,16 @@ ALTER TABLE public.decisions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.decision_options ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.decision_votes ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Trip members can read decisions" ON public.decisions;
+DROP POLICY IF EXISTS "Trip members can create decisions" ON public.decisions;
+DROP POLICY IF EXISTS "Decision creators and organizers can update decisions" ON public.decisions;
+DROP POLICY IF EXISTS "Decision creators and organizers can delete decisions" ON public.decisions;
 CREATE POLICY "Trip members can read decisions"
 ON public.decisions FOR SELECT TO authenticated
 USING (public.is_trip_member(auth.uid(), trip_id) OR public.has_role(auth.uid(), 'admin'::public.app_role));
-
 CREATE POLICY "Trip members can create decisions"
 ON public.decisions FOR INSERT TO authenticated
 WITH CHECK (created_by = auth.uid() AND public.is_trip_member(auth.uid(), trip_id));
-
 CREATE POLICY "Decision creators and organizers can update decisions"
 ON public.decisions FOR UPDATE TO authenticated
 USING (
@@ -350,7 +364,6 @@ WITH CHECK (
   OR public.is_trip_organizer(auth.uid(), trip_id)
   OR (created_by = auth.uid() AND public.is_trip_member(auth.uid(), trip_id))
 );
-
 CREATE POLICY "Decision creators and organizers can delete decisions"
 ON public.decisions FOR DELETE TO authenticated
 USING (
@@ -359,6 +372,10 @@ USING (
   OR (created_by = auth.uid() AND public.is_trip_member(auth.uid(), trip_id))
 );
 
+DROP POLICY IF EXISTS "Trip members can read decision options" ON public.decision_options;
+DROP POLICY IF EXISTS "Decision managers can create options" ON public.decision_options;
+DROP POLICY IF EXISTS "Decision managers can update options" ON public.decision_options;
+DROP POLICY IF EXISTS "Decision managers can delete options" ON public.decision_options;
 CREATE POLICY "Trip members can read decision options"
 ON public.decision_options FOR SELECT TO authenticated
 USING (
@@ -368,7 +385,6 @@ USING (
       AND (public.is_trip_member(auth.uid(), d.trip_id) OR public.has_role(auth.uid(), 'admin'::public.app_role))
   )
 );
-
 CREATE POLICY "Decision managers can create options"
 ON public.decision_options FOR INSERT TO authenticated
 WITH CHECK (
@@ -382,7 +398,6 @@ WITH CHECK (
       )
   )
 );
-
 CREATE POLICY "Decision managers can update options"
 ON public.decision_options FOR UPDATE TO authenticated
 USING (
@@ -407,7 +422,6 @@ WITH CHECK (
       )
   )
 );
-
 CREATE POLICY "Decision managers can delete options"
 ON public.decision_options FOR DELETE TO authenticated
 USING (
@@ -422,6 +436,9 @@ USING (
   )
 );
 
+DROP POLICY IF EXISTS "Trip members can read decision votes" ON public.decision_votes;
+DROP POLICY IF EXISTS "Members can cast own votes" ON public.decision_votes;
+DROP POLICY IF EXISTS "Members can remove own open votes" ON public.decision_votes;
 CREATE POLICY "Trip members can read decision votes"
 ON public.decision_votes FOR SELECT TO authenticated
 USING (
@@ -431,7 +448,6 @@ USING (
       AND (public.is_trip_member(auth.uid(), d.trip_id) OR public.has_role(auth.uid(), 'admin'::public.app_role))
   )
 );
-
 CREATE POLICY "Members can cast own votes"
 ON public.decision_votes FOR INSERT TO authenticated
 WITH CHECK (
@@ -443,7 +459,6 @@ WITH CHECK (
       AND public.is_trip_member(auth.uid(), d.trip_id)
   )
 );
-
 CREATE POLICY "Members can remove own open votes"
 ON public.decision_votes FOR DELETE TO authenticated
 USING (
@@ -526,6 +541,7 @@ FOR EACH ROW EXECUTE FUNCTION public.enforce_expense_identity();
 
 ALTER TABLE public.expense_splits ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Trip members can read expense splits" ON public.expense_splits;
 CREATE POLICY "Trip members can read expense splits"
 ON public.expense_splits FOR SELECT TO authenticated
 USING (
@@ -565,6 +581,12 @@ BEGIN
   END IF;
   IF NOT public.is_trip_member(v_user_id, p_trip_id) THEN
     RAISE EXCEPTION 'not_trip_member' USING ERRCODE = '42501';
+  END IF;
+  IF p_description IS NULL OR length(btrim(p_description)) = 0 THEN
+    RAISE EXCEPTION 'expense_description_required' USING ERRCODE = '23514';
+  END IF;
+  IF p_currency IS NULL OR char_length(upper(p_currency)) <> 3 THEN
+    RAISE EXCEPTION 'invalid_currency' USING ERRCODE = '23514';
   END IF;
   IF p_paid_by_user_id IS NULL OR NOT public.is_trip_member(p_paid_by_user_id, p_trip_id) THEN
     RAISE EXCEPTION 'invalid_payer' USING ERRCODE = '23514';
@@ -645,6 +667,12 @@ BEGIN
     RAISE EXCEPTION 'expense_update_forbidden' USING ERRCODE = '42501';
   END IF;
 
+  IF p_description IS NULL OR length(btrim(p_description)) = 0 THEN
+    RAISE EXCEPTION 'expense_description_required' USING ERRCODE = '23514';
+  END IF;
+  IF p_currency IS NULL OR char_length(upper(p_currency)) <> 3 THEN
+    RAISE EXCEPTION 'invalid_currency' USING ERRCODE = '23514';
+  END IF;
   IF p_paid_by_user_id IS NULL OR NOT public.is_trip_member(p_paid_by_user_id, v_trip_id) THEN
     RAISE EXCEPTION 'invalid_payer' USING ERRCODE = '23514';
   END IF;

@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, ReactNode, useCallback } from "react";
+import { createContext, useCallback, useContext, useEffect, useState, ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 
@@ -45,9 +45,10 @@ interface TripContextType {
   tripMembers: TripMember[];
   isOrganizer: boolean;
   loading: boolean;
+  openTrip: (tripId: string) => Promise<Trip | null>;
   switchTrip: (tripId: string) => void;
   createTrip: (data: CreateTripInput) => Promise<Trip | null>;
-  joinTrip: (inviteCode: string) => Promise<{ error?: string }>;
+  joinTrip: (inviteCode: string) => Promise<{ tripId?: string; error?: string }>;
   refreshTrips: () => Promise<void>;
 }
 
@@ -56,9 +57,6 @@ type RpcResult<T> = {
   error: { message: string } | null;
 };
 
-// The database migration in BUILD 01 introduces these RPCs. Generated Supabase
-// types are regenerated after that migration is applied; this narrow wrapper
-// keeps the branch type-safe until then without weakening the rest of the client.
 async function callVakansieRpc<T>(functionName: string, args: Record<string, unknown>): Promise<RpcResult<T>> {
   const rpc = supabase.rpc as unknown as (
     name: string,
@@ -88,6 +86,7 @@ export function TripProvider({ children }: { children: ReactNode }) {
       return;
     }
 
+    setLoading(true);
     const { data: memberships } = await supabase
       .from("trip_members")
       .select("trip_id, role")
@@ -108,30 +107,12 @@ export function TripProvider({ children }: { children: ReactNode }) {
       .select("*")
       .in("id", tripIds);
 
-    if (trips && trips.length > 0) {
-      const typedTrips = trips as Trip[];
-      setUserTrips(typedTrips);
-
-      const savedTripId = localStorage.getItem("vakansie_active_trip");
-      const saved = typedTrips.find((trip) => trip.id === savedTripId);
-      const selected = saved || typedTrips[0];
-      setActiveTrip(selected);
-
-      const membership = memberships.find((item) => item.trip_id === selected.id);
-      setIsOrganizer(membership?.role === "organizer");
-
-      const { data: members } = await supabase
-        .from("trip_members")
-        .select("user_id, role")
-        .eq("trip_id", selected.id);
-      setTripMembers((members as TripMember[]) || []);
-    } else {
-      setUserTrips([]);
-      setActiveTrip(null);
-      setTripMembers([]);
-      setIsOrganizer(false);
-    }
-
+    const typedTrips = (trips as Trip[] | null) || [];
+    setUserTrips(typedTrips);
+    setActiveTrip((current) => {
+      if (!current) return null;
+      return typedTrips.find((trip) => trip.id === current.id) || null;
+    });
     setLoading(false);
   }, [user]);
 
@@ -139,18 +120,11 @@ export function TripProvider({ children }: { children: ReactNode }) {
     void fetchTrips();
   }, [fetchTrips]);
 
-  const activateTrip = useCallback(async (tripId: string) => {
+  const openTrip = useCallback(async (tripId: string) => {
     if (!user) return null;
 
-    const { data: trip, error: tripError } = await supabase
-      .from("trip")
-      .select("*")
-      .eq("id", tripId)
-      .single();
-
-    if (tripError || !trip) return null;
-
-    const [{ data: membership }, { data: members }] = await Promise.all([
+    const [{ data: trip, error: tripError }, { data: membership, error: membershipError }, { data: members }] = await Promise.all([
+      supabase.from("trip").select("*").eq("id", tripId).single(),
       supabase
         .from("trip_members")
         .select("role")
@@ -163,18 +137,22 @@ export function TripProvider({ children }: { children: ReactNode }) {
         .eq("trip_id", tripId),
     ]);
 
+    if (tripError || membershipError || !trip || !membership) return null;
+
     const typedTrip = trip as Trip;
     setActiveTrip(typedTrip);
-    setIsOrganizer(membership?.role === "organizer");
+    setIsOrganizer(membership.role === "organizer");
     setTripMembers((members as TripMember[]) || []);
-    localStorage.setItem("vakansie_active_trip", tripId);
+
+    // Convenience only. Route tripId remains authoritative when a trip is opened.
+    localStorage.setItem("vakansie_recent_trip", tripId);
 
     return typedTrip;
   }, [user]);
 
   const switchTrip = useCallback((tripId: string) => {
-    void activateTrip(tripId);
-  }, [activateTrip]);
+    void openTrip(tripId);
+  }, [openTrip]);
 
   const createTrip = useCallback(async (data: CreateTripInput): Promise<Trip | null> => {
     if (!user) return null;
@@ -196,12 +174,11 @@ export function TripProvider({ children }: { children: ReactNode }) {
       return null;
     }
 
-    const newTrip = await activateTrip(tripId);
     await fetchTrips();
-    return newTrip;
-  }, [user, activateTrip, fetchTrips]);
+    return openTrip(tripId);
+  }, [user, fetchTrips, openTrip]);
 
-  const joinTrip = useCallback(async (inviteCode: string): Promise<{ error?: string }> => {
+  const joinTrip = useCallback(async (inviteCode: string): Promise<{ tripId?: string; error?: string }> => {
     if (!user) return { error: "Niet ingelogd" };
 
     const { data: tripId, error } = await callVakansieRpc<string>("join_trip_by_code", {
@@ -212,13 +189,14 @@ export function TripProvider({ children }: { children: ReactNode }) {
       if (error?.message.includes("invalid_invite")) {
         return { error: "Ongeldige uitnodigingscode" };
       }
-      return { error: error?.message || "Deelnemen aan vakantie is mislukt" };
+      return { error: error?.message || "Deelnemen aan reis is mislukt" };
     }
 
-    await activateTrip(tripId);
     await fetchTrips();
-    return {};
-  }, [user, activateTrip, fetchTrips]);
+    const opened = await openTrip(tripId);
+    if (!opened) return { error: "De reis kon na deelname niet worden geopend" };
+    return { tripId };
+  }, [user, fetchTrips, openTrip]);
 
   return (
     <TripContext.Provider
@@ -228,6 +206,7 @@ export function TripProvider({ children }: { children: ReactNode }) {
         tripMembers,
         isOrganizer,
         loading,
+        openTrip,
         switchTrip,
         createTrip,
         joinTrip,

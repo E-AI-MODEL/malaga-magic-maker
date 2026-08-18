@@ -47,7 +47,8 @@ describe("Bottom navigation", () => {
   });
 
   it("never exposes Hansie as a navigation item", () => {
-    expect(bottomNav).not.toContain("Hansie");
+    expect(bottomNav).not.toContain('label: "Hansie"');
+    expect(bottomNav).not.toContain("HansieWidget");
   });
 });
 

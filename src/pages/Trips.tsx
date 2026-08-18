@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Archive, ArrowRight, CalendarDays, LogOut, MapPin, Plane, Plus } from "lucide-react";
 import { useAuth } from "@/lib/auth";
@@ -65,6 +65,7 @@ function TripCard({ trip }: { trip: Trip }) {
 export default function Trips() {
   const { profile, signOut } = useAuth();
   const { userTrips, loading } = useTrip();
+  const [archiveOpen, setArchiveOpen] = useState(false);
 
   const { activeTrips, archivedTrips } = useMemo(() => ({
     activeTrips: sortTrips(userTrips.filter((trip) => trip.status !== "archived")),
@@ -131,18 +132,26 @@ export default function Trips() {
               {activeTrips.length > 0 ? (
                 <div className="grid gap-4 sm:grid-cols-2">{activeTrips.map((trip) => <TripCard key={trip.id} trip={trip} />)}</div>
               ) : (
-                <div className="rounded-2xl border border-dashed border-border p-6 text-sm text-muted-foreground">Geen actieve reizen.</div>
+                <div className="rounded-2xl border border-dashed border-border p-6 text-sm text-muted-foreground">
+                  Nog geen actieve reis. Maak een nieuwe reis om met Vakansie te beginnen.
+                </div>
               )}
             </section>
 
             {archivedTrips.length > 0 && (
               <section>
-                <div className="mb-4 flex items-center gap-2">
-                  <Archive className="h-4 w-4 text-muted-foreground" />
-                  <h2 className="font-display text-lg font-extrabold">Archief</h2>
-                  <span className="ml-auto text-xs text-muted-foreground">{archivedTrips.length}</span>
-                </div>
-                <div className="grid gap-4 opacity-80 sm:grid-cols-2">{archivedTrips.map((trip) => <TripCard key={trip.id} trip={trip} />)}</div>
+                <button
+                  onClick={() => setArchiveOpen((current) => !current)}
+                  className="flex w-full items-center gap-2 rounded-xl px-1 py-2 text-left text-muted-foreground transition-colors hover:text-foreground"
+                  aria-expanded={archiveOpen}
+                >
+                  <Archive className="h-4 w-4" />
+                  <span className="font-display text-sm font-extrabold">Archief</span>
+                  <span className="ml-auto text-xs">{archivedTrips.length}</span>
+                </button>
+                {archiveOpen && (
+                  <div className="mt-3 grid gap-4 opacity-80 sm:grid-cols-2">{archivedTrips.map((trip) => <TripCard key={trip.id} trip={trip} />)}</div>
+                )}
               </section>
             )}
           </div>

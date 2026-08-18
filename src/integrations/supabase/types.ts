@@ -1563,6 +1563,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      regenerate_trip_invite_code: {
+        Args: { p_trip_id: string }
+        Returns: string
+      }
       reserve_trip_document: {
         Args: {
           p_document_type?: string

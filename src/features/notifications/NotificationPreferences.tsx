@@ -15,7 +15,8 @@ export function NotificationPreferences({ userId }: { userId: string }) {
   });
 
   const mutation = useMutation({
-    mutationFn: saveNotificationPreferences.bind(null, userId),
+    mutationFn: (preferences: { task_assignments: boolean; decisions: boolean; trip_updates: boolean }) =>
+      saveNotificationPreferences(userId, preferences),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["notification-preferences", userId] }),
   });
 

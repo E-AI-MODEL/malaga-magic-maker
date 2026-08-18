@@ -64,6 +64,10 @@ export type Database = Omit<Build06Database, "public"> & {
         };
         Returns: boolean;
       };
+      get_trip_readiness: {
+        Args: { p_trip_id: string };
+        Returns: Json;
+      };
     };
   };
 };

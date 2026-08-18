@@ -1,5 +1,5 @@
 import { ReactNode } from "react";
-import { ArrowLeft, ChevronDown, LogOut, Plane, Plus } from "lucide-react";
+import { ArrowLeft, ChevronDown, LogOut, Plane, Plus, Settings } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { BottomNav } from "./BottomNav";
 import { AppSidebar } from "./AppSidebar";
@@ -20,7 +20,7 @@ import {
 
 export function AppLayout({ children }: { children: ReactNode }) {
   const { profile, signOut } = useAuth();
-  const { activeTrip, userTrips } = useTrip();
+  const { activeTrip, userTrips, isOrganizer } = useTrip();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
 
@@ -66,6 +66,11 @@ export function AppLayout({ children }: { children: ReactNode }) {
                       </DropdownMenuItem>
                     ))}
                     <DropdownMenuSeparator />
+                    {isOrganizer && (
+                      <DropdownMenuItem onClick={() => navigate(`/trip/${activeTrip.id}/settings`)}>
+                        <Settings className="mr-2 h-4 w-4" />Reisinstellingen
+                      </DropdownMenuItem>
+                    )}
                     <DropdownMenuItem onClick={() => navigate("/new-trip")}>
                       <Plus className="mr-2 h-4 w-4" />Nieuwe reis
                     </DropdownMenuItem>

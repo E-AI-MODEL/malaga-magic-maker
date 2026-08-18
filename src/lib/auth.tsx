@@ -1,9 +1,12 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { Session, User } from "@supabase/supabase-js";
+import { PRELAUNCH_ACCESS_RESTRICTED, PRELAUNCH_AUTH_VERSION } from "@/config/access";
 
-const ADMIN_USER_ID = "638d717f-4943-4993-9b79-b9a79f6f69ec";
-const ADMIN_EMAIL = "admin@local.app";
+// Temporary pre-launch allowlist. This is access control for the private build,
+// not the long-term product role model. BUILD 06 replaces this gate safely.
+const PRELAUNCH_USER_ID = "638d717f-4943-4993-9b79-b9a79f6f69ec";
+const PRELAUNCH_EMAIL = "admin@local.app";
 
 interface Profile {
   id: string;
@@ -40,22 +43,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       supabase.from("user_roles").select("role").eq("user_id", userId),
     ]);
 
-    const hasAdminRole = roleData?.some((r: { role: string }) => r.role === "admin") ?? false;
-    if (!hasAdminRole) {
-      clearAuthState();
-      await supabase.auth.signOut();
-      return false;
-    }
-
     if (profileData) setProfile(profileData);
-    setIsAdmin(true);
-    return true;
+    setIsAdmin(roleData?.some((role: { role: string }) => role.role === "admin") ?? false);
+  };
+
+  const isAllowedDuringPrelaunch = (candidate: User) => {
+    if (!PRELAUNCH_ACCESS_RESTRICTED) return true;
+    return candidate.id === PRELAUNCH_USER_ID && candidate.email?.toLowerCase() === PRELAUNCH_EMAIL;
   };
 
   useEffect(() => {
     let active = true;
 
-    const enforceAdminSession = async (session: Session | null) => {
+    const enforceSession = async (session: Session | null) => {
       if (!active) return;
 
       if (!session?.user) {
@@ -64,8 +64,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      const email = session.user.email?.toLowerCase();
-      if (session.user.id !== ADMIN_USER_ID || email !== ADMIN_EMAIL) {
+      if (!isAllowedDuringPrelaunch(session.user)) {
         clearAuthState();
         await supabase.auth.signOut();
         setLoading(false);
@@ -73,28 +72,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       setUser(session.user);
-      const allowed = await fetchProfile(session.user.id);
-      if (!active) return;
-      if (!allowed) clearAuthState();
-      setLoading(false);
+      await fetchProfile(session.user.id);
+      if (active) setLoading(false);
     };
 
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
-      setTimeout(() => void enforceAdminSession(session), 0);
+      setTimeout(() => void enforceSession(session), 0);
     });
 
-    const AUTH_VERSION = "v3-admin-only";
-    if (localStorage.getItem("auth-version") !== AUTH_VERSION) {
-      localStorage.setItem("auth-version", AUTH_VERSION);
+    if (localStorage.getItem("auth-version") !== PRELAUNCH_AUTH_VERSION) {
+      localStorage.setItem("auth-version", PRELAUNCH_AUTH_VERSION);
       sessionStorage.removeItem("boot-shown");
       supabase.auth.signOut().finally(() => {
         if (active) setLoading(false);
       });
     } else {
       supabase.auth.getSession().then(({ data: { session } }) => {
-        void enforceAdminSession(session);
+        void enforceSession(session);
       });
     }
 
@@ -106,29 +102,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signIn = async (emailOrUsername: string, password: string) => {
     const login = emailOrUsername.trim().toLowerCase();
-    if (login !== "admin" && login !== ADMIN_EMAIL) {
-      return { error: "Geen toegang" };
+    let email = login;
+
+    if (PRELAUNCH_ACCESS_RESTRICTED) {
+      if (login !== "admin" && login !== PRELAUNCH_EMAIL) {
+        return { error: "Geen toegang" };
+      }
+      email = PRELAUNCH_EMAIL;
+    } else if (!login.includes("@")) {
+      return { error: "Gebruik je e-mailadres" };
     }
 
-    const { error, data } = await supabase.auth.signInWithPassword({
-      email: ADMIN_EMAIL,
-      password,
-    });
+    const { error, data } = await supabase.auth.signInWithPassword({ email, password });
 
     if (error) {
       return { error: "Verkeerd e-mailadres of wachtwoord" };
     }
 
-    if (!data.user || data.user.id !== ADMIN_USER_ID || data.user.email?.toLowerCase() !== ADMIN_EMAIL) {
+    if (!data.user || !isAllowedDuringPrelaunch(data.user)) {
       await supabase.auth.signOut();
       clearAuthState();
       return { error: "Geen toegang" };
     }
 
-    const allowed = await fetchProfile(data.user.id);
-    if (!allowed) {
-      return { error: "Geen toegang" };
-    }
+    setUser(data.user);
+    await fetchProfile(data.user.id);
 
     supabase
       .from("activity_log")

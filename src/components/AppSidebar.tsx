@@ -1,4 +1,4 @@
-import { ChevronDown, Home, LogOut, Plane, Plus, Route, User, Users } from "lucide-react";
+import { ChevronDown, Home, LogOut, Plane, Plus, Route, Settings, User, Users } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/lib/auth";
 import { useTrip } from "@/contexts/TripContext";
@@ -28,7 +28,7 @@ export function AppSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const { profile, signOut } = useAuth();
-  const { activeTrip, userTrips } = useTrip();
+  const { activeTrip, userTrips, isOrganizer } = useTrip();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -73,6 +73,11 @@ export function AppSidebar() {
                   </DropdownMenuItem>
                 ))}
                 <DropdownMenuSeparator />
+                {isOrganizer && (
+                  <DropdownMenuItem onClick={() => navigate(`/trip/${activeTrip.id}/settings`)}>
+                    <Settings className="mr-2 h-4 w-4" />Reisinstellingen
+                  </DropdownMenuItem>
+                )}
                 <DropdownMenuItem onClick={() => navigate("/new-trip")}>
                   <Plus className="mr-2 h-4 w-4" />Nieuwe reis
                 </DropdownMenuItem>
@@ -100,6 +105,20 @@ export function AppSidebar() {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
+              {isOrganizer && (
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild isActive={isActive(`/trip/${activeTrip.id}/settings`)}>
+                    <NavLink
+                      to={`/trip/${activeTrip.id}/settings`}
+                      className="hover:bg-sidebar-accent/50"
+                      activeClassName="bg-sidebar-accent text-sidebar-primary font-semibold"
+                    >
+                      <Settings className="mr-2 h-4 w-4" />
+                      {!collapsed && <span>Reisinstellingen</span>}
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              )}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

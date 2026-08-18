@@ -2,7 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useState, ReactNode 
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 
-interface Trip {
+export interface Trip {
   id: string;
   name: string;
   description: string | null;
@@ -39,6 +39,18 @@ interface CreateTripInput {
   currency?: string;
 }
 
+export interface UpdateTripInput {
+  name: string;
+  description?: string | null;
+  start_date?: string | null;
+  end_date?: string | null;
+  group_size?: number;
+  destination_name?: string | null;
+  destination_country?: string | null;
+  timezone?: string | null;
+  currency?: string;
+}
+
 interface TripContextType {
   activeTrip: Trip | null;
   userTrips: Trip[];
@@ -48,6 +60,9 @@ interface TripContextType {
   openTrip: (tripId: string) => Promise<Trip | null>;
   switchTrip: (tripId: string) => void;
   createTrip: (data: CreateTripInput) => Promise<Trip | null>;
+  updateTrip: (tripId: string, data: UpdateTripInput) => Promise<Trip | null>;
+  archiveTrip: (tripId: string) => Promise<boolean>;
+  restoreTrip: (tripId: string) => Promise<boolean>;
   joinTrip: (inviteCode: string) => Promise<{ tripId?: string; error?: string }>;
   refreshTrips: () => Promise<void>;
 }
@@ -178,6 +193,50 @@ export function TripProvider({ children }: { children: ReactNode }) {
     return openTrip(tripId);
   }, [user, fetchTrips, openTrip]);
 
+  const updateTrip = useCallback(async (tripId: string, data: UpdateTripInput): Promise<Trip | null> => {
+    if (!user) return null;
+
+    const { error } = await supabase
+      .from("trip")
+      .update({
+        name: data.name.trim(),
+        description: data.description ?? null,
+        start_date: data.start_date ?? null,
+        end_date: data.end_date ?? null,
+        group_size: Math.max(1, data.group_size ?? 1),
+        destination_name: data.destination_name ?? null,
+        destination_country: data.destination_country ?? null,
+        timezone: data.timezone ?? null,
+        currency: data.currency ?? "EUR",
+      })
+      .eq("id", tripId);
+
+    if (error) {
+      console.error("trip update failed:", error.message);
+      return null;
+    }
+
+    await fetchTrips();
+    return openTrip(tripId);
+  }, [user, fetchTrips, openTrip]);
+
+  const setTripStatus = useCallback(async (tripId: string, status: "planning" | "archived") => {
+    if (!user) return false;
+
+    const { error } = await supabase.from("trip").update({ status }).eq("id", tripId);
+    if (error) {
+      console.error("trip status update failed:", error.message);
+      return false;
+    }
+
+    await fetchTrips();
+    await openTrip(tripId);
+    return true;
+  }, [user, fetchTrips, openTrip]);
+
+  const archiveTrip = useCallback((tripId: string) => setTripStatus(tripId, "archived"), [setTripStatus]);
+  const restoreTrip = useCallback((tripId: string) => setTripStatus(tripId, "planning"), [setTripStatus]);
+
   const joinTrip = useCallback(async (inviteCode: string): Promise<{ tripId?: string; error?: string }> => {
     if (!user) return { error: "Niet ingelogd" };
 
@@ -209,6 +268,9 @@ export function TripProvider({ children }: { children: ReactNode }) {
         openTrip,
         switchTrip,
         createTrip,
+        updateTrip,
+        archiveTrip,
+        restoreTrip,
         joinTrip,
         refreshTrips: fetchTrips,
       }}

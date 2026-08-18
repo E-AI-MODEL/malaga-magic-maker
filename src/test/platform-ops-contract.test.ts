@@ -10,6 +10,7 @@ describe("Vakansie BUILD 09 platform operations contract", () => {
   const migration = source("supabase/migrations/20260818100000_platform_ops.sql");
   const app = source("src/App.tsx");
   const ops = source("src/pages/Ops.tsx");
+  const opsShell = source("src/features/ops/OpsShell.tsx");
 
   it("requires the internal admin role in every privileged server function", () => {
     const functionNames = [
@@ -41,8 +42,10 @@ describe("Vakansie BUILD 09 platform operations contract", () => {
   it("keeps Beheer separate from normal trip routes and customer navigation", () => {
     expect(app).toContain('path="/ops"');
     expect(app).toContain("PlatformAdminRoute");
-    expect(ops).toContain("Beheer");
+    expect(opsShell).toContain("Beheer");
     expect(ops).not.toContain("service_role");
     expect(ops).not.toContain("SUPABASE_SERVICE_ROLE_KEY");
+    expect(opsShell).not.toContain("service_role");
+    expect(opsShell).not.toContain("SUPABASE_SERVICE_ROLE_KEY");
   });
 });

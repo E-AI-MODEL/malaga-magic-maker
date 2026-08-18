@@ -5,13 +5,13 @@ import { useTrip } from "@/contexts/TripContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent } from "@/components/ui/card";
+import { SectionLabel } from "@/components/primitives";
 import { NotificationPreferences } from "@/features/notifications/NotificationPreferences";
 import { toast } from "sonner";
-import { ArrowLeft, Calendar, Settings, User, Users } from "lucide-react";
+import { ArrowLeft, ChevronRight, LogOut } from "lucide-react";
 
 export default function Profiel() {
-  const { profile, isAdmin, user } = useAuth();
+  const { profile, isAdmin, user, signOut } = useAuth();
   const { userTrips } = useTrip();
   const navigate = useNavigate();
   const [displayName, setDisplayName] = useState(profile?.display_name || "");
@@ -36,95 +36,100 @@ export default function Profiel() {
   return (
     <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur">
-        <div className="mx-auto flex max-w-3xl items-center gap-3 px-5 py-3">
+        <div className="mx-auto flex max-w-2xl items-center gap-3 px-5 py-2.5">
           <Button variant="ghost" size="icon" onClick={() => navigate("/trips")} aria-label="Terug naar mijn reizen">
             <ArrowLeft className="h-4 w-4" />
           </Button>
-          <div>
-            <p className="font-display text-sm font-extrabold">Profiel</p>
-            <p className="text-xs text-muted-foreground">Account en voorkeuren</p>
-          </div>
+          <p className="text-sm font-semibold tracking-tight">Profiel</p>
         </div>
       </header>
 
-      <main className="mx-auto max-w-3xl space-y-8 px-5 py-8">
-        <div className="flex items-center gap-4">
-          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10">
-            <User className="h-8 w-8 text-primary" />
-          </div>
-          <div>
-            <h1 className="font-display text-xl font-extrabold">{profile?.display_name}</h1>
-            <p className="text-sm text-muted-foreground">@{profile?.username}</p>
-          </div>
-        </div>
-
-        <div>
-          <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-            Weergavenaam
-          </label>
-          <div className="flex gap-2">
-            <Input
-              value={displayName}
-              onChange={(event) => setDisplayName(event.target.value)}
-              className="h-11"
-            />
-            <Button onClick={handleSave} disabled={saving || displayName === profile?.display_name} className="h-11">
-              {saving ? "..." : "Opslaan"}
-            </Button>
+      <main className="mx-auto max-w-2xl px-5 py-7">
+        <div className="flex items-center gap-3 border-b border-rule/10 pb-5">
+          <span className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 font-brand text-lg font-semibold text-primary">
+            {(profile?.display_name || user?.email || "?").slice(0, 1).toUpperCase()}
+          </span>
+          <div className="min-w-0">
+            <h1 className="truncate font-brand text-xl font-semibold tracking-tight">{profile?.display_name || "Reiziger"}</h1>
+            <p className="truncate text-xs text-muted-foreground">
+              {profile?.username ? `@${profile.username}` : ""}
+              {profile?.username && user?.email ? " · " : ""}
+              {user?.email || ""}
+            </p>
           </div>
         </div>
 
-        {user && <NotificationPreferences userId={user.id} />}
+        <section className="mt-7">
+          <SectionLabel>Account</SectionLabel>
+          <div className="mt-3">
+            <label className="mb-1.5 block text-xs text-muted-foreground">Weergavenaam</label>
+            <div className="flex gap-2">
+              <Input value={displayName} onChange={(event) => setDisplayName(event.target.value)} className="h-10" />
+              <Button onClick={handleSave} disabled={saving || displayName === profile?.display_name} className="h-10">
+                {saving ? "..." : "Opslaan"}
+              </Button>
+            </div>
+          </div>
+        </section>
 
-        {isAdmin && (
-          <button
-            onClick={() => navigate("/ops")}
-            className="flex w-full items-center gap-4 rounded-2xl border border-border bg-card p-4 text-left transition-colors hover:border-primary/30"
-          >
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10">
-              <Settings className="h-5 w-5 text-primary" />
+        {user && (
+          <section className="mt-8">
+            <SectionLabel>Meldingen</SectionLabel>
+            <div className="mt-2">
+              <NotificationPreferences userId={user.id} />
             </div>
-            <div className="min-w-0 flex-1">
-              <p className="font-display font-extrabold">Beheer</p>
-              <p className="mt-1 text-xs leading-relaxed text-muted-foreground">Interne omgeving voor gebruikers, reizen en systeemcontrole.</p>
-            </div>
-          </button>
+          </section>
         )}
 
-        <section>
-          <h2 className="mb-3 font-display text-sm font-extrabold uppercase tracking-wider text-muted-foreground">
-            Actieve reizen ({activeTrips.length})
-          </h2>
-          {activeTrips.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-border p-5 text-sm text-muted-foreground">
-              Je hebt op dit moment geen actieve reis. Gearchiveerde reizen vind je via Mijn reizen.
+        {isAdmin && (
+          <section className="mt-8">
+            <SectionLabel>Toegang</SectionLabel>
+            <div className="mt-1 rule-divide">
+              <button onClick={() => navigate("/ops")} className="flex w-full items-center gap-3 py-3 text-left">
+                <span className="min-w-0 flex-1">
+                  <span className="block text-[15px] font-medium">Beheer</span>
+                  <span className="block text-xs text-muted-foreground">Interne omgeving voor gebruikers, reizen en systeemcontrole.</span>
+                </span>
+                <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground/60" />
+              </button>
             </div>
+          </section>
+        )}
+
+        <section className="mt-8">
+          <SectionLabel>Actieve reizen</SectionLabel>
+          {activeTrips.length === 0 ? (
+            <p className="py-3 text-sm text-muted-foreground">
+              Je hebt op dit moment geen actieve reis. Gearchiveerde reizen vind je via Mijn reizen.
+            </p>
           ) : (
-            <div className="space-y-3">
+            <div className="mt-1 rule-divide">
               {activeTrips.map((trip) => (
-                <Card key={trip.id} className="border-border/60">
-                  <CardContent className="p-4">
-                    <button onClick={() => navigate(`/trip/${trip.id}`)} className="w-full text-left">
-                      <p className="font-display font-bold">{trip.name}</p>
-                      <div className="mt-1.5 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
-                        {trip.start_date && trip.end_date && (
-                          <span className="flex items-center gap-1">
-                            <Calendar className="h-3 w-3" />
-                            {new Date(`${trip.start_date}T12:00:00`).toLocaleDateString("nl-NL", { day: "numeric", month: "short" })} – {new Date(`${trip.end_date}T12:00:00`).toLocaleDateString("nl-NL", { day: "numeric", month: "short", year: "numeric" })}
-                          </span>
-                        )}
-                        <span className="flex items-center gap-1">
-                          <Users className="h-3 w-3" />
-                          {trip.group_size}
-                        </span>
-                      </div>
-                      {trip.description && <p className="mt-1 text-xs text-muted-foreground">{trip.description}</p>}
-                    </button>
-                  </CardContent>
-                </Card>
+                <button key={trip.id} onClick={() => navigate(`/trip/${trip.id}`)} className="flex w-full items-center gap-3 py-3 text-left">
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate text-[15px] font-medium">{trip.name}</span>
+                    <span className="block truncate text-xs text-muted-foreground">
+                      {trip.start_date && trip.end_date
+                        ? `${new Date(`${trip.start_date}T12:00:00`).toLocaleDateString("nl-NL", { day: "numeric", month: "short" })} – ${new Date(`${trip.end_date}T12:00:00`).toLocaleDateString("nl-NL", { day: "numeric", month: "short", year: "numeric" })}`
+                        : "Data nog niet gekozen"}
+                      {trip.group_size ? ` · ${trip.group_size} reizigers` : ""}
+                    </span>
+                  </span>
+                  <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground/60" />
+                </button>
               ))}
             </div>
           )}
+        </section>
+
+        <section className="mt-8">
+          <SectionLabel>Sessie</SectionLabel>
+          <div className="mt-1 rule-divide">
+            <button onClick={() => void signOut()} className="flex w-full items-center gap-3 py-3 text-left text-destructive">
+              <LogOut className="h-4 w-4 shrink-0" />
+              <span className="flex-1 text-[15px] font-medium">Uitloggen</span>
+            </button>
+          </div>
         </section>
       </main>
     </div>

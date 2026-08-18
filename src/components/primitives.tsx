@@ -2,11 +2,11 @@ import { type ComponentType, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { ChevronRight } from "lucide-react";
 
-/** Small uppercase label used to open a genuine section break. */
+/** Small calm sentence-case label used to open a genuine section break. */
 export function SectionLabel({ children, action }: { children: ReactNode; action?: ReactNode }) {
   return (
     <div className="flex items-baseline justify-between gap-3">
-      <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">{children}</p>
+      <p className="text-[13px] font-semibold tracking-tight text-foreground/70">{children}</p>
       {action}
     </div>
   );
@@ -44,7 +44,11 @@ export function RowItem({ icon: Icon, title, meta, trailing, to, onClick, tone =
     </>
   );
 
-  const className = `flex w-full items-center gap-3 py-3.5 text-left ${interactive ? "transition-opacity hover:opacity-70" : ""}`;
+  const className = `flex w-full items-center gap-3 py-3.5 text-left ${
+    interactive
+      ? "transition-opacity hover:opacity-70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+      : ""
+  }`;
 
   if (to) return <Link to={to} className={className}>{body}</Link>;
   if (onClick) return <button type="button" onClick={onClick} className={className}>{body}</button>;

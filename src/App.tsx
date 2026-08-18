@@ -14,6 +14,7 @@ const NewTrip = lazy(() => import("./pages/NewTrip"));
 const TripHome = lazy(() => import("./pages/TripHome"));
 const TripReis = lazy(() => import("./pages/TripReis"));
 const TripSamen = lazy(() => import("./pages/TripSamen"));
+const TripSettings = lazy(() => import("./pages/TripSettings"));
 const JoinTrip = lazy(() => import("./pages/JoinTrip"));
 const Profiel = lazy(() => import("./pages/Profiel"));
 
@@ -104,6 +105,7 @@ function AppRoutes() {
         <Route path="/trip/:tripId" element={<ProtectedRoute><TripRouteGuard><TripHome /></TripRouteGuard></ProtectedRoute>} />
         <Route path="/trip/:tripId/reis" element={<ProtectedRoute><TripRouteGuard><TripReis /></TripRouteGuard></ProtectedRoute>} />
         <Route path="/trip/:tripId/samen" element={<ProtectedRoute><TripRouteGuard><TripSamen /></TripRouteGuard></ProtectedRoute>} />
+        <Route path="/trip/:tripId/settings" element={<ProtectedRoute><TripRouteGuard><TripSettings /></TripRouteGuard></ProtectedRoute>} />
 
         <Route path="/legacy/:tripId/taken" element={<ProtectedRoute><TripRouteGuard><Taken /></TripRouteGuard></ProtectedRoute>} />
         <Route path="/legacy/:tripId/reisplanner" element={<ProtectedRoute><TripRouteGuard><Reisplanner /></TripRouteGuard></ProtectedRoute>} />

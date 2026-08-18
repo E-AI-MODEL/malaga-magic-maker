@@ -115,6 +115,15 @@
 
 @layer components {
   .rule-divide > * + * {
+    @apply border-t border-rule;
+  }
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+@layer components {
+  .rule-divide > * + * {
     border-top: 1px solid hsl(var(--rule) / 0.08);
   }
   .tabular {

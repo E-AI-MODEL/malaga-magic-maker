@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, CalendarDays, LogOut, MapPin, Plus, Suitcase } from "lucide-react";
+import { ArrowRight, CalendarDays, LogOut, MapPin, Plane, Plus } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { useTrip } from "@/contexts/TripContext";
 import { Button } from "@/components/ui/button";
@@ -76,7 +76,7 @@ export default function Trips() {
         ) : trips.length === 0 ? (
           <div className="flex min-h-[360px] flex-col items-center justify-center rounded-3xl border border-dashed border-border bg-card/40 px-6 text-center">
             <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10">
-              <Suitcase className="h-7 w-7 text-primary" />
+              <Plane className="h-7 w-7 text-primary" />
             </div>
             <h2 className="font-display text-xl font-extrabold">Je hebt nog geen reis</h2>
             <p className="mt-2 max-w-sm text-sm text-muted-foreground">

@@ -1,0 +1,28 @@
+name: Temporary BUILD 12 workflow cleanup
+
+on:
+  push:
+    branches:
+      - vakansie/build-12-production-hardening
+
+permissions:
+  contents: write
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: vakansie/build-12-production-hardening
+          fetch-depth: 0
+      - name: Remove all temporary workflow helpers including this workflow
+        run: |
+          git rm -f --ignore-unmatch .github/workflows/build12-*.yml .github/workflows/zz-temporary-cleanup.yml
+          if git diff --cached --quiet; then
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'Finalize BUILD 12 workflow cleanup'
+          git push origin HEAD:vakansie/build-12-production-hardening

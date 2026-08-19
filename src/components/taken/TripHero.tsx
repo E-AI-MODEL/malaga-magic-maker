@@ -73,23 +73,6 @@ export function TripHero({ tasks }: TripHeroProps) {
         ))}
       </div>
 
-      {isOrganizer && trip?.invite_code && (
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5, duration: 0.3 }}
-          className="mt-3 flex items-center gap-2 bg-white/5 rounded-lg px-3 py-2"
-        >
-          <span className="text-[10px] text-white/40 uppercase tracking-wider">Code:</span>
-          <span className="font-mono text-xs text-primary font-bold tracking-wider">{trip.invite_code}</span>
-          <button
-            onClick={() => { navigator.clipboard.writeText(trip.invite_code || ""); toast("Gekopieerd!"); }}
-            className="ml-auto text-[10px] text-white/40 hover:text-white transition-colors"
-          >
-            Kopieer
-          </button>
-        </motion.div>
-      )}
     </section>
   );
 }

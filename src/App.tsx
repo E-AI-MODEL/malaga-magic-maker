@@ -11,6 +11,11 @@ import { ClientErrorReporter } from "@/features/observability/ClientErrorReporte
 import Login from "./pages/Login";
 
 const Trips = lazy(() => import("./pages/Trips"));
+const Landing = lazy(() => import("./pages/Landing"));
+const Signup = lazy(() => import("./pages/Signup"));
+const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
+const ResetPassword = lazy(() => import("./pages/ResetPassword"));
+const Steun = lazy(() => import("./pages/Steun"));
 const NewTrip = lazy(() => import("./pages/NewTrip"));
 const TripHome = lazy(() => import("./pages/TripHome"));
 const TripReis = lazy(() => import("./pages/TripReis"));
@@ -90,7 +95,11 @@ function AppRoutes() {
     <Suspense fallback={<PageLoader />}>
       <Routes>
         <Route path="/login" element={user ? <Navigate to="/trips" replace /> : <Login />} />
-        <Route path="/" element={<Navigate to={user ? "/trips" : "/login"} replace />} />
+        <Route path="/signup" element={user ? <Navigate to="/trips" replace /> : <Signup />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/steun" element={<Steun />} />
+        <Route path="/" element={user ? <Navigate to="/trips" replace /> : <Landing />} />
         <Route path="/boot" element={<Navigate to={user ? "/trips" : "/login"} replace />} />
 
         <Route path="/trips" element={<ProtectedRoute><Trips /></ProtectedRoute>} />

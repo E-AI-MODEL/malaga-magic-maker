@@ -1557,6 +1557,7 @@ export type Database = {
         Returns: boolean
       }
       get_my_account_deletion_blockers: { Args: never; Returns: Json }
+      get_my_plan_status: { Args: never; Returns: Json }
       get_trip_invite_preview: { Args: { p_token: string }; Returns: Json }
       get_trip_readiness: { Args: { p_trip_id: string }; Returns: Json }
       get_username: { Args: { _user_id: string }; Returns: string }
@@ -1571,6 +1572,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_pro_user: { Args: { _user_id: string }; Returns: boolean }
       is_trip_member: {
         Args: { _trip_id: string; _user_id: string }
         Returns: boolean

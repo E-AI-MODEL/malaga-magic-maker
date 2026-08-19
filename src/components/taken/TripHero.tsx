@@ -1,5 +1,4 @@
 import { useTrip } from "@/contexts/TripContext";
-import { toast } from "sonner";
 import { motion } from "framer-motion";
 import type { Task } from "./types";
 
@@ -17,7 +16,7 @@ const statVariants = {
 };
 
 export function TripHero({ tasks }: TripHeroProps) {
-  const { activeTrip, isOrganizer } = useTrip();
+  const { activeTrip } = useTrip();
   const trip = activeTrip;
   const now = new Date();
   const start = trip ? new Date(trip.start_date) : now;

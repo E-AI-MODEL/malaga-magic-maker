@@ -62,7 +62,7 @@ interface TripContextType {
   updateTrip: (tripId: string, data: UpdateTripInput) => Promise<Trip | null>;
   archiveTrip: (tripId: string) => Promise<boolean>;
   restoreTrip: (tripId: string) => Promise<boolean>;
-  joinTrip: (inviteCode: string) => Promise<{ tripId?: string; error?: string }>;
+  joinTrip: (inviteToken: string) => Promise<{ tripId?: string; error?: string }>;
   refreshTrips: () => Promise<void>;
 }
 

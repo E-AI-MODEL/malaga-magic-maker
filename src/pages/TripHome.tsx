@@ -9,7 +9,8 @@ import { listTripItems } from "@/features/travel/data";
 import { listDecisions, listTasks } from "@/features/together/data";
 import { formatTripDateTime } from "@/features/travel/presentation";
 import { RecentActivity } from "@/features/notifications/RecentActivity";
-import { EmptyLine, ReadinessBar, RowItem, RowList, SectionLabel } from "@/components/primitives";
+import { EmptyLine, ReadinessBar, RowItem, RowList, SectionLabel, StatusChip, Surface } from "@/components/primitives";
+import { TripVisual } from "@/components/TripVisual";
 
 function formatDateRange(startDate: string | null, endDate: string | null) {
   if (!startDate && !endDate) return "Data nog niet gekozen";
@@ -101,33 +102,28 @@ export default function TripHome() {
   return (
     <AppLayout>
       <div className="px-5 pb-12 pt-5 sm:px-8">
-        {activeTrip.cover_image_url ? (
-          <img
-            src={activeTrip.cover_image_url}
-            alt={`Omslagfoto van ${activeTrip.name}`}
-            loading="lazy"
-            className="mb-5 h-32 w-full rounded-xl object-cover sm:h-40"
-          />
-        ) : (
-          <div className="mb-5 flex items-center gap-2 rounded-xl bg-secondary px-4 py-3 text-muted-foreground">
-            <MapPin className="h-4 w-4 shrink-0" />
-            <span className="truncate text-sm">{activeTrip.destination_name || "Bestemming nog niet gekozen"}</span>
-          </div>
-        )}
-        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">{timing}</p>
-        <h1 className="mt-1.5 font-brand text-[28px] font-semibold leading-tight sm:text-3xl">{activeTrip.name}</h1>
-        <p className="mt-1.5 text-sm text-muted-foreground">
-          {formatDateRange(activeTrip.start_date, activeTrip.end_date)}
-          {activeTrip.destination_name ? ` · ${activeTrip.destination_name}` : ""}
-        </p>
+        <TripVisual name={activeTrip.name} coverImageUrl={activeTrip.cover_image_url} height="h-[150px] sm:h-[190px]" />
 
-        <div className="mt-5">
-          <ReadinessBar
-            done={Math.max(0, trackedTotal - attentionTotal)}
-            total={Math.max(1, trackedTotal)}
-            sentence={readinessSentence}
-          />
-        </div>
+        <Surface className="relative z-10 -mt-8 mx-2 px-4 pb-4 pt-4 sm:mx-4">
+          <div className="flex items-center justify-between gap-3">
+            <StatusChip tone={attentionTotal > 0 ? "attention" : "done"}>{timing}</StatusChip>
+            <span className="truncate font-ui text-[11px] font-semibold text-muted-foreground">
+              {formatDateRange(activeTrip.start_date, activeTrip.end_date)}
+            </span>
+          </div>
+          <h1 className="mt-3 font-brand text-[26px] font-semibold leading-tight sm:text-3xl">{activeTrip.name}</h1>
+          <p className="mt-1 flex items-center gap-1.5 text-sm text-muted-foreground">
+            <MapPin className="h-[15px] w-[15px] shrink-0" strokeWidth={1.75} />
+            <span className="truncate">{activeTrip.destination_name || "Bestemming nog niet gekozen"}</span>
+          </p>
+          <div className="mt-4">
+            <ReadinessBar
+              done={Math.max(0, trackedTotal - attentionTotal)}
+              total={Math.max(1, trackedTotal)}
+              sentence={readinessSentence}
+            />
+          </div>
+        </Surface>
 
         {personalItems.length > 0 && (
           <section className="mt-8">
@@ -146,16 +142,17 @@ export default function TripHome() {
           </section>
         )}
 
-        {attention.length > 0 && (
-          <section className="mt-8">
-            <SectionLabel>Dit vraagt aandacht</SectionLabel>
+        <section className="mt-8">
+          <SectionLabel>Dit vraagt aandacht</SectionLabel>
+          {attention.length > 0 ? (
             <RowList className="mt-1">
-              {attention.slice(0, 4).map((check) => {
+              {attention.slice(0, 5).map((check) => {
                 const action = readinessAction(check, activeTrip.id);
                 return (
                   <RowItem
                     key={check.key}
                     icon={AlertCircle}
+                    emphasis
                     tone="attention"
                     title={check.label}
                     meta={action?.label}
@@ -165,8 +162,14 @@ export default function TripHome() {
                 );
               })}
             </RowList>
-          </section>
-        )}
+          ) : readinessQuery.isLoading ? (
+            <RowList className="mt-1">
+              <RowItem icon={CalendarClock} title="Voorbereiding wordt opgehaald…" />
+            </RowList>
+          ) : (
+            <EmptyLine text="Alles wat in Vakansie staat, is geregeld. Nieuwe aandachtspunten verschijnen hier vanzelf." />
+          )}
+        </section>
 
         <section className="mt-8">
           <SectionLabel>Daarna komt dit</SectionLabel>

@@ -8,6 +8,7 @@ import {
   Heart,
   Plane,
   Route,
+  Shield,
   Sparkles,
   Users,
   Wallet,
@@ -15,6 +16,12 @@ import {
 import { Button } from "@/components/ui/button";
 import heroHome from "@/assets/hero-home.jpg";
 import logo from "@/assets/vakansie-logo.png";
+
+const TRUST_POINTS = [
+  "Geen creditcard nodig",
+  "Je data blijft van jou",
+  "Documenten privé per reis",
+];
 
 const FEATURES = [
   {

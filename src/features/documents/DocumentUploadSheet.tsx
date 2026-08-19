@@ -59,7 +59,7 @@ export function DocumentUploadSheet({
       onOpenChange(false);
     } catch (caught) {
       console.error("document upload failed", caught);
-      setError("Uploaden is niet gelukt. Probeer het nog een keer.");
+      setError(describePlanLimit(caught) ?? "Uploaden is niet gelukt. Probeer het nog een keer.");
     } finally {
       setSaving(false);
     }

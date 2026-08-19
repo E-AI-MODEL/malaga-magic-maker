@@ -7,7 +7,7 @@ export function BottomNav() {
   if (!activeTrip) return null;
 
   const base =
-    "flex h-14 flex-1 flex-col items-center justify-center gap-1 text-[11px] font-medium tracking-tight transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
+    "relative flex h-[58px] flex-1 flex-col items-center justify-center gap-1 text-[11px] font-semibold tracking-tight transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring";
   const active = "text-primary";
   const inactive = "text-muted-foreground";
 
@@ -18,7 +18,7 @@ export function BottomNav() {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-rule/10 bg-background/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-sm">
+    <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-border bg-card pb-[env(safe-area-inset-bottom)]">
       <div className="mx-auto flex max-w-lg">
         {links.map((link) => (
           <NavLink
@@ -27,8 +27,13 @@ export function BottomNav() {
             end={link.end}
             className={({ isActive }) => `${base} ${isActive ? active : inactive}`}
           >
-            <link.icon className="h-[18px] w-[18px]" strokeWidth={1.75} aria-hidden />
-            <span>{link.label}</span>
+            {({ isActive }) => (
+              <>
+                {isActive && <span aria-hidden className="absolute inset-x-7 top-0 h-[2px] rounded-full bg-primary" />}
+                <link.icon className="h-5 w-5" strokeWidth={isActive ? 2 : 1.75} aria-hidden />
+                <span>{link.label}</span>
+              </>
+            )}
           </NavLink>
         ))}
       </div>

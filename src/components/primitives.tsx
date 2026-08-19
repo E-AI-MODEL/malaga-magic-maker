@@ -2,14 +2,80 @@ import { type ComponentType, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { ChevronRight } from "lucide-react";
 
-/** Small calm sentence-case label used to open a genuine section break. */
+/** Warm white object surface on the off-white canvas. Depth without SaaS cards. */
+export function Surface({
+  children,
+  className = "",
+  as: Tag = "div",
+}: {
+  children: ReactNode;
+  className?: string;
+  as?: "div" | "section";
+}) {
+  return (
+    <Tag className={`rounded-[18px] border border-border bg-card shadow-soft ${className}`}>{children}</Tag>
+  );
+}
+
+/** 36px soft icon container for important actions and section anchors. */
+export function IconBubble({
+  icon: Icon,
+  tone = "default",
+  className = "",
+}: {
+  icon: ComponentType<{ className?: string; strokeWidth?: number }>;
+  tone?: "default" | "attention" | "muted";
+  className?: string;
+}) {
+  const toneClass =
+    tone === "attention"
+      ? "bg-warning/12 text-warning"
+      : tone === "muted"
+        ? "bg-secondary text-muted-foreground"
+        : "bg-primary/10 text-primary";
+  return (
+    <span aria-hidden className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-[12px] ${toneClass} ${className}`}>
+      <Icon className="h-[18px] w-[18px]" strokeWidth={1.75} />
+    </span>
+  );
+}
+
+/** Compact status chip. Word first, colour only as support. */
+export function StatusChip({ children, tone = "neutral" }: { children: ReactNode; tone?: "neutral" | "attention" | "done" }) {
+  const toneClass =
+    tone === "attention"
+      ? "bg-warning/15 text-warning"
+      : tone === "done"
+        ? "bg-primary/10 text-primary"
+        : "bg-secondary text-muted-foreground";
+  return (
+    <span className={`inline-flex items-center rounded-full px-2.5 py-1 font-ui text-[11px] font-semibold ${toneClass}`}>
+      {children}
+    </span>
+  );
+}
+
+/** Quiet sentence-case section break. 13px semibold, never decorative uppercase. */
 export function SectionLabel({ children, action }: { children: ReactNode; action?: ReactNode }) {
   return (
     <div className="flex items-baseline justify-between gap-3">
-      <p className="text-[13px] font-semibold tracking-tight text-foreground/70">{children}</p>
+      <h2 className="font-ui text-[13px] font-semibold text-foreground">{children}</h2>
       {action}
     </div>
   );
+}
+
+/** Status is always a word, never colour alone. */
+export function StatusWord({ children, tone = "neutral" }: { children: ReactNode; tone?: "neutral" | "done" | "attention" | "muted" }) {
+  const toneClass =
+    tone === "done"
+      ? "text-primary"
+      : tone === "attention"
+        ? "text-warning"
+        : tone === "muted"
+          ? "text-muted-foreground/70"
+          : "text-muted-foreground";
+  return <span className={`shrink-0 text-[11px] font-semibold ${toneClass}`}>{children}</span>;
 }
 
 /** Hairline-separated list container. Rows live directly inside it. */
@@ -25,14 +91,17 @@ type RowItemProps = {
   to?: string;
   onClick?: () => void;
   tone?: "default" | "attention";
+  /** Render the leading icon inside a soft 36px container. */
+  emphasis?: boolean;
 };
 
 /** icon · title · meta · chevron. The single row primitive of the product. */
-export function RowItem({ icon: Icon, title, meta, trailing, to, onClick, tone = "default" }: RowItemProps) {
+export function RowItem({ icon: Icon, title, meta, trailing, to, onClick, tone = "default", emphasis = false }: RowItemProps) {
   const interactive = Boolean(to || onClick);
   const body = (
     <>
-      {Icon && (
+      {Icon && emphasis && <IconBubble icon={Icon} tone={tone === "attention" ? "attention" : "default"} />}
+      {Icon && !emphasis && (
         <Icon className={`h-[18px] w-[18px] shrink-0 ${tone === "attention" ? "text-warning" : "text-muted-foreground"}`} />
       )}
       <span className="min-w-0 flex-1">
@@ -44,10 +113,8 @@ export function RowItem({ icon: Icon, title, meta, trailing, to, onClick, tone =
     </>
   );
 
-  const className = `flex w-full items-center gap-3 py-3.5 text-left ${
-    interactive
-      ? "transition-opacity hover:opacity-70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-      : ""
+  const className = `flex min-h-[48px] w-full items-center gap-3 py-3 text-left rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
+    interactive ? "transition-opacity hover:opacity-70" : ""
   }`;
 
   if (to) return <Link to={to} className={className}>{body}</Link>;
@@ -136,7 +203,7 @@ export function Segmented<T extends string>({
   options: Array<{ id: T; label: string }>;
 }) {
   return (
-    <div role="tablist" className="flex w-full rounded-xl border border-border bg-secondary/60 p-0.5">
+    <div role="tablist" className="flex w-full rounded-[14px] border border-border bg-secondary/70 p-1 shadow-soft">
       {options.map((option) => (
         <button
           key={option.id}
@@ -145,7 +212,7 @@ export function Segmented<T extends string>({
           aria-selected={value === option.id}
           onClick={() => onChange(option.id)}
           className={`flex-1 rounded-[10px] px-2 py-2 text-[13px] font-semibold transition-colors ${
-            value === option.id ? "bg-background text-foreground shadow-sm" : "text-muted-foreground"
+            value === option.id ? "bg-card text-foreground shadow-soft" : "text-muted-foreground hover:text-foreground"
           }`}
         >
           {option.label}

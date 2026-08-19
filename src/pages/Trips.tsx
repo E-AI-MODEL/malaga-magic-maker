@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { AlertCircle, Archive, ChevronDown, ChevronRight, LogOut, MapPin, Plus, User } from "lucide-react";
+import { AlertCircle, Archive, ChevronDown, ChevronRight, MapPin, Plus, Sparkles, User } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { Trip, useTrip } from "@/contexts/TripContext";
 import { tripTimingLabel } from "@/features/trips/presentation";
@@ -9,7 +9,8 @@ import { activeReadinessChecks, getTripReadiness, readinessAction } from "@/feat
 import { NotificationCenter } from "@/components/NotificationCenter";
 import { HansieWidget } from "@/components/HansieWidget";
 import { Button } from "@/components/ui/button";
-import { EmptyLine, ReadinessBar, RowItem, RowList, SectionLabel } from "@/components/primitives";
+import { EmptyLine, ReadinessBar, RowItem, RowList, SectionLabel, StatusChip, Surface } from "@/components/primitives";
+import { TripThumb, TripVisual } from "@/components/TripVisual";
 
 function formatDateRange(startDate: string | null, endDate: string | null) {
   if (!startDate && !endDate) return "Data nog niet gekozen";
@@ -34,27 +35,6 @@ function sortTrips(trips: Trip[]) {
   });
 }
 
-/** Cover for the dominant trip. Uses only a real stored cover image. */
-function TripCover({ trip }: { trip: Trip }) {
-  if (trip.cover_image_url) {
-    return (
-      <img
-        src={trip.cover_image_url}
-        alt={`Omslagfoto van ${trip.name}`}
-        loading="lazy"
-        className="h-36 w-full rounded-xl object-cover sm:h-44"
-      />
-    );
-  }
-  return (
-    <div className="flex h-20 w-full items-center gap-2 rounded-xl bg-secondary px-4 text-muted-foreground sm:h-24">
-      <MapPin className="h-4 w-4 shrink-0" />
-      <span className="truncate text-sm">{trip.destination_name || "Bestemming nog niet gekozen"}</span>
-    </div>
-  );
-}
-
-/** The single dominant trip object on Mijn reizen. */
 function ActiveTripPanel({ trip }: { trip: Trip }) {
   const readinessQuery = useQuery({
     queryKey: ["trip-readiness", trip.id],
@@ -77,56 +57,92 @@ function ActiveTripPanel({ trip }: { trip: Trip }) {
 
   return (
     <section className="mt-5">
-      <TripCover trip={trip} />
-      <Link to={`/trip/${trip.id}`} className="group mt-4 block">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-          {tripTimingLabel(trip.start_date, trip.end_date)}
-        </p>
-        <h2 className="mt-1.5 truncate font-brand text-[27px] font-semibold leading-tight sm:text-3xl">{trip.name}</h2>
-        <p className="mt-1 text-sm text-muted-foreground">
-          {formatDateRange(trip.start_date, trip.end_date)}
-          {trip.destination_name ? ` · ${trip.destination_name}` : ""}
-        </p>
-        <span className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-primary">
-          Reis openen<ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-        </span>
-      </Link>
+      <div className="relative -mx-5 sm:mx-0">
+        <TripVisual
+          name={trip.name}
+          coverImageUrl={trip.cover_image_url}
+          height="h-[176px] sm:h-[220px]"
+          rounded="rounded-none sm:rounded-[18px]"
+        />
 
-      <div className="mt-4">
-        <ReadinessBar done={done} total={Math.max(1, trackedTotal)} sentence={sentence} />
+        <Surface className="relative z-10 -mt-8 mx-4 px-4 pb-4 pt-4 sm:mx-5 sm:px-5">
+          <div className="flex items-center justify-between gap-3">
+            <StatusChip tone={attentionTotal > 0 ? "attention" : "done"}>
+              {tripTimingLabel(trip.start_date, trip.end_date)}
+            </StatusChip>
+            {attentionTotal > 0 && (
+              <span className="font-ui text-[11px] font-semibold text-warning">
+                {attentionTotal} {attentionTotal === 1 ? "punt" : "punten"} aandacht
+              </span>
+            )}
+          </div>
+
+          <Link
+            to={`/trip/${trip.id}`}
+            className="mt-3 block rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          >
+            <h2 className="truncate font-brand text-[27px] font-semibold leading-tight sm:text-3xl">{trip.name}</h2>
+            <p className="mt-1 flex items-center gap-1.5 text-sm text-muted-foreground">
+              <MapPin className="h-[15px] w-[15px] shrink-0" strokeWidth={1.75} />
+              <span className="truncate">
+                {trip.destination_name || "Bestemming nog niet gekozen"} · {formatDateRange(trip.start_date, trip.end_date)}
+              </span>
+            </p>
+          </Link>
+
+          <div className="mt-4">
+            <ReadinessBar done={done} total={Math.max(1, trackedTotal)} sentence={sentence} />
+          </div>
+
+          <div className="mt-2 border-t border-rule/10">
+            <RowList>
+              <RowItem icon={ChevronRight} title="Reis openen" meta="Overzicht, reis en samen" to={`/trip/${trip.id}`} />
+              <RowItem
+                icon={Sparkles}
+                title="Vraag Hansie over deze reis"
+                meta="Hansie gebruikt alleen deze reis als context"
+                onClick={() => {
+                  document.querySelector<HTMLButtonElement>('[aria-label="Vraag het Hansie"]')?.click();
+                }}
+              />
+            </RowList>
+          </div>
+        </Surface>
       </div>
 
       {attention.length > 0 && (
         <div className="mt-7">
-          <SectionLabel>Nu belangrijk</SectionLabel>
-          <RowList className="mt-1">
-            {attention.slice(0, 4).map((check) => {
-              const action = readinessAction(check, trip.id);
-              return (
-                <RowItem
-                  key={check.key}
-                  icon={AlertCircle}
-                  tone="attention"
-                  title={check.label}
-                  meta={action?.label}
-                  trailing={check.attention_count > 1 ? String(check.attention_count) : undefined}
-                  to={action?.href}
-                />
-              );
-            })}
-          </RowList>
+          <SectionLabel>Dit vraagt aandacht</SectionLabel>
+          <Surface className="mt-2 px-4 shadow-none">
+            <RowList>
+              {attention.slice(0, 4).map((check) => {
+                const action = readinessAction(check, trip.id);
+                return (
+                  <RowItem
+                    key={check.key}
+                    icon={AlertCircle}
+                    emphasis
+                    tone="attention"
+                    title={check.label}
+                    meta={action?.label}
+                    trailing={check.attention_count > 1 ? String(check.attention_count) : undefined}
+                    to={action?.href}
+                  />
+                );
+              })}
+            </RowList>
+          </Surface>
         </div>
       )}
     </section>
   );
 }
 
-/** Compact one-line row for every other trip. */
 function TripRow({ trip, muted = false }: { trip: Trip; muted?: boolean }) {
   const timing = muted ? "Gearchiveerd" : tripTimingLabel(trip.start_date, trip.end_date);
   return (
-    <Link to={`/trip/${trip.id}`} className="flex items-center gap-3 py-3.5 transition-opacity hover:opacity-70">
-      <span aria-hidden className={`h-1.5 w-1.5 shrink-0 rounded-full ${muted ? "bg-muted-foreground/40" : "bg-primary"}`} />
+    <Link to={`/trip/${trip.id}`} className="flex items-center gap-3 py-3 transition-opacity hover:opacity-70">
+      <TripThumb name={trip.name} coverImageUrl={trip.cover_image_url} className={muted ? "opacity-60" : ""} />
       <span className="min-w-0 flex-1">
         <span className="block truncate text-[15px] font-medium leading-tight">{trip.name}</span>
         <span className="mt-0.5 block truncate text-xs text-muted-foreground">
@@ -139,7 +155,7 @@ function TripRow({ trip, muted = false }: { trip: Trip; muted?: boolean }) {
 }
 
 export default function Trips() {
-  const { profile, signOut } = useAuth();
+  const { profile } = useAuth();
   const { userTrips, loading } = useTrip();
   const [archiveOpen, setArchiveOpen] = useState(false);
 
@@ -152,24 +168,17 @@ export default function Trips() {
 
   return (
     <div className="min-h-screen bg-background pb-[calc(4.5rem+env(safe-area-inset-bottom))]">
-      <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur-sm">
+      <header className="sticky top-0 z-40 border-b border-border bg-background">
         <div className="mx-auto flex h-12 max-w-3xl items-center justify-between px-5">
-          <p className="font-brand text-lg font-semibold">Vakansie</p>
+          <p className="font-brand text-xl font-semibold text-primary">Vakansie</p>
           <div className="flex items-center gap-1">
             <NotificationCenter />
-            <Button asChild variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground">
+            <Button asChild variant="ghost" size="icon" className="h-9 w-9 text-muted-foreground">
               <Link to="/profiel" aria-label="Profiel en voorkeuren">
-                <User className="h-4 w-4" />
+                <span className="flex h-8 w-8 items-center justify-center rounded-full border border-border bg-card text-[11px] font-semibold text-foreground shadow-soft">
+                  {profile?.display_name?.slice(0, 1).toUpperCase() || <User className="h-4 w-4" />}
+                </span>
               </Link>
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => void signOut()}
-              aria-label="Uitloggen"
-              className="h-8 w-8 text-muted-foreground"
-            >
-              <LogOut className="h-4 w-4" />
             </Button>
           </div>
         </div>
@@ -178,18 +187,18 @@ export default function Trips() {
       <main className="mx-auto max-w-3xl px-5 pb-16 pt-6">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+            <p className="font-ui text-[13px] font-semibold text-muted-foreground">
               {profile?.display_name ? `Hoi ${profile.display_name}` : "Welkom"}
             </p>
-            <h1 className="mt-1.5 font-brand text-[28px] font-semibold leading-tight">Mijn reizen</h1>
+            <h1 className="mt-1 font-brand text-[30px] font-semibold leading-tight">Mijn reizen</h1>
           </div>
-          <Button asChild variant="outline" size="sm" className="mt-1 shrink-0 rounded-full">
+          <Button asChild variant="outline" size="sm" className="mt-1 shrink-0 rounded-full bg-card shadow-soft">
             <Link to="/new-trip"><Plus className="mr-1.5 h-3.5 w-3.5" />Nieuwe reis</Link>
           </Button>
         </div>
 
         {loading ? (
-          <div className="mt-5 h-40 animate-pulse rounded-2xl bg-secondary" />
+          <div className="mt-5 h-40 animate-pulse rounded-[18px] bg-secondary" />
         ) : heroTrip ? (
           <ActiveTripPanel trip={heroTrip} />
         ) : (
@@ -203,29 +212,32 @@ export default function Trips() {
         {otherTrips.length > 0 && (
           <section className="mt-8">
             <SectionLabel>Andere reizen</SectionLabel>
-            <RowList className="mt-1">
-              {otherTrips.map((trip) => <TripRow key={trip.id} trip={trip} />)}
-            </RowList>
+            <Surface className="mt-2 px-4 shadow-none">
+              <RowList>
+                {otherTrips.map((trip) => <TripRow key={trip.id} trip={trip} />)}
+              </RowList>
+            </Surface>
           </section>
         )}
 
         {archivedTrips.length > 0 && (
-          <section className="mt-8 border-t border-rule pt-2">
+          <section className="mt-8 border-t border-rule/10 pt-2">
             <button
               onClick={() => setArchiveOpen((current) => !current)}
-              className="flex w-full items-center gap-2 py-3 text-left text-muted-foreground transition-colors hover:text-foreground"
+              className="flex min-h-[48px] w-full items-center gap-2 py-3 text-left text-muted-foreground transition-colors hover:text-foreground"
               aria-expanded={archiveOpen}
             >
-              <Archive className="h-[18px] w-[18px]" />
-              <span className="text-[11px] font-semibold uppercase tracking-[0.18em]">Archief ({archivedTrips.length})</span>
+              <Archive className="h-[18px] w-[18px]" strokeWidth={1.75} />
+              <span className="font-ui text-[13px] font-semibold">Archief ({archivedTrips.length})</span>
               <ChevronDown className={`ml-auto h-4 w-4 transition-transform ${archiveOpen ? "rotate-180" : ""}`} />
             </button>
             {archiveOpen && (
-              <RowList>{archivedTrips.map((trip) => <TripRow key={trip.id} trip={trip} muted />)}</RowList>
+              <Surface className="px-4 shadow-none">
+                <RowList>{archivedTrips.map((trip) => <TripRow key={trip.id} trip={trip} muted />)}</RowList>
+              </Surface>
             )}
           </section>
         )}
-
       </main>
 
       <HansieWidget trip={heroTrip ? { id: heroTrip.id, name: heroTrip.name } : null} floating={false} />

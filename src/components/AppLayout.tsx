@@ -1,5 +1,5 @@
 import { ReactNode } from "react";
-import { ArrowLeft, ChevronDown, LogOut, Plane, Plus, Settings } from "lucide-react";
+import { Check, ChevronLeft, MoreHorizontal, Plane, Plus, Settings, User } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { BottomNav } from "./BottomNav";
 import { AppSidebar } from "./AppSidebar";
@@ -14,12 +14,13 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
 export function AppLayout({ children }: { children: ReactNode }) {
-  const { profile, signOut } = useAuth();
+  const { profile } = useAuth();
   const { activeTrip, userTrips, isOrganizer } = useTrip();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
@@ -27,73 +28,65 @@ export function AppLayout({ children }: { children: ReactNode }) {
   if (isMobile) {
     return (
       <div className="min-h-screen overflow-x-hidden bg-background pb-[calc(7.5rem+env(safe-area-inset-bottom))]">
-        <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur-sm">
-          <div className="mx-auto flex max-w-2xl items-center justify-between px-3 py-2.5">
-            <div className="flex min-w-0 items-center gap-1">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => navigate("/trips")}
-                className="h-8 w-8 shrink-0 text-muted-foreground"
-                aria-label="Terug naar mijn reizen"
-              >
-                <ArrowLeft className="h-4 w-4" />
-              </Button>
+        <header className="sticky top-0 z-40 border-b border-border bg-background">
+          <div className="mx-auto grid h-12 max-w-2xl grid-cols-[40px_minmax(0,1fr)_40px] items-center px-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => navigate("/trips")}
+              className="h-9 w-9 text-muted-foreground"
+              aria-label="Terug naar mijn reizen"
+            >
+              <ChevronLeft className="h-5 w-5" strokeWidth={1.75} />
+            </Button>
 
-              {activeTrip ? (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <button className="flex min-w-0 items-center gap-1.5 px-1 text-left transition-opacity hover:opacity-80">
-                      <h1 className="truncate text-[15px] font-semibold leading-tight">
-                        {activeTrip.name}
-                      </h1>
-                      <ChevronDown className="h-3 w-3 shrink-0 opacity-50" />
-                    </button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="start" className="w-64">
-                    <DropdownMenuItem onClick={() => navigate("/trips")}>
-                      <Plane className="mr-2 h-4 w-4" />Alle reizen
+            <h1 className="min-w-0 truncate px-2 text-center font-ui text-[15px] font-semibold leading-tight">
+              {activeTrip ? activeTrip.name : <span className="font-brand text-lg">Vakansie</span>}
+            </h1>
+
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-9 w-9 text-muted-foreground" aria-label="Meer opties">
+                  <MoreHorizontal className="h-5 w-5" strokeWidth={1.75} />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-64">
+                {activeTrip && isOrganizer && (
+                  <>
+                    <DropdownMenuItem onClick={() => navigate(`/trip/${activeTrip.id}/settings`)}>
+                      <Settings className="mr-2 h-4 w-4" />Reisinstellingen
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    {userTrips.map((trip) => (
-                      <DropdownMenuItem
-                        key={trip.id}
-                        onClick={() => navigate(`/trip/${trip.id}`)}
-                        className={trip.id === activeTrip.id ? "bg-primary/10 font-semibold" : ""}
-                      >
+                  </>
+                )}
+
+                {userTrips.length > 0 && (
+                  <>
+                    <DropdownMenuLabel className="font-ui text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+                      Wissel reis
+                    </DropdownMenuLabel>
+                    {userTrips.slice(0, 6).map((trip) => (
+                      <DropdownMenuItem key={trip.id} onClick={() => navigate(`/trip/${trip.id}`)}>
                         <span className="truncate">{trip.name}</span>
-                        {trip.id === activeTrip.id && <span className="ml-auto text-xs text-primary">✓</span>}
+                        {trip.id === activeTrip?.id && <Check className="ml-auto h-4 w-4 text-primary" aria-hidden />}
                       </DropdownMenuItem>
                     ))}
                     <DropdownMenuSeparator />
-                    {isOrganizer && (
-                      <DropdownMenuItem onClick={() => navigate(`/trip/${activeTrip.id}/settings`)}>
-                        <Settings className="mr-2 h-4 w-4" />Reisinstellingen
-                      </DropdownMenuItem>
-                    )}
-                    <DropdownMenuItem onClick={() => navigate("/new-trip")}>
-                      <Plus className="mr-2 h-4 w-4" />Nieuwe reis
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              ) : (
-                <span className="font-brand text-lg font-semibold">Vakansie</span>
-              )}
-            </div>
+                  </>
+                )}
 
-            <div className="flex shrink-0 items-center gap-1">
-              <NotificationCenter />
-              <span className="ml-1 hidden text-[11px] font-medium text-muted-foreground min-[390px]:inline">{profile?.display_name}</span>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => void signOut()}
-                className="h-7 w-7 text-muted-foreground"
-                aria-label="Uitloggen"
-              >
-                <LogOut className="h-3.5 w-3.5" />
-              </Button>
-            </div>
+                <DropdownMenuItem onClick={() => navigate("/trips")}>
+                  <Plane className="mr-2 h-4 w-4" />Mijn reizen
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate("/profiel")}>
+                  <User className="mr-2 h-4 w-4" />Profiel
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => navigate("/new-trip")}>
+                  <Plus className="mr-2 h-4 w-4" />Nieuwe reis
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </header>
 
@@ -109,12 +102,12 @@ export function AppLayout({ children }: { children: ReactNode }) {
       <div className="flex min-h-screen w-full bg-background">
         <AppSidebar />
         <div className="flex min-w-0 flex-1 flex-col">
-          <header className="sticky top-0 z-40 flex h-12 items-center justify-between border-b border-border bg-background/85 px-4 backdrop-blur-sm">
+          <header className="sticky top-0 z-40 flex h-12 items-center justify-between border-b border-border bg-background px-4">
             <div className="flex min-w-0 items-center gap-2">
               <SidebarTrigger className="text-muted-foreground" />
               <button
                 onClick={() => navigate("/trips")}
-                className="truncate text-sm font-semibold text-muted-foreground transition-colors hover:text-foreground"
+                className="truncate font-ui text-sm font-semibold text-muted-foreground transition-colors hover:text-foreground"
               >
                 {activeTrip?.name || <span className="font-brand text-base">Vakansie</span>}
               </button>

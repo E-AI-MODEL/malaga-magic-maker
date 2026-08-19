@@ -16,11 +16,13 @@ type Props = {
   item?: TripItemRow | null;
   initialType?: string;
   onSaved: () => void | Promise<void>;
+  /** Optional destructive action. Lives in the detail form, never on every timeline row. */
+  onDelete?: (item: TripItemRow) => void | Promise<void>;
 };
 
 const currencies = ["EUR", "USD", "GBP", "CHF"];
 
-export function TripItemSheet({ open, onOpenChange, tripId, timezone, currency, item, initialType, onSaved }: Props) {
+export function TripItemSheet({ open, onOpenChange, tripId, timezone, currency, item, initialType, onSaved, onDelete }: Props) {
   const [type, setType] = useState("custom");
   const [title, setTitle] = useState("");
   const [status, setStatus] = useState("planned");
@@ -35,6 +37,7 @@ export function TripItemSheet({ open, onOpenChange, tripId, timezone, currency, 
   const [notes, setNotes] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     if (!open) return;
@@ -51,7 +54,23 @@ export function TripItemSheet({ open, onOpenChange, tripId, timezone, currency, 
     setItemCurrency(item?.currency || currency || "EUR");
     setNotes(item?.notes || "");
     setError("");
+    setDeleting(false);
   }, [open, item, initialType, timezone, currency]);
+
+  const handleDelete = async () => {
+    if (!item || !onDelete) return;
+    if (!window.confirm(`'${item.title}' verwijderen uit je reis?`)) return;
+    setDeleting(true);
+    try {
+      await onDelete(item);
+      onOpenChange(false);
+    } catch (caught) {
+      console.error("trip item delete failed", caught);
+      setError("Verwijderen is niet gelukt.");
+    } finally {
+      setDeleting(false);
+    }
+  };
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
@@ -107,7 +126,7 @@ export function TripItemSheet({ open, onOpenChange, tripId, timezone, currency, 
       <SheetContent side="bottom" className="max-h-[92vh] overflow-y-auto rounded-t-2xl px-5 pb-8 sm:left-1/2 sm:max-w-xl sm:-translate-x-1/2">
         <SheetHeader className="text-left">
           <SheetTitle className="font-display text-xl font-extrabold">
-            {item ? "Reisonderdeel wijzigen" : selectedType ? `${selectedType.icon} ${selectedType.label} toevoegen` : "Toevoegen aan je reis"}
+            {item ? "Reisonderdeel wijzigen" : selectedType ? `${selectedType.label} toevoegen` : "Toevoegen aan je reis"}
           </SheetTitle>
           <SheetDescription>Vul alleen in wat je al weet. Je kunt dit later altijd aanvullen.</SheetDescription>
         </SheetHeader>
@@ -117,7 +136,7 @@ export function TripItemSheet({ open, onOpenChange, tripId, timezone, currency, 
             <div>
               <label className="text-sm font-semibold" htmlFor="travel-type">Soort</label>
               <select id="travel-type" value={type} onChange={(event) => setType(event.target.value)} className="mt-2 h-11 w-full rounded-md border border-input bg-background px-3 text-sm">
-                {travelTypes.map((option) => <option key={option.value} value={option.value}>{option.icon} {option.label}</option>)}
+                {travelTypes.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
               </select>
             </div>
             <div>
@@ -190,6 +209,17 @@ export function TripItemSheet({ open, onOpenChange, tripId, timezone, currency, 
             {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             {item ? "Wijzigingen opslaan" : "Toevoegen aan reisplan"}
           </Button>
+
+          {item && onDelete && (
+            <button
+              type="button"
+              onClick={() => void handleDelete()}
+              disabled={deleting || saving}
+              className="w-full py-2 text-center text-sm font-medium text-destructive underline-offset-4 hover:underline disabled:opacity-60"
+            >
+              {deleting ? "Verwijderen…" : "Dit onderdeel verwijderen"}
+            </button>
+          )}
         </form>
       </SheetContent>
     </Sheet>

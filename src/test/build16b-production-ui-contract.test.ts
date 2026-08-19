@@ -76,7 +76,8 @@ describe("Vakansie production UI contract", () => {
   });
 
   it("uses line icons instead of emoji for itinerary rows", () => {
-    expect(reis).toContain("<TypeIcon type={item.type} />");
+    expect(reis).toContain("travelTypeIcon");
+    expect(reis).toContain("<TypeIcon");
     expect(reis).not.toContain("{type.icon}");
     expect(reis).toContain("getTravelType(item.type)");
     expect(reis).toContain("{type.label}");

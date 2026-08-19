@@ -80,6 +80,7 @@ const DOSSIER_ROWS = [
 
 export default function Landing() {
   const [showBar, setShowBar] = useState(false);
+  const [heroLoaded, setHeroLoaded] = useState(false);
 
   useEffect(() => {
     const onScroll = () => setShowBar(window.scrollY > 520);

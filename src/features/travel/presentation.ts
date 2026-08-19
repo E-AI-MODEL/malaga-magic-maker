@@ -1,15 +1,15 @@
 export const travelTypes = [
-  { value: "flight", label: "Vliegtuig", icon: "✈️" },
-  { value: "train", label: "Trein", icon: "🚆" },
-  { value: "ferry", label: "Boot", icon: "⛴️" },
-  { value: "stay", label: "Verblijf", icon: "🏠" },
-  { value: "rental_car", label: "Huurauto", icon: "🚗" },
-  { value: "transfer", label: "Transfer", icon: "🚐" },
-  { value: "activity", label: "Activiteit", icon: "🎟️" },
-  { value: "restaurant", label: "Restaurant", icon: "🍽️" },
-  { value: "event", label: "Evenement", icon: "🎫" },
-  { value: "ticket", label: "Ticket", icon: "🎫" },
-  { value: "custom", label: "Anders", icon: "📍" },
+  { value: "flight", label: "Vliegtuig" },
+  { value: "train", label: "Trein" },
+  { value: "ferry", label: "Boot" },
+  { value: "stay", label: "Verblijf" },
+  { value: "rental_car", label: "Huurauto" },
+  { value: "transfer", label: "Transfer" },
+  { value: "activity", label: "Activiteit" },
+  { value: "restaurant", label: "Restaurant" },
+  { value: "event", label: "Evenement" },
+  { value: "ticket", label: "Ticket" },
+  { value: "custom", label: "Anders" },
 ] as const;
 
 export const travelStatuses = [
@@ -20,7 +20,7 @@ export const travelStatuses = [
 ] as const;
 
 export function getTravelType(value: string) {
-  return travelTypes.find((item) => item.value === value) || { value, label: "Reisonderdeel", icon: "📍" };
+  return travelTypes.find((item) => item.value === value) || { value, label: "Reisonderdeel" };
 }
 
 export function getTravelStatus(value: string) {

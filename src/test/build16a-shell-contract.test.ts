@@ -62,7 +62,7 @@ describe("Mijn reizen", () => {
     expect(trips).toContain("getTripReadiness");
     expect(trips).toContain("activeReadinessChecks");
     expect(trips).toContain("readinessAction");
-    expect(trips).toContain("Nu belangrijk");
+    expect(trips).toContain("Dit vraagt aandacht");
   });
 });
 

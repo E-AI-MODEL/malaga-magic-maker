@@ -11,9 +11,10 @@ export interface PaymentRecord {
   receiptUrl: string | null;
 }
 
-export type VerifyResult =
-  | { granted: true }
-  | { granted: false; reason: "pending" | "not_yours" | "error" };
+export interface VerifyResult {
+  granted: boolean;
+  reason?: "pending" | "not_yours" | "error";
+}
 
 /** Server-side re-check of a checkout session; recovers a payment when the webhook missed it. */
 export async function verifyCheckoutSession(sessionId: string): Promise<VerifyResult> {

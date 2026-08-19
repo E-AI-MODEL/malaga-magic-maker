@@ -1110,7 +1110,6 @@ export type Database = {
           golf_min: number | null
           group_size: number
           id: string
-          invite_code: string | null
           name: string
           start_date: string | null
           status: string
@@ -1130,7 +1129,6 @@ export type Database = {
           golf_min?: number | null
           group_size?: number
           id?: string
-          invite_code?: string | null
           name: string
           start_date?: string | null
           status?: string
@@ -1150,7 +1148,6 @@ export type Database = {
           golf_min?: number | null
           group_size?: number
           id?: string
-          invite_code?: string | null
           name?: string
           start_date?: string | null
           status?: string
@@ -1530,7 +1527,6 @@ export type Database = {
         Args: { _trip_id: string; _user_id: string }
         Returns: boolean
       }
-      join_trip_by_code: { Args: { p_invite_code: string }; Returns: string }
       notification_category_enabled: {
         Args: { p_category: string; p_user_id: string }
         Returns: boolean
@@ -1562,10 +1558,6 @@ export type Database = {
           p_trip_id?: string
         }
         Returns: boolean
-      }
-      regenerate_trip_invite_code: {
-        Args: { p_trip_id: string }
-        Returns: string
       }
       reserve_trip_document: {
         Args: {

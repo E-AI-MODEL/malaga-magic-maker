@@ -62,7 +62,9 @@ describe("Vakansie BUILD 01 security contract", () => {
 
   it("uses RPCs instead of browser-side trip/member inserts and invite lookup", () => {
     expect(tripContext).toContain('"create_trip_with_owner"');
-    expect(tripContext).toContain('"join_trip_by_code"');
+    expect(tripContext).toContain('"accept_trip_invite"');
+    expect(tripContext).not.toContain('"join_trip_by_code"');
+    expect(tripContext).not.toContain("invite_code");
     expect(tripContext).not.toContain('.from("trip_members").insert');
     expect(tripContext).not.toContain('.eq("invite_code"');
   });

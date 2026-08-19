@@ -23,7 +23,7 @@ export function IconBubble({
   tone = "default",
   className = "",
 }: {
-  icon: ComponentType<{ className?: string; strokeWidth?: number }>;
+  icon: ComponentType<{ className?: string; strokeWidth?: number | string }>;
   tone?: "default" | "attention" | "muted";
   className?: string;
 }) {

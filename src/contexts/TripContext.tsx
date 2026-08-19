@@ -9,7 +9,6 @@ export interface Trip {
   created_by: string | null;
   cover_image_url: string | null;
   status: string;
-  invite_code: string | null;
   start_date: string | null;
   end_date: string | null;
   group_size: number;
@@ -63,7 +62,7 @@ interface TripContextType {
   updateTrip: (tripId: string, data: UpdateTripInput) => Promise<Trip | null>;
   archiveTrip: (tripId: string) => Promise<boolean>;
   restoreTrip: (tripId: string) => Promise<boolean>;
-  joinTrip: (inviteCode: string) => Promise<{ tripId?: string; error?: string }>;
+  joinTrip: (inviteToken: string) => Promise<{ tripId?: string; error?: string }>;
   refreshTrips: () => Promise<void>;
 }
 
@@ -237,16 +236,22 @@ export function TripProvider({ children }: { children: ReactNode }) {
   const archiveTrip = useCallback((tripId: string) => setTripStatus(tripId, "archived"), [setTripStatus]);
   const restoreTrip = useCallback((tripId: string) => setTripStatus(tripId, "planning"), [setTripStatus]);
 
-  const joinTrip = useCallback(async (inviteCode: string): Promise<{ tripId?: string; error?: string }> => {
+  const joinTrip = useCallback(async (inviteToken: string): Promise<{ tripId?: string; error?: string }> => {
     if (!user) return { error: "Niet ingelogd" };
 
-    const { data: tripId, error } = await callVakansieRpc<string>("join_trip_by_code", {
-      p_invite_code: inviteCode,
+    const { data: tripId, error } = await callVakansieRpc<string>("accept_trip_invite", {
+      p_token: inviteToken,
     });
 
     if (error || !tripId) {
       if (error?.message.includes("invalid_invite")) {
-        return { error: "Ongeldige uitnodigingscode" };
+        return { error: "Deze uitnodiging is niet geldig" };
+      }
+      if (error?.message.includes("invite_unavailable")) {
+        return { error: "Deze uitnodiging is verlopen of ingetrokken" };
+      }
+      if (error?.message.includes("invite_email_mismatch")) {
+        return { error: "Deze uitnodiging hoort bij een ander e-mailadres" };
       }
       return { error: error?.message || "Deelnemen aan reis is mislukt" };
     }

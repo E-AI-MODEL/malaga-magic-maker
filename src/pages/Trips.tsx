@@ -29,79 +29,95 @@ function openHansie() {
   document.querySelector<HTMLButtonElement>('[aria-label="Vraag het Hansie"]')?.click();
 }
 
-/** Editorial welcome hero. Only shown when there is no active trip to lead with. */
+/**
+ * Editorial welcome hero, built like the trip header: full-bleed photography with an
+ * overlapping warm surface that carries the headline and the single primary action.
+ */
 function WelcomeHero({ firstName }: { firstName?: string | null }) {
   return (
     <section className="mt-5">
-      <div className="relative -mx-5 overflow-hidden sm:mx-0 sm:rounded-[18px]">
-        <img
-          src={heroHome}
-          alt="Rustig terras met uitzicht op zee en een reisnotitieboek"
-          width={1280}
-          height={720}
-          className="h-[210px] w-full object-cover sm:h-[260px]"
-        />
-        <div aria-hidden className="absolute inset-0 bg-foreground/45" />
-        <div className="absolute inset-x-0 bottom-0 p-5 sm:p-6">
-          <p className="font-ui text-[11px] font-semibold uppercase tracking-[0.14em] text-white/70">
-            Vakansie
+      <div className="relative -mx-5 sm:mx-0">
+        <div className="relative overflow-hidden sm:rounded-[18px]">
+          <img
+            src={heroHome}
+            alt="Rustig terras met uitzicht op zee en een reisnotitieboek"
+            width={1280}
+            height={720}
+            className="h-[228px] w-full object-cover sm:h-[280px]"
+          />
+          <div aria-hidden className="absolute inset-0 bg-foreground/30" />
+          <p className="absolute left-5 top-5 font-ui text-[11px] font-semibold uppercase tracking-[0.16em] text-white/85">
+            Nieuwe reis
           </p>
-          <h2 className="mt-1.5 font-brand text-[26px] font-semibold leading-tight text-white sm:text-[30px]">
+        </div>
+
+        <Surface className="relative z-10 -mt-10 mx-4 px-5 pb-5 pt-5 sm:mx-5">
+          <h2 className="font-brand text-[27px] font-semibold leading-[1.12] sm:text-[30px]">
             {firstName ? `${firstName}, waar gaat je volgende reis heen?` : "Waar gaat je volgende reis heen?"}
           </h2>
-          <p className="mt-2 max-w-md text-sm leading-relaxed text-white/80">
+          <p className="mt-2.5 text-sm leading-relaxed text-muted-foreground">
             Zet je reis hier neer en bouw hem rustig op: vluchten en verblijf, wat er nog geregeld moet worden en
             wie wat doet. Alles op één plek, ook als er nog weinig vaststaat.
           </p>
-        </div>
+          <Button asChild size="lg" className="mt-4 w-full rounded-full">
+            <Link to="/new-trip">
+              <Plus className="mr-1.5 h-4 w-4" />
+              Reis starten
+            </Link>
+          </Button>
+          <p className="mt-2.5 text-xs leading-relaxed text-muted-foreground">
+            Een naam is genoeg om te beginnen. Data, bestemming en boekingen vul je later aan.
+          </p>
+        </Surface>
       </div>
-
-      <Button asChild size="lg" className="mt-4 w-full rounded-full sm:w-auto">
-        <Link to="/new-trip">
-          <Plus className="mr-1.5 h-4 w-4" />
-          Reis starten
-        </Link>
-      </Button>
-      <p className="mt-2 text-xs text-muted-foreground">
-        Een naam is genoeg om te beginnen. Data, bestemming en boekingen kun je later invullen.
-      </p>
     </section>
   );
 }
 
-/** Plain explanation of the product, in the same row language as the rest of the app. */
+const HOW_IT_WORKS = [
+  {
+    icon: Route,
+    title: "Reis",
+    body: "Vluchten, verblijf, vervoer en activiteiten achter elkaar op één tijdlijn.",
+  },
+  {
+    icon: Users,
+    title: "Samen",
+    body: "Taken verdelen, keuzes maken en kosten bijhouden met je reisgenoten.",
+  },
+  {
+    icon: FileText,
+    title: "Documenten",
+    body: "Tickets, bevestigingen en vouchers veilig bewaard bij de reis waar ze bij horen.",
+  },
+  {
+    icon: Sparkles,
+    title: "Hansie",
+    body: "Stel vragen over je voorbereiding; Hansie kijkt alleen mee in de geopende reis.",
+  },
+];
+
+/** Plain explanation of the product as numbered editorial rows, not a card grid. */
 function HowItWorks() {
   return (
-    <section className="mt-8">
+    <section className="mt-9">
       <SectionLabel>Zo werkt het</SectionLabel>
-      <Surface className="mt-2 px-4 shadow-none">
-        <RowList>
-          <RowItem
-            icon={Route}
-            emphasis
-            title="Reis"
-            meta="Vluchten, verblijf, vervoer en activiteiten op één tijdlijn"
-          />
-          <RowItem
-            icon={Users}
-            emphasis
-            title="Samen"
-            meta="Taken verdelen, keuzes maken en kosten bijhouden met je reisgenoten"
-          />
-          <RowItem
-            icon={FileText}
-            emphasis
-            title="Documenten"
-            meta="Tickets, bevestigingen en vouchers veilig bij de reis bewaard"
-          />
-          <RowItem
-            icon={Sparkles}
-            emphasis
-            title="Hansie"
-            meta="Stel vragen over je voorbereiding; Hansie kijkt alleen mee in de geopende reis"
-          />
-        </RowList>
-      </Surface>
+      <div className="mt-3 rule-divide border-t border-rule/10">
+        {HOW_IT_WORKS.map((item, index) => (
+          <div key={item.title} className="flex gap-4 py-4">
+            <div className="flex w-8 shrink-0 flex-col items-center">
+              <item.icon className="h-[19px] w-[19px] text-primary" strokeWidth={1.6} />
+              <span className="tabular mt-2 font-ui text-[11px] font-semibold text-muted-foreground/60">
+                0{index + 1}
+              </span>
+            </div>
+            <div className="min-w-0">
+              <h3 className="font-brand text-[19px] font-semibold leading-snug">{item.title}</h3>
+              <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{item.body}</p>
+            </div>
+          </div>
+        ))}
+      </div>
     </section>
   );
 }

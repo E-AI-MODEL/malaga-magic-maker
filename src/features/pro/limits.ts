@@ -29,6 +29,7 @@ export function describePlanLimit(error: unknown): string | null {
 
 export interface PlanStatus {
   plan: "free" | "pro";
+  proEnvironment: "sandbox" | "live" | null;
   tripsOwned: number;
   tripLimit: number | null;
   canCreateTrip: boolean;
@@ -57,6 +58,7 @@ export function usePlanStatus() {
     const row = data as Record<string, unknown>;
     setStatus({
       plan: row.plan === "pro" ? "pro" : "free",
+      proEnvironment: row.pro_environment === "sandbox" || row.pro_environment === "live" ? row.pro_environment : null,
       tripsOwned: Number(row.trips_owned ?? 0),
       tripLimit: row.trip_limit === null || row.trip_limit === undefined ? null : Number(row.trip_limit),
       canCreateTrip: row.can_create_trip !== false,

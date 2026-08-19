@@ -1,15 +1,18 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   ArrowRight,
+  Check,
   CheckCircle2,
   FileText,
   Heart,
+  Plane,
   Route,
   Sparkles,
   Users,
+  Wallet,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Surface } from "@/components/primitives";
 import heroHome from "@/assets/hero-home.jpg";
 import logo from "@/assets/vakansie-logo.png";
 
@@ -61,10 +64,26 @@ const FAQ = [
   },
 ];
 
+const DOSSIER_ROWS = [
+  { icon: Plane, title: "Heenvlucht", meta: "vr 12 jun · 07:15", state: "Geboekt" },
+  { icon: Route, title: "Huis met zeezicht", meta: "12 – 19 jun · 6 personen", state: "Geboekt" },
+  { icon: Wallet, title: "Kosten splitsen", meta: "€ 1.240 · 6 reizigers", state: "Loopt" },
+  { icon: FileText, title: "Tickets en vouchers", meta: "4 documenten", state: "Klaar" },
+];
+
 export default function Landing() {
+  const [showBar, setShowBar] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setShowBar(window.scrollY > 520);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
   return (
     <div className="min-h-screen overflow-x-hidden bg-background text-foreground">
-      <header className="sticky top-0 z-40 border-b border-border/70 bg-background/95 backdrop-blur-none">
+      <header className="sticky top-0 z-40 border-b border-border/70 bg-background">
         <div className="mx-auto flex h-14 max-w-3xl items-center justify-between px-5">
           <span className="flex items-center gap-2">
             <img src={logo} alt="" width={28} height={28} className="h-7 w-7 rounded-[8px] object-cover" />
@@ -76,90 +95,148 @@ export default function Landing() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-3xl px-5 pb-20">
-        <section className="mt-6">
-          <div className="relative -mx-5 overflow-hidden sm:mx-0 sm:rounded-[18px]">
+      <main className="pb-16">
+        <section className="relative">
+          <div className="relative h-[420px] w-full overflow-hidden sm:h-[500px]">
             <img
               src={heroHome}
-              alt="Terras met uitzicht op zee en een reisnotitieboek"
+              alt="Terras met uitzicht op zee en een opengeslagen reisnotitieboek"
               width={1280}
               height={720}
-              className="h-[260px] w-full object-cover sm:h-[320px]"
+              className="h-full w-full object-cover"
             />
-            <div aria-hidden className="absolute inset-0 bg-foreground/50" />
-            <div className="absolute inset-x-0 bottom-0 p-5 sm:p-7">
-              <p className="font-display text-[11px] font-semibold uppercase tracking-[0.14em] text-white/70">
+            <div aria-hidden className="absolute inset-0 bg-foreground/55" />
+            <div className="absolute inset-x-0 top-0 mx-auto max-w-3xl px-5 pt-10">
+              <p className="flex items-center gap-2.5 font-ui text-[11px] font-semibold uppercase tracking-[0.16em] text-white/70">
+                <span aria-hidden className="h-px w-7 bg-white/40" />
                 Voorbereiden zonder gedoe
               </p>
-              <h1 className="mt-2 font-brand text-[30px] font-semibold leading-[1.12] text-white sm:text-[38px]">
-                Je hele vakantie geregeld op één rustige plek
+              <h1 className="mt-4 font-brand text-[34px] font-semibold leading-[1.08] text-white sm:text-[46px]">
+                Je hele vakantie
+                <br />
+                geregeld op één
+                <br />
+                rustige plek
               </h1>
-              <p className="mt-3 max-w-md text-sm leading-relaxed text-white/85">
-                Geen losse appjes, mails en screenshots meer. Vakansie brengt je reisplan, taken, kosten en
-                documenten samen — voor jezelf of voor de hele groep.
+              <p className="mt-4 max-w-sm text-[15px] leading-relaxed text-white/85">
+                Geen losse appjes, mails en screenshots meer. Reisplan, taken, kosten en documenten — bij
+                elkaar, voor jezelf of voor de hele groep.
               </p>
             </div>
           </div>
 
-          <div className="mt-4 flex flex-col gap-2 sm:flex-row">
-            <Button asChild size="lg" className="w-full rounded-full sm:w-auto">
-              <Link to="/signup">
-                Gratis beginnen
-                <ArrowRight className="ml-1.5 h-4 w-4" />
-              </Link>
-            </Button>
-            <Button asChild size="lg" variant="outline" className="w-full rounded-full sm:w-auto">
-              <Link to="/login">Ik heb al een account</Link>
-            </Button>
-          </div>
-          <p className="mt-2 text-xs text-muted-foreground">
-            Gratis te gebruiken. Geen creditcard, geen abonnement.
-          </p>
-        </section>
+          <div className="relative z-10 mx-auto -mt-20 max-w-3xl px-5">
+            <div className="rounded-[20px] border border-border bg-card p-4 shadow-soft">
+              <div className="flex items-baseline justify-between gap-3">
+                <p className="font-brand text-[17px] font-semibold">Zomer aan de kust</p>
+                <span className="shrink-0 font-ui text-[11px] font-semibold text-primary">nog 24 dagen</span>
+              </div>
+              <div className="mt-2 h-[3px] w-full overflow-hidden rounded-full bg-secondary">
+                <div className="h-full w-3/4 rounded-full bg-primary" />
+              </div>
+              <ul className="mt-1 rule-divide">
+                {DOSSIER_ROWS.map((row) => (
+                  <li key={row.title} className="flex items-center gap-3 py-2.5">
+                    <row.icon className="h-[18px] w-[18px] shrink-0 text-muted-foreground" strokeWidth={1.75} />
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate text-[14px] font-medium leading-tight">{row.title}</span>
+                      <span className="mt-0.5 block truncate text-[12px] text-muted-foreground">{row.meta}</span>
+                    </span>
+                    <span className="shrink-0 font-ui text-[11px] font-semibold text-muted-foreground">
+                      {row.state}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
 
-        <section className="mt-12">
-          <h2 className="font-brand text-[24px] font-semibold leading-tight">Wat je ermee doet</h2>
-          <div className="mt-4 grid gap-3 sm:grid-cols-2">
-            {FEATURES.map((feature) => (
-              <Surface key={feature.title} className="p-4">
-                <feature.icon className="h-5 w-5 text-primary" strokeWidth={1.75} />
-                <h3 className="mt-3 font-display text-[15px] font-semibold">{feature.title}</h3>
-                <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{feature.body}</p>
-              </Surface>
-            ))}
-          </div>
-        </section>
-
-        <section className="mt-12">
-          <h2 className="font-brand text-[24px] font-semibold leading-tight">Zo werkt het</h2>
-          <ol className="mt-4 space-y-4">
-            {STEPS.map((step, index) => (
-              <li key={step.title} className="flex gap-3.5">
-                <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/10 font-display text-[13px] font-semibold text-primary">
-                  {index + 1}
+            <div className="mt-4 flex flex-col gap-2 sm:flex-row">
+              <Button asChild size="lg" className="w-full rounded-full sm:w-auto">
+                <Link to="/signup">
+                  Gratis beginnen
+                  <ArrowRight className="ml-1.5 h-4 w-4" />
+                </Link>
+              </Button>
+              <Button asChild size="lg" variant="outline" className="w-full rounded-full bg-card sm:w-auto">
+                <Link to="/login">Ik heb al een account</Link>
+              </Button>
+            </div>
+            <p className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
+              {["Geen creditcard", "Geen abonnement", "Elke bestemming"].map((item) => (
+                <span key={item} className="flex items-center gap-1.5">
+                  <Check className="h-3.5 w-3.5 text-primary" strokeWidth={2.25} />
+                  {item}
                 </span>
-                <div>
-                  <h3 className="font-display text-[15px] font-semibold">{step.title}</h3>
-                  <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{step.body}</p>
-                </div>
-              </li>
-            ))}
-          </ol>
+              ))}
+            </p>
+          </div>
         </section>
 
-        <section id="prijs" className="mt-12">
-          <h2 className="font-brand text-[24px] font-semibold leading-tight">Wat kost het</h2>
+        <section className="mx-auto mt-14 max-w-3xl px-5">
+          <p className="font-ui text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+            Wat je ermee doet
+          </p>
+          <h2 className="mt-2 font-brand text-[26px] font-semibold leading-tight">
+            Eén reisdossier in plaats van tien plekken
+          </h2>
+          <div className="mt-5 rule-divide border-t border-[hsl(var(--rule)/0.08)]">
+            {FEATURES.map((feature, index) => (
+              <div key={feature.title} className="flex gap-4 py-5">
+                <div className="flex w-8 shrink-0 flex-col items-center">
+                  <feature.icon className="h-5 w-5 text-primary" strokeWidth={1.6} />
+                  <span className="tabular mt-2 font-ui text-[11px] font-semibold text-muted-foreground/60">
+                    0{index + 1}
+                  </span>
+                </div>
+                <div className="min-w-0">
+                  <h3 className="font-brand text-[19px] font-semibold leading-snug">{feature.title}</h3>
+                  <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{feature.body}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="mt-14 border-y border-border bg-secondary/60 py-12">
+          <div className="mx-auto max-w-3xl px-5">
+            <p className="font-ui text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+              Zo werkt het
+            </p>
+            <h2 className="mt-2 font-brand text-[26px] font-semibold leading-tight">In drie rustige stappen</h2>
+            <ol className="relative mt-6 space-y-7">
+              <span aria-hidden className="absolute bottom-2 left-[13px] top-2 w-px bg-[hsl(var(--rule)/0.14)]" />
+              {STEPS.map((step, index) => (
+                <li key={step.title} className="relative flex gap-4">
+                  <span className="relative z-10 mt-0.5 flex h-[27px] w-[27px] shrink-0 items-center justify-center rounded-full border border-border bg-card font-ui text-[12px] font-semibold text-primary">
+                    {index + 1}
+                  </span>
+                  <div>
+                    <h3 className="font-brand text-[18px] font-semibold leading-snug">{step.title}</h3>
+                    <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{step.body}</p>
+                  </div>
+                </li>
+              ))}
+            </ol>
+          </div>
+        </section>
+
+        <section id="prijs" className="mx-auto mt-14 max-w-3xl px-5">
+          <p className="font-ui text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+            Wat kost het
+          </p>
+          <h2 className="mt-2 font-brand text-[26px] font-semibold leading-tight">Gratis. En dat blijft zo.</h2>
           <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-            Vakansie is gratis. We bouwen het rustig verder uit en vragen er voorlopig niets voor.
+            Je bereidt een volledige reis voor zonder te betalen. Wil je het project steunen, dan kan dat
+            vrijwillig.
           </p>
 
-          <div className="mt-4 grid gap-3 sm:grid-cols-2">
-            <Surface className="p-5">
-              <p className="font-display text-[12px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+          <div className="mt-5 grid gap-3 sm:grid-cols-2">
+            <div className="rounded-[20px] border border-border bg-card p-5 shadow-soft">
+              <p className="font-ui text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
                 Vakansie
               </p>
-              <p className="mt-2 font-brand text-[34px] font-semibold leading-none">Gratis</p>
-              <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
+              <p className="mt-2 font-brand text-[38px] font-semibold leading-none">Gratis</p>
+              <ul className="mt-4 space-y-2.5 text-sm text-muted-foreground">
                 {[
                   "Je volledige reis voorbereiden",
                   "Onbeperkt reisgenoten uitnodigen",
@@ -175,58 +252,78 @@ export default function Landing() {
               <Button asChild className="mt-5 w-full rounded-full">
                 <Link to="/signup">Gratis beginnen</Link>
               </Button>
-            </Surface>
+            </div>
 
-            <Surface className="p-5">
-              <p className="font-display text-[12px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
-                Pro
+            <div className="rounded-[20px] bg-primary p-5 text-primary-foreground">
+              <p className="font-ui text-[11px] font-semibold uppercase tracking-[0.14em] text-primary-foreground/70">
+                Pro · vrijwillig
               </p>
-              <p className="mt-2 flex items-baseline gap-1.5 font-brand text-[34px] font-semibold leading-none">
-                vanaf € 2
-                <span className="font-sans text-[13px] font-normal text-muted-foreground">eenmalig</span>
+              <p className="mt-2 flex items-baseline gap-1.5 font-brand text-[38px] font-semibold leading-none">
+                € 2
+                <span className="font-sans text-[13px] font-normal text-primary-foreground/70">eenmalig</span>
               </p>
-              <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
-                Vind je Vakansie de moeite waard? Met een eenmalige bijdrage ontgrendel je Pro op je account
-                en help je hosting, documentopslag en Hansie betalen. Geen abonnement, geen verlenging — en
-                alle basisfuncties blijven voor iedereen gratis.
+              <p className="mt-4 text-sm leading-relaxed text-primary-foreground/80">
+                Vind je Vakansie de moeite waard? Met een eenmalige bijdrage ontgrendel je Pro en help je
+                hosting, documentopslag en Hansie betalen. Geen abonnement, geen verlenging.
               </p>
-              <Button asChild variant="outline" className="mt-5 w-full rounded-full">
+              <Button asChild variant="secondary" className="mt-5 w-full rounded-full">
                 <Link to="/steun">
                   <Heart className="mr-1.5 h-4 w-4" strokeWidth={1.75} />
                   Pro ontgrendelen
                 </Link>
               </Button>
-            </Surface>
+            </div>
           </div>
         </section>
 
-        <section className="mt-12">
-          <h2 className="font-brand text-[24px] font-semibold leading-tight">Veelgestelde vragen</h2>
-          <dl className="mt-4 divide-y divide-border border-y border-border">
+        <section className="mx-auto mt-14 max-w-3xl px-5">
+          <p className="font-ui text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+            Veelgestelde vragen
+          </p>
+          <dl className="mt-4 rule-divide border-t border-[hsl(var(--rule)/0.08)]">
             {FAQ.map((item) => (
               <div key={item.q} className="py-4">
-                <dt className="font-display text-[15px] font-semibold">{item.q}</dt>
+                <dt className="font-brand text-[17px] font-semibold leading-snug">{item.q}</dt>
                 <dd className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{item.a}</dd>
               </div>
             ))}
           </dl>
         </section>
 
-        <section className="mt-12 rounded-[18px] bg-primary px-5 py-8 text-primary-foreground">
-          <h2 className="font-brand text-[26px] font-semibold leading-tight">Klaar om te beginnen?</h2>
-          <p className="mt-2 text-sm leading-relaxed text-primary-foreground/80">
-            Zet je volgende reis neer en bouw hem rustig op. Een naam is genoeg.
-          </p>
-          <Button asChild size="lg" variant="secondary" className="mt-5 w-full rounded-full sm:w-auto">
-            <Link to="/signup">
-              Gratis beginnen
-              <ArrowRight className="ml-1.5 h-4 w-4" />
-            </Link>
-          </Button>
+        <section className="mx-auto mt-14 max-w-3xl px-5">
+          <div className="rounded-[20px] border border-border bg-card px-5 py-9 text-center shadow-soft">
+            <h2 className="font-brand text-[28px] font-semibold leading-tight">Klaar om te beginnen?</h2>
+            <p className="mx-auto mt-2 max-w-sm text-sm leading-relaxed text-muted-foreground">
+              Zet je volgende reis neer en bouw hem rustig op. Een naam is genoeg.
+            </p>
+            <Button asChild size="lg" className="mt-5 w-full rounded-full sm:w-auto sm:px-10">
+              <Link to="/signup">
+                Gratis beginnen
+                <ArrowRight className="ml-1.5 h-4 w-4" />
+              </Link>
+            </Button>
+          </div>
         </section>
       </main>
 
-      <footer className="border-t border-border py-8">
+      <div
+        className={`fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background px-5 pb-[max(env(safe-area-inset-bottom),0.75rem)] pt-3 transition-transform duration-200 sm:hidden ${
+          showBar ? "translate-y-0" : "translate-y-full"
+        }`}
+      >
+        <div className="flex items-center gap-3">
+          <p className="min-w-0 flex-1 text-xs leading-tight text-muted-foreground">
+            Gratis te gebruiken.
+            <br />
+            Geen creditcard nodig.
+          </p>
+          <Button asChild size="sm" className="shrink-0 rounded-full px-5">
+            <Link to="/signup">Gratis beginnen</Link>
+          </Button>
+        </div>
+      </div>
+
+      <footer className="border-t border-border py-8 pb-24 sm:pb-8">
         <div className="mx-auto flex max-w-3xl flex-wrap items-center justify-between gap-3 px-5 text-xs text-muted-foreground">
           <span>© {new Date().getFullYear()} Vakansie</span>
           <span className="flex gap-4">

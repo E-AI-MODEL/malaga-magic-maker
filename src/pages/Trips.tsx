@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { AlertCircle, Archive, ChevronDown, ChevronRight, LogOut, MapPin, Plus, User } from "lucide-react";
+import { AlertCircle, Archive, ChevronDown, ChevronRight, MapPin, Plus, Sparkles, User } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { Trip, useTrip } from "@/contexts/TripContext";
 import { tripTimingLabel } from "@/features/trips/presentation";
@@ -9,7 +9,8 @@ import { activeReadinessChecks, getTripReadiness, readinessAction } from "@/feat
 import { NotificationCenter } from "@/components/NotificationCenter";
 import { HansieWidget } from "@/components/HansieWidget";
 import { Button } from "@/components/ui/button";
-import { EmptyLine, ReadinessBar, RowItem, RowList, SectionLabel } from "@/components/primitives";
+import { EmptyLine, ReadinessBar, RowItem, RowList, SectionLabel, StatusChip, Surface } from "@/components/primitives";
+import { TripVisual } from "@/components/TripVisual";
 
 function formatDateRange(startDate: string | null, endDate: string | null) {
   if (!startDate && !endDate) return "Data nog niet gekozen";
@@ -34,27 +35,7 @@ function sortTrips(trips: Trip[]) {
   });
 }
 
-/** Cover for the dominant trip. Uses only a real stored cover image. */
-function TripCover({ trip }: { trip: Trip }) {
-  if (trip.cover_image_url) {
-    return (
-      <img
-        src={trip.cover_image_url}
-        alt={`Omslagfoto van ${trip.name}`}
-        loading="lazy"
-        className="h-36 w-full rounded-xl object-cover sm:h-44"
-      />
-    );
-  }
-  return (
-    <div className="flex h-20 w-full items-center gap-2 rounded-xl bg-secondary px-4 text-muted-foreground sm:h-24">
-      <MapPin className="h-4 w-4 shrink-0" />
-      <span className="truncate text-sm">{trip.destination_name || "Bestemming nog niet gekozen"}</span>
-    </div>
-  );
-}
-
-/** The single dominant trip object on Mijn reizen. */
+/** The single dominant trip object on Mijn reizen: hero image plus one warm surface. */
 function ActiveTripPanel({ trip }: { trip: Trip }) {
   const readinessQuery = useQuery({
     queryKey: ["trip-readiness", trip.id],
@@ -77,28 +58,56 @@ function ActiveTripPanel({ trip }: { trip: Trip }) {
 
   return (
     <section className="mt-5">
-      <TripCover trip={trip} />
-      <Link to={`/trip/${trip.id}`} className="group mt-4 block">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-          {tripTimingLabel(trip.start_date, trip.end_date)}
-        </p>
-        <h2 className="mt-1.5 truncate font-brand text-[27px] font-semibold leading-tight sm:text-3xl">{trip.name}</h2>
-        <p className="mt-1 text-sm text-muted-foreground">
-          {formatDateRange(trip.start_date, trip.end_date)}
-          {trip.destination_name ? ` · ${trip.destination_name}` : ""}
-        </p>
-        <span className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-primary">
-          Reis openen<ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-        </span>
-      </Link>
+      <div className="relative">
+        <TripVisual name={trip.name} coverImageUrl={trip.cover_image_url} height="h-[160px] sm:h-[200px]" />
+        <Surface className="relative z-10 -mt-8 mx-3 px-4 pb-4 pt-4 sm:mx-5">
+          <div className="flex items-center justify-between gap-3">
+            <StatusChip tone={attentionTotal > 0 ? "attention" : "done"}>
+              {tripTimingLabel(trip.start_date, trip.end_date)}
+            </StatusChip>
+            {attentionTotal > 0 && (
+              <span className="font-ui text-[11px] font-semibold text-muted-foreground">
+                {attentionTotal} {attentionTotal === 1 ? "punt" : "punten"}
+              </span>
+            )}
+          </div>
 
-      <div className="mt-4">
-        <ReadinessBar done={done} total={Math.max(1, trackedTotal)} sentence={sentence} />
+          <Link
+            to={`/trip/${trip.id}`}
+            className="mt-3 block rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          >
+            <h2 className="truncate font-brand text-[26px] font-semibold leading-tight sm:text-3xl">{trip.name}</h2>
+            <p className="mt-1 flex items-center gap-1.5 text-sm text-muted-foreground">
+              <MapPin className="h-[15px] w-[15px] shrink-0" strokeWidth={1.75} />
+              <span className="truncate">
+                {trip.destination_name || "Bestemming nog niet gekozen"} · {formatDateRange(trip.start_date, trip.end_date)}
+              </span>
+            </p>
+          </Link>
+
+          <div className="mt-4">
+            <ReadinessBar done={done} total={Math.max(1, trackedTotal)} sentence={sentence} />
+          </div>
+
+          <div className="mt-2 border-t border-rule/10">
+            <RowList>
+              <RowItem icon={ChevronRight} title="Reis openen" meta="Overzicht, reis en samen" to={`/trip/${trip.id}`} />
+              <RowItem
+                icon={Sparkles}
+                title="Vraag het Hansie"
+                meta="Over deze reis"
+                onClick={() => {
+                  document.querySelector<HTMLButtonElement>('[aria-label="Vraag het Hansie"]')?.click();
+                }}
+              />
+            </RowList>
+          </div>
+        </Surface>
       </div>
 
       {attention.length > 0 && (
         <div className="mt-7">
-          <SectionLabel>Nu belangrijk</SectionLabel>
+          <SectionLabel>Dit vraagt aandacht</SectionLabel>
           <RowList className="mt-1">
             {attention.slice(0, 4).map((check) => {
               const action = readinessAction(check, trip.id);
@@ -106,6 +115,7 @@ function ActiveTripPanel({ trip }: { trip: Trip }) {
                 <RowItem
                   key={check.key}
                   icon={AlertCircle}
+                  emphasis
                   tone="attention"
                   title={check.label}
                   meta={action?.label}
@@ -139,7 +149,7 @@ function TripRow({ trip, muted = false }: { trip: Trip; muted?: boolean }) {
 }
 
 export default function Trips() {
-  const { profile, signOut } = useAuth();
+  const { profile } = useAuth();
   const { userTrips, loading } = useTrip();
   const [archiveOpen, setArchiveOpen] = useState(false);
 
@@ -157,19 +167,12 @@ export default function Trips() {
           <p className="font-brand text-lg font-semibold">Vakansie</p>
           <div className="flex items-center gap-1">
             <NotificationCenter />
-            <Button asChild variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground">
+            <Button asChild variant="ghost" size="icon" className="h-9 w-9 text-muted-foreground">
               <Link to="/profiel" aria-label="Profiel en voorkeuren">
-                <User className="h-4 w-4" />
+                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-secondary text-[11px] font-semibold text-foreground">
+                  {profile?.display_name?.slice(0, 1).toUpperCase() || <User className="h-4 w-4" />}
+                </span>
               </Link>
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => void signOut()}
-              aria-label="Uitloggen"
-              className="h-8 w-8 text-muted-foreground"
-            >
-              <LogOut className="h-4 w-4" />
             </Button>
           </div>
         </div>
@@ -178,10 +181,10 @@ export default function Trips() {
       <main className="mx-auto max-w-3xl px-5 pb-16 pt-6">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+            <p className="font-ui text-[13px] font-semibold text-muted-foreground">
               {profile?.display_name ? `Hoi ${profile.display_name}` : "Welkom"}
             </p>
-            <h1 className="mt-1.5 font-brand text-[28px] font-semibold leading-tight">Mijn reizen</h1>
+            <h1 className="mt-1 font-brand text-[28px] font-semibold leading-tight">Mijn reizen</h1>
           </div>
           <Button asChild variant="outline" size="sm" className="mt-1 shrink-0 rounded-full">
             <Link to="/new-trip"><Plus className="mr-1.5 h-3.5 w-3.5" />Nieuwe reis</Link>
@@ -189,7 +192,7 @@ export default function Trips() {
         </div>
 
         {loading ? (
-          <div className="mt-5 h-40 animate-pulse rounded-2xl bg-secondary" />
+          <div className="mt-5 h-32 animate-pulse rounded-[14px] bg-secondary" />
         ) : heroTrip ? (
           <ActiveTripPanel trip={heroTrip} />
         ) : (
@@ -210,14 +213,14 @@ export default function Trips() {
         )}
 
         {archivedTrips.length > 0 && (
-          <section className="mt-8 border-t border-rule pt-2">
+          <section className="mt-8 border-t border-rule/10 pt-2">
             <button
               onClick={() => setArchiveOpen((current) => !current)}
-              className="flex w-full items-center gap-2 py-3 text-left text-muted-foreground transition-colors hover:text-foreground"
+              className="flex min-h-[48px] w-full items-center gap-2 py-3 text-left text-muted-foreground transition-colors hover:text-foreground"
               aria-expanded={archiveOpen}
             >
-              <Archive className="h-[18px] w-[18px]" />
-              <span className="text-[11px] font-semibold uppercase tracking-[0.18em]">Archief ({archivedTrips.length})</span>
+              <Archive className="h-[18px] w-[18px]" strokeWidth={1.75} />
+              <span className="font-ui text-[13px] font-semibold">Archief ({archivedTrips.length})</span>
               <ChevronDown className={`ml-auto h-4 w-4 transition-transform ${archiveOpen ? "rotate-180" : ""}`} />
             </button>
             {archiveOpen && (

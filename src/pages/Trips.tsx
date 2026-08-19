@@ -21,7 +21,7 @@ import { activeReadinessChecks, getTripReadiness, readinessAction } from "@/feat
 import { NotificationCenter } from "@/components/NotificationCenter";
 import { HansieWidget } from "@/components/HansieWidget";
 import { Button } from "@/components/ui/button";
-import { EmptyLine, ReadinessBar, RowItem, RowList, SectionLabel, StatusChip, Surface } from "@/components/primitives";
+import { ReadinessBar, RowItem, RowList, SectionLabel, StatusChip, Surface } from "@/components/primitives";
 import { TripThumb, TripVisual } from "@/components/TripVisual";
 import heroHome from "@/assets/hero-home.jpg";
 

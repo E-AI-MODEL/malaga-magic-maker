@@ -125,7 +125,7 @@ export default function Landing() {
             </div>
           </div>
 
-          <div className="mx-auto -mt-20 max-w-3xl px-5">
+          <div className="relative z-10 mx-auto -mt-20 max-w-3xl px-5">
             <div className="rounded-[20px] border border-border bg-card p-4 shadow-soft">
               <div className="flex items-baseline justify-between gap-3">
                 <p className="font-brand text-[17px] font-semibold">Zomer aan de kust</p>

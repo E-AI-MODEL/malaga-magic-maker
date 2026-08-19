@@ -89,7 +89,6 @@ export function HansieWidget({
   floating = true,
 }: {
   trip: HansieTrip | null;
-  /** true = fixed dock above the trip nav, false = sticky bar inside the current layout */
   floating?: boolean;
 }) {
   const isMobile = useIsMobile();
@@ -99,7 +98,6 @@ export function HansieWidget({
   const [loading, setLoading] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
 
-  // Authoritative reference to the trip context currently visible to the user.
   const contextIdRef = useRef<string | null>(trip?.id ?? null);
   const tripId = trip?.id ?? null;
 
@@ -120,7 +118,6 @@ export function HansieWidget({
     const trimmed = text.trim();
     if (!trimmed || loading || !trip) return;
 
-    // Every request is bound to exactly one concrete, authorized trip.
     const requestTripId = trip.id;
 
     const userMessage: ChatMessage = { role: "user", content: trimmed };
@@ -136,7 +133,6 @@ export function HansieWidget({
         tripId: requestTripId,
         messages: nextMessages,
         onDelta: (delta) => {
-          // Ignore stale deltas when the visible trip context has changed.
           if (contextIdRef.current !== requestTripId) return;
           assistantText += delta;
           setMessages((current) => {
@@ -153,11 +149,9 @@ export function HansieWidget({
         },
       });
     } catch (error) {
-      // Ignore stale errors from a trip the user no longer has open.
       if (contextIdRef.current !== requestTripId) return;
       toast.error(error instanceof Error ? error.message : "Hansie is tijdelijk niet bereikbaar.");
     } finally {
-      // Only the originating trip may clear its own loading state.
       if (contextIdRef.current === requestTripId) setLoading(false);
     }
   };
@@ -174,42 +168,47 @@ export function HansieWidget({
       <div
         className={
           floating
-            ? `fixed z-40 bg-background/95 px-3 py-2 backdrop-blur-sm ${
+            ? `fixed z-40 border-t border-border bg-background px-3 pb-2 pt-1.5 ${
                 isMobile
-                  ? "bottom-[calc(3.5rem+env(safe-area-inset-bottom))] left-0 right-0"
+                  ? "bottom-[calc(3.625rem+env(safe-area-inset-bottom))] left-0 right-0"
                   : "bottom-0 right-0 w-full max-w-md"
               }`
-            : "sticky bottom-0 left-0 right-0 z-40 bg-background/95 px-3 py-2 backdrop-blur-sm safe-area-pb"
+            : "sticky bottom-0 left-0 right-0 z-40 border-t border-border bg-background px-3 pb-2 pt-1.5 safe-area-pb"
         }
       >
         <button
           onClick={() => setOpen(true)}
-          className="mx-auto flex h-12 w-full max-w-2xl items-center gap-2.5 rounded-[16px] border border-border bg-card px-3.5 text-left shadow-soft transition-colors hover:bg-card/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+          className="mx-auto flex h-[46px] w-full max-w-2xl items-center gap-2.5 rounded-[16px] border border-border bg-card px-3.5 text-left shadow-soft transition-colors hover:bg-secondary/35 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
           aria-label="Vraag het Hansie"
         >
-          <span aria-hidden className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[10px] bg-primary/10">
-            <MessageCircle className="h-[17px] w-[17px] text-primary" strokeWidth={1.75} />
+          <span aria-hidden className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[11px] bg-primary/10 text-primary">
+            <Sparkles className="h-[17px] w-[17px]" strokeWidth={1.75} />
           </span>
-          <span className="min-w-0 flex-1 truncate text-[13px] text-muted-foreground">Vraag het Hansie…</span>
-          <Send className="h-4 w-4 shrink-0 text-muted-foreground/60" strokeWidth={1.75} />
+          <span className="min-w-0 flex-1 truncate font-ui text-[13px] text-muted-foreground">Vraag Hansie over deze reis…</span>
+          <span aria-hidden className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground">
+            <Send className="h-3.5 w-3.5" strokeWidth={1.9} />
+          </span>
         </button>
       </div>
 
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetContent
           side={isMobile ? "bottom" : "right"}
-          className={isMobile ? "h-[87vh] rounded-t-[14px] p-0" : "w-full sm:max-w-md p-0"}
+          className={isMobile ? "h-[87vh] rounded-t-[18px] p-0" : "w-full p-0 sm:max-w-md"}
         >
-          <div className="flex h-full flex-col">
-            <SheetHeader className="border-b border-border px-5 py-4 text-left">
-              <SheetTitle className="flex items-center gap-2 font-brand text-xl font-semibold">
-                <span aria-hidden className="flex h-8 w-8 items-center justify-center rounded-[10px] bg-primary/10">
-                  <Sparkles className="h-[17px] w-[17px] text-primary" strokeWidth={1.75} />
+          <div className="flex h-full flex-col bg-background">
+            <SheetHeader className="border-b border-border bg-card px-5 py-4 text-left">
+              <SheetTitle className="flex items-center gap-2.5 font-brand text-xl font-semibold">
+                <span aria-hidden className="flex h-9 w-9 items-center justify-center rounded-[12px] bg-primary/10 text-primary">
+                  <MessageCircle className="h-[18px] w-[18px]" strokeWidth={1.75} />
                 </span>
-                Hansie
+                <span className="min-w-0">
+                  Hansie
+                  <span className="block truncate font-ui text-[11px] font-semibold text-muted-foreground">{trip.name}</span>
+                </span>
               </SheetTitle>
               <SheetDescription>
-                {trip.name} · vraag wat vaststaat of nog aandacht nodig heeft.
+                Vraag wat in deze reis vaststaat of nog aandacht nodig heeft.
               </SheetDescription>
             </SheetHeader>
 
@@ -222,13 +221,14 @@ export function HansieWidget({
                       Hansie gebruikt alleen de reis die je nu hebt geopend als context.
                     </p>
                   </div>
-                  <div className="space-y-2">
+                  <div className="flex flex-wrap gap-2">
                     {suggestions.map((suggestion) => (
                       <button
                         key={suggestion}
                         onClick={() => void send(suggestion)}
-                        className="w-full rounded-[14px] border border-border bg-card px-4 py-3 text-left text-sm font-medium transition-colors hover:bg-secondary/60"
+                        className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 font-ui text-[13px] font-medium shadow-soft transition-colors hover:bg-secondary/50"
                       >
+                        <Sparkles className="h-3.5 w-3.5 text-primary" aria-hidden />
                         {suggestion}
                       </button>
                     ))}
@@ -246,7 +246,7 @@ export function HansieWidget({
                           <ReactMarkdown>{message.content}</ReactMarkdown>
                         </div>
                       ) : (
-                        <p className="max-w-[85%] rounded-[14px] rounded-br-md bg-secondary px-3.5 py-2 text-sm font-medium text-secondary-foreground">
+                        <p className="max-w-[85%] rounded-2xl rounded-br-md border border-border bg-card px-3.5 py-2 text-sm font-medium shadow-soft">
                           {message.content}
                         </p>
                       )}
@@ -259,11 +259,11 @@ export function HansieWidget({
               )}
             </div>
 
-            <form ref={formRef} onSubmit={handleSubmit} className="flex gap-2 border-t border-border p-4">
+            <form ref={formRef} onSubmit={handleSubmit} className="flex gap-2 border-t border-border bg-card p-4">
               <Input
                 value={input}
                 onChange={(event) => setInput(event.target.value)}
-                placeholder="Vraag het Hansie…"
+                placeholder="Vraag Hansie over deze reis…"
                 disabled={loading}
                 autoComplete="off"
               />

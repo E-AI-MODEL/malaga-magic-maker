@@ -11,12 +11,13 @@ import { toast } from "sonner";
 import { ArrowLeft, ChevronRight, LogOut, Sparkles } from "lucide-react";
 import { usePro } from "@/features/pro/usePro";
 import { usePlanStatus } from "@/features/pro/limits";
+import { PaymentHistory } from "@/features/pro/PaymentHistory";
 
 export default function Profiel() {
   const { profile, isAdmin, user, signOut } = useAuth();
   const { userTrips } = useTrip();
-  const { isPro } = usePro();
-  const { status: plan } = usePlanStatus();
+  const { isPro, refresh: refreshPro } = usePro();
+  const { status: plan, refresh: refreshPlan } = usePlanStatus();
   const navigate = useNavigate();
   const [displayName, setDisplayName] = useState(profile?.display_name || "");
   const [saving, setSaving] = useState(false);
@@ -102,10 +103,20 @@ export default function Profiel() {
                   <dt>Documenten per reis</dt>
                   <dd className="text-foreground">{plan.documentLimitPerTrip}</dd>
                 </div>
+                {plan.proEnvironment === "sandbox" && (
+                  <p className="pt-2 text-[11px]">Pro staat actief op basis van een testbetaling in de preview.</p>
+                )}
               </dl>
             )}
           </div>
         </section>
+
+        <PaymentHistory
+          onRecovered={() => {
+            void refreshPro();
+            void refreshPlan();
+          }}
+        />
 
         <section className="mt-7">
           <SectionLabel>Account</SectionLabel>

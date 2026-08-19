@@ -510,6 +510,54 @@ export type Database = {
           },
         ]
       }
+      entitlements: {
+        Row: {
+          amount_cents: number
+          created_at: string
+          currency: string
+          environment: string
+          expires_at: string | null
+          granted_at: string
+          id: string
+          price_id: string
+          product_id: string
+          stripe_customer_id: string | null
+          stripe_session_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount_cents: number
+          created_at?: string
+          currency?: string
+          environment?: string
+          expires_at?: string | null
+          granted_at?: string
+          id?: string
+          price_id: string
+          product_id?: string
+          stripe_customer_id?: string | null
+          stripe_session_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount_cents?: number
+          created_at?: string
+          currency?: string
+          environment?: string
+          expires_at?: string | null
+          granted_at?: string
+          id?: string
+          price_id?: string
+          product_id?: string
+          stripe_customer_id?: string | null
+          stripe_session_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       expense_splits: {
         Row: {
           amount: number
@@ -1512,6 +1560,10 @@ export type Database = {
       get_trip_invite_preview: { Args: { p_token: string }; Returns: Json }
       get_trip_readiness: { Args: { p_trip_id: string }; Returns: Json }
       get_username: { Args: { _user_id: string }; Returns: string }
+      has_pro_access: {
+        Args: { _environment?: string; _user_id: string }
+        Returns: boolean
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

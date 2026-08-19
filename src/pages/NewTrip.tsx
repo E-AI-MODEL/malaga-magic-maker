@@ -2,6 +2,7 @@ import { FormEvent, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ArrowLeft, ArrowRight, CalendarDays, Loader2, MapPin, Users } from "lucide-react";
 import { useTrip } from "@/contexts/TripContext";
+import { describePlanLimit } from "@/features/pro/limits";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -51,25 +52,30 @@ export default function NewTrip() {
     }
 
     setSubmitting(true);
-    const trip = await createTrip({
-      name: name.trim(),
-      description: description.trim() || undefined,
-      destination_name: destination.trim() || undefined,
-      destination_country: country.trim() || undefined,
-      start_date: startDate || null,
-      end_date: endDate || null,
-      group_size: Math.max(1, Number.parseInt(groupSize, 10) || 1),
-      timezone,
-      currency,
-    });
-    setSubmitting(false);
+    try {
+      const trip = await createTrip({
+        name: name.trim(),
+        description: description.trim() || undefined,
+        destination_name: destination.trim() || undefined,
+        destination_country: country.trim() || undefined,
+        start_date: startDate || null,
+        end_date: endDate || null,
+        group_size: Math.max(1, Number.parseInt(groupSize, 10) || 1),
+        timezone,
+        currency,
+      });
 
-    if (!trip) {
-      setError("De reis kon niet worden aangemaakt. Probeer het opnieuw.");
-      return;
+      if (!trip) {
+        setError("De reis kon niet worden aangemaakt. Probeer het opnieuw.");
+        return;
+      }
+
+      navigate(`/trip/${trip.id}`, { replace: true });
+    } catch (caught) {
+      setError(describePlanLimit(caught) ?? "De reis kon niet worden aangemaakt. Probeer het opnieuw.");
+    } finally {
+      setSubmitting(false);
     }
-
-    navigate(`/trip/${trip.id}`, { replace: true });
   };
 
   return (

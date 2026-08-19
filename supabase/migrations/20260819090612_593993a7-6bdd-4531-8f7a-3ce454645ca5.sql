@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.is_pro_user(uuid) FROM authenticated;

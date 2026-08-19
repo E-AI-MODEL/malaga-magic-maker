@@ -10,7 +10,8 @@ export const PRO_PLANS: ProPlan[] = [
 ];
 
 export const PRO_BENEFITS = [
-  "Pro-kenmerk op je account",
+  "Onbeperkt reizen (gratis: één actieve reis)",
+  "150 Hansie-vragen per dag in plaats van 12",
+  "200 documenten per reis in plaats van 5",
   "Blijvende toegang, geen abonnement",
-  "Je steunt hosting, documentopslag en Hansie",
 ];

@@ -27,13 +27,12 @@ describe("Vakansie BUILD 12 production hardening contract", () => {
 
   it("records Hansie usage only after membership authorization and stores no conversation text", () => {
     const forbidden = hansie.indexOf('return jsonError(403, "Forbidden")');
-    const telemetry = hansie.indexOf('.from("ai_usage_events")');
+    const telemetry = hansie.indexOf('consume_hansie_quota');
     expect(forbidden).toBeGreaterThan(-1);
     expect(telemetry).toBeGreaterThan(forbidden);
     const telemetryBlock = hansie.slice(telemetry, telemetry + 350);
-    expect(telemetryBlock).toContain("user_id: userId");
-    expect(telemetryBlock).toContain("trip_id: tripId");
-    expect(telemetryBlock).toContain('feature: "hansie"');
+    expect(telemetryBlock).toContain("p_trip_id: tripId");
+    expect(hansie).not.toContain('.from("ai_usage_events")');
     expect(telemetryBlock).not.toContain("messages");
     expect(telemetryBlock).not.toContain("systemPrompt");
   });

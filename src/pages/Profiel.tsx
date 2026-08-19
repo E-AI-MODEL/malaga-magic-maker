@@ -10,11 +10,13 @@ import { NotificationPreferences } from "@/features/notifications/NotificationPr
 import { toast } from "sonner";
 import { ArrowLeft, ChevronRight, LogOut, Sparkles } from "lucide-react";
 import { usePro } from "@/features/pro/usePro";
+import { usePlanStatus } from "@/features/pro/limits";
 
 export default function Profiel() {
   const { profile, isAdmin, user, signOut } = useAuth();
   const { userTrips } = useTrip();
   const { isPro } = usePro();
+  const { status: plan } = usePlanStatus();
   const navigate = useNavigate();
   const [displayName, setDisplayName] = useState(profile?.display_name || "");
   const [saving, setSaving] = useState(false);
@@ -83,6 +85,25 @@ export default function Profiel() {
               </span>
               <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground/60" />
             </button>
+            {plan && (
+              <dl className="py-3 text-xs text-muted-foreground">
+                <div className="flex items-center justify-between py-0.5">
+                  <dt>Eigen reizen</dt>
+                  <dd className="text-foreground">
+                    {plan.tripsOwned}
+                    {plan.tripLimit === null ? " (onbeperkt)" : ` van ${plan.tripLimit}`}
+                  </dd>
+                </div>
+                <div className="flex items-center justify-between py-0.5">
+                  <dt>Hansie-vragen vandaag</dt>
+                  <dd className="text-foreground">{plan.hansieUsedToday} van {plan.hansieDayLimit}</dd>
+                </div>
+                <div className="flex items-center justify-between py-0.5">
+                  <dt>Documenten per reis</dt>
+                  <dd className="text-foreground">{plan.documentLimitPerTrip}</dd>
+                </div>
+              </dl>
+            )}
           </div>
         </section>
 

@@ -329,13 +329,15 @@ export default function Trips() {
         {loading ? (
           <div className="mt-5 h-40 animate-pulse rounded-[18px] bg-secondary" />
         ) : heroTrip ? (
-          <ActiveTripPanel trip={heroTrip} />
+          <>
+            <ActiveTripPanel trip={heroTrip} />
+            <TripSuggestions trip={heroTrip} />
+          </>
         ) : (
-          <EmptyLine
-            text="Je hebt nog geen reis. Een naam is genoeg om te beginnen; data en boekingen kunnen later."
-            actionLabel="Eerste reis starten"
-            to="/new-trip"
-          />
+          <>
+            <WelcomeHero firstName={profile?.display_name?.split(" ")[0]} />
+            <HowItWorks />
+          </>
         )}
 
         {otherTrips.length > 0 && (

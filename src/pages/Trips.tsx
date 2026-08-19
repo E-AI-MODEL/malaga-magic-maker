@@ -1,7 +1,19 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { AlertCircle, Archive, ChevronDown, ChevronRight, MapPin, Plus, Sparkles, User } from "lucide-react";
+import {
+  AlertCircle,
+  Archive,
+  ChevronDown,
+  ChevronRight,
+  FileText,
+  MapPin,
+  Plus,
+  Route,
+  Sparkles,
+  User,
+  Users,
+} from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { Trip, useTrip } from "@/contexts/TripContext";
 import { tripTimingLabel } from "@/features/trips/presentation";
@@ -9,8 +21,127 @@ import { activeReadinessChecks, getTripReadiness, readinessAction } from "@/feat
 import { NotificationCenter } from "@/components/NotificationCenter";
 import { HansieWidget } from "@/components/HansieWidget";
 import { Button } from "@/components/ui/button";
-import { EmptyLine, ReadinessBar, RowItem, RowList, SectionLabel, StatusChip, Surface } from "@/components/primitives";
+import { ReadinessBar, RowItem, RowList, SectionLabel, StatusChip, Surface } from "@/components/primitives";
 import { TripThumb, TripVisual } from "@/components/TripVisual";
+import heroHome from "@/assets/hero-home.jpg";
+
+function openHansie() {
+  document.querySelector<HTMLButtonElement>('[aria-label="Vraag het Hansie"]')?.click();
+}
+
+/** Editorial welcome hero. Only shown when there is no active trip to lead with. */
+function WelcomeHero({ firstName }: { firstName?: string | null }) {
+  return (
+    <section className="mt-5">
+      <div className="relative -mx-5 overflow-hidden sm:mx-0 sm:rounded-[18px]">
+        <img
+          src={heroHome}
+          alt="Rustig terras met uitzicht op zee en een reisnotitieboek"
+          width={1280}
+          height={720}
+          className="h-[210px] w-full object-cover sm:h-[260px]"
+        />
+        <div aria-hidden className="absolute inset-0 bg-foreground/45" />
+        <div className="absolute inset-x-0 bottom-0 p-5 sm:p-6">
+          <p className="font-ui text-[11px] font-semibold uppercase tracking-[0.14em] text-white/70">
+            Vakansie
+          </p>
+          <h2 className="mt-1.5 font-brand text-[26px] font-semibold leading-tight text-white sm:text-[30px]">
+            {firstName ? `${firstName}, waar gaat je volgende reis heen?` : "Waar gaat je volgende reis heen?"}
+          </h2>
+          <p className="mt-2 max-w-md text-sm leading-relaxed text-white/80">
+            Zet je reis hier neer en bouw hem rustig op: vluchten en verblijf, wat er nog geregeld moet worden en
+            wie wat doet. Alles op één plek, ook als er nog weinig vaststaat.
+          </p>
+        </div>
+      </div>
+
+      <Button asChild size="lg" className="mt-4 w-full rounded-full sm:w-auto">
+        <Link to="/new-trip">
+          <Plus className="mr-1.5 h-4 w-4" />
+          Reis starten
+        </Link>
+      </Button>
+      <p className="mt-2 text-xs text-muted-foreground">
+        Een naam is genoeg om te beginnen. Data, bestemming en boekingen kun je later invullen.
+      </p>
+    </section>
+  );
+}
+
+/** Plain explanation of the product, in the same row language as the rest of the app. */
+function HowItWorks() {
+  return (
+    <section className="mt-8">
+      <SectionLabel>Zo werkt het</SectionLabel>
+      <Surface className="mt-2 px-4 shadow-none">
+        <RowList>
+          <RowItem
+            icon={Route}
+            emphasis
+            title="Reis"
+            meta="Vluchten, verblijf, vervoer en activiteiten op één tijdlijn"
+          />
+          <RowItem
+            icon={Users}
+            emphasis
+            title="Samen"
+            meta="Taken verdelen, keuzes maken en kosten bijhouden met je reisgenoten"
+          />
+          <RowItem
+            icon={FileText}
+            emphasis
+            title="Documenten"
+            meta="Tickets, bevestigingen en vouchers veilig bij de reis bewaard"
+          />
+          <RowItem
+            icon={Sparkles}
+            emphasis
+            title="Hansie"
+            meta="Stel vragen over je voorbereiding; Hansie kijkt alleen mee in de geopende reis"
+          />
+        </RowList>
+      </Surface>
+    </section>
+  );
+}
+
+/** Concrete next steps for the trip you are leading with. */
+function TripSuggestions({ trip }: { trip: Trip }) {
+  return (
+    <section className="mt-8">
+      <SectionLabel>Suggesties</SectionLabel>
+      <Surface className="mt-2 px-4 shadow-none">
+        <RowList>
+          <RowItem
+            icon={Route}
+            title="Reisplan aanvullen"
+            meta="Voeg je heenreis, verblijf en eerste dag toe"
+            to={`/trip/${trip.id}/reis`}
+          />
+          <RowItem
+            icon={Users}
+            title="Reisgenoten uitnodigen"
+            meta="Deel de voorbereiding en verdeel taken"
+            to={`/trip/${trip.id}/samen`}
+          />
+          <RowItem
+            icon={FileText}
+            title="Documenten bewaren"
+            meta="Tickets en bevestigingen op één plek"
+            to={`/trip/${trip.id}/reis`}
+          />
+          <RowItem
+            icon={Sparkles}
+            title="Vraag Hansie wat er nog mist"
+            meta="Hansie gebruikt alleen deze reis als context"
+            onClick={openHansie}
+          />
+        </RowList>
+      </Surface>
+    </section>
+  );
+}
 
 function formatDateRange(startDate: string | null, endDate: string | null) {
   if (!startDate && !endDate) return "Data nog niet gekozen";
@@ -101,9 +232,7 @@ function ActiveTripPanel({ trip }: { trip: Trip }) {
                 icon={Sparkles}
                 title="Vraag Hansie over deze reis"
                 meta="Hansie gebruikt alleen deze reis als context"
-                onClick={() => {
-                  document.querySelector<HTMLButtonElement>('[aria-label="Vraag het Hansie"]')?.click();
-                }}
+                onClick={openHansie}
               />
             </RowList>
           </div>
@@ -200,13 +329,15 @@ export default function Trips() {
         {loading ? (
           <div className="mt-5 h-40 animate-pulse rounded-[18px] bg-secondary" />
         ) : heroTrip ? (
-          <ActiveTripPanel trip={heroTrip} />
+          <>
+            <ActiveTripPanel trip={heroTrip} />
+            <TripSuggestions trip={heroTrip} />
+          </>
         ) : (
-          <EmptyLine
-            text="Je hebt nog geen reis. Een naam is genoeg om te beginnen; data en boekingen kunnen later."
-            actionLabel="Eerste reis starten"
-            to="/new-trip"
-          />
+          <>
+            <WelcomeHero firstName={profile?.display_name?.split(" ")[0]} />
+            <HowItWorks />
+          </>
         )}
 
         {otherTrips.length > 0 && (

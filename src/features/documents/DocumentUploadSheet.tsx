@@ -3,6 +3,7 @@ import { FileText, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import type { TripItemRow } from "@/integrations/supabase/database";
+import { describePlanLimit } from "@/features/pro/limits";
 import { documentTypes, uploadTripDocument, validateDocumentFile } from "./data";
 
 export function DocumentUploadSheet({

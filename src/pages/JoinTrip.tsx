@@ -1,3 +1,4 @@
+import { AlertTriangle, Check } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "@/lib/auth";
@@ -54,14 +55,18 @@ export default function JoinTrip() {
         )}
         {status === "success" && (
           <>
-            <div className="mb-4 text-4xl">✓</div>
+            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-[14px] bg-primary/10">
+              <Check className="h-6 w-6 text-primary" strokeWidth={2} />
+            </div>
             <p className="text-lg font-bold">Je doet mee</p>
             <p className="mt-1 text-sm text-muted-foreground">De reis wordt geopend...</p>
           </>
         )}
         {status === "error" && (
           <>
-            <div className="mb-4 text-4xl">!</div>
+            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-[14px] bg-warning/15">
+              <AlertTriangle className="h-6 w-6 text-warning" strokeWidth={1.75} />
+            </div>
             <p className="text-lg font-bold">Uitnodiging werkt niet</p>
             <p className="mt-1 text-sm text-muted-foreground">{error}</p>
             <button onClick={() => navigate("/trips")} className="mt-4 text-sm font-semibold text-primary hover:underline">

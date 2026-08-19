@@ -179,20 +179,21 @@ export default function Landing() {
 
             <Surface className="p-5">
               <p className="font-display text-[12px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
-                Vrijwillig
+                Pro
               </p>
               <p className="mt-2 flex items-baseline gap-1.5 font-brand text-[34px] font-semibold leading-none">
-                € 2
+                vanaf € 2
                 <span className="font-sans text-[13px] font-normal text-muted-foreground">eenmalig</span>
               </p>
               <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
-                Vind je Vakansie de moeite waard? Met een kleine bijdrage help je de hosting, de opslag van
-                documenten en Hansie betalen. Je krijgt er niets extra's voor — alles blijft gewoon gratis.
+                Vind je Vakansie de moeite waard? Met een eenmalige bijdrage ontgrendel je Pro op je account
+                en help je hosting, documentopslag en Hansie betalen. Geen abonnement, geen verlenging — en
+                alle basisfuncties blijven voor iedereen gratis.
               </p>
               <Button asChild variant="outline" className="mt-5 w-full rounded-full">
                 <Link to="/steun">
                   <Heart className="mr-1.5 h-4 w-4" strokeWidth={1.75} />
-                  Vakansie steunen
+                  Pro ontgrendelen
                 </Link>
               </Button>
             </Surface>

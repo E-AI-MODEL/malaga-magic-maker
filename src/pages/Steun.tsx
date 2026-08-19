@@ -1,24 +1,21 @@
 import { useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { ArrowLeft, CheckCircle2, Heart } from "lucide-react";
+import { ArrowLeft, CheckCircle2, Heart, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Surface } from "@/components/primitives";
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
-import { DonationCheckout } from "@/components/DonationCheckout";
+import { ProCheckout } from "@/features/pro/ProCheckout";
+import { PRO_BENEFITS, PRO_PLANS } from "@/features/pro/plans";
+import { usePro } from "@/features/pro/usePro";
 import { paymentsConfigured } from "@/lib/stripe";
 import { useAuth } from "@/lib/auth";
 
-const AMOUNTS = [
-  { cents: 200, label: "€ 2" },
-  { cents: 500, label: "€ 5" },
-  { cents: 1000, label: "€ 10" },
-];
-
 export default function Steun() {
   const { user } = useAuth();
+  const { isPro } = usePro();
   const [searchParams] = useSearchParams();
   const completed = Boolean(searchParams.get("session_id"));
-  const [amount, setAmount] = useState(200);
+  const [priceId, setPriceId] = useState<string>(PRO_PLANS[0].priceId);
   const [checkingOut, setCheckingOut] = useState(false);
   const configured = paymentsConfigured();
 
@@ -28,7 +25,7 @@ export default function Steun() {
       <header className="border-b border-border/70">
         <div className="mx-auto flex h-14 max-w-2xl items-center px-5">
           <Button asChild variant="ghost" size="sm" className="-ml-3 rounded-full">
-            <Link to="/">
+            <Link to={user ? "/trips" : "/"}>
               <ArrowLeft className="mr-1.5 h-4 w-4" />
               Terug
             </Link>
@@ -42,37 +39,58 @@ export default function Steun() {
             <CheckCircle2 className="mx-auto h-10 w-10 text-primary" strokeWidth={1.5} />
             <h1 className="mt-4 font-brand text-[28px] font-semibold leading-tight">Dankjewel</h1>
             <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-              Je bijdrage is verwerkt. Daar help je Vakansie enorm mee — en het blijft voor iedereen gratis.
+              Je betaling is ontvangen. Vakansie Pro staat binnen enkele seconden op je account — je hoeft
+              niets te doen.
             </p>
             <Button asChild className="mt-6 rounded-full">
               <Link to={user ? "/trips" : "/"}>Verder</Link>
             </Button>
           </section>
+        ) : isPro ? (
+          <section className="mt-10 text-center">
+            <Sparkles className="mx-auto h-10 w-10 text-primary" strokeWidth={1.5} />
+            <h1 className="mt-4 font-brand text-[28px] font-semibold leading-tight">Je hebt Vakansie Pro</h1>
+            <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+              Bedankt voor je bijdrage. Pro staat blijvend op je account, er loopt geen abonnement.
+            </p>
+            <Button asChild className="mt-6 rounded-full">
+              <Link to="/trips">Naar mijn reizen</Link>
+            </Button>
+          </section>
         ) : (
           <>
-            <h1 className="mt-8 font-brand text-[30px] font-semibold leading-tight">Vakansie steunen</h1>
+            <h1 className="mt-8 font-brand text-[30px] font-semibold leading-tight">Vakansie Pro</h1>
             <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-              Vakansie is en blijft gratis. Met een eenmalige bijdrage help je de kosten van hosting, veilige
-              opslag van je documenten en Hansie dragen. Je krijgt er geen extra functies voor — het is puur een
-              steuntje in de rug.
+              Vakansie is en blijft gratis te gebruiken. Met een eenmalige bijdrage ontgrendel je Pro op je
+              account en help je de kosten van hosting, veilige documentopslag en Hansie dragen. Geen
+              abonnement, geen verlenging.
             </p>
 
             <Surface className="mt-6 p-5">
-              <p className="font-display text-[13px] font-semibold">Kies een bedrag</p>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                {PRO_BENEFITS.map((benefit) => (
+                  <li key={benefit} className="flex gap-2">
+                    <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" strokeWidth={1.75} />
+                    <span>{benefit}</span>
+                  </li>
+                ))}
+              </ul>
+
+              <p className="mt-5 font-display text-[13px] font-semibold">Kies je bijdrage</p>
               <div className="mt-3 grid grid-cols-3 gap-2">
-                {AMOUNTS.map((option) => (
+                {PRO_PLANS.map((plan) => (
                   <button
-                    key={option.cents}
+                    key={plan.priceId}
                     type="button"
                     disabled={checkingOut}
-                    onClick={() => setAmount(option.cents)}
+                    onClick={() => setPriceId(plan.priceId)}
                     className={`rounded-[12px] border px-3 py-3 font-brand text-[20px] font-semibold transition-colors ${
-                      amount === option.cents
+                      priceId === plan.priceId
                         ? "border-primary bg-primary/10 text-primary"
                         : "border-border bg-background text-foreground"
                     }`}
                   >
-                    {option.label}
+                    {plan.label}
                   </button>
                 ))}
               </div>
@@ -81,10 +99,18 @@ export default function Steun() {
                 <p className="mt-5 text-sm text-muted-foreground">
                   De betaalmodule wordt op dit moment ingericht. Probeer het straks nog eens.
                 </p>
+              ) : !user ? (
+                <>
+                  <Button asChild className="mt-5 w-full rounded-full">
+                    <Link to="/login">Inloggen om Pro te activeren</Link>
+                  </Button>
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    Pro wordt aan je account gekoppeld, dus je logt eerst even in.
+                  </p>
+                </>
               ) : checkingOut ? (
-                <DonationCheckout
-                  amountInCents={amount}
-                  customerEmail={user?.email ?? undefined}
+                <ProCheckout
+                  priceId={priceId}
                   returnUrl={`${window.location.origin}/steun?session_id={CHECKOUT_SESSION_ID}`}
                 />
               ) : (
@@ -96,8 +122,8 @@ export default function Steun() {
             </Surface>
 
             <p className="mt-4 text-xs leading-relaxed text-muted-foreground">
-              Eenmalige betaling, geen abonnement. Je kunt dit op elk moment overslaan; alle functies blijven
-              gewoon beschikbaar.
+              Eenmalige betaling, geen abonnement en geen automatische verlenging. Je kunt dit overslaan; alle
+              basisfuncties blijven gewoon beschikbaar.
             </p>
           </>
         )}

@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.has_pro_access(uuid, text) FROM authenticated;

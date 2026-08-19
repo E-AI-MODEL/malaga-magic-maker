@@ -1,0 +1,16 @@
+export interface ProPlan {
+  priceId: "vakansie_pro_2" | "vakansie_pro_5" | "vakansie_pro_10";
+  label: string;
+}
+
+export const PRO_PLANS: ProPlan[] = [
+  { priceId: "vakansie_pro_2", label: "€ 2" },
+  { priceId: "vakansie_pro_5", label: "€ 5" },
+  { priceId: "vakansie_pro_10", label: "€ 10" },
+];
+
+export const PRO_BENEFITS = [
+  "Pro-kenmerk op je account",
+  "Blijvende toegang, geen abonnement",
+  "Je steunt hosting, documentopslag en Hansie",
+];

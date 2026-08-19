@@ -101,130 +101,142 @@ export default function TripHome() {
 
   return (
     <AppLayout>
-      <div className="px-5 pb-12 pt-5 sm:px-8">
-        <TripVisual name={activeTrip.name} coverImageUrl={activeTrip.cover_image_url} height="h-[150px] sm:h-[190px]" />
+      <div className="pb-12">
+        <TripVisual
+          name={activeTrip.name}
+          coverImageUrl={activeTrip.cover_image_url}
+          height="h-[176px] sm:h-[220px]"
+          rounded="rounded-none"
+        />
 
-        <Surface className="relative z-10 -mt-8 mx-2 px-4 pb-4 pt-4 sm:mx-4">
-          <div className="flex items-center justify-between gap-3">
-            <StatusChip tone={attentionTotal > 0 ? "attention" : "done"}>{timing}</StatusChip>
-            <span className="truncate font-ui text-[11px] font-semibold text-muted-foreground">
-              {formatDateRange(activeTrip.start_date, activeTrip.end_date)}
-            </span>
-          </div>
-          <h1 className="mt-3 font-brand text-[26px] font-semibold leading-tight sm:text-3xl">{activeTrip.name}</h1>
-          <p className="mt-1 flex items-center gap-1.5 text-sm text-muted-foreground">
-            <MapPin className="h-[15px] w-[15px] shrink-0" strokeWidth={1.75} />
-            <span className="truncate">{activeTrip.destination_name || "Bestemming nog niet gekozen"}</span>
-          </p>
-          <div className="mt-4">
-            <ReadinessBar
-              done={Math.max(0, trackedTotal - attentionTotal)}
-              total={Math.max(1, trackedTotal)}
-              sentence={readinessSentence}
-            />
-          </div>
-        </Surface>
-
-        {personalItems.length > 0 && (
-          <section className="mt-8">
-            <SectionLabel>Voor jou</SectionLabel>
-            <RowList className="mt-1">
-              {personalItems.map((item) => (
-                <RowItem
-                  key={item.key}
-                  icon={item.icon}
-                  title={item.title}
-                  meta={item.meta}
-                  to={`/trip/${activeTrip.id}/samen`}
-                />
-              ))}
-            </RowList>
-          </section>
-        )}
-
-        <section className="mt-8">
-          <SectionLabel>Dit vraagt aandacht</SectionLabel>
-          {attention.length > 0 ? (
-            <RowList className="mt-1">
-              {attention.slice(0, 5).map((check) => {
-                const action = readinessAction(check, activeTrip.id);
-                return (
-                  <RowItem
-                    key={check.key}
-                    icon={AlertCircle}
-                    emphasis
-                    tone="attention"
-                    title={check.label}
-                    meta={action?.label}
-                    trailing={check.attention_count > 1 ? String(check.attention_count) : undefined}
-                    to={action?.href}
-                  />
-                );
-              })}
-            </RowList>
-          ) : readinessQuery.isLoading ? (
-            <RowList className="mt-1">
-              <RowItem icon={CalendarClock} title="Voorbereiding wordt opgehaald…" />
-            </RowList>
-          ) : (
-            <EmptyLine text="Alles wat in Vakansie staat, is geregeld. Nieuwe aandachtspunten verschijnen hier vanzelf." />
-          )}
-        </section>
-
-        <section className="mt-8">
-          <SectionLabel>Daarna komt dit</SectionLabel>
-          <RowList className="mt-1">
-            {itemsQuery.isLoading ? (
-              <RowItem icon={CalendarClock} title="Eerstvolgende wordt geladen…" />
-            ) : upcomingItems.length === 0 ? (
-              <RowItem
-                icon={CalendarClock}
-                title="Nog niets op je tijdlijn"
-                meta="Voeg vluchten, verblijf en activiteiten toe"
-                to={`/trip/${activeTrip.id}/reis`}
+        <div className="px-5 sm:px-8">
+          <Surface className="relative z-10 -mt-8 px-4 pb-4 pt-4 sm:mx-2 sm:px-5">
+            <div className="flex items-center justify-between gap-3">
+              <StatusChip tone={attentionTotal > 0 ? "attention" : "done"}>{timing}</StatusChip>
+              <span className="truncate font-ui text-[11px] font-semibold text-muted-foreground">
+                {formatDateRange(activeTrip.start_date, activeTrip.end_date)}
+              </span>
+            </div>
+            <h1 className="mt-3 font-brand text-[28px] font-semibold leading-tight sm:text-3xl">{activeTrip.name}</h1>
+            <p className="mt-1 flex items-center gap-1.5 text-sm text-muted-foreground">
+              <MapPin className="h-[15px] w-[15px] shrink-0" strokeWidth={1.75} />
+              <span className="truncate">{activeTrip.destination_name || "Bestemming nog niet gekozen"}</span>
+            </p>
+            <div className="mt-4 border-t border-rule/10 pt-4">
+              <ReadinessBar
+                done={Math.max(0, trackedTotal - attentionTotal)}
+                total={Math.max(1, trackedTotal)}
+                sentence={readinessSentence}
               />
+            </div>
+          </Surface>
+
+          {personalItems.length > 0 && (
+            <section className="mt-8">
+              <SectionLabel>Voor jou</SectionLabel>
+              <Surface className="mt-2 px-4 shadow-none">
+                <RowList>
+                  {personalItems.map((item) => (
+                    <RowItem
+                      key={item.key}
+                      icon={item.icon}
+                      emphasis
+                      title={item.title}
+                      meta={item.meta}
+                      to={`/trip/${activeTrip.id}/samen`}
+                    />
+                  ))}
+                </RowList>
+              </Surface>
+            </section>
+          )}
+
+          <section className="mt-8">
+            <SectionLabel>Dit vraagt aandacht</SectionLabel>
+            {attention.length > 0 ? (
+              <Surface className="mt-2 px-4 shadow-none">
+                <RowList>
+                  {attention.slice(0, 5).map((check) => {
+                    const action = readinessAction(check, activeTrip.id);
+                    return (
+                      <RowItem
+                        key={check.key}
+                        icon={AlertCircle}
+                        emphasis
+                        tone="attention"
+                        title={check.label}
+                        meta={action?.label}
+                        trailing={check.attention_count > 1 ? String(check.attention_count) : undefined}
+                        to={action?.href}
+                      />
+                    );
+                  })}
+                </RowList>
+              </Surface>
+            ) : readinessQuery.isLoading ? (
+              <RowList className="mt-1">
+                <RowItem icon={CalendarClock} title="Voorbereiding wordt opgehaald…" />
+              </RowList>
             ) : (
-              upcomingItems.map((item) => (
+              <EmptyLine text="Alles wat in Vakansie staat, is geregeld. Nieuwe aandachtspunten verschijnen hier vanzelf." />
+            )}
+          </section>
+
+          <section className="mt-8">
+            <SectionLabel>Daarna komt dit</SectionLabel>
+            <RowList className="mt-1">
+              {itemsQuery.isLoading ? (
+                <RowItem icon={CalendarClock} title="Eerstvolgende wordt geladen…" />
+              ) : upcomingItems.length === 0 ? (
                 <RowItem
-                  key={item.id}
                   icon={CalendarClock}
-                  title={item.title}
-                  meta={formatTripDateTime(item.start_at, item.timezone || timezone)}
+                  title="Nog niets op je tijdlijn"
+                  meta="Voeg vluchten, verblijf en activiteiten toe"
                   to={`/trip/${activeTrip.id}/reis`}
                 />
-              ))
+              ) : (
+                upcomingItems.map((item) => (
+                  <RowItem
+                    key={item.id}
+                    icon={CalendarClock}
+                    title={item.title}
+                    meta={formatTripDateTime(item.start_at, item.timezone || timezone)}
+                    to={`/trip/${activeTrip.id}/reis`}
+                  />
+                ))
+              )}
+            </RowList>
+          </section>
+
+          <section className="mt-8">
+            <SectionLabel>Verder in deze reis</SectionLabel>
+            <RowList className="mt-1">
+              <RowItem
+                icon={Route}
+                title="Reisplan"
+                meta={`${readiness?.facts.trip_item_count ?? 0} onderdelen`}
+                to={`/trip/${activeTrip.id}/reis`}
+              />
+              <RowItem
+                icon={Users}
+                title="Samen"
+                meta={`${readiness?.facts.member_count ?? 0} ${readiness?.facts.member_count === 1 ? "persoon" : "personen"} · ${openTasks.length} open taken`}
+                to={`/trip/${activeTrip.id}/samen`}
+              />
+              <RowItem
+                icon={FileText}
+                title="Documenten"
+                meta={`${readiness?.facts.document_count ?? 0} bewaard`}
+                to={`/trip/${activeTrip.id}/reis`}
+              />
+            </RowList>
+            {!readinessQuery.isLoading && !readiness && (
+              <EmptyLine text="De voorbereidingsstatus kon niet worden opgehaald." />
             )}
-          </RowList>
-        </section>
+          </section>
 
-        <section className="mt-8">
-          <SectionLabel>Verder in deze reis</SectionLabel>
-          <RowList className="mt-1">
-            <RowItem
-              icon={Route}
-              title="Reisplan"
-              meta={`${readiness?.facts.trip_item_count ?? 0} onderdelen`}
-              to={`/trip/${activeTrip.id}/reis`}
-            />
-            <RowItem
-              icon={Users}
-              title="Samen"
-              meta={`${readiness?.facts.member_count ?? 0} ${readiness?.facts.member_count === 1 ? "persoon" : "personen"} · ${openTasks.length} open taken`}
-              to={`/trip/${activeTrip.id}/samen`}
-            />
-            <RowItem
-              icon={FileText}
-              title="Documenten"
-              meta={`${readiness?.facts.document_count ?? 0} bewaard`}
-              to={`/trip/${activeTrip.id}/reis`}
-            />
-          </RowList>
-          {!readinessQuery.isLoading && !readiness && (
-            <EmptyLine text="De voorbereidingsstatus kon niet worden opgehaald." />
-          )}
-        </section>
-
-        <RecentActivity tripId={activeTrip.id} />
+          <RecentActivity tripId={activeTrip.id} />
+        </div>
       </div>
     </AppLayout>
   );

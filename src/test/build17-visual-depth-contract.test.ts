@@ -14,49 +14,86 @@ const appLayout = source("src/components/AppLayout.tsx");
 const hansie = source("src/components/HansieWidget.tsx");
 const bottomNav = source("src/components/BottomNav.tsx");
 const reis = source("src/pages/TripReis.tsx");
+const tripItemSheet = source("src/features/travel/TripItemSheet.tsx");
 const travelTypes = source("src/features/travel/presentation.ts");
 
 describe("Vakansie BUILD 17 visual depth contract", () => {
-  it("ships one shared trip hero with a neutral local fallback image", () => {
-    expect(tripVisual).toContain("@/assets/hero-transport.jpg");
-    expect(tripVisual).toContain("coverImageUrl || heroDefault");
+  it("ships shared trip photography with deterministic local fallbacks", () => {
+    expect(tripVisual).toContain("hero-beach-town.jpg");
+    expect(tripVisual).toContain("hero-villa.jpg");
+    expect(tripVisual).toContain("hero-transport.jpg");
+    expect(tripVisual).toContain("fallbackPool");
+    expect(tripVisual).toContain("stableIndex");
+    expect(tripVisual).toContain("coverImageUrl || fallbackPool");
+    expect(tripVisual).toContain("export function TripThumb");
     expect(tripVisual).not.toContain("http");
   });
 
-  it("uses the shared hero on Mijn reizen and Overzicht", () => {
+  it("keeps consumer photography and Hansie free of gradients and glass", () => {
+    expect(tripVisual).not.toContain("bg-gradient");
+    expect(tripVisual).not.toContain("backdrop-blur");
+    expect(hansie).not.toContain("bg-gradient");
+    expect(hansie).not.toContain("backdrop-blur");
+    expect(trips).not.toContain("backdrop-blur");
+    expect(appLayout).not.toContain("backdrop-blur");
+    expect(bottomNav).not.toContain("backdrop-blur");
+  });
+
+  it("uses hero photography and layered surfaces on Mijn reizen and Overzicht", () => {
     for (const page of [trips, tripHome]) {
       expect(page).toContain("@/components/TripVisual");
       expect(page).toContain("<TripVisual");
+      expect(page).toContain("<Surface");
+      expect(page).toContain("-mt-8");
     }
+    expect(trips).toContain("<TripThumb");
+    expect(trips).toContain("h-[176px] sm:h-[220px]");
+    expect(tripHome).toContain("h-[176px] sm:h-[220px]");
   });
 
-  it("gives real objects a warm surface with soft depth", () => {
+  it("gives important objects soft depth without returning to card grids", () => {
     expect(primitives).toContain("export function Surface");
     expect(primitives).toContain("shadow-soft");
     expect(primitives).toContain("export function IconBubble");
-    expect(trips).toContain("<Surface");
-    expect(tripHome).toContain("<Surface");
+    expect(trips).toContain("Dit vraagt aandacht");
+    expect(tripHome).toContain("Voor jou");
   });
 
-  it("keeps product iconography Lucide-only, never unicode or emoji", () => {
-    for (const file of [appLayout, trips, tripHome, hansie, bottomNav, reis, travelTypes]) {
+  it("keeps product iconography Lucide-only, never emoji or unicode checks", () => {
+    for (const file of [appLayout, trips, tripHome, hansie, bottomNav, reis, travelTypes, tripItemSheet]) {
       expect(file).not.toMatch(/[\u2705\u2714\u2713\u{1F300}-\u{1FAFF}\u{2708}\u{26F4}]/u);
     }
+    expect(appLayout).toContain("MoreHorizontal");
     expect(appLayout).toContain("Check");
-    expect(appLayout).toContain("lucide-react");
     expect(reis).toContain("travelTypeIcon");
+    expect(tripItemSheet).not.toContain("option.icon");
   });
 
-  it("keeps the Hansie ask bar as its own warm surface with a line icon", () => {
-    expect(hansie).toContain("shadow-soft");
-    expect(hansie).toContain("bg-card");
+  it("uses the simple mobile trip header from the chosen direction", () => {
+    expect(appLayout).toContain("ChevronLeft");
+    expect(appLayout).toContain('aria-label="Meer opties"');
+    expect(appLayout).toContain("Wissel reis");
+    expect(appLayout).not.toContain("ChevronDown");
+    const mobileSection = appLayout.slice(appLayout.indexOf("if (isMobile)"), appLayout.indexOf("return (", appLayout.indexOf("if (isMobile)") + 20));
+    expect(mobileSection).not.toContain("NotificationCenter");
+  });
+
+  it("keeps the Hansie ask bar as a warm integrated control with line icons", () => {
+    expect(hansie).toContain("h-[46px]");
+    expect(hansie).toContain("Sparkles");
     expect(hansie).toContain("MessageCircle");
-    expect(hansie).toMatch(/h-1[12]/);
+    expect(hansie).toContain("Send");
+    expect(hansie).toContain("bg-primary text-primary-foreground");
+    expect(hansie).toContain("rounded-full border border-border bg-card");
+    expect(hansie).toContain("const requestTripId = trip.id");
+    expect(hansie).toContain("contextIdRef.current !== requestTripId");
   });
 
-  it("keeps the bottom nav at exactly three Lucide destinations", () => {
+  it("keeps the bottom nav at exactly three Lucide destinations with a stronger active state", () => {
     const labels = [...bottomNav.matchAll(/label: "([^"]+)"/g)].map((match) => match[1]);
     expect(labels).toEqual(["Overzicht", "Reis", "Samen"]);
-    expect(bottomNav).toContain("lucide-react");
+    expect(bottomNav).toContain('className="h-5 w-5"');
+    expect(bottomNav).toContain("bg-card");
+    expect(bottomNav).toContain("h-[2px]");
   });
 });

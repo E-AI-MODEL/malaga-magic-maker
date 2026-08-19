@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Sans:wght@400;500;600&family=Fraunces:opsz,wght@9..144,500;9..144,600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Sans:wght@400;500;600&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -126,12 +126,28 @@
   .safe-area-pb {
     padding-bottom: env(safe-area-inset-bottom);
   }
+  .font-brand {
+    font-family: 'Fraunces', Georgia, serif;
+  }
+  .font-ui {
+    font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;
+  }
+  .shadow-soft {
+    box-shadow: 0 1px 2px hsl(var(--rule) / 0.04), 0 8px 24px -14px hsl(var(--rule) / 0.18);
+  }
+  .hairline {
+    border-color: hsl(var(--rule) / 0.08);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation-duration: 0.01ms !important;
-    transition-duration: 0.01ms !important;
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
   }
 }
 

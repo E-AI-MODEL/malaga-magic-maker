@@ -101,6 +101,8 @@ function AppRoutes() {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/steun" element={<Steun />} />
+        <Route path="/terms" element={<TermsPage />} />
+        <Route path="/privacy" element={<PrivacyPage />} />
         <Route path="/" element={user ? <Navigate to="/trips" replace /> : <Landing />} />
         <Route path="/boot" element={<Navigate to={user ? "/trips" : "/login"} replace />} />
 

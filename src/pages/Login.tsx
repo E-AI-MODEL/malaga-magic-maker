@@ -1,157 +1,120 @@
-import { useState, useRef, useEffect } from "react";
-import { useAuth } from "@/lib/auth";
+import { FormEvent, useState } from "react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { motion, AnimatePresence } from "framer-motion";
+import { useAuth } from "@/lib/auth";
+import { GoogleAuthButton } from "@/components/GoogleAuthButton";
+import logo from "@/assets/vakansie-logo.png";
+
+function safeNext(value: string | null) {
+  if (!value || !value.startsWith("/") || value.startsWith("//")) return "/trips";
+  return value;
+}
 
 export default function Login() {
-  const { signIn } = useAuth();
-  const [emailOrUsername, setEmailOrUsername] = useState("");
+  const { signIn, signInWithGoogle } = useAuth();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const next = safeNext(searchParams.get("next"));
+
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [showForm, setShowForm] = useState(false);
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const videoStartedRef = useRef(false);
 
-  const handleVideoEnd = () => {
-    setShowForm(true);
-  };
-
-  const tryPlay = () => {
-    const video = videoRef.current;
-    if (!video || videoStartedRef.current) return;
-
-    const playPromise = video.play();
-    if (playPromise && typeof playPromise.then === "function") {
-      playPromise
-        .then(() => {
-          videoStartedRef.current = true;
-        })
-        .catch(() => {
-          // Retry on the first user interaction.
-        });
-    }
-  };
-
-  useEffect(() => {
-    const onUserGesture = () => {
-      tryPlay();
-    };
-
-    document.addEventListener("touchstart", onUserGesture, { passive: true });
-    document.addEventListener("pointerdown", onUserGesture, { passive: true });
-    document.addEventListener("keydown", onUserGesture);
-
-    return () => {
-      document.removeEventListener("touchstart", onUserGesture);
-      document.removeEventListener("pointerdown", onUserGesture);
-      document.removeEventListener("keydown", onUserGesture);
-    };
-  }, []);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (!videoStartedRef.current && !showForm) {
-        setShowForm(true);
-      }
-    }, 4000);
-
-    return () => clearTimeout(timer);
-  }, [showForm]);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleGoogle = async () => {
     setError("");
     setLoading(true);
-
-    const result = await signIn(emailOrUsername, password);
-    if (result.error) setError(result.error);
-
+    const result = await signInWithGoogle();
     setLoading(false);
+    if (result.error) setError(result.error);
+  };
+
+  const handleSubmit = async (event: FormEvent) => {
+    event.preventDefault();
+    setError("");
+    setLoading(true);
+    const result = await signIn(email, password);
+    setLoading(false);
+    if (result.error) {
+      setError(result.error);
+      return;
+    }
+    navigate(next, { replace: true });
   };
 
   return (
-    <div className="relative h-[100dvh] flex items-end justify-center overflow-hidden bg-black">
-      <video
-        ref={videoRef}
-        src="/videos/boot-sequence.mp4"
-        autoPlay
-        muted
-        playsInline
-        preload="auto"
-        webkit-playsinline="true"
-        disablePictureInPicture
-        onPlay={() => {
-          videoStartedRef.current = true;
-        }}
-        onEnded={handleVideoEnd}
-        onCanPlay={tryPlay}
-        onCanPlayThrough={tryPlay}
-        onLoadedData={tryPlay}
-        className="absolute inset-0 w-full h-full object-contain sm:object-cover"
-      />
+    <div className="flex min-h-screen flex-col items-center justify-center bg-background px-5 py-10">
+      <div className="w-full max-w-md">
+        <div className="mb-6 flex items-center gap-2.5">
+          <img src={logo} alt="" width={32} height={32} className="h-8 w-8 rounded-[10px] object-cover" />
+          <span className="font-brand text-xl font-semibold">Vakansie</span>
+        </div>
 
-      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/40 sm:from-black/40 sm:via-transparent sm:to-transparent" />
+        <div className="rounded-[24px] border border-border bg-card p-7 shadow-soft">
+          <p className="font-ui text-[11px] font-semibold uppercase tracking-[0.16em] text-primary">Inloggen</p>
+          <h1 className="mt-2 font-brand text-[28px] font-semibold leading-tight">Welkom terug</h1>
+          <p className="mt-2 text-sm text-muted-foreground">Log in om je reizen te bekijken en verder te werken.</p>
 
-      <AnimatePresence>
-        {showForm && (
-          <motion.div
-            key="overlay"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.8 }}
-            className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent"
-          />
-        )}
-      </AnimatePresence>
+          <div className="mt-6">
+            <GoogleAuthButton onClick={handleGoogle} loading={loading} label="Inloggen met Google" />
+          </div>
 
-      <AnimatePresence>
-        {showForm && (
-          <motion.div
-            key="form"
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.3, ease: "easeOut" }}
-            className="relative z-10 w-full max-w-xs mx-auto px-6 pb-10 sm:pb-16 flex flex-col items-center"
-          >
-            <form onSubmit={handleSubmit} className="w-full space-y-2.5">
+          <div className="my-5 flex items-center gap-3">
+            <span className="h-px flex-1 bg-border" />
+            <span className="text-xs font-medium text-muted-foreground">of met e-mail</span>
+            <span className="h-px flex-1 bg-border" />
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label htmlFor="login-email" className="text-sm font-semibold">
+                E-mailadres
+              </label>
               <Input
-                value={emailOrUsername}
-                onChange={(e) => setEmailOrUsername(e.target.value)}
-                placeholder="Admin of e-mailadres"
-                autoComplete="username"
-                className="h-11 bg-black/40 border-white/15 text-white placeholder:text-white/40 text-[16px] sm:text-sm rounded-xl backdrop-blur-md focus:bg-black/50 focus:border-white/30"
+                id="login-email"
+                type="email"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+                autoComplete="email"
+                className="mt-2 h-11"
               />
+            </div>
+            <div>
+              <label htmlFor="login-password" className="text-sm font-semibold">
+                Wachtwoord
+              </label>
               <Input
+                id="login-password"
                 type="password"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Wachtwoord"
+                onChange={(event) => setPassword(event.target.value)}
                 autoComplete="current-password"
-                className="h-11 bg-black/40 border-white/15 text-white placeholder:text-white/40 text-[16px] sm:text-sm rounded-xl backdrop-blur-md focus:bg-black/50 focus:border-white/30"
+                className="mt-2 h-11"
               />
-              {error && <p className="text-xs text-red-400 font-medium pt-0.5">{error}</p>}
-              <Button
-                type="submit"
-                className="w-full h-11 font-bold text-sm rounded-xl"
-                disabled={loading}
-              >
-                {loading ? "Even wachten..." : "Inloggen"}
-              </Button>
-            </form>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            </div>
+            {error && <p className="rounded-xl bg-destructive/10 px-4 py-3 text-sm font-medium text-destructive">{error}</p>}
+            <Button type="submit" className="h-12 w-full rounded-full font-bold" disabled={loading}>
+              {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Inloggen
+            </Button>
+          </form>
 
-      {!showForm && (
-        <button
-          onClick={() => setShowForm(true)}
-          className="absolute bottom-6 right-6 z-20 text-white/30 text-[11px] hover:text-white/60 transition-colors"
-        >
-          Overslaan
-        </button>
-      )}
+          <p className="mt-5 text-center text-xs text-muted-foreground">
+            <Link to="/forgot-password" className="font-semibold text-primary hover:underline">
+              Wachtwoord vergeten?
+            </Link>
+          </p>
+        </div>
+
+        <p className="mt-6 text-center text-sm text-muted-foreground">
+          Nog geen account?{" "}
+          <Link to={`/signup?next=${encodeURIComponent(next)}`} className="font-semibold text-primary hover:underline">
+            Maak er een aan
+          </Link>
+        </p>
+      </div>
     </div>
   );
 }

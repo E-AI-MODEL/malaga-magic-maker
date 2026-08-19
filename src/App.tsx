@@ -16,6 +16,8 @@ const Signup = lazy(() => import("./pages/Signup"));
 const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const Steun = lazy(() => import("./pages/Steun"));
+const TermsPage = lazy(() => import("./pages/TermsPage"));
+const PrivacyPage = lazy(() => import("./pages/PrivacyPage"));
 const NewTrip = lazy(() => import("./pages/NewTrip"));
 const TripHome = lazy(() => import("./pages/TripHome"));
 const TripReis = lazy(() => import("./pages/TripReis"));
@@ -99,6 +101,8 @@ function AppRoutes() {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/steun" element={<Steun />} />
+        <Route path="/terms" element={<TermsPage />} />
+        <Route path="/privacy" element={<PrivacyPage />} />
         <Route path="/" element={user ? <Navigate to="/trips" replace /> : <Landing />} />
         <Route path="/boot" element={<Navigate to={user ? "/trips" : "/login"} replace />} />
 

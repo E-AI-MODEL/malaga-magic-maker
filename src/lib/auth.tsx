@@ -20,6 +20,7 @@ interface AuthContextType {
   isAdmin: boolean;
   loading: boolean;
   signIn: (emailOrUsername: string, password: string) => Promise<{ error?: string }>;
+  signInWithGoogle: () => Promise<{ error?: string }>;
   signUp: (
     email: string,
     password: string,
@@ -147,6 +148,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return {};
   };
 
+  const signInWithGoogle = async () => {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: `${window.location.origin}/` },
+    });
+    if (error) return { error: "Inloggen met Google is niet gelukt." };
+    return {};
+  };
+
   const signOut = async () => {
     clearAuthState();
     await supabase.auth.signOut();
@@ -188,7 +198,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, profile, isAdmin, loading, signIn, signUp, requestPasswordReset, updatePassword, signOut }}
+      value={{ user, profile, isAdmin, loading, signIn, signInWithGoogle, signUp, requestPasswordReset, updatePassword, signOut }}
     >
       {children}
     </AuthContext.Provider>

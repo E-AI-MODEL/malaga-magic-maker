@@ -104,6 +104,26 @@ serve(async (req) => {
     }
     if (!membership) return jsonError(403, "Forbidden");
 
+    // Plan quota + abuse limit. Runs in the caller's authenticated context and
+    // records the usage event itself, so it must succeed before any AI call.
+    const { data: quota, error: quotaError } = await userClient.rpc("consume_hansie_quota", {
+      p_trip_id: tripId,
+    });
+    if (quotaError) {
+      console.error("trip-ai-chat quota check failed:", quotaError.message);
+      return jsonError(500, "Hansie is even niet beschikbaar.");
+    }
+    const quotaResult = (quota ?? {}) as Record<string, unknown>;
+    if (quotaResult.allowed === false) {
+      const isFree = quotaResult.plan !== "pro";
+      const message = quotaResult.reason === "daily_limit"
+        ? (isFree
+          ? `Je hebt je ${quotaResult.day_limit} Hansie-vragen van vandaag gebruikt. Met Pro krijg je er 150 per dag.`
+          : "Je hebt het dagmaximum voor Hansie bereikt. Probeer het morgen opnieuw.")
+        : "Even rustig aan: je stelde net veel vragen. Probeer het zo opnieuw.";
+      return jsonError(429, message);
+    }
+
     // The readiness RPC runs in the caller's authenticated context and enforces
     // its own membership check as defense in depth.
     const readinessPromise = userClient.rpc("get_trip_readiness", { p_trip_id: tripId });
@@ -244,13 +264,6 @@ serve(async (req) => {
       console.error("AI gateway error:", response.status, errorText.slice(0, 500));
       return jsonError(500, "Hansie is even niet beschikbaar.");
     }
-
-    // Minimal observability only: record that an authorized Hansie request reached
-    // a successful upstream response. Never persist the prompt, response or documents.
-    const { error: usageError } = await db
-      .from("ai_usage_events")
-      .insert({ user_id: userId, trip_id: tripId, feature: "hansie" });
-    if (usageError) console.error("trip-ai-chat usage telemetry failed:", usageError.message);
 
     return new Response(response.body, {
       headers: { ...corsHeaders, "Content-Type": "text/event-stream" },

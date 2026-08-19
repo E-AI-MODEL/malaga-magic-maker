@@ -1,4 +1,4 @@
-import { ChevronDown, Home, LogOut, Plane, Plus, Route, Settings, User, Users } from "lucide-react";
+import { Check, ChevronDown, Home, LogOut, Plane, Plus, Route, Settings, User, Users } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/lib/auth";
 import { useTrip } from "@/contexts/TripContext";
@@ -69,7 +69,7 @@ export function AppSidebar() {
                     className={trip.id === activeTrip.id ? "bg-primary/10 font-semibold" : ""}
                   >
                     <span className="truncate">{trip.name}</span>
-                    {trip.id === activeTrip.id && <span className="ml-auto text-xs text-primary">✓</span>}
+                    {trip.id === activeTrip.id && <Check className="ml-auto h-3.5 w-3.5 shrink-0 text-primary" strokeWidth={2} />}
                   </DropdownMenuItem>
                 ))}
                 <DropdownMenuSeparator />

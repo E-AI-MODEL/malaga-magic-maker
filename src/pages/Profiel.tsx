@@ -8,11 +8,13 @@ import { Input } from "@/components/ui/input";
 import { SectionLabel } from "@/components/primitives";
 import { NotificationPreferences } from "@/features/notifications/NotificationPreferences";
 import { toast } from "sonner";
-import { ArrowLeft, ChevronRight, LogOut } from "lucide-react";
+import { ArrowLeft, ChevronRight, LogOut, Sparkles } from "lucide-react";
+import { usePro } from "@/features/pro/usePro";
 
 export default function Profiel() {
   const { profile, isAdmin, user, signOut } = useAuth();
   const { userTrips } = useTrip();
+  const { isPro } = usePro();
   const navigate = useNavigate();
   const [displayName, setDisplayName] = useState(profile?.display_name || "");
   const [saving, setSaving] = useState(false);
@@ -56,8 +58,33 @@ export default function Profiel() {
               {profile?.username && user?.email ? " · " : ""}
               {user?.email || ""}
             </p>
+            {isPro && (
+              <span className="mt-1.5 inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-medium text-primary">
+                <Sparkles className="h-3 w-3" strokeWidth={1.75} />
+                Pro
+              </span>
+            )}
           </div>
         </div>
+
+        <section className="mt-7">
+          <SectionLabel>Vakansie Pro</SectionLabel>
+          <div className="mt-1 rule-divide">
+            <button onClick={() => navigate("/steun")} className="flex w-full items-center gap-3 py-3 text-left">
+              <span className="min-w-0 flex-1">
+                <span className="block text-[15px] font-medium">
+                  {isPro ? "Pro is actief" : "Pro ontgrendelen"}
+                </span>
+                <span className="block text-xs text-muted-foreground">
+                  {isPro
+                    ? "Bedankt voor je bijdrage. Er loopt geen abonnement."
+                    : "Eenmalige bijdrage vanaf € 2. Geen abonnement."}
+                </span>
+              </span>
+              <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground/60" />
+            </button>
+          </div>
+        </section>
 
         <section className="mt-7">
           <SectionLabel>Account</SectionLabel>

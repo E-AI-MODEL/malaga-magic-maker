@@ -106,16 +106,22 @@ export default function Landing() {
       <main className="pb-16">
         <section className="relative">
           <div className="relative h-[420px] w-full overflow-hidden sm:h-[500px]">
+            <div
+              aria-hidden
+              className={`absolute inset-0 bg-secondary transition-opacity duration-700 ${heroLoaded ? "opacity-0" : "opacity-100"}`}
+            />
             <img
               src={heroHome}
               alt="Terras met uitzicht op zee en een opengeslagen reisnotitieboek"
               width={1280}
               height={720}
+              loading="eager"
+              onLoad={() => setHeroLoaded(true)}
               className="h-full w-full object-cover"
             />
-            <div aria-hidden className="absolute inset-0 bg-foreground/55" />
+            <div aria-hidden className="absolute inset-0 bg-foreground/60" />
             <div className="absolute inset-x-0 top-0 mx-auto max-w-3xl px-5 pt-10">
-              <p className="flex items-center gap-2.5 font-ui text-[11px] font-semibold uppercase tracking-[0.16em] text-white/70">
+              <p className="flex items-center gap-2.5 font-ui text-[11px] font-semibold uppercase tracking-[0.16em] text-white/80">
                 <span aria-hidden className="h-px w-7 bg-white/40" />
                 Voorbereiden zonder gedoe
               </p>
@@ -126,7 +132,7 @@ export default function Landing() {
                 <br />
                 rustige plek
               </h1>
-              <p className="mt-4 max-w-sm text-[15px] leading-relaxed text-white/85">
+              <p className="mt-4 max-w-sm text-[15px] leading-relaxed text-white/90">
                 Geen losse appjes, mails en screenshots meer. Reisplan, taken, kosten en documenten — bij
                 elkaar, voor jezelf of voor de hele groep.
               </p>

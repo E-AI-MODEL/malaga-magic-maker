@@ -183,6 +183,19 @@ export default function Landing() {
                 </span>
               ))}
             </p>
+            <div className="mt-6 rounded-[16px] border border-border bg-card p-4">
+              <p className="mb-3 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                Waarom Vakansie?
+              </p>
+              <div className="grid gap-3 sm:grid-cols-3">
+                {TRUST_POINTS.map((point) => (
+                  <div key={point} className="flex items-center gap-2">
+                    <Shield className="h-4 w-4 text-primary" strokeWidth={1.75} />
+                    <span className="text-sm font-medium">{point}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </section>
 

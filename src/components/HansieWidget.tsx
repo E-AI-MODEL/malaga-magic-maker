@@ -1,6 +1,6 @@
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
-import { Loader2, Send, Sparkles } from "lucide-react";
+import { Loader2, MessageCircle, Send, Sparkles } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -112,7 +112,7 @@ export function HansieWidget({
   }, [tripId]);
 
   const suggestions = useMemo(
-    () => ["Wat moet deze week?", "Wat ontbreekt nog?", "Zijn we klaar voor vertrek?"],
+    () => ["Ben ik klaar voor vertrek?", "Wat ontbreekt nog?", "Wat moet deze week?", "Vat deze reis samen"],
     [],
   );
 
@@ -174,35 +174,42 @@ export function HansieWidget({
       <div
         className={
           floating
-            ? `fixed z-40 border-t border-border bg-background/95 backdrop-blur-sm ${
+            ? `fixed z-40 bg-background/95 px-3 py-2 backdrop-blur-sm ${
                 isMobile
                   ? "bottom-[calc(3.5rem+env(safe-area-inset-bottom))] left-0 right-0"
                   : "bottom-0 right-0 w-full max-w-md"
               }`
-            : "sticky bottom-0 left-0 right-0 z-40 border-t border-border bg-background/95 backdrop-blur-sm safe-area-pb"
+            : "sticky bottom-0 left-0 right-0 z-40 bg-background/95 px-3 py-2 backdrop-blur-sm safe-area-pb"
         }
       >
         <button
           onClick={() => setOpen(true)}
-          className="mx-auto flex h-12 w-full max-w-2xl items-center gap-2.5 px-5 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          aria-label="Vraag Hansie"
+          className="mx-auto flex h-12 w-full max-w-2xl items-center gap-2.5 rounded-[16px] border border-border bg-card px-3.5 text-left shadow-soft transition-colors hover:bg-card/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+          aria-label="Vraag het Hansie"
         >
-          <Sparkles className="h-4 w-4 shrink-0 text-primary" />
-          <span className="min-w-0 flex-1 truncate text-[13px] text-muted-foreground">Vraag Hansie over deze reis…</span>
-          <Send className="h-3.5 w-3.5 shrink-0 text-muted-foreground/60" />
+          <span aria-hidden className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[10px] bg-primary/10">
+            <MessageCircle className="h-[17px] w-[17px] text-primary" strokeWidth={1.75} />
+          </span>
+          <span className="min-w-0 flex-1 truncate text-[13px] text-muted-foreground">Vraag het Hansie…</span>
+          <Send className="h-4 w-4 shrink-0 text-muted-foreground/60" strokeWidth={1.75} />
         </button>
       </div>
 
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetContent
           side={isMobile ? "bottom" : "right"}
-          className={isMobile ? "h-[84vh] rounded-t-2xl p-0" : "w-full sm:max-w-md p-0"}
+          className={isMobile ? "h-[87vh] rounded-t-[14px] p-0" : "w-full sm:max-w-md p-0"}
         >
           <div className="flex h-full flex-col">
             <SheetHeader className="border-b border-border px-5 py-4 text-left">
-              <SheetTitle className="font-brand text-xl font-semibold">Hansie</SheetTitle>
+              <SheetTitle className="flex items-center gap-2 font-brand text-xl font-semibold">
+                <span aria-hidden className="flex h-8 w-8 items-center justify-center rounded-[10px] bg-primary/10">
+                  <Sparkles className="h-[17px] w-[17px] text-primary" strokeWidth={1.75} />
+                </span>
+                Hansie
+              </SheetTitle>
               <SheetDescription>
-                Vraag wat er voor {trip.name} vaststaat of nog aandacht nodig heeft.
+                {trip.name} · vraag wat vaststaat of nog aandacht nodig heeft.
               </SheetDescription>
             </SheetHeader>
 
@@ -220,7 +227,7 @@ export function HansieWidget({
                       <button
                         key={suggestion}
                         onClick={() => void send(suggestion)}
-                        className="w-full rounded-xl border border-border bg-card px-4 py-3 text-left text-sm font-medium transition-colors hover:bg-secondary/60"
+                        className="w-full rounded-[14px] border border-border bg-card px-4 py-3 text-left text-sm font-medium transition-colors hover:bg-secondary/60"
                       >
                         {suggestion}
                       </button>
@@ -239,7 +246,7 @@ export function HansieWidget({
                           <ReactMarkdown>{message.content}</ReactMarkdown>
                         </div>
                       ) : (
-                        <p className="max-w-[85%] rounded-2xl rounded-br-md bg-secondary px-3.5 py-2 text-sm font-medium">
+                        <p className="max-w-[85%] rounded-[14px] rounded-br-md bg-secondary px-3.5 py-2 text-sm font-medium text-secondary-foreground">
                           {message.content}
                         </p>
                       )}
@@ -256,7 +263,7 @@ export function HansieWidget({
               <Input
                 value={input}
                 onChange={(event) => setInput(event.target.value)}
-                placeholder="Vraag Hansie over deze reis…"
+                placeholder="Vraag het Hansie…"
                 disabled={loading}
                 autoComplete="off"
               />

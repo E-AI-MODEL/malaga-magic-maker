@@ -185,6 +185,9 @@ export function TripProvider({ children }: { children: ReactNode }) {
 
     if (error || !tripId) {
       console.error("create_trip_with_owner failed:", error?.message || "No trip id returned");
+      if (error?.message?.includes("trip_limit_reached")) {
+        throw new Error("trip_limit_reached");
+      }
       return null;
     }
 

@@ -148,6 +148,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return {};
   };
 
+  const signInWithGoogle = async () => {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: `${window.location.origin}/` },
+    });
+    if (error) return { error: "Inloggen met Google is niet gelukt." };
+    return {};
+  };
+
   const signOut = async () => {
     clearAuthState();
     await supabase.auth.signOut();

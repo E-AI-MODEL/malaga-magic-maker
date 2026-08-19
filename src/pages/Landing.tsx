@@ -351,12 +351,14 @@ export default function Landing() {
       </div>
 
       <footer className="border-t border-border py-8 pb-24 sm:pb-8">
-        <div className="mx-auto flex max-w-3xl flex-wrap items-center justify-between gap-3 px-5 text-xs text-muted-foreground">
+        <div className="mx-auto flex max-w-3xl flex-col gap-3 px-5 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
           <span>© {new Date().getFullYear()} Vakansie</span>
-          <span className="flex gap-4">
+          <span className="flex flex-wrap gap-4">
             <Link to="/login" className="hover:text-foreground">Inloggen</Link>
             <Link to="/signup" className="hover:text-foreground">Account maken</Link>
             <Link to="/steun" className="hover:text-foreground">Steunen</Link>
+            <Link to="/terms" className="hover:text-foreground">Voorwaarden</Link>
+            <Link to="/privacy" className="hover:text-foreground">Privacy</Link>
           </span>
         </div>
       </footer>

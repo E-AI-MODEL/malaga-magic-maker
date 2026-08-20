@@ -187,9 +187,11 @@ export default function TripReis() {
 
         {actionError && <p className="mt-4 text-sm font-medium text-destructive">{actionError}</p>}
 
-        <section className="mt-7">
-          <SectionLabel>Tijdlijn</SectionLabel>
+        <StickyBar className="mt-4">
+          <FilterChips value={filter} onChange={setFilter} options={counts} />
+        </StickyBar>
 
+        <section className="mt-3">
           {itemsQuery.isLoading ? (
             <div className="mt-2 space-y-2">
               {[0, 1, 2].map((row) => <div key={row} className="h-12 animate-pulse rounded-sm bg-secondary" />)}
@@ -198,18 +200,23 @@ export default function TripReis() {
             <p className="mt-3 text-sm text-destructive">Je reisgegevens konden niet worden geladen.</p>
           ) : groups.length === 0 ? (
             <EmptyLine
-              text="Nog niets ingepland. Begin met vervoer of verblijf; wat nog niet vaststaat mag op Nog regelen."
-              actionLabel={readOnly ? undefined : "Eerste onderdeel toevoegen"}
-              onClick={readOnly ? undefined : () => openCreate()}
+              text={
+                items.length === 0
+                  ? "Nog niets ingepland. Begin met vervoer of verblijf; wat nog niet vaststaat mag op Nog regelen."
+                  : "Niets in deze filter."
+              }
+              actionLabel={readOnly || items.length > 0 ? undefined : "Eerste onderdeel toevoegen"}
+              onClick={readOnly || items.length > 0 ? undefined : () => openCreate()}
             />
           ) : (
-            <div className="mt-2 space-y-6">
+            <div>
               {groups.map(([day, dayItems]) => (
-                <div key={day}>
-                  <h3 className="font-ui text-[13px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">
-                    {day === "undated" ? "Nog niet ingepland" : formatTripDay(day, timezone)}
-                  </h3>
-                  <RowList className="mt-1">
+                <div key={day} className="mb-2">
+                  <DayHeader
+                    label={day === "undated" ? "Nog niet ingepland" : formatTripDay(day, timezone)}
+                    meta={`${dayItems.length}`}
+                  />
+                  <div className="border-t border-rule">
                     {dayItems.map((item) => {
                       const type = getTravelType(item.type);
                       const canEdit = !readOnly && (isOrganizer || item.created_by === user?.id);
@@ -218,10 +225,15 @@ export default function TripReis() {
                         .filter(Boolean)
                         .join(" · ");
                       const TypeIcon = travelTypeIcon(item.type);
-                      const body = (
-                        <>
-                          <span className="w-11 shrink-0 font-ui text-[12px] font-semibold tabular text-muted-foreground">
-                            {timeAnchor(item, displayTimezone)}
+
+                      const row = (
+                        <div className="flex min-h-[56px] items-center gap-3 border-b border-rule py-2.5">
+                          {/* Time gutter keeps every row aligned on one vertical rhythm. */}
+                          <span className="relative flex w-11 shrink-0 flex-col items-start self-stretch">
+                            <span className="num font-ui text-[12px] font-semibold leading-5 text-foreground">
+                              {timeAnchor(item, displayTimezone)}
+                            </span>
+                            <span aria-hidden className="mt-1 w-px flex-1 bg-rail" />
                           </span>
                           <IconBubble icon={TypeIcon} tone="muted" />
                           <span className="min-w-0 flex-1">
@@ -234,34 +246,31 @@ export default function TripReis() {
                           </span>
                           {item.booking_url && <FileText className="h-4 w-4 shrink-0 text-muted-foreground/60" strokeWidth={1.75} />}
                           <StatusWord tone={statusTone(item.status)}>{getTravelStatus(item.status)}</StatusWord>
-                          {canEdit && <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground/60" />}
-                        </>
+                        </div>
                       );
 
-                      const rowClass =
-                        "flex min-h-[52px] w-full items-center gap-3 py-3 text-left rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2";
+                      if (!canEdit) return <div key={item.id}>{row}</div>;
 
-                      return canEdit ? (
-                        <button key={item.id} type="button" onClick={() => openEdit(item)} className={`${rowClass} transition-opacity hover:opacity-70`}>
-                          {body}
-                        </button>
-                      ) : (
-                        <div key={item.id} className={rowClass}>{body}</div>
+                      return (
+                        <SwipeRow
+                          key={item.id}
+                          actions={[
+                            { label: "Bewerken", icon: Pencil, onClick: () => openEdit(item) },
+                            { label: "Wissen", icon: Trash2, tone: "danger", onClick: () => void handleDelete(item) },
+                          ]}
+                        >
+                          <button type="button" onClick={() => openEdit(item)} className="w-full text-left">
+                            {row}
+                          </button>
+                        </SwipeRow>
                       );
                     })}
-                  </RowList>
+                  </div>
                 </div>
               ))}
             </div>
           )}
         </section>
-
-        {items.length > 0 && !itemsQuery.isLoading && (
-          <p className="mt-6 flex items-center gap-2 text-xs text-muted-foreground">
-            <CalendarClock className="h-4 w-4" strokeWidth={1.75} />
-            {items.length} {items.length === 1 ? "onderdeel" : "onderdelen"} in je reis
-          </p>
-        )}
 
         <DocumentsSection
           tripId={activeTrip.id}

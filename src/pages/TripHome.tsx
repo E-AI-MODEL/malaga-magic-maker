@@ -235,6 +235,7 @@ export default function TripHome() {
           <section className="mt-6 border-t border-rule pt-1">
             <SectionLabel>Eerstvolgend</SectionLabel>
             <RowList className="mt-0.5">
+              {null}
               {itemsQuery.isLoading ? (
                 <RowItem icon={CalendarClock} title="Laden…" />
               ) : upcomingItems.length === 0 ? (

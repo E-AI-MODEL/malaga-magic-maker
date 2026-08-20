@@ -72,7 +72,6 @@ export default function NewTrip() {
 
       navigate(`/trip/${trip.id}`, { replace: true });
     } catch (caught) {
-      console.error("[dbg] createTrip threw", caught);
       setError(describePlanLimit(caught) ?? "De reis kon niet worden aangemaakt. Probeer het opnieuw.");
     } finally {
       setSubmitting(false);

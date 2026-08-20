@@ -72,7 +72,7 @@ type RpcResult<T> = {
 };
 
 async function callVakansieRpc<T>(functionName: string, args: Record<string, unknown>): Promise<RpcResult<T>> {
-  const rpc = supabase.rpc as unknown as (
+  const rpc = supabase.rpc.bind(supabase) as unknown as (
     name: string,
     parameters: Record<string, unknown>,
   ) => Promise<RpcResult<T>>;
@@ -171,7 +171,6 @@ export function TripProvider({ children }: { children: ReactNode }) {
   const createTrip = useCallback(async (data: CreateTripInput): Promise<Trip | null> => {
     if (!user) return null;
 
-    console.log("[dbg] createTrip start", !!user);
     const { data: tripId, error } = await callVakansieRpc<string>("create_trip_with_owner", {
       p_name: data.name,
       p_description: data.description ?? null,

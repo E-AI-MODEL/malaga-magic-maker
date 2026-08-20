@@ -201,6 +201,26 @@ export async function setOpsTripStatus(tripId: string, status: string) {
   if (error) throw error;
 }
 
+export async function grantOpsPro(userId: string, note?: string) {
+  const { error } = await supabase.rpc("ops_grant_pro", { p_user_id: userId, p_note: note ?? null });
+  if (error) throw error;
+}
+
+export async function revokeOpsPro(userId: string, note?: string) {
+  const { error } = await supabase.rpc("ops_revoke_pro", { p_user_id: userId, p_note: note ?? null });
+  if (error) throw error;
+}
+
+export async function deleteOpsTrip(tripId: string) {
+  const { error } = await supabase.rpc("ops_delete_trip", { p_trip_id: tripId });
+  if (error) throw error;
+}
+
+export async function deleteOpsUser(userId: string) {
+  const { error } = await supabase.rpc("ops_delete_user", { p_user_id: userId });
+  if (error) throw error;
+}
+
 export async function listOpsAudit(): Promise<AdminAuditRow[]> {
   const { data, error } = await supabase
     .from("admin_audit_log")

@@ -1,6 +1,6 @@
-import { useRef, useState, type ComponentType, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
+import { useRef, useState, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
 import { Link } from "react-router-dom";
-import { ChevronRight, Sparkles, X } from "lucide-react";
+import { ChevronRight, Sparkles, X, type LucideIcon } from "lucide-react";
 
 /** Warm white object surface on the off-white canvas. Depth without SaaS cards. */
 export function Surface({
@@ -361,7 +361,7 @@ export function SuggestionRow({
 
 export type SwipeAction = {
   label: string;
-  icon: ComponentType<{ className?: string; strokeWidth?: number }>;
+  icon: LucideIcon;
   onClick: () => void;
   tone?: "default" | "danger";
 };

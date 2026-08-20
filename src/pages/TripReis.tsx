@@ -29,7 +29,7 @@ import {
 const quickAddTypes = ["flight", "train", "stay", "activity", "custom"] as const;
 
 const filters = [
-  { id: "all", label: "Alles", types: [] as string[] },
+  { id: "all", label: "Alles", types: [] as readonly string[] },
   { id: "transport", label: "Vervoer", types: ["flight", "train", "ferry", "rental_car", "transfer"] },
   { id: "stay", label: "Verblijf", types: ["stay"] },
   { id: "doing", label: "Doen", types: ["activity", "restaurant", "event", "ticket"] },
@@ -188,7 +188,7 @@ export default function TripReis() {
         {actionError && <p className="mt-4 text-sm font-medium text-destructive">{actionError}</p>}
 
         <StickyBar className="mt-4">
-          <FilterChips value={filter} onChange={setFilter} options={counts} />
+          <FilterChips<FilterId> value={filter} onChange={setFilter} options={counts} />
         </StickyBar>
 
         <section className="mt-3">

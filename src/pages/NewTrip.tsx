@@ -171,17 +171,12 @@ export default function NewTrip() {
             </div>
 
             <form onSubmit={handleSubmit} className="mt-9 space-y-6">
-              <div className="rounded-2xl border border-border bg-card p-4 sm:p-5">
-                <div className="flex items-start gap-3">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10">
-                    <CalendarDays className="h-4 w-4 text-primary" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold">Wanneer ga je?</p>
-                    <p className="mt-1 text-xs text-muted-foreground">Laat leeg als de data nog niet gekozen zijn.</p>
-                  </div>
+              <div className="border-t border-rule/10 pt-4">
+                <div className="flex items-baseline justify-between gap-3">
+                  <p className="font-ui text-[15px] font-semibold">Wanneer ga je?</p>
+                  <span className="text-xs text-muted-foreground">Optioneel</span>
                 </div>
-                <div className="mt-4 grid grid-cols-2 gap-3">
+                <div className="mt-3 grid grid-cols-2 gap-3">
                   <div>
                     <label className="text-xs font-medium text-muted-foreground" htmlFor="start-date">Van</label>
                     <Input id="start-date" type="date" value={startDate} onChange={(event) => setStartDate(event.target.value)} className="mt-1.5 h-11" />
@@ -193,17 +188,12 @@ export default function NewTrip() {
                 </div>
               </div>
 
-              <div className="rounded-2xl border border-border bg-card p-4 sm:p-5">
-                <div className="flex items-start gap-3">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10">
-                    <Users className="h-4 w-4 text-primary" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold">Wie gaat er mee?</p>
-                    <p className="mt-1 text-xs text-muted-foreground">Een soloreis begint gewoon bij 1.</p>
-                  </div>
+              <div className="border-t border-rule/10 pt-4">
+                <div className="flex items-baseline justify-between gap-3">
+                  <p className="font-ui text-[15px] font-semibold">Wie gaat er mee?</p>
+                  <span className="text-xs text-muted-foreground">Solo begint bij 1</span>
                 </div>
-                <div className="mt-4 grid grid-cols-2 gap-3">
+                <div className="mt-3 grid grid-cols-2 gap-3">
                   <div>
                     <label className="text-xs font-medium text-muted-foreground" htmlFor="group-size">Reizigers</label>
                     <Input id="group-size" type="number" min={1} max={99} value={groupSize} onChange={(event) => setGroupSize(event.target.value)} className="mt-1.5 h-11" />
@@ -222,8 +212,8 @@ export default function NewTrip() {
                 </div>
               </div>
 
-              <div>
-                <label className="text-sm font-semibold" htmlFor="description">Iets dat je wilt onthouden?</label>
+              <div className="border-t border-rule/10 pt-4">
+                <label className="font-ui text-[15px] font-semibold" htmlFor="description">Iets dat je wilt onthouden?</label>
                 <Textarea
                   id="description"
                   value={description}

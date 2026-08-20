@@ -17,6 +17,11 @@ export type TripDocumentRow = {
   size_bytes: number | null;
   created_at: string;
   ready_at: string | null;
+  extraction_status: string;
+  extracted_text: string | null;
+  extracted_summary: string | null;
+  extracted_suggestion: Json | null;
+  extracted_at: string | null;
 };
 
 type TripDocumentsTable = { Row: TripDocumentRow; Insert: never; Update: never; Relationships: [] };

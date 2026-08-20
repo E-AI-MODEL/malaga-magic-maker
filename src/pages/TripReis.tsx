@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Archive, CalendarClock, ChevronRight, FileText, Plus } from "lucide-react";
+import { Archive, FileText, Pencil, Plus, Trash2 } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth";
@@ -8,7 +8,15 @@ import { useTrip } from "@/contexts/TripContext";
 import { deleteTripItem, listTripItems, TripItemRow } from "@/features/travel/data";
 import { TripItemSheet } from "@/features/travel/TripItemSheet";
 import { DocumentsSection } from "@/features/documents/DocumentsSection";
-import { EmptyLine, IconBubble, RowList, SectionLabel, StatusWord } from "@/components/primitives";
+import {
+  DayHeader,
+  EmptyLine,
+  FilterChips,
+  IconBubble,
+  StatusWord,
+  StickyBar,
+  SwipeRow,
+} from "@/components/primitives";
 import { travelTypeIcon } from "@/features/travel/icons";
 import {
   formatTripDateTime,
@@ -19,6 +27,15 @@ import {
 } from "@/features/travel/presentation";
 
 const quickAddTypes = ["flight", "train", "stay", "activity", "custom"] as const;
+
+const filters = [
+  { id: "all", label: "Alles", types: [] as string[] },
+  { id: "transport", label: "Vervoer", types: ["flight", "train", "ferry", "rental_car", "transfer"] },
+  { id: "stay", label: "Verblijf", types: ["stay"] },
+  { id: "doing", label: "Doen", types: ["activity", "restaurant", "event", "ticket"] },
+] as const;
+
+type FilterId = (typeof filters)[number]["id"];
 
 function formatDateRange(startDate: string | null, endDate: string | null) {
   if (!startDate && !endDate) return "Data nog niet gekozen";
@@ -56,6 +73,7 @@ export default function TripReis() {
   const [editingItem, setEditingItem] = useState<TripItemRow | null>(null);
   const [createType, setCreateType] = useState<string>("custom");
   const [actionError, setActionError] = useState("");
+  const [filter, setFilter] = useState<FilterId>("all");
 
   const tripId = activeTrip?.id || "";
   const timezone = activeTrip?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone || "Europe/Amsterdam";
@@ -68,9 +86,20 @@ export default function TripReis() {
     enabled: Boolean(tripId),
   });
 
+  const counts = useMemo(() => {
+    const all = itemsQuery.data || [];
+    return filters.map((entry) => ({
+      id: entry.id,
+      label: entry.label,
+      count: entry.types.length === 0 ? all.length : all.filter((item) => entry.types.includes(item.type)).length,
+    }));
+  }, [itemsQuery.data]);
+
   const groups = useMemo(() => {
+    const allowed = filters.find((entry) => entry.id === filter)?.types || [];
+    const visible = (itemsQuery.data || []).filter((item) => allowed.length === 0 || allowed.includes(item.type));
     const grouped = new Map<string, TripItemRow[]>();
-    for (const item of itemsQuery.data || []) {
+    for (const item of visible) {
       const key = tripDayKey(item.start_at, item.timezone || timezone);
       grouped.set(key, [...(grouped.get(key) || []), item]);
     }
@@ -80,7 +109,7 @@ export default function TripReis() {
       if (b === "undated") return -1;
       return a.localeCompare(b);
     });
-  }, [itemsQuery.data, timezone]);
+  }, [itemsQuery.data, timezone, filter]);
 
   if (!activeTrip) return null;
 

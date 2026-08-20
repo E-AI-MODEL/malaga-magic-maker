@@ -126,6 +126,13 @@
   .tabular {
     font-variant-numeric: tabular-nums;
   }
+  .num {
+    font-variant-numeric: tabular-nums lining-nums;
+    letter-spacing: -0.01em;
+  }
+  .row-tap {
+    min-height: 56px;
+  }
 }
 
 @layer utilities {

@@ -233,9 +233,24 @@ export default function TripHome() {
           </section>
 
           <section className="mt-6 border-t border-rule pt-1">
+            {reminders.length > 0 && (
+              <div className="mb-6">
+                <SectionLabel>Herinneringen</SectionLabel>
+                <RowList className="mt-0.5">
+                  {reminders.map((reminder) => (
+                    <RowItem
+                      key={reminder.key}
+                      icon={reminder.tone === "urgent" ? BellRing : Bell}
+                      title={reminder.title}
+                      meta={reminder.meta}
+                      to={`/trip/${activeTrip.id}/${reminder.target}`}
+                    />
+                  ))}
+                </RowList>
+              </div>
+            )}
             <SectionLabel>Eerstvolgend</SectionLabel>
             <RowList className="mt-0.5">
-              {null}
               {itemsQuery.isLoading ? (
                 <RowItem icon={CalendarClock} title="Laden…" />
               ) : upcomingItems.length === 0 ? (

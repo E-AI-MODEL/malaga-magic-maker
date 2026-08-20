@@ -72,7 +72,7 @@ type RpcResult<T> = {
 };
 
 async function callVakansieRpc<T>(functionName: string, args: Record<string, unknown>): Promise<RpcResult<T>> {
-  const rpc = supabase.rpc as unknown as (
+  const rpc = supabase.rpc.bind(supabase) as unknown as (
     name: string,
     parameters: Record<string, unknown>,
   ) => Promise<RpcResult<T>>;

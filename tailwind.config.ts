@@ -62,6 +62,8 @@ export default {
           foreground: "hsl(var(--warning-foreground))",
         },
         rule: "hsl(var(--rule) / 0.08)",
+        rail: "hsl(var(--rail))",
+        band: "hsl(var(--band))",
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",

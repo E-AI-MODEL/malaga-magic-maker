@@ -11,6 +11,7 @@ import {
   type TripDocumentRow,
 } from "./data";
 import { DocumentUploadSheet } from "./DocumentUploadSheet";
+import { EmptyLine, IconBubble } from "@/components/primitives";
 
 function formatSize(value: number | null) {
   if (!value) return null;
@@ -75,18 +76,12 @@ export function DocumentsSection({
   };
 
   return (
-    <section className="mt-10 border-t border-border pt-8">
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">Documenten</p>
-          <h2 className="mt-2 font-display text-xl font-extrabold">Je reispapieren bij elkaar</h2>
-          <p className="mt-1 max-w-2xl text-sm leading-relaxed text-muted-foreground">
-            Bewaar tickets, vouchers en bevestigingen privé bij deze reis. Een document wordt pas zichtbaar nadat de upload volledig is afgerond.
-          </p>
-        </div>
+    <section className="mt-8 border-t border-rule/10 pt-5">
+      <div className="flex items-center justify-between gap-3">
+        <h2 className="font-ui text-[15px] font-semibold">Documenten</h2>
         {!readOnly && (
-          <Button variant="outline" onClick={() => setUploadOpen(true)} className="shrink-0">
-            <Plus className="mr-2 h-4 w-4" /><span className="hidden sm:inline">Document</span><span className="sm:hidden">Nieuw</span>
+          <Button variant="ghost" size="sm" onClick={() => setUploadOpen(true)} className="-mr-2 h-8 rounded-full px-2 text-muted-foreground">
+            <Plus className="mr-1 h-3.5 w-3.5" />Toevoegen
           </Button>
         )}
       </div>
@@ -94,32 +89,29 @@ export function DocumentsSection({
       {actionError && <p className="mt-4 rounded-xl bg-destructive/10 px-4 py-3 text-sm font-medium text-destructive">{actionError}</p>}
 
       {documentsQuery.isLoading ? (
-        <div className="mt-5 space-y-2">
-          {[0, 1].map((item) => <div key={item} className="h-20 animate-pulse rounded-2xl border border-border bg-card" />)}
+        <div className="mt-3 space-y-2">
+          {[0, 1].map((item) => <div key={item} className="h-12 animate-pulse rounded-sm bg-secondary" />)}
         </div>
       ) : documentsQuery.isError ? (
-        <div className="mt-5 rounded-2xl border border-destructive/20 bg-destructive/5 p-5 text-sm text-destructive">Je documenten konden niet worden geladen.</div>
+        <p className="mt-3 text-sm text-destructive">Je documenten konden niet worden geladen.</p>
       ) : (documentsQuery.data?.length || 0) === 0 ? (
-        <div className="mt-5 rounded-2xl border border-dashed border-border bg-card/40 px-5 py-7 text-center">
-          <FileText className="mx-auto h-7 w-7 text-muted-foreground" />
-          <p className="mt-3 text-sm font-semibold">Nog geen documenten</p>
-          <p className="mt-1 text-xs leading-relaxed text-muted-foreground">Voeg alleen reispapieren toe die je onderweg of bij vertrek nodig kunt hebben.</p>
-          {!readOnly && <Button size="sm" onClick={() => setUploadOpen(true)} className="mt-4"><Plus className="mr-1.5 h-3.5 w-3.5" />Eerste document</Button>}
-        </div>
+        <EmptyLine
+          text="Nog geen tickets, vouchers of bevestigingen."
+          actionLabel={readOnly ? undefined : "Document toevoegen"}
+          onClick={readOnly ? undefined : () => setUploadOpen(true)}
+        />
       ) : (
-        <div className="mt-5 space-y-2">
+        <div className="mt-2 border-t border-rule/10">
           {documentsQuery.data?.map((document) => {
             const canDelete = !readOnly && (isOrganizer || document.uploaded_by === currentUserId);
             const linkedItem = document.trip_item_id ? itemTitles.get(document.trip_item_id) : null;
             const createdAt = new Date(document.created_at).toLocaleDateString("nl-NL", { day: "numeric", month: "short", year: "numeric" });
             const size = formatSize(document.size_bytes);
             return (
-              <article key={document.id} className="flex items-center gap-3 rounded-2xl border border-border bg-card px-4 py-4 shadow-sm">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-secondary">
-                  <FileText className="h-5 w-5 text-primary" />
-                </div>
+              <article key={document.id} className="flex min-h-[56px] items-center gap-3 border-b border-rule/10 py-2.5">
+                <IconBubble icon={FileText} tone="muted" />
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-semibold">{document.filename}</p>
+                  <p className="truncate text-[15px] font-medium leading-tight">{document.filename}</p>
                   <p className="mt-0.5 truncate text-xs text-muted-foreground">
                     {getDocumentTypeLabel(document.document_type)}{linkedItem ? ` · ${linkedItem}` : ""} · {createdAt}{size ? ` · ${size}` : ""}
                   </p>

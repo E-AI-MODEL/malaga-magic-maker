@@ -71,6 +71,7 @@ export default function TripReis() {
   const { activeTrip, isOrganizer } = useTrip();
   const queryClient = useQueryClient();
   const [sheetOpen, setSheetOpen] = useState(false);
+  const [bookingSheetOpen, setBookingSheetOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<TripItemRow | null>(null);
   const [createType, setCreateType] = useState<string>("custom");
   const [actionError, setActionError] = useState("");
@@ -300,6 +301,12 @@ export default function TripReis() {
         initialType={editingItem ? undefined : createType}
         onSaved={refreshItems}
         onDelete={readOnly ? undefined : handleDelete}
+      />
+      <BookingPasteSheet
+        open={bookingSheetOpen}
+        onOpenChange={setBookingSheetOpen}
+        tripId={activeTrip.id}
+        onSaved={refreshItems}
       />
     </AppLayout>
   );

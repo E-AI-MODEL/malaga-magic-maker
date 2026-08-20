@@ -36,7 +36,7 @@ import {
 import { TaskSheet } from "@/features/together/TaskSheet";
 import { DecisionSheet } from "@/features/together/DecisionSheet";
 import { ExpenseSheet } from "@/features/together/ExpenseSheet";
-import { EmptyLine, RowItem, RowList, SectionLabel, Segmented, StatusWord } from "@/components/primitives";
+import { CountBar, EmptyLine, RowItem, RowList, SectionLabel, Segmented, StatusWord, StickyBar } from "@/components/primitives";
 
 /** The primary switcher holds only the three kinds of shared work. */
 type Section = "tasks" | "decisions" | "expenses";
@@ -212,8 +212,17 @@ export default function TripSamen() {
   return (
     <AppLayout>
       <div className="px-5 pb-12 pt-5 sm:px-8">
-        <h1 className="font-ui text-[22px] font-semibold leading-tight">Samen</h1>
-        <p className="mt-1 text-sm text-muted-foreground">{groupLine}</p>
+        <h1 className="font-brand text-[24px] font-semibold leading-tight">Samen</h1>
+        <div className="mt-3 border-y border-rule py-3">
+          <CountBar
+            items={[
+              { label: "Reizigers", value: members.length },
+              { label: "Open taken", value: openTasks.length, onClick: () => setSection("tasks") },
+              { label: "Open keuzes", value: openDecisions.length, onClick: () => setSection("decisions") },
+              { label: "Kostenregels", value: expenses.length, onClick: () => setSection("expenses") },
+            ]}
+          />
+        </div>
 
         {readOnly && (
           <div className="mt-4 flex items-center gap-2 border-t border-rule/10 pt-3 text-sm text-muted-foreground">
@@ -250,16 +259,21 @@ export default function TripSamen() {
           </section>
         )}
 
-        <div className="mt-7">
+        <StickyBar className="mt-5">
           <Segmented
             value={section}
             onChange={(next) => {
               setSection(next);
               setActionError("");
             }}
-            options={sectionOptions}
+            options={sectionOptions.map((option) => ({
+              ...option,
+              label: `${option.label} ${
+                option.id === "tasks" ? openTasks.length : option.id === "decisions" ? openDecisions.length : expenses.length
+              }`,
+            }))}
           />
-        </div>
+        </StickyBar>
 
         {actionError && <p className="mt-4 text-sm font-medium text-destructive">{actionError}</p>}
 
@@ -385,7 +399,7 @@ export default function TripSamen() {
                                   <span className="truncate">{option.label}</span>
                                   {winner && <span className="shrink-0 text-[11px] font-semibold text-primary">meeste stemmen</span>}
                                 </span>
-                                <span className="shrink-0 text-xs font-semibold text-muted-foreground tabular">{option.votes.length}</span>
+                                <span className="shrink-0 text-xs font-semibold text-muted-foreground num">{option.votes.length}</span>
                               </button>
                             );
                           })}
@@ -434,7 +448,7 @@ export default function TripSamen() {
                             {expense.splits.length > 0 ? `verdeeld over ${expense.splits.length}` : "verdeling nog niet ingevuld"}
                           </span>
                         </button>
-                        <span className="shrink-0 text-[15px] font-semibold tabular">{formatMoney(expense.amount, expense.currency)}</span>
+                        <span className="shrink-0 text-[15px] font-semibold num">{formatMoney(expense.amount, expense.currency)}</span>
                         <ChevronDown className={`h-4 w-4 shrink-0 text-muted-foreground/60 transition-transform ${expanded ? "rotate-180" : ""}`} />
                       </div>
 
@@ -443,7 +457,7 @@ export default function TripSamen() {
                           {expense.splits.map((split) => (
                             <div key={split.id} className="flex items-center justify-between gap-3 text-sm">
                               <span className="truncate text-muted-foreground">{memberMap.get(split.user_id)?.displayName || "Medereiziger"}</span>
-                              <span className="tabular font-medium">{formatMoney(split.amount, expense.currency)}</span>
+                              <span className="num font-medium">{formatMoney(split.amount, expense.currency)}</span>
                             </div>
                           ))}
                           {!readOnly && manager && (

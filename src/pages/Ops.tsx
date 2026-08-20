@@ -347,6 +347,35 @@ export default function Ops() {
       )}
 
       {section === "audit" && (
+        <div />
+      )}
+
+      {section === "settings" && (
+        <div className="max-w-xl">
+          <p className="text-[13px] font-semibold text-foreground/70">Platformschakelaars</p>
+          <p className="mt-1 text-xs text-muted-foreground">Wijzigingen gelden direct voor alle gebruikers en worden vastgelegd in het logboek.</p>
+          {settings.isError && <p className="mt-3 text-sm text-destructive">De instellingen konden niet worden geladen.</p>}
+          <div className="mt-3 rule-divide">
+            {PLATFORM_SWITCHES.map((item) => (
+              <div key={item.key} className="flex items-start justify-between gap-4 py-3">
+                <div className="min-w-0">
+                  <p className="text-sm font-medium">{item.label}</p>
+                  <p className="text-xs text-muted-foreground">{item.description}</p>
+                </div>
+                <Switch
+                  checked={settings.data?.[item.key] === true}
+                  disabled={settings.isLoading || settingMutation.isPending}
+                  onCheckedChange={(value) => settingMutation.mutate({ key: item.key, value })}
+                  aria-label={item.label}
+                />
+              </div>
+            ))}
+          </div>
+          {actionError && <p className="mt-2 text-sm text-destructive">{actionError}</p>}
+        </div>
+      )}
+
+      {section === "audit" && (
         <div>
           {audit.isLoading ? <p className="text-sm text-muted-foreground">Logboek laden…</p> : audit.isError ? <p className="text-sm text-destructive">Het logboek kon niet worden geladen.</p> : (
             <div className="rule-divide">

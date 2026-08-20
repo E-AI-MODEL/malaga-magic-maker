@@ -151,6 +151,17 @@ export function parseDocumentSuggestion(value: unknown): DocumentSuggestion | nu
   return suggestion;
 }
 
+/**
+ * A date/time read from a document has no zone information. Interpret it as
+ * wall-clock time in the trip's own timezone instead of UTC.
+ */
+function toTripIso(value: string | null | undefined, timezone: string) {
+  if (!value) return null;
+  const naive = value.match(/^(\d{4}-\d{2}-\d{2})[T ](\d{2}:\d{2})/);
+  if (!naive || /(Z|[+-]\d{2}:?\d{2})$/.test(value.trim())) return value;
+  return localInputToIso(`${naive[1]}T${naive[2]}`, timezone);
+}
+
 /** Reads the uploaded file server-side and stores the result on the document. */
 export async function extractTripDocument(tripId: string, documentId: string) {
   const { data, error } = await supabase.functions.invoke("document-extract", {

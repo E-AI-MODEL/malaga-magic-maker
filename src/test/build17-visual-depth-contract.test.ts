@@ -39,16 +39,15 @@ describe("Vakansie BUILD 17 visual depth contract", () => {
     expect(bottomNav).not.toContain("backdrop-blur");
   });
 
-  it("uses hero photography and layered surfaces on Mijn reizen and Overzicht", () => {
+  it("uses restrained trip photography on Mijn reizen and Overzicht", () => {
     for (const page of [trips, tripHome]) {
       expect(page).toContain("@/components/TripVisual");
       expect(page).toContain("<TripVisual");
-      expect(page).toContain("<Surface");
-      expect(page).toContain("-mt-8");
     }
+    // One photo per screen, at working size: no repeated full-bleed hero blocks.
     expect(trips).toContain("<TripThumb");
-    expect(trips).toContain("h-[176px] sm:h-[220px]");
-    expect(tripHome).toContain("h-[176px] sm:h-[220px]");
+    expect(trips).toContain('height="h-[72px]"');
+    expect(tripHome).toContain('height="h-[140px]"');
   });
 
   it("gives important objects soft depth without returning to card grids", () => {
@@ -57,6 +56,9 @@ describe("Vakansie BUILD 17 visual depth contract", () => {
     expect(primitives).toContain("export function IconBubble");
     expect(trips).toContain("Dit vraagt aandacht");
     expect(tripHome).toContain("Voor jou");
+    expect(primitives).toContain("export function DayHeader");
+    expect(primitives).toContain("export function CountBar");
+    expect(primitives).toContain("export function SuggestionRow");
   });
 
   it("keeps product iconography Lucide-only, never emoji or unicode checks", () => {

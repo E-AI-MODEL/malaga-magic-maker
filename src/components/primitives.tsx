@@ -1,6 +1,6 @@
-import { type ComponentType, type ReactNode } from "react";
+import { useRef, useState, type ComponentType, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
 import { Link } from "react-router-dom";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, Sparkles, X } from "lucide-react";
 
 /** Warm white object surface on the off-white canvas. Depth without SaaS cards. */
 export function Surface({

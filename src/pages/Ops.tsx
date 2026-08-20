@@ -346,10 +346,6 @@ export default function Ops() {
         </div>
       )}
 
-      {section === "audit" && (
-        <div />
-      )}
-
       {section === "settings" && (
         <div className="max-w-xl">
           <p className="text-[13px] font-semibold text-foreground/70">Platformschakelaars</p>

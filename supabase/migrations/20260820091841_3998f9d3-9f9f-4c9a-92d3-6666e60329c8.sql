@@ -1,0 +1,12 @@
+REVOKE EXECUTE ON FUNCTION public.ops_list_settings() FROM PUBLIC, anon;
+REVOKE EXECUTE ON FUNCTION public.ops_set_setting(text, text) FROM PUBLIC, anon;
+REVOKE EXECUTE ON FUNCTION public.ops_grant_pro(uuid, text) FROM PUBLIC, anon;
+REVOKE EXECUTE ON FUNCTION public.ops_revoke_pro(uuid, text) FROM PUBLIC, anon;
+REVOKE EXECUTE ON FUNCTION public.ops_delete_trip(uuid) FROM PUBLIC, anon;
+REVOKE EXECUTE ON FUNCTION public.ops_delete_user(uuid) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.ops_list_settings() TO authenticated;
+GRANT EXECUTE ON FUNCTION public.ops_set_setting(text, text) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.ops_grant_pro(uuid, text) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.ops_revoke_pro(uuid, text) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.ops_delete_trip(uuid) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.ops_delete_user(uuid) TO authenticated;

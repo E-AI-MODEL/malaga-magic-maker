@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { AlertCircle, CalendarClock, CheckSquare, Scale } from "lucide-react";
+import { AlertCircle, Bell, BellRing, CalendarClock, CheckSquare, Scale } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
 import { useTrip } from "@/contexts/TripContext";
 import { useAuth } from "@/lib/auth";

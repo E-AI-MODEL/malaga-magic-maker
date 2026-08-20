@@ -2,11 +2,13 @@ import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Archive,
+  ArrowRight,
   CalendarClock,
   Check,
   CheckCircle2,
   ChevronDown,
   Circle,
+  Copy,
   ListChecks,
   Plus,
   Receipt,
@@ -36,6 +38,7 @@ import {
 import { TaskSheet } from "@/features/together/TaskSheet";
 import { DecisionSheet } from "@/features/together/DecisionSheet";
 import { ExpenseSheet } from "@/features/together/ExpenseSheet";
+import { computeBalances, settleBalances } from "@/features/together/settle";
 import { CountBar, EmptyLine, RowItem, RowList, SectionLabel, Segmented, StatusWord, StickyBar } from "@/components/primitives";
 
 /** The primary switcher holds only the three kinds of shared work. */
@@ -63,6 +66,7 @@ export default function TripSamen() {
   const [editingExpense, setEditingExpense] = useState<ExpenseBundle | null>(null);
   const [expandedDecision, setExpandedDecision] = useState<string | null>(null);
   const [expandedExpense, setExpandedExpense] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
   const [actionError, setActionError] = useState("");
 
   const tripId = activeTrip?.id || "";
@@ -97,7 +101,35 @@ export default function TripSamen() {
   const decisions = decisionsQuery.data || [];
   const expenses = expensesQuery.data || [];
 
+  const balances = useMemo(
+    () =>
+      computeBalances(
+        expenses.map((expense) => ({
+          paidByUserId: expense.paid_by_user_id,
+          amount: Number(expense.amount) || 0,
+          splits: expense.splits.map((split) => ({ user_id: split.user_id, amount: Number(split.amount) || 0 })),
+        }))
+      ),
+    [expenses]
+  );
+  const transfers = useMemo(() => settleBalances(balances), [balances]);
+
   if (!activeTrip || !user) return null;
+
+  const copySettlement = async () => {
+    const lines = transfers.map((transfer) => {
+      const from = memberMap.get(transfer.fromUserId)?.displayName || "Medereiziger";
+      const to = memberMap.get(transfer.toUserId)?.displayName || "Medereiziger";
+      return `${from} betaalt ${to} ${formatMoney(transfer.cents / 100, currency)}`;
+    });
+    try {
+      await navigator.clipboard.writeText(lines.join("\n"));
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 2000);
+    } catch {
+      setActionError("Kopiëren lukte niet op dit apparaat.");
+    }
+  };
 
   const refreshTasks = () => queryClient.invalidateQueries({ queryKey: ["together-tasks", activeTrip.id] });
   const refreshDecisions = () => queryClient.invalidateQueries({ queryKey: ["together-decisions", activeTrip.id] });

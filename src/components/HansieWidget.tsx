@@ -3,6 +3,8 @@ import ReactMarkdown from "react-markdown";
 import { Loader2, MessageCircle, Send, Sparkles } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/lib/auth";
+import { usePlatformSwitches } from "@/features/ops/settings";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {

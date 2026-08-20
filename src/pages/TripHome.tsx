@@ -61,7 +61,7 @@ export default function TripHome() {
    * short proposals you can act on or dismiss, instead of a chat you have to read.
    */
   const suggestions = useMemo(() => {
-    if (!readiness || !tripId) return [];
+    if (!readiness || !tripId || activeTrip?.status === "archived") return [];
     const list: Array<{ key: string; title: string; meta: string; action: string; href: string }> = [];
     if (readiness.facts.trip_item_count === 0) {
       list.push({ key: "items", title: "Zet je heenreis en verblijf erin", meta: "Nog niets op de tijdlijn", action: "Openen", href: `/trip/${tripId}/reis` });
@@ -73,7 +73,7 @@ export default function TripHome() {
       list.push({ key: "docs", title: "Bewaar je tickets en bevestigingen", meta: "Nog geen documenten", action: "Openen", href: `/trip/${tripId}/reis` });
     }
     return list.filter((item) => !dismissed.includes(item.key)).slice(0, 2);
-  }, [readiness, tripId, dismissed]);
+  }, [readiness, tripId, dismissed, activeTrip?.status]);
 
   if (!activeTrip) return null;
 

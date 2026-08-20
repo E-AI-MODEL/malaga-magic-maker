@@ -71,6 +71,7 @@ function NextTrip({ trip }: { trip: Trip }) {
           coverImageUrl={trip.cover_image_url}
           height="h-[72px]"
           rounded="rounded-[14px]"
+          showBadge={false}
           className="w-[72px] shrink-0"
         />
         <span className="min-w-0 flex-1">

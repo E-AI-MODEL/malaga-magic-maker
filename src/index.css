@@ -38,6 +38,9 @@
 
     --radius: 0.5rem;
 
+    --rail: 34 12% 82%;
+    --band: 38 24% 95%;
+
     --success: 172 58% 19%;
     --success-foreground: 0 0% 100%;
     --warning: 36 78% 46%;
@@ -83,6 +86,9 @@
     --ring: 172 45% 48%;
 
     --rule: 0 0% 100%;
+
+    --rail: 220 15% 26%;
+    --band: 220 16% 12%;
 
     --sidebar-background: 220 18% 9%;
     --sidebar-foreground: 0 0% 95%;

@@ -28,12 +28,12 @@ import {
 
 const quickAddTypes = ["flight", "train", "stay", "activity", "custom"] as const;
 
-const filters = [
-  { id: "all", label: "Alles", types: [] as readonly string[] },
+const filters: ReadonlyArray<{ id: "all" | "transport" | "stay" | "doing"; label: string; types: readonly string[] }> = [
+  { id: "all", label: "Alles", types: [] },
   { id: "transport", label: "Vervoer", types: ["flight", "train", "ferry", "rental_car", "transfer"] },
   { id: "stay", label: "Verblijf", types: ["stay"] },
   { id: "doing", label: "Doen", types: ["activity", "restaurant", "event", "ticket"] },
-] as const;
+];
 
 type FilterId = (typeof filters)[number]["id"];
 

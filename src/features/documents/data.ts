@@ -175,7 +175,7 @@ export async function acceptDocumentSuggestion(document: TripDocumentRow, sugges
       trip_id: document.trip_id,
       type,
       title: String(suggestion.title).slice(0, 200),
-      status: "booked",
+      status: "confirmed",
       start_at: suggestion.start_at || null,
       end_at: suggestion.end_at || null,
       location_name: suggestion.location_name || null,

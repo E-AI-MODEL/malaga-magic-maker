@@ -9,6 +9,7 @@ import { activeReadinessChecks, getTripReadiness, readinessAction } from "@/feat
 import { tripTimingLabel } from "@/features/trips/presentation";
 import { listTripItems } from "@/features/travel/data";
 import { listDecisions, listTasks } from "@/features/together/data";
+import { computeReminders } from "@/features/reminders/data";
 import { formatTripDateTime } from "@/features/travel/presentation";
 import { RecentActivity } from "@/features/notifications/RecentActivity";
 import { CountBar, EmptyLine, ReadinessBar, RowItem, RowList, SectionLabel, SuggestionRow } from "@/components/primitives";
@@ -100,6 +101,25 @@ export default function TripHome() {
   ].slice(0, 3);
 
   const attentionTotal = attention.reduce((total, check) => total + check.attention_count, 0);
+
+  const reminders =
+    activeTrip.status === "archived"
+      ? []
+      : computeReminders({
+          now,
+          tripStart: activeTrip.start_date,
+          items: itemsQuery.data || [],
+          tasks: tasksQuery.data || [],
+          decisions: (decisionsQuery.data || []).map((decision) => ({
+            id: decision.id,
+            title: decision.title,
+            status: decision.status,
+            closes_at: decision.closes_at,
+            hasMyVote: Boolean(
+              user && decision.options.some((option) => option.votes.some((vote) => vote.user_id === user.id)),
+            ),
+          })),
+        });
   const trackedTotal = (readiness?.checks.length || 0) + attentionTotal;
   const readinessSentence = readinessQuery.isLoading
     ? "Voorbereiding laden…"

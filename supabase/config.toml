@@ -8,6 +8,11 @@ verify_jwt = false
 [functions.firecrawl-scrape]
 verify_jwt = true
 
+[functions.document-extract]
+# Explicit token + trip-membership check in function code before any
+# service-role document read.
+verify_jwt = false
+
 [functions.seed-users]
 verify_jwt = true
 

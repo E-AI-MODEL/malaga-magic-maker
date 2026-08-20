@@ -1207,6 +1207,11 @@ export type Database = {
         Row: {
           created_at: string
           document_type: string
+          extracted_at: string | null
+          extracted_suggestion: Json | null
+          extracted_summary: string | null
+          extracted_text: string | null
+          extraction_status: string
           filename: string
           id: string
           mime_type: string
@@ -1221,6 +1226,11 @@ export type Database = {
         Insert: {
           created_at?: string
           document_type?: string
+          extracted_at?: string | null
+          extracted_suggestion?: Json | null
+          extracted_summary?: string | null
+          extracted_text?: string | null
+          extraction_status?: string
           filename: string
           id?: string
           mime_type: string
@@ -1235,6 +1245,11 @@ export type Database = {
         Update: {
           created_at?: string
           document_type?: string
+          extracted_at?: string | null
+          extracted_suggestion?: Json | null
+          extracted_summary?: string | null
+          extracted_text?: string | null
+          extraction_status?: string
           filename?: string
           id?: string
           mime_type?: string

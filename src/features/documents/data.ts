@@ -124,3 +124,72 @@ export async function deleteTripDocument(document: TripDocumentRow) {
 export function getDocumentTypeLabel(value: string) {
   return documentTypes.find((item) => item.value === value)?.label || "Document";
 }
+
+export type DocumentSuggestion = {
+  type?: string | null;
+  title?: string | null;
+  start_at?: string | null;
+  end_at?: string | null;
+  location_name?: string | null;
+  address?: string | null;
+  provider?: string | null;
+  booking_reference?: string | null;
+  price?: number | null;
+  currency?: string | null;
+};
+
+const allowedItemTypes = new Set([
+  "flight", "train", "ferry", "bus", "stay", "car_rental", "transfer",
+  "activity", "restaurant", "event", "ticket", "other",
+]);
+
+export function parseDocumentSuggestion(value: unknown): DocumentSuggestion | null {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+  const suggestion = value as DocumentSuggestion;
+  if (!suggestion.title || typeof suggestion.title !== "string") return null;
+  return suggestion;
+}
+
+/** Reads the uploaded file server-side and stores the result on the document. */
+export async function extractTripDocument(tripId: string, documentId: string) {
+  const { data, error } = await supabase.functions.invoke("document-extract", {
+    body: { tripId, documentId },
+  });
+  if (error) throw error;
+  return data;
+}
+
+export async function dismissDocumentSuggestion(tripId: string, documentId: string) {
+  const { error } = await supabase.functions.invoke("document-extract", {
+    body: { tripId, documentId, action: "dismiss" },
+  });
+  if (error) throw error;
+}
+
+/** Turns an accepted suggestion into a real trip item and links the document to it. */
+export async function acceptDocumentSuggestion(document: TripDocumentRow, suggestion: DocumentSuggestion) {
+  const type = suggestion.type && allowedItemTypes.has(suggestion.type) ? suggestion.type : "other";
+  const { data, error } = await supabase
+    .from("trip_items")
+    .insert({
+      trip_id: document.trip_id,
+      type,
+      title: String(suggestion.title).slice(0, 200),
+      status: "confirmed",
+      start_at: suggestion.start_at || null,
+      end_at: suggestion.end_at || null,
+      location_name: suggestion.location_name || null,
+      address: suggestion.address || null,
+      provider: suggestion.provider || null,
+      booking_reference: suggestion.booking_reference || null,
+      price: typeof suggestion.price === "number" ? suggestion.price : null,
+      currency: suggestion.currency || null,
+      notes: `Overgenomen uit ${document.filename}`,
+    })
+    .select("id")
+    .single();
+
+  if (error) throw error;
+  await dismissDocumentSuggestion(document.trip_id, document.id);
+  return data.id as string;
+}

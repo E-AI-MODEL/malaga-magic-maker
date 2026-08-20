@@ -1,12 +1,13 @@
 import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Archive, FileText, Pencil, Plus, Trash2 } from "lucide-react";
+import { Archive, FileText, Mail, Pencil, Plus, Trash2 } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth";
 import { useTrip } from "@/contexts/TripContext";
 import { deleteTripItem, listTripItems, TripItemRow } from "@/features/travel/data";
 import { TripItemSheet } from "@/features/travel/TripItemSheet";
+import { BookingPasteSheet } from "@/features/travel/BookingPasteSheet";
 import { DocumentsSection } from "@/features/documents/DocumentsSection";
 import {
   DayHeader,
@@ -167,6 +168,14 @@ export default function TripReis() {
 
         {!readOnly && (
           <div className="-mx-5 mt-4 flex gap-2 overflow-x-auto px-5 pb-1 sm:mx-0 sm:px-0">
+            <button
+              type="button"
+              onClick={() => setBookingSheetOpen(true)}
+              className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full border border-foreground/25 px-3 font-ui text-[13px] font-medium transition-colors hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              <Mail className="h-3.5 w-3.5" strokeWidth={1.75} />
+              Boeking plakken
+            </button>
             {quickAddTypes.map((value) => {
               const type = getTravelType(value);
               const TypeIcon = travelTypeIcon(value);

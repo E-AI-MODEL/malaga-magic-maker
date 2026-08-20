@@ -3,6 +3,7 @@ import { Check, ChevronLeft, MoreHorizontal, Plane, Plus, Settings, User } from 
 import { useNavigate } from "react-router-dom";
 import { BottomNav } from "./BottomNav";
 import { AppSidebar } from "./AppSidebar";
+import { AdminBar } from "./AdminBar";
 import { NotificationCenter } from "./NotificationCenter";
 import { HansieWidget } from "./HansieWidget";
 import { useAuth } from "@/lib/auth";
@@ -29,6 +30,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
     return (
       <div className="min-h-screen overflow-x-hidden bg-background pb-[calc(7.5rem+env(safe-area-inset-bottom))]">
         <header className="sticky top-0 z-40 border-b border-border bg-background">
+          <AdminBar />
           <div className="mx-auto grid h-12 max-w-2xl grid-cols-[40px_minmax(0,1fr)_40px] items-center px-2">
             <Button
               variant="ghost"
@@ -102,7 +104,9 @@ export function AppLayout({ children }: { children: ReactNode }) {
       <div className="flex min-h-screen w-full bg-background">
         <AppSidebar />
         <div className="flex min-w-0 flex-1 flex-col">
-          <header className="sticky top-0 z-40 flex h-12 items-center justify-between border-b border-border bg-background px-4">
+          <header className="sticky top-0 z-40 border-b border-border bg-background">
+            <AdminBar />
+            <div className="flex h-12 items-center justify-between px-4">
             <div className="flex min-w-0 items-center gap-2">
               <SidebarTrigger className="text-muted-foreground" />
               <button
@@ -115,6 +119,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
             <div className="flex items-center gap-2">
               <NotificationCenter />
               <span className="text-xs font-medium text-muted-foreground">{profile?.display_name}</span>
+            </div>
             </div>
           </header>
           <main className="mx-auto w-full max-w-5xl flex-1 pb-24">{children}</main>

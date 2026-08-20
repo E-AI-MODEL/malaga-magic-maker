@@ -9,6 +9,7 @@ import { PRO_BENEFITS, PRO_PLANS } from "@/features/pro/plans";
 import { usePro } from "@/features/pro/usePro";
 import { verifyCheckoutSession } from "@/features/pro/account";
 import { paymentsConfigured } from "@/lib/stripe";
+import { usePlatformSwitches } from "@/features/ops/settings";
 import { useAuth } from "@/lib/auth";
 
 export default function Steun() {
@@ -20,7 +21,8 @@ export default function Steun() {
   const [priceId, setPriceId] = useState<string>(PRO_PLANS[0].priceId);
   const [checkingOut, setCheckingOut] = useState(false);
   const [verifyState, setVerifyState] = useState<"idle" | "busy" | "granted" | "pending" | "failed">("idle");
-  const configured = paymentsConfigured();
+  const { paymentsEnabled } = usePlatformSwitches();
+  const configured = paymentsConfigured() && paymentsEnabled;
 
   // The webhook normally grants Pro; this is the fallback when it is late or missed.
   useEffect(() => {

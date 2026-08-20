@@ -3,6 +3,8 @@ import ReactMarkdown from "react-markdown";
 import { Loader2, MessageCircle, Send, Sparkles } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/lib/auth";
+import { usePlatformSwitches } from "@/features/ops/settings";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -92,6 +94,8 @@ export function HansieWidget({
   floating?: boolean;
 }) {
   const isMobile = useIsMobile();
+  const { isAdmin } = useAuth();
+  const { hansieEnabled } = usePlatformSwitches();
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -162,6 +166,7 @@ export function HansieWidget({
   };
 
   if (!trip) return null;
+  if (!hansieEnabled && !isAdmin) return null;
 
   return (
     <>

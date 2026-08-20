@@ -2,12 +2,13 @@ import { type ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 
-export type OpsSection = "overview" | "users" | "trips" | "audit" | "errors";
+export type OpsSection = "overview" | "users" | "trips" | "settings" | "audit" | "errors";
 
 export const opsSections: Array<{ id: OpsSection; label: string }> = [
   { id: "overview", label: "Overzicht" },
   { id: "users", label: "Gebruikers" },
   { id: "trips", label: "Reizen" },
+  { id: "settings", label: "Instellingen" },
   { id: "audit", label: "Logboek" },
   { id: "errors", label: "Fouten" },
 ];

@@ -171,6 +171,7 @@ export function TripProvider({ children }: { children: ReactNode }) {
   const createTrip = useCallback(async (data: CreateTripInput): Promise<Trip | null> => {
     if (!user) return null;
 
+    console.log("[dbg] createTrip start", !!user);
     const { data: tripId, error } = await callVakansieRpc<string>("create_trip_with_owner", {
       p_name: data.name,
       p_description: data.description ?? null,

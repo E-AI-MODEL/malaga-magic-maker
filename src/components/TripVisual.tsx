@@ -32,6 +32,7 @@ export function TripVisual({
   height = "h-[160px] sm:h-[200px]",
   rounded = "rounded-[18px]",
   overlay = false,
+  showBadge = true,
   className = "",
   children,
 }: {
@@ -40,6 +41,7 @@ export function TripVisual({
   height?: string;
   rounded?: string;
   overlay?: boolean;
+  showBadge?: boolean;
   className?: string;
   children?: ReactNode;
 }) {
@@ -56,7 +58,7 @@ export function TripVisual({
         className="h-full w-full object-cover"
       />
       {overlay && <div aria-hidden className="absolute inset-0 bg-foreground/25" />}
-      {visual.isFallback && (
+      {visual.isFallback && showBadge && (
         <span className="absolute right-3 top-3 rounded-full bg-card px-2.5 py-1 font-ui text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground shadow-soft">
           Sfeerbeeld
         </span>

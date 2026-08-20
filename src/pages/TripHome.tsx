@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { AlertCircle, CalendarClock, CheckSquare, Scale } from "lucide-react";
+import { AlertCircle, Bell, BellRing, CalendarClock, CheckSquare, Scale } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
 import { useTrip } from "@/contexts/TripContext";
 import { useAuth } from "@/lib/auth";
@@ -9,6 +9,7 @@ import { activeReadinessChecks, getTripReadiness, readinessAction } from "@/feat
 import { tripTimingLabel } from "@/features/trips/presentation";
 import { listTripItems } from "@/features/travel/data";
 import { listDecisions, listTasks } from "@/features/together/data";
+import { computeReminders } from "@/features/reminders/data";
 import { formatTripDateTime } from "@/features/travel/presentation";
 import { RecentActivity } from "@/features/notifications/RecentActivity";
 import { CountBar, EmptyLine, ReadinessBar, RowItem, RowList, SectionLabel, SuggestionRow } from "@/components/primitives";
@@ -100,6 +101,25 @@ export default function TripHome() {
   ].slice(0, 3);
 
   const attentionTotal = attention.reduce((total, check) => total + check.attention_count, 0);
+
+  const reminders =
+    activeTrip.status === "archived"
+      ? []
+      : computeReminders({
+          now,
+          tripStart: activeTrip.start_date,
+          items: itemsQuery.data || [],
+          tasks: tasksQuery.data || [],
+          decisions: (decisionsQuery.data || []).map((decision) => ({
+            id: decision.id,
+            title: decision.title,
+            status: decision.status,
+            closes_at: decision.closes_at,
+            hasMyVote: Boolean(
+              user && decision.options.some((option) => option.votes.some((vote) => vote.user_id === user.id)),
+            ),
+          })),
+        });
   const trackedTotal = (readiness?.checks.length || 0) + attentionTotal;
   const readinessSentence = readinessQuery.isLoading
     ? "Voorbereiding laden…"
@@ -213,6 +233,22 @@ export default function TripHome() {
           </section>
 
           <section className="mt-6 border-t border-rule pt-1">
+            {reminders.length > 0 && (
+              <div className="mb-6">
+                <SectionLabel>Herinneringen</SectionLabel>
+                <RowList className="mt-0.5">
+                  {reminders.map((reminder) => (
+                    <RowItem
+                      key={reminder.key}
+                      icon={reminder.tone === "urgent" ? BellRing : Bell}
+                      title={reminder.title}
+                      meta={reminder.meta}
+                      to={`/trip/${activeTrip.id}/${reminder.target}`}
+                    />
+                  ))}
+                </RowList>
+              </div>
+            )}
             <SectionLabel>Eerstvolgend</SectionLabel>
             <RowList className="mt-0.5">
               {itemsQuery.isLoading ? (

@@ -180,18 +180,21 @@ export async function dismissDocumentSuggestion(tripId: string, documentId: stri
 
 /** Turns an accepted suggestion into a real trip item and links the document to it. */
 export async function acceptDocumentSuggestion(document: TripDocumentRow, suggestion: DocumentSuggestion) {
+  const itemId = await createItemFromSuggestion(document.trip_id, suggestion, `Overgenomen uit ${document.filename}`);
+  await dismissDocumentSuggestion(document.trip_id, document.id);
+  return itemId;
+}
+
+/** Shared writer: turns a read suggestion into a real timeline item. */
+export async function createItemFromSuggestion(tripId: string, suggestion: DocumentSuggestion, note: string) {
   const type = suggestion.type && allowedItemTypes.has(suggestion.type) ? suggestion.type : "other";
-  const { data: trip } = await supabase
-    .from("trip")
-    .select("timezone")
-    .eq("id", document.trip_id)
-    .maybeSingle();
+  const { data: trip } = await supabase.from("trip").select("timezone").eq("id", tripId).maybeSingle();
   const timezone = trip?.timezone || "Europe/Amsterdam";
 
   const { data, error } = await supabase
     .from("trip_items")
     .insert({
-      trip_id: document.trip_id,
+      trip_id: tripId,
       type,
       title: String(suggestion.title).slice(0, 200),
       status: "confirmed",
@@ -203,12 +206,20 @@ export async function acceptDocumentSuggestion(document: TripDocumentRow, sugges
       booking_reference: suggestion.booking_reference || null,
       price: typeof suggestion.price === "number" ? suggestion.price : null,
       currency: suggestion.currency || null,
-      notes: `Overgenomen uit ${document.filename}`,
+      notes: note,
     })
     .select("id")
     .single();
 
   if (error) throw error;
-  await dismissDocumentSuggestion(document.trip_id, document.id);
   return data.id as string;
+}
+
+/** Reads a pasted/forwarded booking email server-side and returns suggestions. */
+export async function parseBookingText(tripId: string, text: string) {
+  const { data, error } = await supabase.functions.invoke("booking-parse", {
+    body: { tripId, text },
+  });
+  if (error) throw error;
+  return (data || {}) as { summary?: string | null; suggestions?: unknown[] };
 }

@@ -2,11 +2,13 @@ import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Archive,
+  ArrowRight,
   CalendarClock,
   Check,
   CheckCircle2,
   ChevronDown,
   Circle,
+  Copy,
   ListChecks,
   Plus,
   Receipt,
@@ -36,6 +38,7 @@ import {
 import { TaskSheet } from "@/features/together/TaskSheet";
 import { DecisionSheet } from "@/features/together/DecisionSheet";
 import { ExpenseSheet } from "@/features/together/ExpenseSheet";
+import { computeBalances, settleBalances } from "@/features/together/settle";
 import { CountBar, EmptyLine, RowItem, RowList, SectionLabel, Segmented, StatusWord, StickyBar } from "@/components/primitives";
 
 /** The primary switcher holds only the three kinds of shared work. */
@@ -63,6 +66,7 @@ export default function TripSamen() {
   const [editingExpense, setEditingExpense] = useState<ExpenseBundle | null>(null);
   const [expandedDecision, setExpandedDecision] = useState<string | null>(null);
   const [expandedExpense, setExpandedExpense] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
   const [actionError, setActionError] = useState("");
 
   const tripId = activeTrip?.id || "";
@@ -97,7 +101,35 @@ export default function TripSamen() {
   const decisions = decisionsQuery.data || [];
   const expenses = expensesQuery.data || [];
 
+  const balances = useMemo(
+    () =>
+      computeBalances(
+        expenses.map((expense) => ({
+          paidByUserId: expense.paid_by_user_id,
+          amount: Number(expense.amount) || 0,
+          splits: expense.splits.map((split) => ({ user_id: split.user_id, amount: Number(split.amount) || 0 })),
+        }))
+      ),
+    [expenses]
+  );
+  const transfers = useMemo(() => settleBalances(balances), [balances]);
+
   if (!activeTrip || !user) return null;
+
+  const copySettlement = async () => {
+    const lines = transfers.map((transfer) => {
+      const from = memberMap.get(transfer.fromUserId)?.displayName || "Medereiziger";
+      const to = memberMap.get(transfer.toUserId)?.displayName || "Medereiziger";
+      return `${from} betaalt ${to} ${formatMoney(transfer.cents / 100, currency)}`;
+    });
+    try {
+      await navigator.clipboard.writeText(lines.join("\n"));
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 2000);
+    } catch {
+      setActionError("Kopiëren lukte niet op dit apparaat.");
+    }
+  };
 
   const refreshTasks = () => queryClient.invalidateQueries({ queryKey: ["together-tasks", activeTrip.id] });
   const refreshDecisions = () => queryClient.invalidateQueries({ queryKey: ["together-decisions", activeTrip.id] });
@@ -477,6 +509,73 @@ export default function TripSamen() {
                 })}
               </RowList>
             )
+          )}
+
+          {section === "expenses" && expenses.length > 0 && (
+            <div className="mt-7">
+              <SectionLabel>Verrekenen</SectionLabel>
+              {balances.length === 0 ? (
+                <EmptyLine text="Koppel een betaler en verdeling aan de kostenregels om te kunnen verrekenen." />
+              ) : (
+                <>
+                  <RowList className="mt-1">
+                    {balances.map((balance) => {
+                      const settled = balance.cents === 0;
+                      return (
+                        <div key={balance.userId} className="flex min-h-[44px] items-center gap-3 py-2.5">
+                          <span className="min-w-0 flex-1 truncate text-[15px]">
+                            {memberMap.get(balance.userId)?.displayName || "Medereiziger"}
+                          </span>
+                          <span className="shrink-0 text-xs text-muted-foreground">
+                            {settled ? "staat gelijk" : balance.cents > 0 ? "krijgt terug" : "moet betalen"}
+                          </span>
+                          <span
+                            className={`num shrink-0 text-[15px] font-semibold ${settled ? "text-muted-foreground" : balance.cents > 0 ? "text-primary" : "text-foreground"}`}
+                          >
+                            {formatMoney(Math.abs(balance.cents) / 100, currency)}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </RowList>
+
+                  <div className="mt-4">
+                    <SectionLabel>Wie betaalt wie</SectionLabel>
+                    {transfers.length === 0 ? (
+                      <p className="mt-2 flex items-center gap-2 text-sm text-muted-foreground">
+                        <CheckCircle2 className="h-4 w-4" strokeWidth={1.75} />
+                        Alles is al verrekend.
+                      </p>
+                    ) : (
+                      <RowList className="mt-1">
+                        {transfers.map((transfer, index) => (
+                          <div key={`${transfer.fromUserId}-${transfer.toUserId}-${index}`} className="flex min-h-[44px] items-center gap-2 py-2.5">
+                            <span className="min-w-0 flex-1 truncate text-[15px]">
+                              {memberMap.get(transfer.fromUserId)?.displayName || "Medereiziger"}
+                            </span>
+                            <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground/70" strokeWidth={1.75} />
+                            <span className="min-w-0 flex-1 truncate text-[15px]">
+                              {memberMap.get(transfer.toUserId)?.displayName || "Medereiziger"}
+                            </span>
+                            <span className="num shrink-0 text-[15px] font-semibold">{formatMoney(transfer.cents / 100, currency)}</span>
+                          </div>
+                        ))}
+                      </RowList>
+                    )}
+                    {transfers.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={copySettlement}
+                        className="mt-3 inline-flex items-center gap-2 text-[13px] font-semibold text-primary underline-offset-4 hover:underline"
+                      >
+                        <Copy className="h-3.5 w-3.5" strokeWidth={1.75} />
+                        {copied ? "Gekopieerd" : "Overzicht kopiëren"}
+                      </button>
+                    )}
+                  </div>
+                </>
+              )}
+            </div>
           )}
         </section>
 

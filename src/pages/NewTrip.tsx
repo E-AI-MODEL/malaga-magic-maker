@@ -1,6 +1,6 @@
 import { FormEvent, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ArrowLeft, ArrowRight, CalendarDays, Loader2, MapPin, Users } from "lucide-react";
+import { ArrowLeft, ArrowRight, Loader2, MapPin } from "lucide-react";
 import { useTrip } from "@/contexts/TripContext";
 import { describePlanLimit } from "@/features/pro/limits";
 import { Button } from "@/components/ui/button";

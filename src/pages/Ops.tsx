@@ -13,12 +13,18 @@ import {
   searchOpsTrips,
   searchOpsUsers,
   setOpsTripStatus,
+  grantOpsPro,
+  revokeOpsPro,
+  deleteOpsTrip,
+  deleteOpsUser,
 } from "@/features/ops/data";
+import { PLATFORM_SWITCHES, listOpsSettings, setOpsSetting, type PlatformSwitchKey } from "@/features/ops/settings";
+import { Switch } from "@/components/ui/switch";
 import { OpsShell, opsSectionPath, type OpsSection } from "@/features/ops/OpsShell";
 
 type Section = Exclude<OpsSection, "errors">;
 
-const sectionIds: Section[] = ["overview", "users", "trips", "audit"];
+const sectionIds: Section[] = ["overview", "users", "trips", "settings", "audit"];
 
 function parseSection(value: string | null): Section {
   return sectionIds.includes((value || "") as Section) ? (value as Section) : "overview";
@@ -55,6 +61,7 @@ export default function Ops() {
   const users = useQuery({ queryKey: ["ops-users", search], queryFn: () => searchOpsUsers(search), enabled: section === "users" });
   const trips = useQuery({ queryKey: ["ops-trips", search], queryFn: () => searchOpsTrips(search), enabled: section === "trips" });
   const audit = useQuery({ queryKey: ["ops-audit"], queryFn: listOpsAudit, enabled: section === "audit" });
+  const settings = useQuery({ queryKey: ["ops-settings"], queryFn: listOpsSettings, enabled: section === "settings" });
   const userDetail = useQuery({ queryKey: ["ops-user", selectedUserId], queryFn: () => getOpsUserOverview(selectedUserId || ""), enabled: Boolean(selectedUserId) });
   const tripDetail = useQuery({ queryKey: ["ops-trip", selectedTripId], queryFn: () => getOpsTripOverview(selectedTripId || ""), enabled: Boolean(selectedTripId) });
 
@@ -79,6 +86,59 @@ export default function Ops() {
     event.preventDefault();
     setSearch(draftSearch.trim());
   };
+
+  const settingMutation = useMutation({
+    mutationFn: ({ key, value }: { key: PlatformSwitchKey; value: boolean }) => setOpsSetting(key, value),
+    onSuccess: async () => {
+      setActionError("");
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["ops-settings"] }),
+        queryClient.invalidateQueries({ queryKey: ["ops-audit"] }),
+      ]);
+    },
+    onError: () => setActionError("Deze schakelaar kon niet worden opgeslagen."),
+  });
+
+  const proMutation = useMutation({
+    mutationFn: ({ userId, grant }: { userId: string; grant: boolean }) =>
+      grant ? grantOpsPro(userId) : revokeOpsPro(userId),
+    onSuccess: async () => {
+      setActionError("");
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["ops-user", selectedUserId] }),
+        queryClient.invalidateQueries({ queryKey: ["ops-audit"] }),
+      ]);
+    },
+    onError: () => setActionError("Pro kon niet worden aangepast."),
+  });
+
+  const deleteTripMutation = useMutation({
+    mutationFn: (tripId: string) => deleteOpsTrip(tripId),
+    onSuccess: async () => {
+      setActionError("");
+      setSelectedTripId(null);
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["ops-trips"] }),
+        queryClient.invalidateQueries({ queryKey: ["ops-summary"] }),
+        queryClient.invalidateQueries({ queryKey: ["ops-audit"] }),
+      ]);
+    },
+    onError: () => setActionError("Deze reis kon niet worden verwijderd."),
+  });
+
+  const deleteUserMutation = useMutation({
+    mutationFn: (userId: string) => deleteOpsUser(userId),
+    onSuccess: async () => {
+      setActionError("");
+      setSelectedUserId(null);
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["ops-users"] }),
+        queryClient.invalidateQueries({ queryKey: ["ops-summary"] }),
+        queryClient.invalidateQueries({ queryKey: ["ops-audit"] }),
+      ]);
+    },
+    onError: () => setActionError("Deze gebruiker kon niet worden verwijderd."),
+  });
 
   const switchSection = (next: OpsSection) => {
     if (next === "errors") {
@@ -175,6 +235,32 @@ export default function Ops() {
                     </button>
                   ))}
                 </div>
+
+                <p className="mt-5 text-[13px] font-semibold text-foreground/70">Accountbeheer</p>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={proMutation.isPending}
+                    onClick={() => proMutation.mutate({ userId: userDetail.data.id, grant: true })}
+                  >Pro toekennen</Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={proMutation.isPending}
+                    onClick={() => proMutation.mutate({ userId: userDetail.data.id, grant: false })}
+                  >Pro intrekken</Button>
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    disabled={deleteUserMutation.isPending}
+                    onClick={() => {
+                      if (!window.confirm("Dit account definitief verwijderen? Dit kan niet ongedaan worden gemaakt.")) return;
+                      deleteUserMutation.mutate(userDetail.data.id);
+                    }}
+                  >Gebruiker verwijderen</Button>
+                </div>
+                {actionError && <p className="mt-2 text-sm text-destructive">{actionError}</p>}
               </div>
             ) : null}
           </div>
@@ -228,6 +314,18 @@ export default function Ops() {
                     >Opslaan</Button>
                   </div>
                   {actionError && <p className="mt-2 text-sm text-destructive">{actionError}</p>}
+                </div>
+
+                <div className="mt-4">
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    disabled={deleteTripMutation.isPending}
+                    onClick={() => {
+                      if (!window.confirm(`"${tripDetail.data.name}" definitief verwijderen? Alle reisgegevens gaan verloren.`)) return;
+                      deleteTripMutation.mutate(tripDetail.data.id);
+                    }}
+                  >Reis verwijderen</Button>
                 </div>
 
                 <p className="mt-5 text-[13px] font-semibold text-foreground/70">Deelnemers</p>

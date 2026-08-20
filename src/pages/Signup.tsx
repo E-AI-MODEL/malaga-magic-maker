@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { useAuth } from "@/lib/auth";
 import { GoogleAuthButton } from "@/components/GoogleAuthButton";
 import { PUBLIC_SIGNUP_ENABLED } from "@/config/access";
+import { usePlatformSwitches } from "@/features/ops/settings";
 import logo from "@/assets/vakansie-logo.png";
 
 function safeNext(value: string | null) {
@@ -19,7 +20,8 @@ export default function Signup() {
   const [searchParams] = useSearchParams();
   const next = safeNext(searchParams.get("next"));
   const inviteContinuation = next.startsWith("/join/");
-  const enabled = PUBLIC_SIGNUP_ENABLED || inviteContinuation;
+  const { signupsOpen } = usePlatformSwitches();
+  const enabled = (PUBLIC_SIGNUP_ENABLED && signupsOpen) || inviteContinuation;
 
   const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");

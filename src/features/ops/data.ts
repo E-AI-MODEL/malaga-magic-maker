@@ -212,6 +212,18 @@ export async function revokeOpsPro(userId: string, note?: string) {
 }
 
 export async function deleteOpsTrip(tripId: string) {
+  // Remove the private files first: the metadata rows disappear with the trip,
+  // which would otherwise leave unreachable objects in storage.
+  const { data: documents } = await supabase
+    .from("trip_documents")
+    .select("storage_path")
+    .eq("trip_id", tripId);
+
+  const paths = (documents || []).map((row) => row.storage_path).filter(Boolean);
+  if (paths.length > 0) {
+    await supabase.storage.from("trip-documents").remove(paths);
+  }
+
   const { error } = await supabase.rpc("ops_delete_trip", { p_trip_id: tripId });
   if (error) throw error;
 }

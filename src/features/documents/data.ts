@@ -1,5 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import type { TripDocumentRow } from "@/integrations/supabase/database.live";
+import { localInputToIso } from "@/features/travel/presentation";
 
 export type { TripDocumentRow };
 
@@ -169,6 +170,13 @@ export async function dismissDocumentSuggestion(tripId: string, documentId: stri
 /** Turns an accepted suggestion into a real trip item and links the document to it. */
 export async function acceptDocumentSuggestion(document: TripDocumentRow, suggestion: DocumentSuggestion) {
   const type = suggestion.type && allowedItemTypes.has(suggestion.type) ? suggestion.type : "other";
+  const { data: trip } = await supabase
+    .from("trip")
+    .select("timezone")
+    .eq("id", document.trip_id)
+    .maybeSingle();
+  const timezone = trip?.timezone || "Europe/Amsterdam";
+
   const { data, error } = await supabase
     .from("trip_items")
     .insert({
@@ -176,8 +184,8 @@ export async function acceptDocumentSuggestion(document: TripDocumentRow, sugges
       type,
       title: String(suggestion.title).slice(0, 200),
       status: "confirmed",
-      start_at: suggestion.start_at || null,
-      end_at: suggestion.end_at || null,
+      start_at: toTripIso(suggestion.start_at, timezone),
+      end_at: toTripIso(suggestion.end_at, timezone),
       location_name: suggestion.location_name || null,
       address: suggestion.address || null,
       provider: suggestion.provider || null,

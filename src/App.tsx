@@ -9,6 +9,7 @@ import { AuthProvider, useAuth } from "@/lib/auth";
 import { TripProvider, useTrip } from "@/contexts/TripContext";
 import { ActivityLogProvider } from "@/contexts/ActivityLogContext";
 import { ClientErrorReporter } from "@/features/observability/ClientErrorReporter";
+import { AppErrorBoundary } from "@/features/observability/AppErrorBoundary";
 import Login from "./pages/Login";
 
 const Trips = lazy(() => import("./pages/Trips"));
@@ -151,7 +152,9 @@ const App = () => (
           <TripProvider>
             <ClientErrorReporter />
             <ActivityLogProvider>
-              <AppRoutes />
+              <AppErrorBoundary>
+                <AppRoutes />
+              </AppErrorBoundary>
             </ActivityLogProvider>
           </TripProvider>
         </AuthProvider>

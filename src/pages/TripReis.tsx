@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Archive, FileText, Mail, Pencil, Plus, Trash2 } from "lucide-react";
+import { Archive, FileText, Mail, Pencil, Plus, Search, Trash2 } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth";
@@ -8,6 +8,7 @@ import { useTrip } from "@/contexts/TripContext";
 import { deleteTripItem, listTripItems, TripItemRow } from "@/features/travel/data";
 import { TripItemSheet } from "@/features/travel/TripItemSheet";
 import { BookingPasteSheet } from "@/features/travel/BookingPasteSheet";
+import { AccommodationSearchSheet } from "@/features/travel/AccommodationSearchSheet";
 import { DocumentsSection } from "@/features/documents/DocumentsSection";
 import {
   DayHeader,
@@ -72,6 +73,7 @@ export default function TripReis() {
   const queryClient = useQueryClient();
   const [sheetOpen, setSheetOpen] = useState(false);
   const [bookingSheetOpen, setBookingSheetOpen] = useState(false);
+  const [staySearchOpen, setStaySearchOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<TripItemRow | null>(null);
   const [createType, setCreateType] = useState<string>("custom");
   const [actionError, setActionError] = useState("");
@@ -176,6 +178,14 @@ export default function TripReis() {
             >
               <Mail className="h-3.5 w-3.5" strokeWidth={1.75} />
               Boeking plakken
+            </button>
+            <button
+              type="button"
+              onClick={() => setStaySearchOpen(true)}
+              className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full border border-foreground/25 px-3 font-ui text-[13px] font-medium transition-colors hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              <Search className="h-3.5 w-3.5" strokeWidth={1.75} />
+              Verblijf zoeken
             </button>
             {quickAddTypes.map((value) => {
               const type = getTravelType(value);
@@ -301,6 +311,16 @@ export default function TripReis() {
         initialType={editingItem ? undefined : createType}
         onSaved={refreshItems}
         onDelete={readOnly ? undefined : handleDelete}
+      />
+      <AccommodationSearchSheet
+        open={staySearchOpen}
+        onOpenChange={setStaySearchOpen}
+        tripId={activeTrip.id}
+        destination={activeTrip.destination_name || ""}
+        startDate={activeTrip.start_date}
+        endDate={activeTrip.end_date}
+        groupSize={activeTrip.group_size ?? null}
+        onSaved={refreshItems}
       />
       <BookingPasteSheet
         open={bookingSheetOpen}

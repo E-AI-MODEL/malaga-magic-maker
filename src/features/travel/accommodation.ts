@@ -1,6 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import { createDecisionWithOptions } from "@/features/together/data";
-import { createItemFromSuggestion } from "@/features/documents/data";
+import { createItemFromSuggestion, type DocumentSuggestion } from "@/features/documents/data";
 
 export type AccommodationSource = "booking" | "airbnb" | "micazu" | "web";
 
@@ -122,7 +122,7 @@ export async function addCandidateAsStay(
       booking_reference: null,
       price: candidate.price,
       currency: candidate.currency,
-    } as never,
+    } satisfies DocumentSuggestion,
     `Gevonden via zoeken — ${candidate.url}`,
   );
 

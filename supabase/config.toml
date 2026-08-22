@@ -27,3 +27,8 @@ verify_jwt = false
 
 [functions.payments-account]
 verify_jwt = false
+
+[functions.accommodation-search]
+# Explicit token + trip-membership check in function code before any
+# service-role read.
+verify_jwt = false

@@ -95,11 +95,12 @@ export default function TripSamen() {
     enabled: Boolean(tripId),
   });
 
-  const members = membersQuery.data || [];
+  const members = useMemo(() => membersQuery.data || [], [membersQuery.data]);
   const memberMap = useMemo(() => new Map(members.map((member) => [member.userId, member])), [members]);
   const tasks = tasksQuery.data || [];
   const decisions = decisionsQuery.data || [];
-  const expenses = expensesQuery.data || [];
+  const expenses = useMemo(() => expensesQuery.data || [], [expensesQuery.data]);
+
 
   const balances = useMemo(
     () =>

@@ -1,3 +1,4 @@
+import { forwardRef } from "react";
 import { Chrome } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -7,9 +8,10 @@ interface GoogleAuthButtonProps {
   label?: string;
 }
 
-export function GoogleAuthButton({ onClick, loading, label = "Ga verder met Google" }: GoogleAuthButtonProps) {
-  return (
+export const GoogleAuthButton = forwardRef<HTMLButtonElement, GoogleAuthButtonProps>(
+  ({ onClick, loading, label = "Ga verder met Google" }, ref) => (
     <Button
+      ref={ref}
       type="button"
       variant="outline"
       className="h-12 w-full rounded-full border-border bg-card font-semibold"
@@ -23,5 +25,7 @@ export function GoogleAuthButton({ onClick, loading, label = "Ga verder met Goog
       )}
       {label}
     </Button>
-  );
-}
+  ),
+);
+
+GoogleAuthButton.displayName = "GoogleAuthButton";

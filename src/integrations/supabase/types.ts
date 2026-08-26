@@ -1159,6 +1159,7 @@ export type Database = {
           group_size: number
           id: string
           name: string
+          party_type: string | null
           start_date: string | null
           status: string
           timezone: string | null
@@ -1178,6 +1179,7 @@ export type Database = {
           group_size?: number
           id?: string
           name: string
+          party_type?: string | null
           start_date?: string | null
           status?: string
           timezone?: string | null
@@ -1197,6 +1199,7 @@ export type Database = {
           group_size?: number
           id?: string
           name?: string
+          party_type?: string | null
           start_date?: string | null
           status?: string
           timezone?: string | null
@@ -1465,6 +1468,62 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "trip_members_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "trip"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trip_traveler_profiles: {
+        Row: {
+          allergies: string | null
+          budget_feel: string | null
+          comfort: string | null
+          created_at: string
+          diet: string[]
+          id: string
+          mobility: string | null
+          notes: string | null
+          pace: string | null
+          priorities: string[]
+          trip_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          allergies?: string | null
+          budget_feel?: string | null
+          comfort?: string | null
+          created_at?: string
+          diet?: string[]
+          id?: string
+          mobility?: string | null
+          notes?: string | null
+          pace?: string | null
+          priorities?: string[]
+          trip_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          allergies?: string | null
+          budget_feel?: string | null
+          comfort?: string | null
+          created_at?: string
+          diet?: string[]
+          id?: string
+          mobility?: string | null
+          notes?: string | null
+          pace?: string | null
+          priorities?: string[]
+          trip_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trip_traveler_profiles_trip_id_fkey"
             columns: ["trip_id"]
             isOneToOne: false
             referencedRelation: "trip"

@@ -264,7 +264,70 @@ export default function TripSamen() {
           </div>
         )}
 
+        <section className="mt-7">
+          <SectionLabel
+            action={
+              !readOnly ? (
+                <button
+                  type="button"
+                  onClick={() => setInviteOpen((open) => !open)}
+                  className="inline-flex items-center gap-1 text-[13px] font-semibold text-primary underline-offset-4 hover:underline"
+                >
+                  <UserPlus className="h-3.5 w-3.5" strokeWidth={2} />
+                  {inviteOpen ? "Sluiten" : "Uitnodigen"}
+                </button>
+              ) : null
+            }
+          >
+            Reizigers
+          </SectionLabel>
+
+          {membersQuery.isLoading ? (
+            <LoadingRows />
+          ) : (
+            <RowList className="mt-1">
+              {members.map((member) => {
+                const summary = summariseProfile(profileMapByUser.get(member.userId));
+                const isMe = member.userId === user.id;
+                return (
+                  <div key={member.userId} className="flex min-h-[48px] items-start gap-3 py-3">
+                    <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-secondary text-xs font-semibold">
+                      {member.displayName.slice(0, 1).toUpperCase()}
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-[15px] font-medium">
+                        {member.displayName}{isMe ? " (jij)" : ""}
+                      </p>
+                      <p className="mt-0.5 truncate text-[13px] text-muted-foreground">
+                        {summary || (isMe ? "Nog geen wensen ingevuld" : "Wensen nog niet ingevuld")}
+                      </p>
+                    </div>
+                    {isMe && !readOnly ? (
+                      <button
+                        type="button"
+                        onClick={() => setProfileSheetOpen(true)}
+                        className="shrink-0 text-[13px] font-semibold text-primary underline-offset-4 hover:underline"
+                      >
+                        {myProfile ? "Aanpassen" : "Invullen"}
+                      </button>
+                    ) : (
+                      <StatusWord tone="muted">{member.role === "organizer" ? "Organisator" : "Reiziger"}</StatusWord>
+                    )}
+                  </div>
+                );
+              })}
+            </RowList>
+          )}
+
+          {!readOnly && inviteOpen && (
+            <div className="mt-4">
+              <TripInvitesCard tripId={activeTrip.id} canManage={isOrganizer} />
+            </div>
+          )}
+        </section>
+
         {personalAttentionCount > 0 && (
+
           <section className="mt-7">
             <SectionLabel>Voor jou</SectionLabel>
             <RowList className="mt-1">

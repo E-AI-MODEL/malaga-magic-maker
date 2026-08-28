@@ -339,7 +339,13 @@ export default function TripSamen() {
 
           {!readOnly && inviteOpen && (
             <div className="mt-4">
-              <TripInvitesCard tripId={activeTrip.id} />
+              {isOrganizer ? (
+                <TripInvitesCard tripId={activeTrip.id} />
+              ) : (
+                <p className="border-t border-rule/20 pt-3 text-sm text-muted-foreground">
+                  Alleen de organisator van deze reis kan nieuwe mensen uitnodigen.
+                </p>
+              )}
             </div>
           )}
         </section>

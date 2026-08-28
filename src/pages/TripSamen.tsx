@@ -580,26 +580,8 @@ export default function TripSamen() {
           )}
         </section>
 
-        <section className="mt-8">
-          <SectionLabel>Reizigers</SectionLabel>
-          {membersQuery.isLoading ? (
-            <LoadingRows />
-          ) : members.length === 0 ? (
-            <EmptyLine text="Er zijn nog geen andere mensen aan deze reis gekoppeld." />
-          ) : (
-            <RowList className="mt-1">
-              {members.map((member) => (
-                <div key={member.userId} className="flex min-h-[48px] items-center gap-3 py-3">
-                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-secondary text-xs font-semibold">
-                    {member.displayName.slice(0, 1).toUpperCase()}
-                  </span>
-                  <span className="min-w-0 flex-1 truncate text-[15px] font-medium">{member.displayName}</span>
-                  <StatusWord tone="muted">{member.role === "organizer" ? "Organisator" : "Reiziger"}</StatusWord>
-                </div>
-              ))}
-            </RowList>
-          )}
-        </section>
+
+
 
         {expenses.length > 0 && (
           <p className="mt-6 flex items-center gap-2 text-xs text-muted-foreground">

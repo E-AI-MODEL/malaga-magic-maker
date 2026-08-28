@@ -346,7 +346,72 @@ export default function NewTrip() {
               {error && <p className="rounded-xl bg-destructive/10 px-4 py-3 text-sm font-medium text-destructive">{error}</p>}
 
               <div className="flex gap-3">
-                <Button type="button" variant="outline" className="h-12" onClick={() => { setError(""); setStep(1); }} disabled={submitting}>
+                <Button type="button" variant="outline" className="h-12" onClick={() => { setError(""); setStep(1); }}>
+                  <ArrowLeft className="mr-2 h-4 w-4" />Terug
+                </Button>
+                <Button type="submit" className="h-12 flex-1 font-bold">
+                  Verder <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </div>
+              <p className="text-center text-xs text-muted-foreground">Je kunt al deze gegevens later wijzigen.</p>
+            </form>
+          </>
+        ) : (
+          <>
+            <div className="mt-9">
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">{name.trim()}</p>
+              <h1 className="mt-2 font-display text-3xl font-extrabold tracking-tight sm:text-4xl">Met wie en hoe?</h1>
+              <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+                Nodig meteen mensen uit en vertel wat jij belangrijk vindt. Hansie houdt hier rekening mee bij suggesties.
+              </p>
+            </div>
+
+            <form onSubmit={handleSubmit} className="mt-9 space-y-6">
+              <fieldset className="border-t border-rule/20 pt-4">
+                <legend className="sr-only">Reisgezelschap</legend>
+                <p className="font-ui text-[15px] font-semibold">Wat voor gezelschap is dit?</p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {partyTypeOptions.map((option) => (
+                    <button
+                      key={option.value}
+                      type="button"
+                      aria-pressed={partyType === option.value}
+                      onClick={() => setPartyType(partyType === option.value ? "" : option.value)}
+                      className={`min-h-[36px] rounded-full border px-3 text-[13px] font-semibold transition-colors ${
+                        partyType === option.value
+                          ? "border-primary bg-primary text-primary-foreground"
+                          : "border-rule/40 bg-card text-foreground"
+                      }`}
+                    >
+                      {option.label}
+                    </button>
+                  ))}
+                </div>
+              </fieldset>
+
+              <div className="border-t border-rule/20 pt-4">
+                <label className="font-ui text-[15px] font-semibold" htmlFor="invite-emails">
+                  Wie nodig je uit?
+                </label>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  E-mailadressen, gescheiden door komma of nieuwe regel. Je krijgt straks per persoon een uitnodigingslink.
+                </p>
+                <Textarea
+                  id="invite-emails"
+                  value={inviteEmails}
+                  onChange={(event) => setInviteEmails(event.target.value)}
+                  placeholder="naam@example.com, ander@example.com"
+                  className="mt-2"
+                  rows={3}
+                />
+              </div>
+
+              <TravelerProfileForm value={profile} onChange={setProfile} idPrefix="new-trip" />
+
+              {error && <p className="rounded-xl bg-destructive/10 px-4 py-3 text-sm font-medium text-destructive">{error}</p>}
+
+              <div className="flex gap-3">
+                <Button type="button" variant="outline" className="h-12" onClick={() => { setError(""); setStep(2); }} disabled={submitting}>
                   <ArrowLeft className="mr-2 h-4 w-4" />Terug
                 </Button>
                 <Button type="submit" className="h-12 flex-1 font-bold" disabled={submitting}>
@@ -354,10 +419,11 @@ export default function NewTrip() {
                   Reis starten
                 </Button>
               </div>
-              <p className="text-center text-xs text-muted-foreground">Je kunt al deze gegevens later wijzigen.</p>
+              <p className="text-center text-xs text-muted-foreground">Je kunt alles later aanpassen vanuit je reis.</p>
             </form>
           </>
         )}
+
       </div>
     </div>
   );

@@ -13,6 +13,7 @@ import {
   Plus,
   Receipt,
   Trash2,
+  UserPlus,
   UserRound,
 } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
@@ -39,6 +40,9 @@ import { TaskSheet } from "@/features/together/TaskSheet";
 import { DecisionSheet } from "@/features/together/DecisionSheet";
 import { ExpenseSheet } from "@/features/together/ExpenseSheet";
 import { computeBalances, settleBalances } from "@/features/together/settle";
+import { TripInvitesCard } from "@/features/invites/TripInvitesCard";
+import { listTravelerProfiles, summariseProfile } from "@/features/travelers/data";
+import { TravelerProfileSheet } from "@/features/travelers/TravelerProfileSheet";
 import { CountBar, EmptyLine, RowItem, RowList, SectionLabel, Segmented, StatusWord, StickyBar } from "@/components/primitives";
 
 /** The primary switcher holds only the three kinds of shared work. */
@@ -68,6 +72,8 @@ export default function TripSamen() {
   const [expandedExpense, setExpandedExpense] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [actionError, setActionError] = useState("");
+  const [inviteOpen, setInviteOpen] = useState(false);
+  const [profileSheetOpen, setProfileSheetOpen] = useState(false);
 
   const tripId = activeTrip?.id || "";
   const timezone = activeTrip?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone || "Europe/Amsterdam";
@@ -95,7 +101,19 @@ export default function TripSamen() {
     enabled: Boolean(tripId),
   });
 
+  const profilesQuery = useQuery({
+    queryKey: ["trip-traveler-profiles", tripId],
+    queryFn: () => listTravelerProfiles(tripId),
+    enabled: Boolean(tripId),
+  });
+
   const members = useMemo(() => membersQuery.data || [], [membersQuery.data]);
+  const profileMapByUser = useMemo(
+    () => new Map((profilesQuery.data || []).map((profile) => [profile.user_id, profile])),
+    [profilesQuery.data],
+  );
+  const myProfile = user ? profileMapByUser.get(user.id) : undefined;
+  const refreshProfiles = () => queryClient.invalidateQueries({ queryKey: ["trip-traveler-profiles", tripId] });
   const memberMap = useMemo(() => new Map(members.map((member) => [member.userId, member])), [members]);
   const tasks = tasksQuery.data || [];
   const decisions = decisionsQuery.data || [];
@@ -321,7 +339,7 @@ export default function TripSamen() {
 
           {!readOnly && inviteOpen && (
             <div className="mt-4">
-              <TripInvitesCard tripId={activeTrip.id} canManage={isOrganizer} />
+              <TripInvitesCard tripId={activeTrip.id} />
             </div>
           )}
         </section>

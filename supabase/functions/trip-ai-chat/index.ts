@@ -205,11 +205,40 @@ serve(async (req) => {
       return jsonError(500, "Reiscontext kon niet worden geladen.");
     }
 
+    const travelerProfilesRes = memberIds.length
+      ? await db
+        .from("trip_traveler_profiles")
+        .select("user_id, priorities, diet, allergies, pace, comfort, budget_feel, mobility, notes")
+        .eq("trip_id", tripId)
+      : { data: [], error: null };
+    if (travelerProfilesRes.error) {
+      console.error("trip-ai-chat traveler profile load failed:", travelerProfilesRes.error.message);
+      return jsonError(500, "Reiscontext kon niet worden geladen.");
+    }
+
     const profiles = new Map((profilesRes.data || []).map((profile) => [profile.id, profile.display_name]));
-    const members = (membersRes.data || []).map((member) => ({
-      role: member.role,
-      display_name: profiles.get(member.user_id) || "Medereiziger",
-    }));
+    const travelerProfiles = new Map(
+      (travelerProfilesRes.data || []).map((profile) => [profile.user_id, profile]),
+    );
+    const members = (membersRes.data || []).map((member) => {
+      const profile = travelerProfiles.get(member.user_id);
+      return {
+        role: member.role,
+        display_name: profiles.get(member.user_id) || "Medereiziger",
+        wensen: profile
+          ? {
+            prioriteiten: profile.priorities,
+            dieet: profile.diet,
+            allergieen: profile.allergies,
+            tempo: profile.pace,
+            comfort: profile.comfort,
+            budgetgevoel: profile.budget_feel,
+            mobiliteit: profile.mobility,
+            opmerkingen: profile.notes,
+          }
+          : null,
+      };
+    });
 
     const expenseTotals = new Map<string, number>();
     for (const expense of expensesRes.data || []) {

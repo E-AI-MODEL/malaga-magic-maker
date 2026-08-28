@@ -279,7 +279,7 @@ export default function NewTrip() {
               </Button>
             </form>
           </>
-        ) : (
+        ) : step === 2 ? (
           <>
             <div className="mt-9">
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">{name.trim()}</p>
@@ -289,7 +289,7 @@ export default function NewTrip() {
               </p>
             </div>
 
-            <form onSubmit={handleSubmit} className="mt-9 space-y-6">
+            <form onSubmit={goToGroup} className="mt-9 space-y-6">
               <div className="border-t border-rule/10 pt-4">
                 <div className="flex items-baseline justify-between gap-3">
                   <p className="font-ui text-[15px] font-semibold">Wanneer ga je?</p>

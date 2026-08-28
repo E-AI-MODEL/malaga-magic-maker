@@ -1,7 +1,12 @@
 import { FormEvent, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ArrowLeft, ArrowRight, Loader2, MapPin } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, Copy, Loader2, MapPin } from "lucide-react";
 import { useTrip } from "@/contexts/TripContext";
+import { useAuth } from "@/lib/auth";
+import { supabase } from "@/integrations/supabase/client";
+import { createInvite } from "@/features/invites/data";
+import { partyTypeOptions, saveTravelerProfile } from "@/features/travelers/data";
+import { emptyTravelerDraft, TravelerProfileForm, type TravelerProfileDraft } from "@/features/travelers/TravelerProfileForm";
 import { describePlanLimit } from "@/features/pro/limits";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,8 +16,9 @@ const currencies = ["EUR", "USD", "GBP", "CHF"];
 
 export default function NewTrip() {
   const { createTrip } = useTrip();
+  const { user } = useAuth();
   const navigate = useNavigate();
-  const [step, setStep] = useState<1 | 2>(1);
+  const [step, setStep] = useState<1 | 2 | 3>(1);
   const [name, setName] = useState("");
   const [destination, setDestination] = useState("");
   const [country, setCountry] = useState("");
@@ -23,6 +29,12 @@ export default function NewTrip() {
   const [currency, setCurrency] = useState("EUR");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [partyType, setPartyType] = useState("");
+  const [inviteEmails, setInviteEmails] = useState("");
+  const [profile, setProfile] = useState<TravelerProfileDraft>(emptyTravelerDraft);
+  const [createdTripId, setCreatedTripId] = useState("");
+  const [inviteLinks, setInviteLinks] = useState<Array<{ email: string; url: string }>>([]);
+  const [copiedLink, setCopiedLink] = useState("");
   const [timezone] = useState(() => Intl.DateTimeFormat().resolvedOptions().timeZone || "Europe/Amsterdam");
 
   const goToDetails = (event: FormEvent) => {
@@ -36,6 +48,22 @@ export default function NewTrip() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  const goToGroup = (event: FormEvent) => {
+    event.preventDefault();
+    setError("");
+    if (startDate && endDate && endDate < startDate) {
+      setError("De einddatum kan niet vóór de startdatum liggen.");
+      return;
+    }
+    setStep(3);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const parsedEmails = inviteEmails
+    .split(/[\n,;]+/)
+    .map((value) => value.trim())
+    .filter(Boolean);
+
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
     setError("");
@@ -47,7 +75,14 @@ export default function NewTrip() {
     }
 
     if (startDate && endDate && endDate < startDate) {
+      setStep(2);
       setError("De einddatum kan niet vóór de startdatum liggen.");
+      return;
+    }
+
+    const invalidEmail = parsedEmails.find((value) => !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value));
+    if (invalidEmail) {
+      setError(`${invalidEmail} lijkt geen geldig e-mailadres.`);
       return;
     }
 
@@ -70,6 +105,53 @@ export default function NewTrip() {
         return;
       }
 
+      if (partyType) {
+        const { error: partyError } = await supabase.from("trip").update({ party_type: partyType }).eq("id", trip.id);
+        if (partyError) console.error("party type update failed", partyError.message);
+      }
+
+      const hasWishes =
+        profile.priorities.length > 0 ||
+        profile.diet.length > 0 ||
+        Boolean(profile.allergies || profile.pace || profile.comfort || profile.budgetFeel || profile.mobility || profile.notes);
+
+      if (hasWishes && user) {
+        try {
+          await saveTravelerProfile({
+            tripId: trip.id,
+            userId: user.id,
+            priorities: profile.priorities,
+            diet: profile.diet,
+            allergies: profile.allergies,
+            pace: profile.pace,
+            comfort: profile.comfort,
+            budgetFeel: profile.budgetFeel,
+            mobility: profile.mobility,
+            notes: profile.notes,
+          });
+        } catch (caught) {
+          console.error("traveler profile save failed", caught);
+        }
+      }
+
+      if (parsedEmails.length > 0) {
+        const links: Array<{ email: string; url: string }> = [];
+        for (const email of parsedEmails) {
+          try {
+            const token = await createInvite({ tripId: trip.id, email, expiresHours: 168, maxUses: 1 });
+            if (typeof token === "string") links.push({ email, url: `${window.location.origin}/join/${token}` });
+          } catch (caught) {
+            console.error("invite create failed", caught);
+          }
+        }
+        if (links.length > 0) {
+          setCreatedTripId(trip.id);
+          setInviteLinks(links);
+          window.scrollTo({ top: 0, behavior: "smooth" });
+          return;
+        }
+      }
+
       navigate(`/trip/${trip.id}`, { replace: true });
     } catch (caught) {
       setError(describePlanLimit(caught) ?? "De reis kon niet worden aangemaakt. Probeer het opnieuw.");
@@ -87,15 +169,52 @@ export default function NewTrip() {
               <ArrowLeft className="mr-2 h-4 w-4" />Mijn reizen
             </Link>
           </Button>
-          <span className="text-xs font-semibold text-muted-foreground">Stap {step} van 2</span>
+          <span className="text-xs font-semibold text-muted-foreground">Stap {step} van 3</span>
         </div>
 
         <div className="mt-6 flex gap-2" aria-hidden="true">
-          <span className="h-1.5 flex-1 rounded-full bg-primary" />
-          <span className={`h-1.5 flex-1 rounded-full ${step === 2 ? "bg-primary" : "bg-secondary"}`} />
+          {[1, 2, 3].map((item) => (
+            <span key={item} className={`h-1.5 flex-1 rounded-full ${step >= item ? "bg-primary" : "bg-secondary"}`} />
+          ))}
         </div>
 
-        {step === 1 ? (
+        {inviteLinks.length > 0 ? (
+          <>
+            <div className="mt-9">
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">{name.trim()}</p>
+              <h1 className="mt-2 font-display text-3xl font-extrabold tracking-tight sm:text-4xl">Je reis staat klaar.</h1>
+              <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+                Stuur deze persoonlijke links door. Ze zijn zeven dagen geldig en werken één keer. Later opnieuw ophalen kan niet.
+              </p>
+            </div>
+
+            <div className="mt-7 space-y-3">
+              {inviteLinks.map((link) => (
+                <div key={link.email} className="rounded-2xl border border-border bg-card p-4">
+                  <p className="text-sm font-semibold">{link.email}</p>
+                  <p className="mt-1 break-all text-xs text-muted-foreground">{link.url}</p>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    className="mt-3"
+                    onClick={() => {
+                      void navigator.clipboard.writeText(link.url);
+                      setCopiedLink(link.url);
+                    }}
+                  >
+                    {copiedLink === link.url ? <Check className="mr-2 h-4 w-4" /> : <Copy className="mr-2 h-4 w-4" />}
+                    {copiedLink === link.url ? "Gekopieerd" : "Kopieer link"}
+                  </Button>
+                </div>
+              ))}
+            </div>
+
+            <Button className="mt-7 h-12 w-full font-bold" onClick={() => navigate(`/trip/${createdTripId}`, { replace: true })}>
+              Naar mijn reis <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+          </>
+        ) : step === 1 ? (
           <>
             <div className="mt-9">
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">Nieuwe reis</p>
@@ -160,7 +279,7 @@ export default function NewTrip() {
               </Button>
             </form>
           </>
-        ) : (
+        ) : step === 2 ? (
           <>
             <div className="mt-9">
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">{name.trim()}</p>
@@ -170,7 +289,7 @@ export default function NewTrip() {
               </p>
             </div>
 
-            <form onSubmit={handleSubmit} className="mt-9 space-y-6">
+            <form onSubmit={goToGroup} className="mt-9 space-y-6">
               <div className="border-t border-rule/10 pt-4">
                 <div className="flex items-baseline justify-between gap-3">
                   <p className="font-ui text-[15px] font-semibold">Wanneer ga je?</p>
@@ -227,7 +346,72 @@ export default function NewTrip() {
               {error && <p className="rounded-xl bg-destructive/10 px-4 py-3 text-sm font-medium text-destructive">{error}</p>}
 
               <div className="flex gap-3">
-                <Button type="button" variant="outline" className="h-12" onClick={() => { setError(""); setStep(1); }} disabled={submitting}>
+                <Button type="button" variant="outline" className="h-12" onClick={() => { setError(""); setStep(1); }}>
+                  <ArrowLeft className="mr-2 h-4 w-4" />Terug
+                </Button>
+                <Button type="submit" className="h-12 flex-1 font-bold">
+                  Verder <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </div>
+              <p className="text-center text-xs text-muted-foreground">Je kunt al deze gegevens later wijzigen.</p>
+            </form>
+          </>
+        ) : (
+          <>
+            <div className="mt-9">
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">{name.trim()}</p>
+              <h1 className="mt-2 font-display text-3xl font-extrabold tracking-tight sm:text-4xl">Met wie en hoe?</h1>
+              <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+                Nodig meteen mensen uit en vertel wat jij belangrijk vindt. Hansie houdt hier rekening mee bij suggesties.
+              </p>
+            </div>
+
+            <form onSubmit={handleSubmit} className="mt-9 space-y-6">
+              <fieldset className="border-t border-rule/20 pt-4">
+                <legend className="sr-only">Reisgezelschap</legend>
+                <p className="font-ui text-[15px] font-semibold">Wat voor gezelschap is dit?</p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {partyTypeOptions.map((option) => (
+                    <button
+                      key={option.value}
+                      type="button"
+                      aria-pressed={partyType === option.value}
+                      onClick={() => setPartyType(partyType === option.value ? "" : option.value)}
+                      className={`min-h-[36px] rounded-full border px-3 text-[13px] font-semibold transition-colors ${
+                        partyType === option.value
+                          ? "border-primary bg-primary text-primary-foreground"
+                          : "border-rule/40 bg-card text-foreground"
+                      }`}
+                    >
+                      {option.label}
+                    </button>
+                  ))}
+                </div>
+              </fieldset>
+
+              <div className="border-t border-rule/20 pt-4">
+                <label className="font-ui text-[15px] font-semibold" htmlFor="invite-emails">
+                  Wie nodig je uit?
+                </label>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  E-mailadressen, gescheiden door komma of nieuwe regel. Je krijgt straks per persoon een uitnodigingslink.
+                </p>
+                <Textarea
+                  id="invite-emails"
+                  value={inviteEmails}
+                  onChange={(event) => setInviteEmails(event.target.value)}
+                  placeholder="naam@example.com, ander@example.com"
+                  className="mt-2"
+                  rows={3}
+                />
+              </div>
+
+              <TravelerProfileForm value={profile} onChange={setProfile} idPrefix="new-trip" />
+
+              {error && <p className="rounded-xl bg-destructive/10 px-4 py-3 text-sm font-medium text-destructive">{error}</p>}
+
+              <div className="flex gap-3">
+                <Button type="button" variant="outline" className="h-12" onClick={() => { setError(""); setStep(2); }} disabled={submitting}>
                   <ArrowLeft className="mr-2 h-4 w-4" />Terug
                 </Button>
                 <Button type="submit" className="h-12 flex-1 font-bold" disabled={submitting}>
@@ -235,10 +419,11 @@ export default function NewTrip() {
                   Reis starten
                 </Button>
               </div>
-              <p className="text-center text-xs text-muted-foreground">Je kunt al deze gegevens later wijzigen.</p>
+              <p className="text-center text-xs text-muted-foreground">Je kunt alles later aanpassen vanuit je reis.</p>
             </form>
           </>
         )}
+
       </div>
     </div>
   );

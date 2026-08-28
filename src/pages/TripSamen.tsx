@@ -13,6 +13,7 @@ import {
   Plus,
   Receipt,
   Trash2,
+  UserPlus,
   UserRound,
 } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
@@ -39,6 +40,9 @@ import { TaskSheet } from "@/features/together/TaskSheet";
 import { DecisionSheet } from "@/features/together/DecisionSheet";
 import { ExpenseSheet } from "@/features/together/ExpenseSheet";
 import { computeBalances, settleBalances } from "@/features/together/settle";
+import { TripInvitesCard } from "@/features/invites/TripInvitesCard";
+import { listTravelerProfiles, summariseProfile } from "@/features/travelers/data";
+import { TravelerProfileSheet } from "@/features/travelers/TravelerProfileSheet";
 import { CountBar, EmptyLine, RowItem, RowList, SectionLabel, Segmented, StatusWord, StickyBar } from "@/components/primitives";
 
 /** The primary switcher holds only the three kinds of shared work. */
@@ -68,6 +72,8 @@ export default function TripSamen() {
   const [expandedExpense, setExpandedExpense] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [actionError, setActionError] = useState("");
+  const [inviteOpen, setInviteOpen] = useState(false);
+  const [profileSheetOpen, setProfileSheetOpen] = useState(false);
 
   const tripId = activeTrip?.id || "";
   const timezone = activeTrip?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone || "Europe/Amsterdam";
@@ -95,7 +101,19 @@ export default function TripSamen() {
     enabled: Boolean(tripId),
   });
 
+  const profilesQuery = useQuery({
+    queryKey: ["trip-traveler-profiles", tripId],
+    queryFn: () => listTravelerProfiles(tripId),
+    enabled: Boolean(tripId),
+  });
+
   const members = useMemo(() => membersQuery.data || [], [membersQuery.data]);
+  const profileMapByUser = useMemo(
+    () => new Map((profilesQuery.data || []).map((profile) => [profile.user_id, profile])),
+    [profilesQuery.data],
+  );
+  const myProfile = user ? profileMapByUser.get(user.id) : undefined;
+  const refreshProfiles = () => queryClient.invalidateQueries({ queryKey: ["trip-traveler-profiles", tripId] });
   const memberMap = useMemo(() => new Map(members.map((member) => [member.userId, member])), [members]);
   const tasks = tasksQuery.data || [];
   const decisions = decisionsQuery.data || [];
@@ -264,7 +282,76 @@ export default function TripSamen() {
           </div>
         )}
 
+        <section className="mt-7">
+          <SectionLabel
+            action={
+              !readOnly ? (
+                <button
+                  type="button"
+                  onClick={() => setInviteOpen((open) => !open)}
+                  className="inline-flex items-center gap-1 text-[13px] font-semibold text-primary underline-offset-4 hover:underline"
+                >
+                  <UserPlus className="h-3.5 w-3.5" strokeWidth={2} />
+                  {inviteOpen ? "Sluiten" : "Uitnodigen"}
+                </button>
+              ) : null
+            }
+          >
+            Reizigers
+          </SectionLabel>
+
+          {membersQuery.isLoading ? (
+            <LoadingRows />
+          ) : (
+            <RowList className="mt-1">
+              {members.map((member) => {
+                const summary = summariseProfile(profileMapByUser.get(member.userId));
+                const isMe = member.userId === user.id;
+                return (
+                  <div key={member.userId} className="flex min-h-[48px] items-start gap-3 py-3">
+                    <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-secondary text-xs font-semibold">
+                      {member.displayName.slice(0, 1).toUpperCase()}
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-[15px] font-medium">
+                        {member.displayName}{isMe ? " (jij)" : ""}
+                      </p>
+                      <p className="mt-0.5 truncate text-[13px] text-muted-foreground">
+                        {summary || (isMe ? "Nog geen wensen ingevuld" : "Wensen nog niet ingevuld")}
+                      </p>
+                    </div>
+                    {isMe && !readOnly ? (
+                      <button
+                        type="button"
+                        onClick={() => setProfileSheetOpen(true)}
+                        className="shrink-0 text-[13px] font-semibold text-primary underline-offset-4 hover:underline"
+                      >
+                        {myProfile ? "Aanpassen" : "Invullen"}
+                      </button>
+                    ) : (
+                      <StatusWord tone="muted">{member.role === "organizer" ? "Organisator" : "Reiziger"}</StatusWord>
+                    )}
+                  </div>
+                );
+              })}
+            </RowList>
+          )}
+
+          {!readOnly && inviteOpen && (
+            <div className="mt-4">
+              {isOrganizer ? (
+                <TripInvitesCard tripId={activeTrip.id} />
+              ) : (
+                <p className="border-t border-rule/20 pt-3 text-sm text-muted-foreground">
+                  Alleen de organisator van deze reis kan nieuwe mensen uitnodigen.
+                </p>
+              )}
+            </div>
+          )}
+        </section>
+
         {personalAttentionCount > 0 && (
+
           <section className="mt-7">
             <SectionLabel>Voor jou</SectionLabel>
             <RowList className="mt-1">
@@ -580,26 +667,8 @@ export default function TripSamen() {
           )}
         </section>
 
-        <section className="mt-8">
-          <SectionLabel>Reizigers</SectionLabel>
-          {membersQuery.isLoading ? (
-            <LoadingRows />
-          ) : members.length === 0 ? (
-            <EmptyLine text="Er zijn nog geen andere mensen aan deze reis gekoppeld." />
-          ) : (
-            <RowList className="mt-1">
-              {members.map((member) => (
-                <div key={member.userId} className="flex min-h-[48px] items-center gap-3 py-3">
-                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-secondary text-xs font-semibold">
-                    {member.displayName.slice(0, 1).toUpperCase()}
-                  </span>
-                  <span className="min-w-0 flex-1 truncate text-[15px] font-medium">{member.displayName}</span>
-                  <StatusWord tone="muted">{member.role === "organizer" ? "Organisator" : "Reiziger"}</StatusWord>
-                </div>
-              ))}
-            </RowList>
-          )}
-        </section>
+
+
 
         {expenses.length > 0 && (
           <p className="mt-6 flex items-center gap-2 text-xs text-muted-foreground">
@@ -609,6 +678,14 @@ export default function TripSamen() {
         )}
       </div>
 
+      <TravelerProfileSheet
+        open={profileSheetOpen}
+        onOpenChange={setProfileSheetOpen}
+        tripId={activeTrip.id}
+        userId={user.id}
+        profile={myProfile}
+        onSaved={refreshProfiles}
+      />
       <TaskSheet
         open={taskSheetOpen}
         onOpenChange={setTaskSheetOpen}

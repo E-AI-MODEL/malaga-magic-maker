@@ -591,6 +591,14 @@ export default function TripSamen() {
         )}
       </div>
 
+      <TravelerProfileSheet
+        open={profileSheetOpen}
+        onOpenChange={setProfileSheetOpen}
+        tripId={activeTrip.id}
+        userId={user.id}
+        profile={myProfile}
+        onSaved={refreshProfiles}
+      />
       <TaskSheet
         open={taskSheetOpen}
         onOpenChange={setTaskSheetOpen}

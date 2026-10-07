@@ -1,3 +1,4 @@
+import { HansiePanel } from "@/features/hansie/HansiePanel";
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -175,7 +176,10 @@ export default function Trips() {
         {loading ? (
           <div className="mt-5 h-20 animate-pulse rounded-[14px] bg-secondary" />
         ) : heroTrip ? (
-          <NextTrip trip={heroTrip} />
+          <>
+            <NextTrip trip={heroTrip} />
+            <HansiePanel page="trips" tripId={heroTrip.id} title={`Vraag Hansie over ${heroTrip.name}`} className="mt-5" />
+          </>
         ) : (
           <div className="mt-8 border-t border-rule pt-6">
             <p className="font-display uppercase tracking-tight text-[22px] font-extrabold leading-snug">Nog geen reis</p>

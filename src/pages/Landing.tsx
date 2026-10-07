@@ -129,7 +129,7 @@ export default function Landing() {
                 rustige plek
               </h1>
               <p className="mt-4 max-w-sm text-[15px] leading-relaxed text-white/90">
-                Geen losse appjes, mails en screenshots meer. Reisplan, taken, kosten en documenten — bij
+                Geen losse appjes, mails en screenshots meer. Reisplan, taken, kosten en documenten bij
                 elkaar, voor jezelf of voor de hele groep.
               </p>
             </div>
@@ -172,7 +172,7 @@ export default function Landing() {
               </Button>
             </div>
             <p className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
-              {["Geen creditcard", "Geen abonnement", "Elke bestemming"].map((item) => (
+              {["Gratis te gebruiken", "Elke bestemming", "Privé per reis"].map((item) => (
                 <span key={item} className="flex items-center gap-1.5">
                   <Check className="h-3.5 w-3.5 text-primary" strokeWidth={2.25} />
                   {item}

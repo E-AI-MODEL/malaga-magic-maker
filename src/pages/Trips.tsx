@@ -1,4 +1,3 @@
-import { HansiePanel } from "@/features/hansie/HansiePanel";
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -65,7 +64,7 @@ function NextTrip({ trip }: { trip: Trip }) {
         ? "Alles geregeld"
         : attentionTotal > 0
           ? `${attentionTotal} ${attentionTotal === 1 ? "punt vraagt" : "punten vragen"} aandacht`
-          : "Alles geregeld";
+          : "Reisplan nog leeg";
 
   return (
     <section className="mt-5 border-y border-border bg-card px-4 py-4">
@@ -180,7 +179,6 @@ export default function Trips() {
         ) : heroTrip ? (
           <>
             <NextTrip trip={heroTrip} />
-            <HansiePanel page="trips" tripId={heroTrip.id} title={`Vraag Hansie over ${heroTrip.name}`} className="mt-5" />
           </>
         ) : (
           <div className="mt-8 border-t border-rule pt-6">

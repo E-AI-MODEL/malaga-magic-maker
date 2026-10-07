@@ -166,7 +166,7 @@ export function DocumentsSection({
         <p className="mt-3 text-sm text-destructive">Je documenten konden niet worden geladen.</p>
       ) : (documentsQuery.data?.length || 0) === 0 ? (
         <EmptyLine
-          text="Nog geen tickets, vouchers of bevestigingen."
+          text="Zet hier je tickets, boardingpassen en boekingsbevestigingen. Iedereen in de reis heeft ze dan bij de hand, zonder te zoeken in de mail."
           actionLabel={readOnly ? undefined : "Document toevoegen"}
           onClick={readOnly ? undefined : () => setUploadOpen(true)}
         />

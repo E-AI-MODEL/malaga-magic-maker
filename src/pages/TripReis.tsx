@@ -1,4 +1,3 @@
-import { HansiePanel } from "@/features/hansie/HansiePanel";
 import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { AlertTriangle, Archive, ChevronDown, FileText, Mail, Pencil, Plus, Search, Trash2 } from "lucide-react";
@@ -212,7 +211,6 @@ export default function TripReis() {
           </div>
         )}
 
-        {!readOnly && <HansiePanel page="reis" title="Ik check je planning op gaten en dubbelingen." className="mt-4" />}
 
         {actionError && <p className="mt-4 text-sm font-medium text-destructive">{actionError}</p>}
 

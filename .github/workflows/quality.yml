@@ -22,7 +22,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
 
       - name: Setup Deno
@@ -43,9 +43,15 @@ jobs:
 
       - name: Check Edge Functions
         run: |
-          deno check supabase/functions/trip-ai-chat/index.ts
+          deno check supabase/functions/accommodation-search/index.ts
+          deno check supabase/functions/booking-parse/index.ts
+          deno check supabase/functions/create-checkout/index.ts
+          deno check supabase/functions/document-extract/index.ts
           deno check supabase/functions/firecrawl-scrape/index.ts
-          deno check supabase/functions/seed-users/index.ts
+          deno check supabase/functions/ops-admin-users/index.ts
+          deno check supabase/functions/payments-account/index.ts
+          deno check supabase/functions/payments-webhook/index.ts
+          deno check supabase/functions/trip-ai-chat/index.ts
 
       - name: Lint
         run: npm run lint

@@ -70,8 +70,8 @@ const STEPS = [
 
 const FAQ = [
   {
-    q: "Is Vakansie echt gratis?",
-    a: "Ja. Een volledige reis voorbereiden kost niets: één actieve reis, 5 documenten per reis en 12 Hansie-vragen per dag. Wil je meer ruimte, dan is Pro een eenmalige bijdrage.",
+    q: "Wat kost Vakansie?",
+    a: "Je kiest: gratis of Pro. Gratis is één actieve reis, 5 documenten per reis en 12 Hansie-vragen per dag. Pro is een eenmalige bijdrage van € 2, € 5 of € 10 en geeft meer ruimte.",
   },
   {
     q: "Boekt Vakansie mijn vakantie?",
@@ -266,11 +266,10 @@ export default function Landing() {
             Wat kost het
           </p>
           <h2 className="mt-2 font-display text-[26px] font-bold uppercase tracking-wide leading-tight">
-            Gratis. En dat blijft zo.
+            Twee opties: gratis of Pro
           </h2>
           <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-            Je bereidt een volledige reis voor zonder te betalen. Het verschil tussen gratis en Pro zit in de
-            ruimte, niet in de functies.
+            Beide opties hebben dezelfde functies. Het verschil zit in de ruimte.
           </p>
 
           <div className="mt-5 grid gap-3 sm:grid-cols-2">
@@ -374,7 +373,7 @@ export default function Landing() {
       >
         <div className="flex items-center gap-3">
           <p className="min-w-0 flex-1 text-xs leading-tight text-muted-foreground">
-            Gratis te gebruiken.
+            Gratis of Pro.
           </p>
           <Button asChild size="sm" className="shrink-0 rounded-md px-5">
             <Link to="/signup">Gratis beginnen</Link>

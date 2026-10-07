@@ -93,7 +93,7 @@ export default function Steun() {
           <>
             <h1 className="mt-8 font-brand text-[30px] font-semibold leading-tight">Vakansie Pro</h1>
             <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-              Vakansie is en blijft gratis te gebruiken. Met een eenmalige bijdrage ontgrendel je Pro op je
+              Vakansie is gratis te gebruiken. Met een eenmalige bijdrage ontgrendel je Pro op je
               account en help je de kosten van hosting, veilige documentopslag en Hansie dragen. Geen
               abonnement, geen verlenging.
             </p>

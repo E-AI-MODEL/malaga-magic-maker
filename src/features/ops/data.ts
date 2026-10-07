@@ -201,9 +201,71 @@ export async function setOpsTripStatus(tripId: string, status: string) {
   if (error) throw error;
 }
 
-export async function grantOpsPro(userId: string, note?: string) {
-  const { error } = await supabase.rpc("ops_grant_pro", { p_user_id: userId, p_note: note ?? null });
+export async function grantOpsPro(userId: string, note?: string, expiresAt?: string | null) {
+  const { error } = await supabase.rpc("ops_grant_pro_until", {
+    p_user_id: userId,
+    p_expires_at: expiresAt ?? undefined,
+    p_note: note ?? undefined,
+  });
   if (error) throw error;
+}
+
+/** Pro duration presets in days; null means no end date. */
+export const PRO_DURATIONS: { label: string; days: number | null }[] = [
+  { label: "30 dagen", days: 30 },
+  { label: "1 jaar", days: 365 },
+  { label: "Altijd", days: null },
+];
+
+export function proExpiry(days: number | null, now = new Date()): string | null {
+  if (days === null) return null;
+  return new Date(now.getTime() + days * 86_400_000).toISOString();
+}
+
+export type OpsUserAccess = { is_admin: boolean; banned_until: string | null; pro_active: boolean; pro_until: string | null };
+
+export async function getOpsUserAccess(userId: string): Promise<OpsUserAccess> {
+  const { data, error } = await supabase.rpc("ops_get_user_access", { p_user_id: userId });
+  if (error) throw error;
+  const item = (data ?? {}) as Record<string, unknown>;
+  return {
+    is_admin: item.is_admin === true,
+    banned_until: typeof item.banned_until === "string" ? item.banned_until : null,
+    pro_active: item.pro_active === true,
+    pro_until: typeof item.pro_until === "string" ? item.pro_until : null,
+  };
+}
+
+export async function setOpsAdminRole(userId: string, admin: boolean) {
+  const { error } = await supabase.rpc("ops_set_admin_role", { p_user_id: userId, p_admin: admin });
+  if (error) throw error;
+}
+
+export async function addOpsTripMember(tripId: string, userId: string, role: "organizer" | "member") {
+  const { error } = await supabase.rpc("ops_add_trip_member", { p_trip_id: tripId, p_user_id: userId, p_role: role });
+  if (error) throw error;
+}
+
+async function opsUsersFn(body: Record<string, unknown>) {
+  const { data, error } = await supabase.functions.invoke("ops-admin-users", {
+    body: { ...body, redirectTo: `${window.location.origin}/reset-password` },
+  });
+  if (error) {
+    const ctx = (error as { context?: Response }).context;
+    const detail = ctx ? await ctx.json().catch(() => null) : null;
+    throw new Error(detail?.error || error.message);
+  }
+  return data as { userId?: string; ok?: boolean };
+}
+
+export function createOpsUser(input: { email: string; displayName: string; mode: "invite" | "password"; password?: string }) {
+  return opsUsersFn({ action: "create", ...input });
+}
+export function setOpsUserBlocked(userId: string, blocked: boolean) {
+  return opsUsersFn({ action: blocked ? "ban" : "unban", userId });
+}
+export function sendOpsRecovery(userId: string) {
+  return opsUsersFn({ action: "recovery", userId });
 }
 
 export async function revokeOpsPro(userId: string, note?: string) {

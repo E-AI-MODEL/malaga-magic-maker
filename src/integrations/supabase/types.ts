@@ -1659,13 +1659,22 @@ export type Database = {
         Args: { p_category: string; p_user_id: string }
         Returns: boolean
       }
+      ops_add_trip_member: {
+        Args: { p_role: string; p_trip_id: string; p_user_id: string }
+        Returns: boolean
+      }
       ops_delete_trip: { Args: { p_trip_id: string }; Returns: boolean }
       ops_delete_user: { Args: { p_user_id: string }; Returns: boolean }
       ops_get_system_summary: { Args: never; Returns: Json }
       ops_get_trip_overview: { Args: { p_trip_id: string }; Returns: Json }
+      ops_get_user_access: { Args: { p_user_id: string }; Returns: Json }
       ops_get_user_overview: { Args: { p_user_id: string }; Returns: Json }
       ops_grant_pro: {
         Args: { p_note?: string; p_user_id: string }
+        Returns: boolean
+      }
+      ops_grant_pro_until: {
+        Args: { p_expires_at?: string; p_note?: string; p_user_id: string }
         Returns: boolean
       }
       ops_list_settings: { Args: never; Returns: Json }
@@ -1684,6 +1693,10 @@ export type Database = {
       ops_search_users: {
         Args: { p_limit?: number; p_query?: string }
         Returns: Json
+      }
+      ops_set_admin_role: {
+        Args: { p_admin: boolean; p_user_id: string }
+        Returns: boolean
       }
       ops_set_setting: {
         Args: { p_key: string; p_value: string }

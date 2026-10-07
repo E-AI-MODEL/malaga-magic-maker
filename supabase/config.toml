@@ -13,9 +13,6 @@ verify_jwt = true
 # service-role document read.
 verify_jwt = false
 
-[functions.seed-users]
-verify_jwt = true
-
 [functions.create-donation-checkout]
 verify_jwt = false
 
@@ -31,4 +28,8 @@ verify_jwt = false
 [functions.accommodation-search]
 # Explicit token + trip-membership check in function code before any
 # service-role read.
+verify_jwt = false
+
+[functions.ops-admin-users]
+# Explicit token + platform-admin role check in code before service-role calls.
 verify_jwt = false

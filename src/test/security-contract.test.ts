@@ -12,7 +12,7 @@ describe("Vakansie BUILD 01 security contract", () => {
   const attachmentLockdown = source("supabase/migrations/20260816165200_disable_public_task_attachment_uploads.sql");
   const hansie = source("supabase/functions/trip-ai-chat/index.ts");
   const firecrawl = source("supabase/functions/firecrawl-scrape/index.ts");
-  const seedUsers = source("supabase/functions/seed-users/index.ts");
+  const opsUsers = source("supabase/functions/ops-admin-users/index.ts");
   const tripContext = source("src/contexts/TripContext.tsx");
 
   it("removes direct membership joins and creates atomic server RPCs", () => {
@@ -52,12 +52,14 @@ describe("Vakansie BUILD 01 security contract", () => {
     expect(firecrawl).toContain('return jsonResponse(403, { success: false, error: "Forbidden" })');
   });
 
-  it("keeps the legacy account seeder disabled and credential-free", () => {
-    expect(seedUsers).toContain("Legacy seed endpoint is disabled");
-    expect(seedUsers).toContain("status: 410");
-    expect(seedUsers).not.toContain("SUPABASE_SERVICE_ROLE_KEY");
-    expect(seedUsers).not.toContain("password:");
-    expect(seedUsers).not.toContain("@local.app");
+  it("checks platform admin before any admin user action", () => {
+    const roleCheck = opsUsers.indexOf('admin.rpc("has_role"');
+    expect(roleCheck).toBeGreaterThan(-1);
+    expect(opsUsers.indexOf("auth.getUser")).toBeLessThan(roleCheck);
+    for (const call of ["inviteUserByEmail", "createUser(", "updateUserById", "resetPasswordForEmail"]) {
+      expect(opsUsers.indexOf(call)).toBeGreaterThan(roleCheck);
+    }
+    expect(opsUsers).toContain('json(403, { error: "platform_admin_required" })');
   });
 
   it("uses RPCs instead of browser-side trip/member inserts and invite lookup", () => {

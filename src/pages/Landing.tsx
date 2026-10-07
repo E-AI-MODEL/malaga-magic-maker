@@ -161,13 +161,13 @@ export default function Landing() {
             </div>
 
             <div className="mt-4 flex flex-col gap-2 sm:flex-row">
-              <Button asChild size="lg" className="w-full rounded-full sm:w-auto">
+              <Button asChild size="lg" className="w-full rounded-md sm:w-auto">
                 <Link to="/signup">
                   Gratis beginnen
                   <ArrowRight className="ml-1.5 h-4 w-4" />
                 </Link>
               </Button>
-              <Button asChild size="lg" variant="outline" className="w-full rounded-full bg-card sm:w-auto">
+              <Button asChild size="lg" variant="outline" className="w-full rounded-md bg-card sm:w-auto">
                 <Link to="/login">Ik heb al een account</Link>
               </Button>
             </div>
@@ -272,7 +272,7 @@ export default function Landing() {
                   </li>
                 ))}
               </ul>
-              <Button asChild className="mt-5 w-full rounded-full">
+              <Button asChild className="mt-5 w-full rounded-md">
                 <Link to="/signup">Gratis beginnen</Link>
               </Button>
             </div>
@@ -289,7 +289,7 @@ export default function Landing() {
                 Vind je Vakansie de moeite waard? Met een eenmalige bijdrage ontgrendel je Pro en help je
                 hosting, documentopslag en Hansie betalen. Geen abonnement, geen verlenging.
               </p>
-              <Button asChild variant="secondary" className="mt-5 w-full rounded-full">
+              <Button asChild variant="secondary" className="mt-5 w-full rounded-md">
                 <Link to="/steun">
                   <Heart className="mr-1.5 h-4 w-4" strokeWidth={1.75} />
                   Pro ontgrendelen
@@ -319,7 +319,7 @@ export default function Landing() {
             <p className="mx-auto mt-2 max-w-sm text-sm leading-relaxed text-muted-foreground">
               Zet je volgende reis neer en bouw hem rustig op. Een naam is genoeg.
             </p>
-            <Button asChild size="lg" className="mt-5 w-full rounded-full sm:w-auto sm:px-10">
+            <Button asChild size="lg" className="mt-5 w-full rounded-md sm:w-auto sm:px-10">
               <Link to="/signup">
                 Gratis beginnen
                 <ArrowRight className="ml-1.5 h-4 w-4" />
@@ -338,7 +338,7 @@ export default function Landing() {
           <p className="min-w-0 flex-1 text-xs leading-tight text-muted-foreground">
             Gratis te gebruiken.
           </p>
-          <Button asChild size="sm" className="shrink-0 rounded-full px-5">
+          <Button asChild size="sm" className="shrink-0 rounded-md px-5">
             <Link to="/signup">Gratis beginnen</Link>
           </Button>
         </div>

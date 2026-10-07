@@ -63,7 +63,9 @@ function NextTrip({ trip }: { trip: Trip }) {
       ? "Voorbereiding niet beschikbaar"
       : readiness.status === "ready"
         ? "Alles geregeld"
-        : `${done} van ${trackedTotal} geregeld`;
+        : attentionTotal > 0
+          ? `${attentionTotal} ${attentionTotal === 1 ? "punt vraagt" : "punten vragen"} aandacht`
+          : "Alles geregeld";
 
   return (
     <section className="mt-5 border-y border-border bg-card px-4 py-4">

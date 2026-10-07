@@ -215,7 +215,7 @@ export default function Trips() {
         )}
       </main>
 
-      <HansieWidget trip={heroTrip ? { id: heroTrip.id, name: heroTrip.name } : null} floating={false} />
+      <HansieWidget trip={heroTrip ? { id: heroTrip.id, name: heroTrip.name, start_date: heroTrip.start_date, end_date: heroTrip.end_date } : null} floating={false} />
     </div>
   );
 }

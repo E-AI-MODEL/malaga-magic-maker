@@ -17,3 +17,7 @@
 - [x] Homepage: stap 4 "Onderweg kijkt Hansie mee" en functies reizigerswensen + meldingen toegevoegd; connectorlijn netjes gestopt
 - [ ] Hansie ingelogd visueel controleren — geblokkeerd: geen beschikbare sessie voor de verzoeker; inloggen in preview nodig
 - [x] Homepage: "Waarom Vakansie?"-blok en losse documentvraag verwijderd; FAQ rijker (9 vragen) en uitklapbaar; nieuwe test + 102 tests, lint, typecheck, build OK
+- [x] Reis: één Toevoegen-menu, filters alleen bij inhoud, waarschuwingen ingeklapt
+- [x] Overzicht: "x/y geregeld" telt lege reis en nachten zonder verblijf niet meer als geregeld
+- [x] Hansie prominenter: blok op Mijn reizen, Overzicht, Reis en Samen; vraagbalk past zich aan per scherm
+- [ ] Hansie ingelogd op telefoon bekijken — wacht op de gebruiker

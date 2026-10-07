@@ -9,21 +9,20 @@ import {
   Heart,
   Plane,
   Route,
-  Shield,
   Sparkles,
   UserRound,
   Users,
   Wallet,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import heroHome from "@/assets/hero-home.jpg";
 import logo from "@/assets/vakansie_primary_complete.png.asset.json";
-
-const TRUST_POINTS = [
-  "Je data blijft van jou",
-  "Documenten privé per reis",
-  "Geen abonnement",
-];
 
 const FEATURES = [
   {
@@ -71,15 +70,39 @@ const STEPS = [
 const FAQ = [
   {
     q: "Wat kost Vakansie?",
-    a: "Je kiest: gratis of Pro. Gratis is één actieve reis, 5 documenten per reis en 12 Hansie-vragen per dag. Pro is een eenmalige bijdrage van € 2, € 5 of € 10 en geeft meer ruimte.",
+    a: "Je kiest: gratis of Pro. Gratis is één actieve reis, 5 documenten per reis en 12 Hansie-vragen per dag. Pro is een eenmalige bijdrage van € 2, € 5 of € 10 en geeft meer ruimte. Beide opties hebben dezelfde functies.",
+  },
+  {
+    q: "Wat is Pro precies?",
+    a: "Een eenmalige bijdrage van € 2, € 5 of € 10, naar wat je graag wilt bijdragen. Je krijgt onbeperkt reizen, 200 documenten per reis en 150 Hansie-vragen per dag. Geen abonnement en geen automatische verlenging.",
   },
   {
     q: "Boekt Vakansie mijn vakantie?",
-    a: "Nee. Je boekt zelf waar je wilt. Vakansie is de plek waar alles rond die boekingen samenkomt.",
+    a: "Nee. Je boekt zelf bij de maatschappij, het hotel of de verhuurder van je keuze. Vakansie is de plek waar alles rond die boekingen samenkomt: je plan, je documenten, je taken en je kosten.",
   },
   {
-    q: "Zijn mijn documenten veilig?",
-    a: "Tickets en bevestigingen staan in afgeschermde opslag en zijn alleen zichtbaar voor de reizigers van die reis.",
+    q: "Werkt Vakansie voor elke bestemming?",
+    a: "Ja. Bos, stad, zon, festival of roadtrip. Je vult zelf in waar je heen gaat en wat je wilt regelen. Vakansie gaat uit van jouw reis, niet van een vast template.",
+  },
+  {
+    q: "Kan ik ook alleen reizen?",
+    a: "Ja. Een reis maken kan zonder iemand uit te nodigen. Je hebt dan één plek met je planning, je documenten en het overzicht over wat er nog moet.",
+  },
+  {
+    q: "Hoeveel reisgenoten kunnen er mee?",
+    a: "Onbeperkt, ook zonder Pro. Iedereen ziet dezelfde stand van zaken en kan zelf instellen welke meldingen hij of zij wil krijgen.",
+  },
+  {
+    q: "Wat kan Hansie?",
+    a: "Hansie kent je reis en de wensen van je reisgenoten. Je vraagt wat er morgen op de planning staat, welke uitjes bij jullie passen, of wat er nog geregeld moet worden.",
+  },
+  {
+    q: "Werkt Vakansie op mijn telefoon?",
+    a: "Ja. Vakansie is eerst op je telefoon gemaakt en werkt ook op je tablet of laptop. Je hebt geen app nodig; je opent het in de browser.",
+  },
+  {
+    q: "Kan ik een reis weghalen?",
+    a: "Je archiveert een reis. Archiveren verwijdert niets: een gearchiveerde reis staat apart op je overzicht en kun je later weer terugzetten.",
   },
 ];
 
@@ -192,19 +215,6 @@ export default function Landing() {
                 </span>
               ))}
             </p>
-            <div className="mt-6 rounded-[16px] border border-border bg-card p-4">
-              <p className="mb-3 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-                Waarom Vakansie?
-              </p>
-              <div className="grid gap-3 sm:grid-cols-3">
-                {TRUST_POINTS.map((point) => (
-                  <div key={point} className="flex items-center gap-2">
-                    <Shield className="h-4 w-4 text-primary" strokeWidth={1.75} />
-                    <span className="text-sm font-medium">{point}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
           </div>
         </section>
 
@@ -338,16 +348,27 @@ export default function Landing() {
 
         <section className="mx-auto mt-14 max-w-3xl px-5">
           <p className="font-ui text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-            Veelgestelde vragen
+            Goed om te weten
           </p>
-          <dl className="mt-4 rule-divide border-t border-[hsl(var(--rule)/0.08)]">
+          <h2 className="mt-2 font-display text-[26px] font-bold uppercase tracking-wide leading-tight">
+            Veelgestelde vragen
+          </h2>
+          <Accordion
+            type="single"
+            collapsible
+            className="mt-4 rule-divide border-t border-[hsl(var(--rule)/0.08)]"
+          >
             {FAQ.map((item) => (
-              <div key={item.q} className="py-4">
-                <dt className="font-display text-[17px] font-bold uppercase tracking-wide leading-snug">{item.q}</dt>
-                <dd className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{item.a}</dd>
-              </div>
+              <AccordionItem key={item.q} value={item.q} className="border-b-0">
+                <AccordionTrigger className="py-4 text-left font-display text-[17px] font-bold uppercase tracking-wide leading-snug no-underline transition-colors hover:no-underline hover:text-primary">
+                  {item.q}
+                </AccordionTrigger>
+                <AccordionContent className="pb-4 text-sm leading-relaxed text-muted-foreground">
+                  {item.a}
+                </AccordionContent>
+              </AccordionItem>
             ))}
-          </dl>
+          </Accordion>
         </section>
 
         <section className="mx-auto mt-14 max-w-3xl px-5">

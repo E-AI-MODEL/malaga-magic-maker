@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   ArrowRight,
+  Bell,
   Check,
   CheckCircle2,
   FileText,
@@ -10,6 +11,7 @@ import {
   Route,
   Shield,
   Sparkles,
+  UserRound,
   Users,
   Wallet,
 } from "lucide-react";
@@ -35,14 +37,24 @@ const FEATURES = [
     body: "Taken verdelen, knopen doorhakken en kosten eerlijk splitsen met iedereen die meegaat.",
   },
   {
+    icon: UserRound,
+    title: "Ieder zijn wensen",
+    body: "Dieet, tempo, budget en prioriteiten per reiziger. Hansie kent die gegevens en houdt er rekening mee.",
+  },
+  {
     icon: FileText,
     title: "Documenten bij de hand",
     body: "Tickets, bevestigingen en vouchers veilig bewaard bij de reis waar ze bij horen.",
   },
   {
+    icon: Bell,
+    title: "Meldingen, geen appgroep",
+    body: "Nieuwe taken, stemmen, documenten en reisupdates komen bij je binnen. Je hoeft niets handmatig na te vragen.",
+  },
+  {
     icon: Sparkles,
     title: "Hansie denkt mee",
-    body: "Wat willen jullie doen? Hansie denkt mee over uitjes die passen bij jullie wensen en helpt je zien wat er nog geregeld moet worden.",
+    body: "Wat willen jullie doen? Hansie denkt mee over uitjes die bij jullie passen en laat zien wat er nog geregeld moet worden.",
   },
 ];
 
@@ -50,6 +62,10 @@ const STEPS = [
   { title: "Start je reis", body: "Een naam is genoeg. Data en bestemming vul je later aan." },
   { title: "Nodig je reisgenoten uit", body: "Iedereen ziet dezelfde stand van zaken, zonder eindeloze appgroep." },
   { title: "Werk toe naar vertrek", body: "Vakansie houdt bij wat geregeld is en wat nog aandacht vraagt." },
+  {
+    title: "Onderweg kijkt Hansie mee",
+    body: "Ter plaatse: wat er vandaag en morgen staat, waar je tickets zijn en wat er nog ontbreekt. Na afloop: wie wat nog moet betalen.",
+  },
 ];
 
 const FAQ = [

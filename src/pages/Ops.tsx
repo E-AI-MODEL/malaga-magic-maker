@@ -13,13 +13,12 @@ import {
   searchOpsTrips,
   searchOpsUsers,
   setOpsTripStatus,
-  grantOpsPro,
-  revokeOpsPro,
   deleteOpsTrip,
   deleteOpsUser,
 } from "@/features/ops/data";
 import { PLATFORM_SWITCHES, listOpsSettings, setOpsSetting, type PlatformSwitchKey } from "@/features/ops/settings";
 import { Switch } from "@/components/ui/switch";
+import { OpsCreateUser, OpsUserActions } from "@/features/ops/OpsUserAdmin";
 import { OpsShell, opsSectionPath, type OpsSection } from "@/features/ops/OpsShell";
 
 type Section = Exclude<OpsSection, "errors">;
@@ -97,19 +96,6 @@ export default function Ops() {
       ]);
     },
     onError: () => setActionError("Deze schakelaar kon niet worden opgeslagen."),
-  });
-
-  const proMutation = useMutation({
-    mutationFn: ({ userId, grant }: { userId: string; grant: boolean }) =>
-      grant ? grantOpsPro(userId) : revokeOpsPro(userId),
-    onSuccess: async () => {
-      setActionError("");
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: ["ops-user", selectedUserId] }),
-        queryClient.invalidateQueries({ queryKey: ["ops-audit"] }),
-      ]);
-    },
-    onError: () => setActionError("Pro kon niet worden aangepast."),
   });
 
   const deleteTripMutation = useMutation({
@@ -200,6 +186,7 @@ export default function Ops() {
         </form>
       )}
 
+      {section === "users" && <div className="mt-4"><OpsCreateUser /></div>}
       {section === "users" && (
         <div className="mt-5 grid gap-6 lg:grid-cols-[1fr_1.1fr]">
           <div className="rule-divide">

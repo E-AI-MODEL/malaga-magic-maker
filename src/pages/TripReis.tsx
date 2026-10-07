@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Archive, FileText, Mail, Pencil, Plus, Search, Trash2 } from "lucide-react";
+import { AlertTriangle, Archive, FileText, Mail, Pencil, Plus, Search, Trash2 } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth";
@@ -25,6 +25,8 @@ import {
   formatTripDay,
   getTravelStatus,
   getTravelType,
+  timelineWarnings,
+  travelStatuses,
   tripDayKey,
 } from "@/features/travel/presentation";
 
@@ -52,8 +54,9 @@ function formatDateRange(startDate: string | null, endDate: string | null) {
 }
 
 function statusTone(status: string): "done" | "attention" | "muted" | "neutral" {
-  if (status === "confirmed") return "done";
+  if (status === "confirmed" || status === "paid") return "done";
   if (status === "planned") return "attention";
+  if (status === "idea") return "neutral";
   if (status === "completed" || status === "cancelled") return "muted";
   return "neutral";
 }
@@ -78,6 +81,7 @@ export default function TripReis() {
   const [createType, setCreateType] = useState<string>("custom");
   const [actionError, setActionError] = useState("");
   const [filter, setFilter] = useState<FilterId>("all");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
 
   const tripId = activeTrip?.id || "";
   const timezone = activeTrip?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone || "Europe/Amsterdam";
@@ -101,7 +105,9 @@ export default function TripReis() {
 
   const groups = useMemo(() => {
     const allowed = filters.find((entry) => entry.id === filter)?.types || [];
-    const visible = (itemsQuery.data || []).filter((item) => allowed.length === 0 || allowed.includes(item.type));
+    const visible = (itemsQuery.data || []).filter(
+      (item) => (allowed.length === 0 || allowed.includes(item.type)) && (statusFilter === "all" || item.status === statusFilter),
+    );
     const grouped = new Map<string, TripItemRow[]>();
     for (const item of visible) {
       const key = tripDayKey(item.start_at, item.timezone || timezone);
@@ -113,7 +119,12 @@ export default function TripReis() {
       if (b === "undated") return -1;
       return a.localeCompare(b);
     });
-  }, [itemsQuery.data, timezone, filter]);
+  }, [itemsQuery.data, timezone, filter, statusFilter]);
+
+  const warnings = useMemo(
+    () => timelineWarnings(itemsQuery.data || [], activeTrip?.start_date ?? null, activeTrip?.end_date ?? null),
+    [itemsQuery.data, activeTrip?.start_date, activeTrip?.end_date],
+  );
 
   if (!activeTrip) return null;
 
@@ -208,8 +219,30 @@ export default function TripReis() {
         {actionError && <p className="mt-4 text-sm font-medium text-destructive">{actionError}</p>}
 
         <StickyBar className="mt-4">
-          <FilterChips<FilterId> value={filter} onChange={setFilter} options={counts} />
+          <div className="flex items-center gap-2">
+            <div className="min-w-0 flex-1"><FilterChips<FilterId> value={filter} onChange={setFilter} options={counts} /></div>
+            <select
+              aria-label="Filter op status"
+              value={statusFilter}
+              onChange={(event) => setStatusFilter(event.target.value)}
+              className="h-9 shrink-0 rounded-full border border-border bg-background px-3 font-ui text-[13px]"
+            >
+              <option value="all">Elke status</option>
+              {travelStatuses.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
+            </select>
+          </div>
         </StickyBar>
+
+        {!readOnly && warnings.length > 0 && (
+          <div className="mt-3 divide-y divide-rule border-y border-rule">
+            {warnings.map((w) => (
+              <p key={w.kind + w.message} className="flex items-start gap-2 py-2 text-sm text-muted-foreground">
+                <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-warning" strokeWidth={1.75} />
+                {w.message}
+              </p>
+            ))}
+          </div>
+        )}
 
         <section className="mt-3">
           {itemsQuery.isLoading ? (

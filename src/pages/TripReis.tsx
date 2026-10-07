@@ -167,7 +167,7 @@ export default function TripReis() {
             </p>
           </div>
           {!readOnly && (
-            <Button variant="outline" size="sm" onClick={() => openCreate()} className="mt-0.5 shrink-0 rounded-full">
+            <Button variant="outline" size="sm" onClick={() => openCreate()} className="mt-0.5 shrink-0 rounded-md">
               <Plus className="mr-1.5 h-3.5 w-3.5" />Toevoegen
             </Button>
           )}
@@ -185,7 +185,7 @@ export default function TripReis() {
             <button
               type="button"
               onClick={() => setBookingSheetOpen(true)}
-              className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full border border-foreground/25 px-3 font-ui text-[13px] font-medium transition-colors hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-md border border-foreground/25 px-3 font-ui text-[13px] font-medium transition-colors hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               <Mail className="h-3.5 w-3.5" strokeWidth={1.75} />
               Boeking plakken
@@ -193,7 +193,7 @@ export default function TripReis() {
             <button
               type="button"
               onClick={() => setStaySearchOpen(true)}
-              className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full border border-foreground/25 px-3 font-ui text-[13px] font-medium transition-colors hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-md border border-foreground/25 px-3 font-ui text-[13px] font-medium transition-colors hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               <Search className="h-3.5 w-3.5" strokeWidth={1.75} />
               Verblijf zoeken
@@ -206,7 +206,7 @@ export default function TripReis() {
                   key={value}
                   type="button"
                   onClick={() => openCreate(value)}
-                  className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full border border-border px-3 font-ui text-[13px] font-medium text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-md border border-border px-3 font-ui text-[13px] font-medium text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 >
                   <TypeIcon className="h-3.5 w-3.5" strokeWidth={1.75} />
                   {type.label}
@@ -225,7 +225,7 @@ export default function TripReis() {
               aria-label="Filter op status"
               value={statusFilter}
               onChange={(event) => setStatusFilter(event.target.value)}
-              className="h-9 rounded-full border border-border bg-background px-3 font-ui text-base text-muted-foreground"
+              className="h-9 rounded-md border border-border bg-background px-3 font-ui text-base text-muted-foreground"
             >
               <option value="all">Elke status</option>
               {travelStatuses.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}

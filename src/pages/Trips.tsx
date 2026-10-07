@@ -75,7 +75,7 @@ function NextTrip({ trip }: { trip: Trip }) {
           className="w-[72px] shrink-0"
         />
         <span className="min-w-0 flex-1">
-          <span className="block truncate font-brand text-[22px] font-semibold leading-tight">{trip.name}</span>
+          <span className="block truncate font-display uppercase tracking-tight text-[22px] font-extrabold leading-tight">{trip.name}</span>
           <span className="num mt-1 block truncate text-[13px] text-muted-foreground">
             {formatDateRange(trip.start_date, trip.end_date)}
             {trip.destination_name ? ` · ${trip.destination_name}` : ""}
@@ -165,8 +165,8 @@ export default function Trips() {
 
       <main className="mx-auto max-w-3xl px-5 pb-16 pt-5">
         <div className="flex items-center justify-between gap-3">
-          <h1 className="font-brand text-[26px] font-semibold leading-tight">Mijn reizen</h1>
-          <Button asChild variant="outline" size="sm" className="shrink-0 rounded-full bg-card">
+          <h1 className="font-display uppercase tracking-tight text-[26px] font-extrabold leading-tight">Mijn reizen</h1>
+          <Button asChild variant="outline" size="sm" className="shrink-0 rounded-md bg-card">
             <Link to="/new-trip"><Plus className="mr-1.5 h-3.5 w-3.5" />Nieuwe reis</Link>
           </Button>
         </div>
@@ -177,9 +177,9 @@ export default function Trips() {
           <NextTrip trip={heroTrip} />
         ) : (
           <div className="mt-8 border-t border-rule pt-6">
-            <p className="font-brand text-[22px] font-semibold leading-snug">Nog geen reis</p>
+            <p className="font-display uppercase tracking-tight text-[22px] font-extrabold leading-snug">Nog geen reis</p>
             <p className="mt-1.5 text-sm text-muted-foreground">Een naam is genoeg om te beginnen.</p>
-            <Button asChild size="lg" className="mt-4 rounded-full">
+            <Button asChild size="lg" className="mt-4 rounded-md">
               <Link to="/new-trip"><Plus className="mr-1.5 h-4 w-4" />Reis starten</Link>
             </Button>
           </div>

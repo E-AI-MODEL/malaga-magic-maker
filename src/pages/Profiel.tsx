@@ -55,7 +55,7 @@ export default function Profiel() {
             {(profile?.display_name || user?.email || "?").slice(0, 1).toUpperCase()}
           </span>
           <div className="min-w-0">
-            <h1 className="truncate font-brand text-xl font-semibold tracking-tight">{profile?.display_name || "Reiziger"}</h1>
+            <h1 className="truncate font-display uppercase tracking-tight text-xl font-extrabold tracking-tight">{profile?.display_name || "Reiziger"}</h1>
             <p className="truncate text-xs text-muted-foreground">
               {profile?.username ? `@${profile.username}` : ""}
               {profile?.username && user?.email ? " · " : ""}

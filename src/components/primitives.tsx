@@ -49,7 +49,7 @@ export function StatusChip({ children, tone = "neutral" }: { children: ReactNode
         ? "bg-primary/10 text-primary"
         : "bg-secondary text-muted-foreground";
   return (
-    <span className={`inline-flex items-center rounded-full px-2.5 py-1 font-ui text-[11px] font-semibold ${toneClass}`}>
+    <span className={`inline-flex items-center rounded-md px-2.5 py-1 font-ui text-[11px] font-semibold ${toneClass}`}>
       {children}
     </span>
   );
@@ -256,7 +256,7 @@ export function FilterChips<T extends string>({
             type="button"
             aria-pressed={selected}
             onClick={() => onChange(option.id)}
-            className={`inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full border px-3 font-ui text-[13px] font-medium transition-colors ${
+            className={`inline-flex h-9 shrink-0 items-center gap-1.5 rounded-md border px-3 font-ui text-[13px] font-medium transition-colors ${
               selected ? "border-foreground bg-foreground text-background" : "border-border text-muted-foreground hover:text-foreground"
             }`}
           >
@@ -343,7 +343,7 @@ export function SuggestionRow({
       <button
         type="button"
         onClick={onAccept}
-        className="h-9 shrink-0 rounded-full bg-foreground px-3 font-ui text-[12px] font-semibold text-background"
+        className="h-9 shrink-0 rounded-md bg-foreground px-3 font-ui text-[12px] font-semibold text-background"
       >
         {actionLabel}
       </button>

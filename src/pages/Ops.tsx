@@ -236,30 +236,11 @@ export default function Ops() {
                   ))}
                 </div>
 
-                <p className="mt-5 text-[13px] font-semibold text-foreground/70">Accountbeheer</p>
-                <div className="mt-2 flex flex-wrap gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    disabled={proMutation.isPending}
-                    onClick={() => proMutation.mutate({ userId: userDetail.data.id, grant: true })}
-                  >Pro toekennen</Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    disabled={proMutation.isPending}
-                    onClick={() => proMutation.mutate({ userId: userDetail.data.id, grant: false })}
-                  >Pro intrekken</Button>
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    disabled={deleteUserMutation.isPending}
-                    onClick={() => {
-                      if (!window.confirm("Dit account definitief verwijderen? Dit kan niet ongedaan worden gemaakt.")) return;
-                      deleteUserMutation.mutate(userDetail.data.id);
-                    }}
-                  >Gebruiker verwijderen</Button>
-                </div>
+                <OpsUserActions
+                  userId={userDetail.data.id}
+                  deleting={deleteUserMutation.isPending}
+                  onDelete={() => deleteUserMutation.mutate(userDetail.data.id)}
+                />
                 {actionError && <p className="mt-2 text-sm text-destructive">{actionError}</p>}
               </div>
             ) : null}

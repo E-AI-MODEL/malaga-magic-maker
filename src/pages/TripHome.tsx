@@ -12,7 +12,7 @@ import { computeReminders } from "@/features/reminders/data";
 import { travelTypeIcon } from "@/features/travel/icons";
 import { countdownLabel, firstThings, type FirstThing } from "@/features/trips/overview";
 import { Button } from "@/components/ui/button";
-import { RowItem, RowList, SectionLabel, Surface } from "@/components/primitives";
+import { RowItem, RowList, SectionLabel } from "@/components/primitives";
 import { TripVisual } from "@/components/TripVisual";
 
 const TYPE_TINT: Record<string, string> = {

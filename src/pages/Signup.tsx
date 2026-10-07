@@ -77,12 +77,12 @@ export default function Signup() {
   if (!enabled) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background px-5">
-        <div className="w-full max-w-md rounded-[24px] border border-border bg-card p-7 text-center shadow-soft">
-          <h1 className="font-brand text-2xl font-semibold">Vakansie is nog privé</h1>
+        <div className="w-full max-w-md rounded-lg border border-border bg-card p-7 text-center shadow-soft">
+          <h1 className="font-display uppercase text-2xl font-semibold">Vakansie is nog privé</h1>
           <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
             Nieuwe accounts worden pas geopend wanneer de publieke versie klaar is.
           </p>
-          <Button asChild className="mt-6 rounded-full">
+          <Button asChild className="mt-6 rounded-md">
             <Link to={`/login?next=${encodeURIComponent(next)}`}>Ik heb al toegang</Link>
           </Button>
         </div>
@@ -97,9 +97,9 @@ export default function Signup() {
           <img src={logo.url} alt="Vakansie" width={169} height={43} className="h-10 w-auto object-contain" />
         </div>
 
-        <div className="rounded-[24px] border border-border bg-card p-7 shadow-soft">
+        <div className="rounded-lg border border-border bg-card p-7 shadow-soft">
           <p className="font-ui text-[11px] font-semibold uppercase tracking-[0.16em] text-primary">Account</p>
-          <h1 className="mt-2 font-brand text-[28px] font-semibold leading-tight">Maak je account</h1>
+          <h1 className="mt-2 font-display uppercase text-[28px] font-semibold leading-tight">Maak je account</h1>
           <p className="mt-2 text-sm text-muted-foreground">
             Daarmee kun je je eigen reizen beheren en uitnodigingen accepteren.
           </p>
@@ -168,12 +168,12 @@ export default function Signup() {
               />
             </div>
             {error && (
-              <p className="rounded-xl bg-destructive/10 px-4 py-3 text-sm font-medium text-destructive">{error}</p>
+              <p className="rounded-lg bg-destructive/10 px-4 py-3 text-sm font-medium text-destructive">{error}</p>
             )}
             {message && (
-              <p className="rounded-xl bg-primary/10 px-4 py-3 text-sm font-medium text-primary">{message}</p>
+              <p className="rounded-lg bg-primary/10 px-4 py-3 text-sm font-medium text-primary">{message}</p>
             )}
-            <Button type="submit" className="h-12 w-full rounded-full font-bold" disabled={loading}>
+            <Button type="submit" className="h-12 w-full rounded-md font-bold" disabled={loading}>
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Account maken
             </Button>

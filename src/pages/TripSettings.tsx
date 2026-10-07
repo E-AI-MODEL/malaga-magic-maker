@@ -108,8 +108,8 @@ export default function TripSettings() {
       </Button>
 
       <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">Beheer</p>
-      <h1 className="mt-2 font-display text-3xl font-extrabold tracking-tight">Reisinstellingen</h1>
-      <p className="mt-2 text-sm text-muted-foreground">Pas de basis van deze reis aan. Boekingen en gezamenlijke onderdelen staan hier los van.</p>
+      <h1 className="mt-2 font-display text-3xl font-extrabold tracking-normal">Reisinstellingen</h1>
+      <p className="mt-2 text-sm text-muted-foreground">Wijzig de naam, bestemming en data van je reis.</p>
 
       <form onSubmit={handleSubmit} className="mt-8 space-y-5">
         <div>
@@ -162,8 +162,8 @@ export default function TripSettings() {
           <Textarea id="settings-description" value={description} onChange={(event) => setDescription(event.target.value)} className="mt-2" rows={3} />
         </div>
 
-        {error && <p className="rounded-xl bg-destructive/10 px-4 py-3 text-sm font-medium text-destructive">{error}</p>}
-        {saved && <p className="rounded-xl bg-primary/10 px-4 py-3 text-sm font-medium text-primary">Opgeslagen.</p>}
+        {error && <p className="rounded-lg bg-destructive/10 px-4 py-3 text-sm font-medium text-destructive">{error}</p>}
+        {saved && <p className="rounded-lg bg-primary/10 px-4 py-3 text-sm font-medium text-primary">Opgeslagen.</p>}
 
         <Button type="submit" className="h-12 w-full font-bold" disabled={saving || lifecycleBusy}>
           {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}

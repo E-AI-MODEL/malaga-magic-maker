@@ -49,7 +49,7 @@ export default function Steun() {
       <PaymentTestModeBanner />
       <header className="border-b border-border/70">
         <div className="mx-auto flex h-14 max-w-2xl items-center px-5">
-          <Button asChild variant="ghost" size="sm" className="-ml-3 rounded-full">
+          <Button asChild variant="ghost" size="sm" className="-ml-3 rounded-md">
             <Link to={user ? "/trips" : "/"}>
               <ArrowLeft className="mr-1.5 h-4 w-4" />
               Terug
@@ -62,7 +62,7 @@ export default function Steun() {
         {completed ? (
           <section className="mt-10 text-center">
             <CheckCircle2 className="mx-auto h-10 w-10 text-primary" strokeWidth={1.5} />
-            <h1 className="mt-4 font-brand text-[28px] font-semibold leading-tight">Dankjewel</h1>
+            <h1 className="mt-4 font-display uppercase text-[28px] font-semibold leading-tight">Dankjewel</h1>
             <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
               {!user
                 ? "Je bijdrage is ontvangen. Bedankt — dit was een donatie zonder account, dus er wordt geen Pro geactiveerd."
@@ -74,24 +74,24 @@ export default function Steun() {
                       ? "We konden je betaling nog niet koppelen. Probeer het via Profiel › Betalingen opnieuw te controleren."
                       : "Je betaling is ontvangen. We koppelen Pro nu aan je account."}
             </p>
-            <Button asChild className="mt-6 rounded-full">
+            <Button asChild className="mt-6 rounded-md">
               <Link to={user ? "/trips" : "/"}>Verder</Link>
             </Button>
           </section>
         ) : isPro ? (
           <section className="mt-10 text-center">
             <Sparkles className="mx-auto h-10 w-10 text-primary" strokeWidth={1.5} />
-            <h1 className="mt-4 font-brand text-[28px] font-semibold leading-tight">Je hebt Vakansie Pro</h1>
+            <h1 className="mt-4 font-display uppercase text-[28px] font-semibold leading-tight">Je hebt Vakansie Pro</h1>
             <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
               Bedankt voor je bijdrage. Pro staat blijvend op je account, er loopt geen abonnement.
             </p>
-            <Button asChild className="mt-6 rounded-full">
+            <Button asChild className="mt-6 rounded-md">
               <Link to="/trips">Naar mijn reizen</Link>
             </Button>
           </section>
         ) : (
           <>
-            <h1 className="mt-8 font-brand text-[30px] font-semibold leading-tight">Vakansie Pro</h1>
+            <h1 className="mt-8 font-display uppercase text-[30px] font-semibold leading-tight">Vakansie Pro</h1>
             <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
               Vakansie is gratis te gebruiken. Met een eenmalige bijdrage ontgrendel je Pro op je
               account en help je de kosten van hosting, veilige documentopslag en Hansie dragen. Geen
@@ -116,7 +116,7 @@ export default function Steun() {
                     type="button"
                     disabled={checkingOut}
                     onClick={() => setPriceId(plan.priceId)}
-                    className={`rounded-[12px] border px-3 py-3 font-brand text-[20px] font-semibold transition-colors ${
+                    className={`rounded-lg border px-3 py-3 font-display uppercase text-[20px] font-semibold transition-colors ${
                       priceId === plan.priceId
                         ? "border-primary bg-primary/10 text-primary"
                         : "border-border bg-background text-foreground"
@@ -138,7 +138,7 @@ export default function Steun() {
                 />
               ) : (
                 <>
-                  <Button className="mt-5 w-full rounded-full" onClick={() => setCheckingOut(true)}>
+                  <Button className="mt-5 w-full rounded-md" onClick={() => setCheckingOut(true)}>
                     <Heart className="mr-1.5 h-4 w-4" strokeWidth={1.75} />
                     {user ? "Doorgaan naar betalen" : "Doneren zonder account"}
                   </Button>

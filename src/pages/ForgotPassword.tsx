@@ -24,13 +24,13 @@ export default function ForgotPassword() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-5">
-      <div className="w-full max-w-md rounded-3xl border border-border bg-card p-7 shadow-sm">
+      <div className="w-full max-w-md rounded-lg border border-border bg-card p-7 shadow-sm">
         <h1 className="font-display text-2xl font-extrabold">Wachtwoord herstellen</h1>
         <p className="mt-2 text-sm leading-relaxed text-muted-foreground">Vul je e-mailadres in. Als daar een account bij hoort, ontvang je een herstellink.</p>
 
         {sent ? (
           <div className="mt-6">
-            <p className="rounded-xl bg-primary/10 px-4 py-3 text-sm font-medium text-primary">Controleer je e-mail voor de herstellink.</p>
+            <p className="rounded-lg bg-primary/10 px-4 py-3 text-sm font-medium text-primary">Controleer je e-mail voor de herstellink.</p>
             <Button asChild variant="outline" className="mt-4 w-full"><Link to="/login">Terug naar inloggen</Link></Button>
           </div>
         ) : (
@@ -39,7 +39,7 @@ export default function ForgotPassword() {
               <label htmlFor="recovery-email" className="text-sm font-semibold">E-mailadres</label>
               <Input id="recovery-email" type="email" value={email} onChange={(event) => setEmail(event.target.value)} autoComplete="email" className="mt-2 h-11" required />
             </div>
-            {error && <p className="rounded-xl bg-destructive/10 px-4 py-3 text-sm font-medium text-destructive">{error}</p>}
+            {error && <p className="rounded-lg bg-destructive/10 px-4 py-3 text-sm font-medium text-destructive">{error}</p>}
             <Button type="submit" className="h-12 w-full font-bold" disabled={loading}>
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Verstuur herstellink

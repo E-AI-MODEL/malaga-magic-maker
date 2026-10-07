@@ -182,7 +182,7 @@ export default function NewTrip() {
           <>
             <div className="mt-9">
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">{name.trim()}</p>
-              <h1 className="mt-2 font-display text-3xl font-extrabold tracking-tight sm:text-4xl">Je reis staat klaar.</h1>
+              <h1 className="mt-2 font-display text-3xl font-extrabold tracking-normal sm:text-4xl">Je reis staat klaar.</h1>
               <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
                 Stuur deze persoonlijke links door. Ze zijn zeven dagen geldig en werken één keer. Later opnieuw ophalen kan niet.
               </p>
@@ -190,7 +190,7 @@ export default function NewTrip() {
 
             <div className="mt-7 space-y-3">
               {inviteLinks.map((link) => (
-                <div key={link.email} className="rounded-2xl border border-border bg-card p-4">
+                <div key={link.email} className="rounded-lg border border-border bg-card p-4">
                   <p className="text-sm font-semibold">{link.email}</p>
                   <p className="mt-1 break-all text-xs text-muted-foreground">{link.url}</p>
                   <Button
@@ -218,9 +218,9 @@ export default function NewTrip() {
           <>
             <div className="mt-9">
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">Nieuwe reis</p>
-              <h1 className="mt-2 font-display text-3xl font-extrabold tracking-tight sm:text-4xl">Geef je reis een plek.</h1>
+              <h1 className="mt-2 font-display text-3xl font-extrabold tracking-normal sm:text-4xl">Hoe heet je reis?</h1>
               <p className="mt-3 max-w-lg text-sm leading-relaxed text-muted-foreground">
-                Begin klein. Een naam is genoeg om te starten; bestemming en de rest kun je altijd later aanvullen.
+                Een naam is genoeg. Bestemming en data kun je later aanvullen.
               </p>
             </div>
 
@@ -238,9 +238,9 @@ export default function NewTrip() {
                 />
               </div>
 
-              <div className="rounded-2xl border border-border bg-card p-4 sm:p-5">
+              <div className="rounded-lg border border-border bg-card p-4 sm:p-5">
                 <div className="flex items-start gap-3">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
                     <MapPin className="h-4 w-4 text-primary" />
                   </div>
                   <div className="min-w-0 flex-1">
@@ -272,7 +272,7 @@ export default function NewTrip() {
                 </div>
               </div>
 
-              {error && <p className="rounded-xl bg-destructive/10 px-4 py-3 text-sm font-medium text-destructive">{error}</p>}
+              {error && <p className="rounded-lg bg-destructive/10 px-4 py-3 text-sm font-medium text-destructive">{error}</p>}
 
               <Button type="submit" className="h-12 w-full font-bold">
                 Verder <ArrowRight className="ml-2 h-4 w-4" />
@@ -283,7 +283,7 @@ export default function NewTrip() {
           <>
             <div className="mt-9">
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">{name.trim()}</p>
-              <h1 className="mt-2 font-display text-3xl font-extrabold tracking-tight sm:text-4xl">Wat weet je al?</h1>
+              <h1 className="mt-2 font-display text-3xl font-extrabold tracking-normal sm:text-4xl">Wat weet je al?</h1>
               <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
                 Alles hieronder is optioneel. Sla over wat nog niet vaststaat en vul het later aan vanuit je reis.
               </p>
@@ -343,7 +343,7 @@ export default function NewTrip() {
                 />
               </div>
 
-              {error && <p className="rounded-xl bg-destructive/10 px-4 py-3 text-sm font-medium text-destructive">{error}</p>}
+              {error && <p className="rounded-lg bg-destructive/10 px-4 py-3 text-sm font-medium text-destructive">{error}</p>}
 
               <div className="flex gap-3">
                 <Button type="button" variant="outline" className="h-12" onClick={() => { setError(""); setStep(1); }}>
@@ -360,7 +360,7 @@ export default function NewTrip() {
           <>
             <div className="mt-9">
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">{name.trim()}</p>
-              <h1 className="mt-2 font-display text-3xl font-extrabold tracking-tight sm:text-4xl">Met wie en hoe?</h1>
+              <h1 className="mt-2 font-display text-3xl font-extrabold tracking-normal sm:text-4xl">Met wie en hoe?</h1>
               <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
                 Nodig meteen mensen uit en vertel wat jij belangrijk vindt. Hansie houdt hier rekening mee bij suggesties.
               </p>
@@ -408,7 +408,7 @@ export default function NewTrip() {
 
               <TravelerProfileForm value={profile} onChange={setProfile} idPrefix="new-trip" />
 
-              {error && <p className="rounded-xl bg-destructive/10 px-4 py-3 text-sm font-medium text-destructive">{error}</p>}
+              {error && <p className="rounded-lg bg-destructive/10 px-4 py-3 text-sm font-medium text-destructive">{error}</p>}
 
               <div className="flex gap-3">
                 <Button type="button" variant="outline" className="h-12" onClick={() => { setError(""); setStep(2); }} disabled={submitting}>

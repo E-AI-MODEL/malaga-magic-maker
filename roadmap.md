@@ -1,8 +1,10 @@
 # Roadmap
 
-- [ ] Homepage: functies en vier stappen onderscheiden, dubbele uitleg schrappen
-- [ ] Bestaande Signal-stijl en directe toon doortrekken naar overige schermen
-- [ ] Relevante tests, lint, typecontrole en visuele controle uitvoeren
+- [x] Homepage: functies en vier stappen onderscheiden, dubbele uitleg schrappen
+- [x] Bestaande Signal-stijl en directe toon doortrekken naar overige schermen
+- [x] 102 tests geslaagd, lint 0 fouten/18 waarschuwingen, automatische build OK; homepage, inloggen en Pro mobiel/desktop gecontroleerd
+- [ ] Overige schermen ingelogd visueel controleren — geblokkeerd: geen beschikbare sessie voor de verzoeker
+- [ ] Logo in live preview controleren — lokale controle kan de beheerde afbeeldingslink niet laden
 
 - [x] Beheer (ops) overzetten naar de nieuwe merkstijl
 - [x] Proefrun testaccount: actieve reis "Proefrun Toscane" aangemaakt en schermen bekeken

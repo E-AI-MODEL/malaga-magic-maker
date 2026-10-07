@@ -19,6 +19,9 @@ import { useQuery } from "@tanstack/react-query";
 import { listTripItems } from "@/features/travel/data";
 import { listDecisions, listExpenses } from "@/features/together/data";
 import { hansieSuggestions } from "@/features/hansie/suggestions";
+import { useLocation, useSearchParams } from "react-router-dom";
+import { HANSIE_ASK_EVENT, hansieBarLabel, hansiePageFromPath } from "@/features/hansie/bus";
+import { HansieMark } from "@/features/hansie/HansiePanel";
 
 type ChatMessage = {
   role: "user" | "assistant";
@@ -98,6 +101,9 @@ export function HansieWidget({
   floating?: boolean;
 }) {
   const isMobile = useIsMobile();
+  const { pathname } = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const page = hansiePageFromPath(pathname);
   const { isAdmin } = useAuth();
   const { hansieEnabled } = usePlatformSwitches();
   const [open, setOpen] = useState(false);
@@ -188,6 +194,29 @@ export function HansieWidget({
     }
   };
 
+  const sendRef = useRef(send);
+  sendRef.current = send;
+
+  useEffect(() => {
+    const onAsk = (event: Event) => {
+      const question = (event as CustomEvent<{ question?: string }>).detail?.question || "";
+      setOpen(true);
+      if (question) void sendRef.current(question);
+    };
+    window.addEventListener(HANSIE_ASK_EVENT, onAsk);
+    return () => window.removeEventListener(HANSIE_ASK_EVENT, onAsk);
+  }, []);
+
+  useEffect(() => {
+    const question = searchParams.get("vraag");
+    if (!question || !tripId) return;
+    const next = new URLSearchParams(searchParams);
+    next.delete("vraag");
+    setSearchParams(next, { replace: true });
+    setOpen(true);
+    void sendRef.current(question);
+  }, [searchParams, setSearchParams, tripId]);
+
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault();
     void send(input);
@@ -210,14 +239,12 @@ export function HansieWidget({
           variant="ghost"
           onClick={() => setOpen(true)}
           className={floating
-            ? "mx-auto flex h-[46px] w-full max-w-lg items-center gap-2.5 rounded-none px-2 text-left hover:bg-secondary/35"
-            : "mx-auto flex h-[46px] w-full max-w-2xl items-center gap-2.5 rounded-md border border-foreground/20 bg-card px-3.5 text-left transition-colors hover:bg-secondary/35 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"}
+            ? "mx-auto flex h-[48px] w-full max-w-lg items-center gap-2.5 rounded-md border border-primary/40 bg-background px-2 text-left hover:bg-secondary/35"
+            : "mx-auto flex h-[48px] w-full max-w-2xl items-center gap-2.5 rounded-md border border-primary/40 bg-card px-3.5 text-left transition-colors hover:bg-secondary/35 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"}
           aria-label="Vraag het Hansie"
         >
-          <span aria-hidden className="flex h-8 w-8 shrink-0 items-center justify-center text-primary">
-            <Sparkles className="h-[17px] w-[17px]" strokeWidth={1.75} />
-          </span>
-          <span className="min-w-0 flex-1 truncate font-ui text-[13px] text-muted-foreground">Vraag Hansie over deze reis…</span>
+          <HansieMark className="h-8 w-8 text-[15px]" />
+          <span className="min-w-0 flex-1 truncate font-ui text-[14px] font-medium text-foreground/80">{hansieBarLabel(page)}</span>
           <span aria-hidden className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground">
             <Send className="h-3.5 w-3.5" strokeWidth={1.9} />
           </span>

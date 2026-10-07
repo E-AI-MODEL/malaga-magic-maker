@@ -128,7 +128,7 @@ export function HansieWidget({
     enabled: Boolean(tripId && open),
   });
   const expensesQuery = useQuery({
-    queryKey: ["trip-expenses", tripId],
+    queryKey: ["together-expenses", tripId],
     queryFn: () => listExpenses(tripId as string),
     enabled: Boolean(tripId && open),
   });

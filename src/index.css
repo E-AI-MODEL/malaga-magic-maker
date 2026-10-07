@@ -22,7 +22,7 @@
     --muted: 45 18% 90%;
     --muted-foreground: 160 4% 38%;
 
-    --accent: 153 72% 21%;
+    --accent: 30 10% 18%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 72% 51%;
@@ -40,7 +40,7 @@
     --rail: 45 10% 76%;
     --band: 46 26% 91%;
 
-    --success: 153 72% 21%;
+    --success: 217 80% 38%;
     --success-foreground: 0 0% 100%;
     --warning: 36 90% 42%;
     --warning-foreground: 220 20% 12%;

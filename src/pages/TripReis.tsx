@@ -1,8 +1,16 @@
 import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { AlertTriangle, Archive, FileText, Mail, Pencil, Plus, Search, Trash2 } from "lucide-react";
+import { AlertTriangle, Archive, ChevronDown, FileText, Mail, Pencil, Plus, Search, Trash2 } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/lib/auth";
 import { useTrip } from "@/contexts/TripContext";
 import { deleteTripItem, listTripItems, TripItemRow } from "@/features/travel/data";
@@ -167,9 +175,32 @@ export default function TripReis() {
             </p>
           </div>
           {!readOnly && (
-            <Button variant="outline" size="sm" onClick={() => openCreate()} className="mt-0.5 shrink-0 rounded-md">
-              <Plus className="mr-1.5 h-3.5 w-3.5" />Toevoegen
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button size="sm" className="mt-0.5 shrink-0 rounded-md">
+                  <Plus className="mr-1.5 h-3.5 w-3.5" />Toevoegen
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-60">
+                <DropdownMenuItem onClick={() => setBookingSheetOpen(true)}>
+                  <Mail className="mr-2 h-4 w-4" strokeWidth={1.75} />Boeking plakken
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setStaySearchOpen(true)}>
+                  <Search className="mr-2 h-4 w-4" strokeWidth={1.75} />Verblijf zoeken
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuLabel className="text-[11px] font-semibold uppercase text-muted-foreground">Zelf invullen</DropdownMenuLabel>
+                {quickAddTypes.map((value) => {
+                  const type = getTravelType(value);
+                  const TypeIcon = travelTypeIcon(value);
+                  return (
+                    <DropdownMenuItem key={value} onClick={() => openCreate(value)}>
+                      <TypeIcon className="mr-2 h-4 w-4" strokeWidth={1.75} />{type.label}
+                    </DropdownMenuItem>
+                  );
+                })}
+              </DropdownMenuContent>
+            </DropdownMenu>
           )}
         </div>
 
@@ -180,68 +211,42 @@ export default function TripReis() {
           </div>
         )}
 
-        {!readOnly && (
-          <div className="-mx-5 mt-4 flex gap-2 overflow-x-auto px-5 pb-1 sm:mx-0 sm:px-0">
-            <button
-              type="button"
-              onClick={() => setBookingSheetOpen(true)}
-              className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-md border border-foreground/25 px-3 font-ui text-[13px] font-medium transition-colors hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            >
-              <Mail className="h-3.5 w-3.5" strokeWidth={1.75} />
-              Boeking plakken
-            </button>
-            <button
-              type="button"
-              onClick={() => setStaySearchOpen(true)}
-              className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-md border border-foreground/25 px-3 font-ui text-[13px] font-medium transition-colors hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            >
-              <Search className="h-3.5 w-3.5" strokeWidth={1.75} />
-              Verblijf zoeken
-            </button>
-            {quickAddTypes.map((value) => {
-              const type = getTravelType(value);
-              const TypeIcon = travelTypeIcon(value);
-              return (
-                <button
-                  key={value}
-                  type="button"
-                  onClick={() => openCreate(value)}
-                  className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-md border border-border px-3 font-ui text-[13px] font-medium text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                >
-                  <TypeIcon className="h-3.5 w-3.5" strokeWidth={1.75} />
-                  {type.label}
-                </button>
-              );
-            })}
-          </div>
-        )}
-
         {actionError && <p className="mt-4 text-sm font-medium text-destructive">{actionError}</p>}
 
-        <StickyBar className="mt-4">
-          <FilterChips<FilterId> value={filter} onChange={setFilter} options={counts} />
-          <div className="mt-2">
-            <select
-              aria-label="Filter op status"
-              value={statusFilter}
-              onChange={(event) => setStatusFilter(event.target.value)}
-              className="h-9 rounded-md border border-border bg-background px-3 font-ui text-base text-muted-foreground"
-            >
-              <option value="all">Elke status</option>
-              {travelStatuses.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
-            </select>
-          </div>
-        </StickyBar>
+        {items.length > 0 && (
+          <StickyBar className="mt-4">
+            <div className="flex items-center gap-2">
+              <div className="min-w-0 flex-1 overflow-x-auto">
+                <FilterChips<FilterId> value={filter} onChange={setFilter} options={counts} />
+              </div>
+              <select
+                aria-label="Filter op status"
+                value={statusFilter}
+                onChange={(event) => setStatusFilter(event.target.value)}
+                className="h-9 w-28 shrink-0 rounded-md border border-border bg-background px-2 font-ui text-base text-muted-foreground"
+              >
+                <option value="all">Status</option>
+                {travelStatuses.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
+              </select>
+            </div>
+          </StickyBar>
+        )}
 
         {!readOnly && warnings.length > 0 && (
-          <div className="mt-3 divide-y divide-rule border-y border-rule">
-            {warnings.map((w) => (
-              <p key={w.kind + w.message} className="flex items-start gap-2 py-2 text-sm text-muted-foreground">
-                <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-warning" strokeWidth={1.75} />
-                {w.message}
-              </p>
-            ))}
-          </div>
+          <details className="group mt-4 border-y border-rule">
+            <summary className="flex cursor-pointer list-none items-center gap-2 py-3 text-sm font-medium">
+              <AlertTriangle className="h-4 w-4 shrink-0 text-warning" strokeWidth={1.75} />
+              {warnings.length === 1 ? warnings[0].message : `${warnings.length} punten om na te kijken`}
+              {warnings.length > 1 && <ChevronDown className="ml-auto h-4 w-4 text-muted-foreground transition-transform group-open:rotate-180" />}
+            </summary>
+            {warnings.length > 1 && (
+              <div className="divide-y divide-rule border-t border-rule">
+                {warnings.map((w) => (
+                  <p key={w.kind + w.message} className="py-2 pl-6 text-sm text-muted-foreground">{w.message}</p>
+                ))}
+              </div>
+            )}
+          </details>
         )}
 
         <section className="mt-3">

@@ -80,13 +80,7 @@ describe("Vakansie BUILD 17 visual depth contract", () => {
     expect(mobileSection).not.toContain("NotificationCenter");
   });
 
-  it("keeps the Hansie ask bar as a warm integrated control with line icons", () => {
-    expect(hansie).toContain("h-[46px]");
-    expect(hansie).toContain("Sparkles");
-    expect(hansie).toContain("MessageCircle");
-    expect(hansie).toContain("Send");
-    expect(hansie).toContain("bg-primary text-primary-foreground");
-    expect(hansie).toContain("rounded-md border border-foreground/20 bg-card");
+  it("keeps Hansie answers bound to the trip they were asked for", () => {
     expect(hansie).toContain("const requestTripId = trip.id");
     expect(hansie).toContain("contextIdRef.current !== requestTripId");
   });

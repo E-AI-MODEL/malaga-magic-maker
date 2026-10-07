@@ -1,6 +1,6 @@
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { createClient } from "npm:@supabase/supabase-js@2";
-import { type StripeEnv, createStripeClient } from "../_shared/stripe.ts";
+import { type StripeEnv, createStripeClient, getServerStripeEnv } from "../_shared/stripe.ts";
 
 const supabase = createClient(
   Deno.env.get("SUPABASE_URL")!,
@@ -107,9 +107,7 @@ Deno.serve(async (req) => {
     if (!user) return json({ error: "Niet ingelogd" }, 401);
 
     const body = await req.json();
-    const environment = body?.environment;
-    if (environment !== "sandbox" && environment !== "live") return json({ error: "Ongeldige omgeving" }, 400);
-    const env: StripeEnv = environment;
+    const env: StripeEnv = getServerStripeEnv();
 
     if (body?.action === "verify") {
       const sessionId = String(body?.sessionId ?? "");

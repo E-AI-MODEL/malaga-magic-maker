@@ -79,3 +79,11 @@ export async function verifyWebhook(
 
   return JSON.parse(body);
 }
+
+/** Server-side source of truth for the payments environment; never taken from the request. */
+export function getServerStripeEnv(): StripeEnv {
+  const value = (Deno.env.get("PAYMENTS_ENVIRONMENT") ?? "sandbox").trim().toLowerCase();
+  if (value === "live") return "live";
+  if (value === "sandbox") return "sandbox";
+  throw new Error("PAYMENTS_ENVIRONMENT must be 'sandbox' or 'live'");
+}

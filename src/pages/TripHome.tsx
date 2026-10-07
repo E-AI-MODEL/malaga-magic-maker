@@ -10,7 +10,8 @@ import { listTripItems } from "@/features/travel/data";
 import { listDecisions, listTasks } from "@/features/together/data";
 import { computeReminders } from "@/features/reminders/data";
 import { travelTypeIcon } from "@/features/travel/icons";
-import { countdownLabel, firstThings, type FirstThing } from "@/features/trips/overview";
+import { countdownLabel, firstThings, preparationScore, type FirstThing } from "@/features/trips/overview";
+import { timelineWarnings } from "@/features/travel/presentation";
 import { Button } from "@/components/ui/button";
 import { RowItem, RowList, SectionLabel } from "@/components/primitives";
 import { TripVisual } from "@/components/TripVisual";
@@ -170,10 +171,13 @@ export default function TripHome() {
       ...myVotes.map((decision) => ({ key: `decision-${decision.id}`, icon: Scale, title: decision.title, meta: "Nog niet gestemd" })),
     ].slice(0, 3);
 
-    const attentionTotal = checks.reduce((total, check) => total + check.attention_count, 0);
-    const total = (readiness?.checks.length || 0) + attentionTotal;
+    const score = preparationScore({
+      checks: readiness?.checks || [],
+      itemCount: items.length,
+      missingStay: timelineWarnings(items, activeTrip.start_date ?? null, activeTrip.end_date ?? null).some((w) => w.kind === "missing_stay"),
+    });
 
-    return { things, upcoming, personal, done: Math.max(0, total - attentionTotal), total };
+    return { things, upcoming, personal, done: score.done, total: score.total };
   }, [activeTrip, archived, itemsQuery.data, tasksQuery.data, decisionsQuery.data, readiness, user]);
 
   if (!activeTrip || !view) return null;

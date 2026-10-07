@@ -31,3 +31,15 @@ describe("Eerst dit order", () => {
     expect(list[0].key).toBe("s");
   });
 });
+
+import { preparationScore } from "./overview";
+describe("preparationScore", () => {
+  it("does not count an empty trip as fully arranged", () => {
+    const s = preparationScore({ checks: [0, 0, 0, 0, 0].map((n) => ({ attention_count: n })), itemCount: 0, missingStay: true });
+    expect(s).toEqual({ done: 5, total: 7 });
+  });
+  it("counts a check with several open items once", () => {
+    const s = preparationScore({ checks: [{ attention_count: 3 }, { attention_count: 0 }], itemCount: 2, missingStay: false });
+    expect(s).toEqual({ done: 3, total: 4 });
+  });
+});

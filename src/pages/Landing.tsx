@@ -91,7 +91,7 @@ export default function Landing() {
         <div className="mx-auto flex h-14 max-w-3xl items-center justify-between px-5">
           <span className="flex items-center gap-2">
             <img src={logo} alt="" width={28} height={28} className="h-7 w-7 rounded-[8px] object-cover" />
-            <span className="font-brand text-[19px] font-semibold">Vakansie</span>
+            <span className="font-display text-[19px] font-bold uppercase tracking-wide">Vakansie</span>
           </span>
           <Button asChild variant="ghost" size="sm" className="rounded-full">
             <Link to="/login">Inloggen</Link>
@@ -121,7 +121,7 @@ export default function Landing() {
                 <span aria-hidden className="h-px w-7 bg-white/40" />
                 Voorbereiden zonder gedoe
               </p>
-              <h1 className="mt-4 font-brand text-[34px] font-semibold leading-[1.08] text-white sm:text-[46px]">
+              <h1 className="mt-4 font-display text-[34px] font-bold uppercase tracking-wide leading-[1.08] text-white sm:text-[46px]">
                 Je hele vakantie
                 <br />
                 geregeld op één
@@ -138,7 +138,7 @@ export default function Landing() {
           <div className="relative z-10 mx-auto -mt-20 max-w-3xl px-5">
             <div className="rounded-[20px] border border-border bg-card p-4 shadow-soft">
               <div className="flex items-baseline justify-between gap-3">
-                <p className="font-brand text-[17px] font-semibold">Zomer aan de kust</p>
+                <p className="font-display text-[17px] font-bold uppercase tracking-wide">Zomer aan de kust</p>
                 <span className="shrink-0 font-ui text-[11px] font-semibold text-primary">nog 24 dagen</span>
               </div>
               <div className="mt-2 h-[3px] w-full overflow-hidden rounded-full bg-secondary">
@@ -199,7 +199,7 @@ export default function Landing() {
           <p className="font-ui text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
             Wat je ermee doet
           </p>
-          <h2 className="mt-2 font-brand text-[26px] font-semibold leading-tight">
+          <h2 className="mt-2 font-display text-[26px] font-bold uppercase tracking-wide leading-tight">
             Eén reisdossier in plaats van tien plekken
           </h2>
           <div className="mt-5 rule-divide border-t border-[hsl(var(--rule)/0.08)]">
@@ -212,7 +212,7 @@ export default function Landing() {
                   </span>
                 </div>
                 <div className="min-w-0">
-                  <h3 className="font-brand text-[19px] font-semibold leading-snug">{feature.title}</h3>
+                  <h3 className="font-display text-[19px] font-bold uppercase tracking-wide leading-snug">{feature.title}</h3>
                   <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{feature.body}</p>
                 </div>
               </div>
@@ -225,7 +225,7 @@ export default function Landing() {
             <p className="font-ui text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
               Zo werkt het
             </p>
-            <h2 className="mt-2 font-brand text-[26px] font-semibold leading-tight">In drie rustige stappen</h2>
+            <h2 className="mt-2 font-display text-[26px] font-bold uppercase tracking-wide leading-tight">In drie rustige stappen</h2>
             <ol className="relative mt-6 space-y-7">
               <span aria-hidden className="absolute bottom-2 left-[13px] top-2 w-px bg-[hsl(var(--rule)/0.14)]" />
               {STEPS.map((step, index) => (
@@ -234,7 +234,7 @@ export default function Landing() {
                     {index + 1}
                   </span>
                   <div>
-                    <h3 className="font-brand text-[18px] font-semibold leading-snug">{step.title}</h3>
+                    <h3 className="font-display text-[18px] font-bold uppercase tracking-wide leading-snug">{step.title}</h3>
                     <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{step.body}</p>
                   </div>
                 </li>
@@ -247,7 +247,7 @@ export default function Landing() {
           <p className="font-ui text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
             Wat kost het
           </p>
-          <h2 className="mt-2 font-brand text-[26px] font-semibold leading-tight">Gratis. En dat blijft zo.</h2>
+          <h2 className="mt-2 font-display text-[26px] font-bold uppercase tracking-wide leading-tight">Gratis. En dat blijft zo.</h2>
           <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
             Je bereidt een volledige reis voor zonder te betalen. Wil je het project steunen, dan kan dat
             vrijwillig.
@@ -258,7 +258,7 @@ export default function Landing() {
               <p className="font-ui text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
                 Vakansie
               </p>
-              <p className="mt-2 font-brand text-[38px] font-semibold leading-none">Gratis</p>
+              <p className="mt-2 font-display text-[38px] font-bold uppercase tracking-wide leading-none">Gratis</p>
               <ul className="mt-4 space-y-2.5 text-sm text-muted-foreground">
                 {[
                   "Je volledige reis voorbereiden",
@@ -281,7 +281,7 @@ export default function Landing() {
               <p className="font-ui text-[11px] font-semibold uppercase tracking-[0.14em] text-primary-foreground/70">
                 Pro · vrijwillig
               </p>
-              <p className="mt-2 flex items-baseline gap-1.5 font-brand text-[38px] font-semibold leading-none">
+              <p className="mt-2 flex items-baseline gap-1.5 font-display text-[38px] font-bold uppercase tracking-wide leading-none">
                 € 2
                 <span className="font-sans text-[13px] font-normal text-primary-foreground/70">eenmalig</span>
               </p>
@@ -306,7 +306,7 @@ export default function Landing() {
           <dl className="mt-4 rule-divide border-t border-[hsl(var(--rule)/0.08)]">
             {FAQ.map((item) => (
               <div key={item.q} className="py-4">
-                <dt className="font-brand text-[17px] font-semibold leading-snug">{item.q}</dt>
+                <dt className="font-display text-[17px] font-bold uppercase tracking-wide leading-snug">{item.q}</dt>
                 <dd className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{item.a}</dd>
               </div>
             ))}
@@ -315,7 +315,7 @@ export default function Landing() {
 
         <section className="mx-auto mt-14 max-w-3xl px-5">
           <div className="rounded-[20px] border border-border bg-card px-5 py-9 text-center shadow-soft">
-            <h2 className="font-brand text-[28px] font-semibold leading-tight">Klaar om te beginnen?</h2>
+            <h2 className="font-display text-[28px] font-bold uppercase tracking-wide leading-tight">Klaar om te beginnen?</h2>
             <p className="mx-auto mt-2 max-w-sm text-sm leading-relaxed text-muted-foreground">
               Zet je volgende reis neer en bouw hem rustig op. Een naam is genoeg.
             </p>

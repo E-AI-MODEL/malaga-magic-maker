@@ -10,4 +10,4 @@
 - [x] Hansie 2: new system prompt (verbatim)
 - [x] Hansie 3: trip-aware starter questions + new intro line
 - [x] Layout 4: round Hansie button, trip name once, AdminBar only on deviation
-- [ ] Layout 5: Overzicht in one clear order (photo, Eerst dit, Eerstvolgend, Voor jou)
+- [x] Layout 5: Overzicht in one clear order (photo, Eerst dit, Eerstvolgend, Voor jou)

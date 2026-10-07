@@ -1,7 +1,7 @@
 import { FormEvent, useEffect, useState } from "react";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { FormSheet } from "@/components/FormSheet";
 import { saveTravelerProfile, type TravelerProfile } from "./data";
 import { draftFromProfile, TravelerProfileForm, type TravelerProfileDraft } from "./TravelerProfileForm";
 
@@ -54,14 +54,12 @@ export function TravelerProfileSheet({ open, onOpenChange, tripId, userId, profi
   };
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="bottom" className="max-h-[92vh] overflow-y-auto">
-        <SheetHeader className="text-left">
-          <SheetTitle>Jouw wensen voor deze reis</SheetTitle>
-          <SheetDescription>
-            Hansie gebruikt dit bij suggesties, zoeken naar verblijf en planning. Alles is optioneel.
-          </SheetDescription>
-        </SheetHeader>
+    <FormSheet
+      open={open}
+      onOpenChange={onOpenChange}
+      title="Jouw wensen voor deze reis"
+      description="Hansie gebruikt dit bij suggesties, zoeken naar verblijf en planning. Alles is optioneel."
+    >
 
         <form onSubmit={handleSubmit} className="mt-5 pb-8">
           <TravelerProfileForm value={draft} onChange={setDraft} idPrefix="sheet" />
@@ -78,7 +76,6 @@ export function TravelerProfileSheet({ open, onOpenChange, tripId, userId, profi
             </Button>
           </div>
         </form>
-      </SheetContent>
-    </Sheet>
+    </FormSheet>
   );
 }

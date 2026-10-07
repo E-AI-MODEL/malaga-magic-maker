@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import { Check, Loader2, Mail } from "lucide-react";
+import { Check, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { FormSheet } from "@/components/FormSheet";
 import {
   createItemFromSuggestion,
   parseBookingText,
@@ -75,19 +75,13 @@ export function BookingPasteSheet({ open, onOpenChange, tripId, onSaved }: Props
   };
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="bottom" className="max-h-[92vh] overflow-y-auto">
-        <SheetHeader className="text-left">
-          <SheetTitle className="flex items-center gap-2 text-[17px]">
-            <Mail className="h-[18px] w-[18px]" strokeWidth={1.75} />
-            Boeking doorsturen
-          </SheetTitle>
-          <SheetDescription>
-            Plak de tekst van je boekingsmail. Hansie leest vluchten, verblijf en huurauto's eruit en zet ze op de tijdlijn.
-          </SheetDescription>
-        </SheetHeader>
-
-        <div className="mt-4 space-y-4">
+    <FormSheet
+      open={open}
+      onOpenChange={onOpenChange}
+      title="Boeking doorsturen"
+      description="Plak de tekst van je boekingsmail. Hansie leest vluchten, verblijf en huurauto's eruit en zet ze op de tijdlijn."
+    >
+      <div className="mt-4 space-y-4">
           <Textarea
             value={text}
             onChange={(event) => setText(event.target.value)}
@@ -140,7 +134,6 @@ export function BookingPasteSheet({ open, onOpenChange, tripId, onSaved }: Props
             </div>
           )}
         </div>
-      </SheetContent>
-    </Sheet>
+    </FormSheet>
   );
 }

@@ -1,9 +1,7 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
-import { Loader2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { FormError, FormField, FormSelect, FormSheet, FormSubmit } from "@/components/FormSheet";
 import type { TaskRow } from "@/integrations/supabase/database";
 import { isoToLocalInput, localInputToIso } from "@/features/travel/presentation";
 import { createTask, TripMemberView, updateTask } from "./data";
@@ -90,55 +88,58 @@ export function TaskSheet({ open, onOpenChange, tripId, timezone, currentUserId,
   };
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="bottom" className="max-h-[90vh] overflow-y-auto rounded-t-2xl px-5 pb-8 sm:left-1/2 sm:max-w-xl sm:-translate-x-1/2">
-        <SheetHeader className="text-left">
-          <SheetTitle className="font-display text-xl font-extrabold">{task ? "Taak wijzigen" : "Nieuwe taak"}</SheetTitle>
-          <SheetDescription>Maak duidelijk wat nog moet gebeuren en wie het oppakt.</SheetDescription>
-        </SheetHeader>
+    <FormSheet
+      open={open}
+      onOpenChange={onOpenChange}
+      title={task ? "Taak wijzigen" : "Nieuwe taak"}
+      description="Wat moet er gebeuren, en wie doet het?"
+    >
+      <form onSubmit={handleSubmit} className="mt-6 space-y-5">
+        <FormField label="Taak" htmlFor="task-title" required>
+          <Input id="task-title" value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Bijv. Huurauto reserveren" className="h-11" autoFocus />
+        </FormField>
 
-        <form onSubmit={handleSubmit} className="mt-6 space-y-5">
-          <div>
-            <label className="text-sm font-semibold" htmlFor="task-title">Taak *</label>
-            <Input id="task-title" value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Bijv. Huurauto reserveren" className="mt-2 h-11" autoFocus />
-          </div>
+        <FormField label="Toelichting" htmlFor="task-description">
+          <Textarea id="task-description" value={description} onChange={(event) => setDescription(event.target.value)} rows={3} placeholder="Alleen wat nodig is om de taak uit te voeren" />
+        </FormField>
 
-          <div>
-            <label className="text-sm font-semibold" htmlFor="task-description">Toelichting</label>
-            <Textarea id="task-description" value={description} onChange={(event) => setDescription(event.target.value)} rows={3} className="mt-2" placeholder="Alleen wat nodig is om de taak uit te voeren" />
-          </div>
+        <FormField
+          label="Wie pakt dit op?"
+          htmlFor="task-assignee"
+          hint={!isOrganizer ? "Als deelnemer kun je een nieuwe taak alleen aan jezelf toewijzen." : undefined}
+        >
+          <FormSelect
+            id="task-assignee"
+            value={assignedUserId}
+            onChange={setAssignedUserId}
+            options={[
+              { value: "", label: "Nog niemand" },
+              ...allowedAssignees.map((member) => ({ value: member.userId, label: member.displayName })),
+            ]}
+          />
+        </FormField>
 
-          <div>
-            <label className="text-sm font-semibold" htmlFor="task-assignee">Wie pakt dit op?</label>
-            <select id="task-assignee" value={assignedUserId} onChange={(event) => setAssignedUserId(event.target.value)} className="mt-2 h-11 w-full rounded-md border border-input bg-background px-3 text-sm">
-              <option value="">Nog niemand</option>
-              {allowedAssignees.map((member) => <option key={member.userId} value={member.userId}>{member.displayName}</option>)}
-            </select>
-            {!isOrganizer && <p className="mt-1 text-xs text-muted-foreground">Als deelnemer kun je een nieuwe taak alleen aan jezelf toewijzen.</p>}
-          </div>
+        <div className="grid grid-cols-[1fr_130px] gap-3">
+          <FormField label="Wanneer nodig?" htmlFor="task-due">
+            <Input id="task-due" type="datetime-local" value={dueAt} onChange={(event) => setDueAt(event.target.value)} className="h-11" />
+          </FormField>
+          <FormField label="Belang" htmlFor="task-priority">
+            <FormSelect
+              id="task-priority"
+              value={priority}
+              onChange={setPriority}
+              options={[
+                { value: "low", label: "Laag" },
+                { value: "normal", label: "Normaal" },
+                { value: "high", label: "Hoog" },
+              ]}
+            />
+          </FormField>
+        </div>
 
-          <div className="grid grid-cols-[1fr_130px] gap-3">
-            <div>
-              <label className="text-sm font-semibold" htmlFor="task-due">Wanneer nodig?</label>
-              <Input id="task-due" type="datetime-local" value={dueAt} onChange={(event) => setDueAt(event.target.value)} className="mt-2 h-11" />
-            </div>
-            <div>
-              <label className="text-sm font-semibold" htmlFor="task-priority">Belang</label>
-              <select id="task-priority" value={priority} onChange={(event) => setPriority(event.target.value)} className="mt-2 h-11 w-full rounded-md border border-input bg-background px-3 text-sm">
-                <option value="low">Laag</option>
-                <option value="normal">Normaal</option>
-                <option value="high">Hoog</option>
-              </select>
-            </div>
-          </div>
-
-          {error && <p className="rounded-xl bg-destructive/10 px-4 py-3 text-sm font-medium text-destructive">{error}</p>}
-          <Button type="submit" className="h-12 w-full font-bold" disabled={saving}>
-            {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            {task ? "Wijzigingen opslaan" : "Taak toevoegen"}
-          </Button>
-        </form>
-      </SheetContent>
-    </Sheet>
+        <FormError message={error} />
+        <FormSubmit saving={saving}>{task ? "Wijzigingen opslaan" : "Taak toevoegen"}</FormSubmit>
+      </form>
+    </FormSheet>
   );
 }

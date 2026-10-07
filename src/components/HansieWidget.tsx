@@ -15,6 +15,10 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { toast } from "sonner";
+import { useQuery } from "@tanstack/react-query";
+import { listTripItems } from "@/features/travel/data";
+import { listDecisions, listExpenses } from "@/features/together/data";
+import { hansieSuggestions } from "@/features/hansie/suggestions";
 
 type ChatMessage = {
   role: "user" | "assistant";
@@ -84,7 +88,7 @@ async function streamHansie({
   }
 }
 
-export type HansieTrip = { id: string; name: string };
+export type HansieTrip = { id: string; name: string; start_date?: string | null; end_date?: string | null };
 
 export function HansieWidget({
   trip,
@@ -113,9 +117,33 @@ export function HansieWidget({
     setOpen(false);
   }, [tripId]);
 
+  const itemsQuery = useQuery({
+    queryKey: ["trip-items", tripId],
+    queryFn: () => listTripItems(tripId as string),
+    enabled: Boolean(tripId && open),
+  });
+  const decisionsQuery = useQuery({
+    queryKey: ["trip-decisions", tripId],
+    queryFn: () => listDecisions(tripId as string),
+    enabled: Boolean(tripId && open),
+  });
+  const expensesQuery = useQuery({
+    queryKey: ["trip-expenses", tripId],
+    queryFn: () => listExpenses(tripId as string),
+    enabled: Boolean(tripId && open),
+  });
+
   const suggestions = useMemo(
-    () => ["Ben ik klaar voor vertrek?", "Wat ontbreekt nog?", "Wat moet deze week?", "Vat deze reis samen"],
-    [],
+    () =>
+      hansieSuggestions({
+        now: new Date(),
+        startDate: trip?.start_date ?? null,
+        endDate: trip?.end_date ?? null,
+        itemCount: itemsQuery.data?.length ?? 0,
+        openDecisionTitle: decisionsQuery.data?.find((decision) => decision.status === "open")?.title ?? null,
+        expenseCount: expensesQuery.data?.length ?? 0,
+      }),
+    [trip?.start_date, trip?.end_date, itemsQuery.data, decisionsQuery.data, expensesQuery.data],
   );
 
   const send = async (text: string) => {
@@ -223,7 +251,7 @@ export function HansieWidget({
                   <div>
                     <p className="font-brand text-2xl font-semibold">Waar kan ik mee helpen?</p>
                     <p className="mt-1 text-sm text-muted-foreground">
-                      Hansie gebruikt alleen de reis die je nu hebt geopend als context.
+                      Ik ken het dossier van {trip.name}. Vraag maar raak.
                     </p>
                   </div>
                   <div className="flex flex-wrap gap-2">

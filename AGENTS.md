@@ -31,6 +31,7 @@ URL tripId is authoritative (`/trips`, `/new-trip`, `/trip/:tripId[/reis|/samen]
 One generic `trip_items` model; type-specific details in metadata, no destination-specific columns. Golf is an activity; accommodation comparison is a generic decision.
 
 ## Code changes
+- Mobile Hansie uses a full-width entry strip directly above trip navigation with the same surface; reserve page space for both controls to keep content reachable.
 Bounded builds; no unrelated redesigns, extra features, duplicated concepts or branding changes during backend/security work. Mobile first, desktop functional.
 
 ## Quality gate

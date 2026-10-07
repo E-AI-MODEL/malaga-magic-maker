@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import heroHome from "@/assets/hero-home.jpg";
-import logo from "@/assets/vakansie-logo.png";
+import logo from "@/assets/vakansie_primary_complete.png.asset.json";
 
 const TRUST_POINTS = [
   "Je data blijft van jou",
@@ -42,7 +42,7 @@ const FEATURES = [
   {
     icon: Sparkles,
     title: "Hansie denkt mee",
-    body: "Vraag wat er nog mist. Hansie kijkt alleen in jouw reis en verzint nooit een boeking.",
+    body: "Wat willen jullie doen? Hansie denkt mee over uitjes die passen bij jullie wensen en helpt je zien wat er nog geregeld moet worden.",
   },
 ];
 
@@ -90,8 +90,7 @@ export default function Landing() {
       <header className="sticky top-0 z-40 border-b border-border/70 bg-background">
         <div className="mx-auto flex h-14 max-w-3xl items-center justify-between px-5">
           <span className="flex items-center gap-2">
-            <img src={logo} alt="" width={28} height={28} className="h-7 w-7 rounded-[8px] object-cover" />
-            <span className="font-display text-[19px] font-bold uppercase tracking-wide">Vakansie</span>
+            <img src={logo.url} alt="Vakansie" width={169} height={43} className="h-8 w-auto object-contain" />
           </span>
           <Button asChild variant="ghost" size="sm" className="rounded-md">
             <Link to="/login">Inloggen</Link>
@@ -124,9 +123,7 @@ export default function Landing() {
               <h1 className="mt-4 font-display text-[34px] font-bold uppercase tracking-wide leading-[1.08] text-white sm:text-[46px]">
                 Je hele vakantie
                 <br />
-                geregeld op
-                <br />
-                één plek
+                in je broekzak
               </h1>
               <p className="mt-4 max-w-sm text-[15px] leading-relaxed text-white/90">
                 Geen losse appjes, mails en screenshots meer. Reisplan, taken, kosten en documenten bij
@@ -200,7 +197,7 @@ export default function Landing() {
             Wat je ermee doet
           </p>
           <h2 className="mt-2 font-display text-[26px] font-bold uppercase tracking-wide leading-tight">
-            Eén reisdossier in plaats van tien plekken
+            Van een goed idee naar een vakansie met Hansie
           </h2>
           <div className="mt-5 rule-divide border-t border-[hsl(var(--rule)/0.08)]">
             {FEATURES.map((feature, index) => (

@@ -196,42 +196,33 @@ export function HansieWidget({
   if (!trip) return null;
   if (!hansieEnabled && !isAdmin) return null;
 
-  const roundButton = floating && isMobile;
-
   return (
     <>
-      {roundButton ? (
-        <button
-          type="button"
-          onClick={() => setOpen(true)}
-          className="fixed bottom-[calc(3.625rem+12px+env(safe-area-inset-bottom))] right-4 z-40 flex h-[52px] w-[52px] items-center justify-center rounded-full bg-primary text-primary-foreground shadow-soft transition-transform hover:scale-[1.03] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background motion-reduce:transition-none"
-          aria-label="Vraag het Hansie"
-        >
-          <Sparkles className="h-[22px] w-[22px]" strokeWidth={1.75} aria-hidden />
-        </button>
-      ) : (
       <div
         className={
           floating
-            ? "fixed bottom-0 right-0 z-40 w-full max-w-md border-t border-border bg-background px-3 pb-2 pt-1.5"
+            ? "fixed bottom-[calc(58px+env(safe-area-inset-bottom))] inset-x-0 z-40 border-t border-border bg-card px-3 py-1.5"
             : "sticky bottom-0 left-0 right-0 z-40 border-t border-border bg-background px-3 pb-2 pt-1.5 safe-area-pb"
         }
       >
-        <button
+        <Button
+          type="button"
+          variant="ghost"
           onClick={() => setOpen(true)}
-          className="mx-auto flex h-[46px] w-full max-w-2xl items-center gap-2.5 rounded-md border border-foreground/20 bg-card px-3.5 text-left transition-colors hover:bg-secondary/35 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+          className={floating
+            ? "mx-auto flex h-[46px] w-full max-w-lg items-center gap-2.5 rounded-none px-2 text-left hover:bg-secondary/35"
+            : "mx-auto flex h-[46px] w-full max-w-2xl items-center gap-2.5 rounded-md border border-foreground/20 bg-card px-3.5 text-left transition-colors hover:bg-secondary/35 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"}
           aria-label="Vraag het Hansie"
         >
-          <span aria-hidden className="flex h-8 w-8 shrink-0 items-center justify-center rounded-sm bg-foreground text-background">
+          <span aria-hidden className="flex h-8 w-8 shrink-0 items-center justify-center text-primary">
             <Sparkles className="h-[17px] w-[17px]" strokeWidth={1.75} />
           </span>
           <span className="min-w-0 flex-1 truncate font-ui text-[13px] text-muted-foreground">Vraag Hansie over deze reis…</span>
           <span aria-hidden className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground">
             <Send className="h-3.5 w-3.5" strokeWidth={1.9} />
           </span>
-        </button>
+        </Button>
       </div>
-      )}
 
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetContent

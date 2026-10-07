@@ -1,6 +1,6 @@
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { createClient } from "npm:@supabase/supabase-js@2";
-import { type StripeEnv, createStripeClient } from "../_shared/stripe.ts";
+import { type StripeEnv, createStripeClient, getServerStripeEnv } from "../_shared/stripe.ts";
 
 const ALLOWED_PRICE_IDS = new Set(["vakansie_pro_2", "vakansie_pro_5", "vakansie_pro_10"]);
 
@@ -56,11 +56,9 @@ Deno.serve(async (req) => {
   try {
     const body = await req.json();
     const priceId = String(body?.priceId ?? "");
-    const environment = body?.environment;
     const returnUrl = typeof body?.returnUrl === "string" ? body.returnUrl : "";
 
     if (!ALLOWED_PRICE_IDS.has(priceId)) return json({ error: "Onbekend product" }, 400);
-    if (environment !== "sandbox" && environment !== "live") return json({ error: "Ongeldige omgeving" }, 400);
     if (!returnUrl.startsWith("http")) return json({ error: "Ongeldige return url" }, 400);
 
     // Optional auth: anonymous supporters are allowed, but a signed-in user is
@@ -76,7 +74,7 @@ Deno.serve(async (req) => {
       }
     }
 
-    const env: StripeEnv = environment;
+    const env: StripeEnv = getServerStripeEnv();
     const stripe = createStripeClient(env);
 
     const prices = await stripe.prices.list({ lookup_keys: [priceId] });

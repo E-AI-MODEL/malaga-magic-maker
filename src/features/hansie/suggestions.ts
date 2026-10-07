@@ -20,8 +20,10 @@ export function hansieSuggestions(input: HansieSuggestionInput): string[] {
   const ended = Boolean(input.startDate) && localMidnight(input.endDate || input.startDate!) < today;
   const started = Boolean(input.startDate) && localMidnight(input.startDate!) <= today;
   // The opening question follows the trip's phase, for any trip.
-  if (ended) list.push("Wat moet er na deze reis nog worden afgerond?");
-  else if (started) list.push("Wat staat er vandaag op het programma?");
+  if (ended) {
+    // After a trip it is mostly settling up, not new planning.
+    list.push(input.expenseCount > 0 ? "Wie moet wie nog betalen?" : "Wat moeten we nog afronden?");
+  } else if (started) list.push("Wat staat er vandaag op het programma?");
   else list.push("Wat moet ik nog doen voor vertrek?");
 
   if (input.startDate) {
@@ -36,7 +38,7 @@ export function hansieSuggestions(input: HansieSuggestionInput): string[] {
     }
   }
   if (input.openDecisionTitle) list.push(`Wie moet nog stemmen over ${input.openDecisionTitle}?`);
-  if (input.expenseCount > 0) list.push("Wie moet wie nog betalen?");
+  if (input.expenseCount > 0 && !ended) list.push("Wie moet wie nog betalen?");
   if (input.itemCount > 0 && !ended) list.push("Zitten er gaten in onze planning?");
 
   return list.slice(0, 4);

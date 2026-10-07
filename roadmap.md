@@ -1,5 +1,6 @@
 # Roadmap
 
-- [ ] Beheer (ops) overzetten naar de nieuwe merkstijl (oranje, condensed koppen, logo)
-- [ ] Proefrun testaccount: actieve reis aanmaken zodat Overzicht/Reis/Samen live te bekijken zijn
-- [ ] Nieuw logo ontwerpen (huidige is te lelijk) + favicon bijwerken
+- [x] Beheer (ops) overzetten naar de nieuwe merkstijl
+- [x] Proefrun testaccount: actieve reis "Proefrun Toscane" aangemaakt en schermen bekeken
+- [x] Nieuw logo (V met routepunt) toegepast + favicon bijgewerkt
+- [ ] Open vraag: zwevende Hansie-knop rechtsonder vs. contractregel "geen zwevende knop" — gebruiker beslist

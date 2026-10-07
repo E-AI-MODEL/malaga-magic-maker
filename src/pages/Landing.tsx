@@ -49,7 +49,7 @@ const FEATURES = [
 const STEPS = [
   { title: "Start je reis", body: "Een naam is genoeg. Data en bestemming vul je later aan." },
   { title: "Nodig je reisgenoten uit", body: "Iedereen ziet dezelfde stand van zaken, zonder eindeloze appgroep." },
-  { title: "Werk rustig toe naar vertrek", body: "Vakansie houdt bij wat geregeld is en wat nog aandacht vraagt." },
+  { title: "Werk toe naar vertrek", body: "Vakansie houdt bij wat geregeld is en wat nog aandacht vraagt." },
 ];
 
 const FAQ = [
@@ -124,9 +124,9 @@ export default function Landing() {
               <h1 className="mt-4 font-display text-[34px] font-bold uppercase tracking-wide leading-[1.08] text-white sm:text-[46px]">
                 Je hele vakantie
                 <br />
-                geregeld op één
+                geregeld op
                 <br />
-                rustige plek
+                één plek
               </h1>
               <p className="mt-4 max-w-sm text-[15px] leading-relaxed text-white/90">
                 Geen losse appjes, mails en screenshots meer. Reisplan, taken, kosten en documenten bij
@@ -225,7 +225,7 @@ export default function Landing() {
             <p className="font-ui text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
               Zo werkt het
             </p>
-            <h2 className="mt-2 font-display text-[26px] font-bold uppercase tracking-wide leading-tight">In drie rustige stappen</h2>
+            <h2 className="mt-2 font-display text-[26px] font-bold uppercase tracking-wide leading-tight">In drie stappen</h2>
             <ol className="relative mt-6 space-y-7">
               <span aria-hidden className="absolute bottom-2 left-[13px] top-2 w-px bg-[hsl(var(--rule)/0.14)]" />
               {STEPS.map((step, index) => (
@@ -317,7 +317,7 @@ export default function Landing() {
           <div className="rounded-[20px] border border-border bg-card px-5 py-9 text-center shadow-soft">
             <h2 className="font-display text-[28px] font-bold uppercase tracking-wide leading-tight">Klaar om te beginnen?</h2>
             <p className="mx-auto mt-2 max-w-sm text-sm leading-relaxed text-muted-foreground">
-              Zet je volgende reis neer en bouw hem rustig op. Een naam is genoeg.
+              Zet je volgende reis neer en bouw hem stap voor stap op. Een naam is genoeg.
             </p>
             <Button asChild size="lg" className="mt-5 w-full rounded-md sm:w-auto sm:px-10">
               <Link to="/signup">

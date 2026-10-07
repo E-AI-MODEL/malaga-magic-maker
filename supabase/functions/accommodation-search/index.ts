@@ -8,7 +8,17 @@ const corsHeaders = {
 };
 const jsonHeaders = { ...corsHeaders, "Content-Type": "application/json" };
 
-const FIRECRAWL_V2 = "https://api.firecrawl.dev/v2";
+// Connection keys starting with "lovc_" go through the Lovable connector
+// gateway; real Firecrawl keys ("fc-") call the provider directly.
+function firecrawlRequest(apiKey: string, path: string, body: unknown) {
+  const viaGateway = apiKey.startsWith("lovc_");
+  const lovableKey = Deno.env.get("LOVABLE_API_KEY") ?? "";
+  const base = viaGateway ? "https://connector-gateway.lovable.dev/firecrawl/v2" : "https://api.firecrawl.dev/v2";
+  const headers: Record<string, string> = viaGateway
+    ? { Authorization: `Bearer ${lovableKey}`, "X-Connection-Api-Key": apiKey, "Content-Type": "application/json" }
+    : { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" };
+  return fetch(`${base}${path}`, { method: "POST", headers, body: JSON.stringify(body) });
+}
 
 /** Bronnen die de gebruiker kan aanvinken. Airbnb blokkeert crawlers vaak; dat is geen fout. */
 const SOURCES: Record<string, { label: string; site: string | null }> = {
@@ -122,11 +132,7 @@ function normaliseCandidates(value: unknown, fallbackSource: string) {
 }
 
 async function firecrawlSearch(apiKey: string, query: string) {
-  const response = await fetch(`${FIRECRAWL_V2}/search`, {
-    method: "POST",
-    headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ query, limit: 6, scrapeOptions: { formats: ["markdown"] } }),
-  });
+  const response = await firecrawlRequest(apiKey, "/search", { query, limit: 6, scrapeOptions: { formats: ["markdown"] } });
   if (!response.ok) {
     const detail = await response.text();
     console.error("firecrawl search failed:", response.status, detail.slice(0, 300));
@@ -142,11 +148,7 @@ async function firecrawlSearch(apiKey: string, query: string) {
 }
 
 async function firecrawlScrape(apiKey: string, url: string) {
-  const response = await fetch(`${FIRECRAWL_V2}/scrape`, {
-    method: "POST",
-    headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ url, formats: ["markdown"], onlyMainContent: true }),
-  });
+  const response = await firecrawlRequest(apiKey, "/scrape", { url, formats: ["markdown"], onlyMainContent: true });
   const payload = await response.json().catch(() => null);
   if (!response.ok) {
     console.error("firecrawl scrape failed:", response.status, JSON.stringify(payload).slice(0, 300));

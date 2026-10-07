@@ -161,3 +161,6 @@ For relevant user flows, use browser testing where available and inspect console
 Report changed files, migrations created, tests executed, failures and remaining risks.
 
 Never report a build as done while known acceptance criteria fail.
+## Platform admin user management
+
+Account creation, invites, blocking and recovery mails go through the `ops-admin-users` Edge Function, which validates the token and the `user_roles` admin row before any service-role call; Pro grants, admin roles and admin trip membership go through `ops_*` security-definer RPCs that log to `admin_audit_log`. Why: auth admin APIs need the service role and must never be reachable from UI checks alone.

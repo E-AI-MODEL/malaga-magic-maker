@@ -70,7 +70,7 @@ export function TripItemSheet({ open, onOpenChange, tripId, timezone, currency, 
     setError("");
     try {
       const members = await listTripMembers(tripId);
-      const ids = members.map((m) => m.user_id);
+      const ids = members.map((m) => m.userId);
       const amount = Number(item.price);
       const expenseId = await createExpenseWithSplits(tripId, {
         description: item.title,

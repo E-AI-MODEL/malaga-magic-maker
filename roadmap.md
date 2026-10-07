@@ -16,3 +16,4 @@
 - [x] Homepage: gratis versus Pro duidelijk gemaakt met echte grenzen (1 reis, 5 documenten, 12 Hansie-vragen; Pro: onbeperkt reizen, 200 documenten, 150 Hansie-vragen)
 - [x] Homepage: stap 4 "Onderweg kijkt Hansie mee" en functies reizigerswensen + meldingen toegevoegd; connectorlijn netjes gestopt
 - [ ] Hansie ingelogd visueel controleren — geblokkeerd: geen beschikbare sessie voor de verzoeker; inloggen in preview nodig
+- [x] Homepage: "Waarom Vakansie?"-blok en losse documentvraag verwijderd; FAQ rijker (9 vragen) en uitklapbaar; nieuwe test + 102 tests, lint, typecheck, build OK

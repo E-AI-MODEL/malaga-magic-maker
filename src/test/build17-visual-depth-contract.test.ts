@@ -86,7 +86,7 @@ describe("Vakansie BUILD 17 visual depth contract", () => {
     expect(hansie).toContain("MessageCircle");
     expect(hansie).toContain("Send");
     expect(hansie).toContain("bg-primary text-primary-foreground");
-    expect(hansie).toContain("rounded-full border border-border bg-card");
+    expect(hansie).toContain("rounded-md border border-foreground/20 bg-card");
     expect(hansie).toContain("const requestTripId = trip.id");
     expect(hansie).toContain("contextIdRef.current !== requestTripId");
   });
@@ -96,6 +96,6 @@ describe("Vakansie BUILD 17 visual depth contract", () => {
     expect(labels).toEqual(["Overzicht", "Reis", "Samen"]);
     expect(bottomNav).toContain('className="h-5 w-5"');
     expect(bottomNav).toContain("bg-card");
-    expect(bottomNav).toContain("h-[2px]");
+    expect(bottomNav).toContain("h-[3px]");
   });
 });

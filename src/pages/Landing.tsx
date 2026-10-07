@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   ArrowRight,
+  Bell,
   Check,
   CheckCircle2,
   FileText,
@@ -10,6 +11,7 @@ import {
   Route,
   Shield,
   Sparkles,
+  UserRound,
   Users,
   Wallet,
 } from "lucide-react";
@@ -35,14 +37,24 @@ const FEATURES = [
     body: "Taken verdelen, knopen doorhakken en kosten eerlijk splitsen met iedereen die meegaat.",
   },
   {
+    icon: UserRound,
+    title: "Ieder zijn wensen",
+    body: "Dieet, tempo, budget en prioriteiten per reiziger. Hansie kent die gegevens en houdt er rekening mee.",
+  },
+  {
     icon: FileText,
     title: "Documenten bij de hand",
     body: "Tickets, bevestigingen en vouchers veilig bewaard bij de reis waar ze bij horen.",
   },
   {
+    icon: Bell,
+    title: "Meldingen, geen appgroep",
+    body: "Nieuwe taken, stemmen, documenten en reisupdates komen bij je binnen. Je hoeft niets handmatig na te vragen.",
+  },
+  {
     icon: Sparkles,
     title: "Hansie denkt mee",
-    body: "Wat willen jullie doen? Hansie denkt mee over uitjes die passen bij jullie wensen en helpt je zien wat er nog geregeld moet worden.",
+    body: "Wat willen jullie doen? Hansie denkt mee over uitjes die bij jullie passen en laat zien wat er nog geregeld moet worden.",
   },
 ];
 
@@ -50,12 +62,16 @@ const STEPS = [
   { title: "Start je reis", body: "Een naam is genoeg. Data en bestemming vul je later aan." },
   { title: "Nodig je reisgenoten uit", body: "Iedereen ziet dezelfde stand van zaken, zonder eindeloze appgroep." },
   { title: "Werk toe naar vertrek", body: "Vakansie houdt bij wat geregeld is en wat nog aandacht vraagt." },
+  {
+    title: "Onderweg kijkt Hansie mee",
+    body: "Ter plaatse: wat er vandaag en morgen staat, waar je tickets zijn en wat er nog ontbreekt. Na afloop: wie wat nog moet betalen.",
+  },
 ];
 
 const FAQ = [
   {
     q: "Is Vakansie echt gratis?",
-    a: "Ja. Je kunt een volledige reis van begin tot vertrek voorbereiden zonder te betalen. Wil je het project steunen, dan kan dat vrijwillig.",
+    a: "Ja. Een volledige reis voorbereiden kost niets: één actieve reis, 5 documenten per reis en 12 Hansie-vragen per dag. Wil je meer ruimte, dan is Pro een eenmalige bijdrage.",
   },
   {
     q: "Boekt Vakansie mijn vakantie?",
@@ -222,11 +238,16 @@ export default function Landing() {
             <p className="font-ui text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
               Zo werkt het
             </p>
-            <h2 className="mt-2 font-display text-[26px] font-bold uppercase tracking-wide leading-tight">In drie stappen</h2>
-            <ol className="relative mt-6 space-y-7">
-              <span aria-hidden className="absolute bottom-2 left-[13px] top-2 w-px bg-[hsl(var(--rule)/0.14)]" />
+            <h2 className="mt-2 font-display text-[26px] font-bold uppercase tracking-wide leading-tight">In vier stappen</h2>
+            <ol className="relative mt-6">
               {STEPS.map((step, index) => (
-                <li key={step.title} className="relative flex gap-4">
+                <li key={step.title} className="relative flex gap-4 pb-7 last:pb-0">
+                  {index < STEPS.length - 1 && (
+                    <span
+                      aria-hidden
+                      className="absolute bottom-1 left-[13px] top-[29px] w-px bg-[hsl(var(--rule)/0.14)]"
+                    />
+                  )}
                   <span className="relative z-10 mt-0.5 flex h-[27px] w-[27px] shrink-0 items-center justify-center rounded-full border border-border bg-card font-ui text-[12px] font-semibold text-primary">
                     {index + 1}
                   </span>
@@ -244,24 +265,27 @@ export default function Landing() {
           <p className="font-ui text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
             Wat kost het
           </p>
-          <h2 className="mt-2 font-display text-[26px] font-bold uppercase tracking-wide leading-tight">Gratis. En dat blijft zo.</h2>
+          <h2 className="mt-2 font-display text-[26px] font-bold uppercase tracking-wide leading-tight">
+            Gratis. En dat blijft zo.
+          </h2>
           <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-            Je bereidt een volledige reis voor zonder te betalen. Wil je het project steunen, dan kan dat
-            vrijwillig.
+            Je bereidt een volledige reis voor zonder te betalen. Het verschil tussen gratis en Pro zit in de
+            ruimte, niet in de functies.
           </p>
 
           <div className="mt-5 grid gap-3 sm:grid-cols-2">
             <div className="rounded-[20px] border border-border bg-card p-5 shadow-soft">
               <p className="font-ui text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-                Vakansie
+                Gratis
               </p>
-              <p className="mt-2 font-display text-[38px] font-bold uppercase tracking-wide leading-none">Gratis</p>
+              <p className="mt-2 font-display text-[38px] font-bold uppercase tracking-wide leading-none">€ 0</p>
               <ul className="mt-4 space-y-2.5 text-sm text-muted-foreground">
                 {[
-                  "Je volledige reis voorbereiden",
+                  "Eén actieve reis",
                   "Onbeperkt reisgenoten uitnodigen",
                   "Taken, keuzes en kosten",
-                  "Documenten en Hansie",
+                  "5 documenten per reis",
+                  "12 Hansie-vragen per dag",
                 ].map((item) => (
                   <li key={item} className="flex gap-2">
                     <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" strokeWidth={1.75} />
@@ -280,12 +304,25 @@ export default function Landing() {
               </p>
               <p className="mt-2 flex items-baseline gap-1.5 font-display text-[38px] font-bold uppercase tracking-wide leading-none">
                 € 2
-                <span className="font-sans text-[13px] font-normal text-primary-foreground/70">eenmalig</span>
+                <span className="font-sans text-[13px] font-normal text-primary-foreground/70">
+                  eenmalig, ook € 5 of € 10
+                </span>
               </p>
               <p className="mt-4 text-sm leading-relaxed text-primary-foreground/80">
-                Vind je Vakansie de moeite waard? Met een eenmalige bijdrage ontgrendel je Pro en help je
-                hosting, documentopslag en Hansie betalen. Geen abonnement, geen verlenging.
+                Eenmalige bijdrage, geen abonnement. Je krijgt meer ruimte bovenop alles wat gratis al kan.
               </p>
+              <ul className="mt-4 space-y-2.5 text-sm text-primary-foreground/90">
+                {[
+                  "Onbeperkt reizen",
+                  "200 documenten per reis",
+                  "150 Hansie-vragen per dag",
+                ].map((item) => (
+                  <li key={item} className="flex gap-2">
+                    <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" strokeWidth={1.75} />
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
               <Button asChild variant="secondary" className="mt-5 w-full rounded-md">
                 <Link to="/steun">
                   <Heart className="mr-1.5 h-4 w-4" strokeWidth={1.75} />
@@ -294,6 +331,10 @@ export default function Landing() {
               </Button>
             </div>
           </div>
+
+          <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
+            Pro staat blijvend op je account. Geen abonnement, geen automatische verlenging.
+          </p>
         </section>
 
         <section className="mx-auto mt-14 max-w-3xl px-5">

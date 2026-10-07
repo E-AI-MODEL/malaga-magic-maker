@@ -7,4 +7,6 @@
 - [x] Hansie als geïntegreerde balk boven de tripnavigatie toegepast
 - [x] Logo 01 (primair) en icoon 05 uit de aangeleverde set toegepast
 - [x] 102 tests geslaagd; lint zonder fouten (18 waarschuwingen); automatische build OK; homepage mobiel/desktop gecontroleerd
+- [x] Homepage: gratis versus Pro duidelijk gemaakt met echte grenzen (1 reis, 5 documenten, 12 Hansie-vragen; Pro: onbeperkt reizen, 200 documenten, 150 Hansie-vragen)
+- [x] Homepage: stap 4 "Onderweg kijkt Hansie mee" en functies reizigerswensen + meldingen toegevoegd; connectorlijn netjes gestopt
 - [ ] Hansie ingelogd visueel controleren — geblokkeerd: geen beschikbare sessie voor de verzoeker; inloggen in preview nodig

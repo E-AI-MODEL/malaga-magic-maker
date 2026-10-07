@@ -30,33 +30,6 @@ const TYPE_TINT: Record<string, string> = {
   restaurant: "bg-tint-food/12 text-tint-food",
 };
 
-function ProgressRing({ done, total }: { done: number; total: number }) {
-  const r = 15;
-  const c = 2 * Math.PI * r;
-  const share = total > 0 ? Math.min(1, done / total) : 0;
-  return (
-    <div className="flex items-center gap-1.5 rounded-full bg-background/90 py-1 pl-1 pr-2.5 shadow-soft">
-      <svg viewBox="0 0 36 36" className="h-8 w-8 -rotate-90" aria-hidden>
-        <circle cx="18" cy="18" r={r} fill="none" strokeWidth="3.5" className="stroke-secondary" />
-        <circle
-          cx="18"
-          cy="18"
-          r={r}
-          fill="none"
-          strokeWidth="3.5"
-          strokeLinecap="round"
-          className="stroke-success"
-          strokeDasharray={c}
-          strokeDashoffset={c * (1 - share)}
-        />
-      </svg>
-      <span className="num font-ui text-[12px] font-semibold text-foreground">
-        {done}/{total} geregeld
-      </span>
-    </div>
-  );
-}
-
 function shortDate(value: string, timeZone: string) {
   return new Date(value)
     .toLocaleDateString("nl-NL", { weekday: "short", day: "numeric", month: "short", timeZone })

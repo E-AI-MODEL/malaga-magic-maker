@@ -239,10 +239,15 @@ export default function Landing() {
               Zo werkt het
             </p>
             <h2 className="mt-2 font-display text-[26px] font-bold uppercase tracking-wide leading-tight">In vier stappen</h2>
-            <ol className="relative mt-6 space-y-7">
-              <span aria-hidden className="absolute bottom-2 left-[13px] top-2 w-px bg-[hsl(var(--rule)/0.14)]" />
+            <ol className="relative mt-6">
               {STEPS.map((step, index) => (
-                <li key={step.title} className="relative flex gap-4">
+                <li key={step.title} className="relative flex gap-4 pb-7 last:pb-0">
+                  {index < STEPS.length - 1 && (
+                    <span
+                      aria-hidden
+                      className="absolute bottom-1 left-[13px] top-[29px] w-px bg-[hsl(var(--rule)/0.14)]"
+                    />
+                  )}
                   <span className="relative z-10 mt-0.5 flex h-[27px] w-[27px] shrink-0 items-center justify-center rounded-full border border-border bg-card font-ui text-[12px] font-semibold text-primary">
                     {index + 1}
                   </span>

@@ -15,7 +15,7 @@ describe("travel product language", () => {
 
   it("maps technical statuses to normal customer labels", () => {
     expect(getTravelStatus("planned")).toBe("Nog te regelen");
-    expect(getTravelStatus("confirmed")).toBe("Bevestigd");
+    expect(getTravelStatus("confirmed")).toBe("Geboekt");
   });
 });
 

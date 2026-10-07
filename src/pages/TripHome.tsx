@@ -1,4 +1,3 @@
-import { HansiePanel } from "@/features/hansie/HansiePanel";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -183,7 +182,6 @@ export default function TripHome() {
         </TripVisual>
 
         <div className="space-y-6 px-5 pt-4 sm:px-8">
-          {!archived && <HansiePanel page="overzicht" title="Vraag Hansie over deze reis." />}
           <section className="border-l-4 border-primary bg-band p-4">
             <p className="font-ui text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Eerst dit</p>
             {readinessQuery.isLoading ? (

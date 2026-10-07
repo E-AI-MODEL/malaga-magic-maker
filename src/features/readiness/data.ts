@@ -51,7 +51,8 @@ export function parseTripReadiness(value: unknown): TripReadiness {
   }
 
   return {
-    status: value.status === "ready" ? "ready" : "attention",
+    // An empty travel plan is never "ready", however many tasks are ticked off.
+    status: value.status === "ready" && facts.trip_item_count > 0 ? "ready" : "attention",
     attention_count: typeof value.attention_count === "number" ? value.attention_count : 0,
     checks,
     facts: {

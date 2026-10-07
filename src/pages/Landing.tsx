@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import heroHome from "@/assets/hero-home.jpg";
-import logo from "@/assets/vakansie-logo.png";
+import logo from "@/assets/vakansie_primary_complete.png.asset.json";
 
 const TRUST_POINTS = [
   "Je data blijft van jou",
@@ -90,8 +90,7 @@ export default function Landing() {
       <header className="sticky top-0 z-40 border-b border-border/70 bg-background">
         <div className="mx-auto flex h-14 max-w-3xl items-center justify-between px-5">
           <span className="flex items-center gap-2">
-            <img src={logo} alt="" width={28} height={28} className="h-7 w-7 rounded-[8px] object-cover" />
-            <span className="font-display text-[19px] font-bold uppercase tracking-wide">Vakansie</span>
+            <img src={logo.url} alt="Vakansie" width={169} height={43} className="h-8 w-auto object-contain" />
           </span>
           <Button asChild variant="ghost" size="sm" className="rounded-md">
             <Link to="/login">Inloggen</Link>

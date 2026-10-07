@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/lib/auth";
 import { GoogleAuthButton } from "@/components/GoogleAuthButton";
-import logo from "@/assets/vakansie-logo.png";
+import logo from "@/assets/vakansie_primary_complete.png.asset.json";
 
 function safeNext(value: string | null) {
   if (!value || !value.startsWith("/") || value.startsWith("//")) return "/trips";
@@ -48,8 +48,7 @@ export default function Login() {
     <div className="flex min-h-screen flex-col items-center justify-center bg-background px-5 py-10">
       <div className="w-full max-w-md">
         <div className="mb-6 flex items-center gap-2.5">
-          <img src={logo} alt="" width={32} height={32} className="h-8 w-8 rounded-[10px] object-cover" />
-          <span className="font-brand text-xl font-semibold">Vakansie</span>
+          <img src={logo.url} alt="Vakansie" width={169} height={43} className="h-10 w-auto object-contain" />
         </div>
 
         <div className="rounded-[24px] border border-border bg-card p-7 shadow-soft">

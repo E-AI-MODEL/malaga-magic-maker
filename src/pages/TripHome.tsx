@@ -43,7 +43,7 @@ function ProgressRing({ done, total }: { done: number; total: number }) {
           fill="none"
           strokeWidth="3.5"
           strokeLinecap="round"
-          className="stroke-primary"
+          className="stroke-success"
           strokeDasharray={c}
           strokeDashoffset={c * (1 - share)}
         />
@@ -193,11 +193,11 @@ export default function TripHome() {
         >
           <div className="flex items-end justify-between gap-3">
             <div className="min-w-0">
-              <h1 className="truncate font-display uppercase tracking-tight text-[24px] font-extrabold leading-tight text-white">{activeTrip.name}</h1>
+              <h1 className="break-words font-display uppercase text-[28px] font-bold leading-tight text-on-image">{activeTrip.name}</h1>
               {activeTrip.destination_name && (
-                <p className="truncate text-[12px] font-semibold text-white/85">{activeTrip.destination_name}</p>
+                <p className="truncate text-[12px] font-semibold text-on-image/85">{activeTrip.destination_name}</p>
               )}
-              <p className="num mt-1 font-display uppercase tracking-tight text-[30px] font-extrabold leading-none text-white">
+              <p className="num mt-1 font-display uppercase text-[30px] font-bold leading-none text-on-image">
                 {countdownLabel(activeTrip.start_date, activeTrip.end_date)}
               </p>
             </div>
@@ -206,7 +206,7 @@ export default function TripHome() {
         </TripVisual>
 
         <div className="space-y-6 px-5 pt-4 sm:px-8">
-          <Surface as="section" className="p-4">
+          <section className="border-l-4 border-primary bg-band p-4">
             <p className="font-ui text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Eerst dit</p>
             {readinessQuery.isLoading ? (
               <p className="mt-2 text-[15px] text-muted-foreground">Laden…</p>
@@ -241,7 +241,7 @@ export default function TripHome() {
             ) : (
               <p className="mt-1.5 font-display uppercase tracking-tight text-[19px] font-extrabold">Alles geregeld. Goede reis.</p>
             )}
-          </Surface>
+          </section>
 
           <section>
             <SectionLabel>Eerstvolgend</SectionLabel>

@@ -264,7 +264,7 @@ export default function TripSamen() {
   return (
     <AppLayout>
       <div className="px-5 pb-12 pt-5 sm:px-8">
-        <h1 className="font-display uppercase tracking-tight text-[24px] font-extrabold leading-tight">Samen</h1>
+        <h1 className="font-display uppercase text-[30px] font-bold leading-tight">Samen</h1>
         <div className="mt-3 border-y border-rule py-3">
           <CountBar
             items={[
@@ -513,7 +513,7 @@ export default function TripSamen() {
                                 type="button"
                                 disabled={readOnly || decision.status !== "open"}
                                 onClick={() => void voteFor(decision, option.id)}
-                                className={`flex w-full items-center justify-between gap-3 rounded-[14px] border px-3.5 py-2.5 text-left transition-colors ${chosen ? "border-primary bg-primary/5" : "border-border"} ${!readOnly && decision.status === "open" ? "hover:border-primary/40" : "cursor-default"}`}
+                                className={`flex w-full items-center justify-between gap-3 rounded-lg border px-3.5 py-2.5 text-left transition-colors ${chosen ? "border-primary bg-primary/10" : "border-border"} ${!readOnly && decision.status === "open" ? "hover:border-primary/40" : "cursor-default"}`}
                               >
                                 <span className="flex min-w-0 items-center gap-2 text-sm font-medium">
                                   {chosen && <Check className="h-4 w-4 shrink-0 text-primary" />}

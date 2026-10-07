@@ -32,12 +32,12 @@ export function OpsShell({
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur-sm">
+      <header className="sticky top-0 z-40 border-b border-border bg-background">
         <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-3 sm:px-6">
           <button onClick={() => navigate("/profiel")} aria-label="Terug" className="text-muted-foreground hover:text-foreground">
             <ArrowLeft className="h-4 w-4" />
           </button>
-          <p className="font-display text-lg font-semibold uppercase tracking-wide">Beheer</p>
+          <p className="border-l-4 border-primary pl-3 font-display text-[24px] font-bold uppercase">Beheer</p>
           <span className="hidden truncate text-xs text-muted-foreground sm:block">
             Interne omgeving{operator ? ` · ${operator}` : ""}
           </span>
@@ -51,7 +51,7 @@ export function OpsShell({
               aria-current={active === item.id ? "page" : undefined}
               className={`shrink-0 border-b-2 px-3 py-2.5 text-[13px] font-medium transition-colors ${
                 active === item.id
-                  ? "border-primary text-foreground"
+                  ? "border-primary bg-primary/10 text-foreground"
                   : "border-transparent text-muted-foreground hover:text-foreground"
               }`}
             >

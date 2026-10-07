@@ -31,6 +31,8 @@ URL tripId is authoritative (`/trips`, `/new-trip`, `/trip/:tripId[/reis|/samen]
 One generic `trip_items` model; type-specific details in metadata, no destination-specific columns. Golf is an activity; accommodation comparison is a generic decision.
 
 ## Code changes
+- Shared presentation primitives and semantic tokens carry the approved homepage style across working screens; keep page-specific data logic unchanged.
+- Load the shared font stylesheet from the application entry point, not CSS URL imports, so font loading does not depend on CSS import resolution.
 - Mobile Hansie uses a full-width entry strip directly above trip navigation with the same surface; reserve page space for both controls to keep content reachable.
 Bounded builds; no unrelated redesigns, extra features, duplicated concepts or branding changes during backend/security work. Mobile first, desktop functional.
 

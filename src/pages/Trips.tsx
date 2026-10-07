@@ -11,6 +11,7 @@ import { HansieWidget } from "@/components/HansieWidget";
 import { Button } from "@/components/ui/button";
 import { ReadinessBar, RowItem, RowList, SectionLabel } from "@/components/primitives";
 import { TripThumb, TripVisual } from "@/components/TripVisual";
+import logo from "@/assets/vakansie_primary_complete.png.asset.json";
 
 function formatDateRange(startDate: string | null, endDate: string | null) {
   if (!startDate && !endDate) return "Data nog te kiezen";
@@ -64,13 +65,13 @@ function NextTrip({ trip }: { trip: Trip }) {
         : `${done} van ${trackedTotal} geregeld`;
 
   return (
-    <section className="mt-4">
+    <section className="mt-5 border-y border-border bg-card px-4 py-4">
       <Link to={`/trip/${trip.id}`} className="flex items-center gap-3.5 py-1">
         <TripVisual
           name={trip.name}
           coverImageUrl={trip.cover_image_url}
           height="h-[72px]"
-          rounded="rounded-[14px]"
+          rounded="rounded-lg"
           showBadge={false}
           className="w-[72px] shrink-0"
         />
@@ -149,7 +150,7 @@ export default function Trips() {
     <div className="min-h-screen bg-background pb-[calc(4.5rem+env(safe-area-inset-bottom))]">
       <header className="sticky top-0 z-40 border-b border-border bg-background">
         <div className="mx-auto flex h-12 max-w-3xl items-center justify-between px-5">
-          <p className="font-brand text-xl font-semibold text-primary">Vakansie</p>
+          <img src={logo.url} alt="Vakansie" width={169} height={43} className="h-8 w-auto object-contain" />
           <div className="flex items-center gap-1">
             <NotificationCenter />
             <Button asChild variant="ghost" size="icon" className="h-9 w-9 text-muted-foreground">
@@ -165,7 +166,7 @@ export default function Trips() {
 
       <main className="mx-auto max-w-3xl px-5 pb-16 pt-5">
         <div className="flex items-center justify-between gap-3">
-          <h1 className="font-display uppercase tracking-tight text-[26px] font-extrabold leading-tight">Mijn reizen</h1>
+          <h1 className="font-display uppercase text-[30px] font-bold leading-tight">Mijn reizen</h1>
           <Button asChild variant="outline" size="sm" className="shrink-0 rounded-md bg-card">
             <Link to="/new-trip"><Plus className="mr-1.5 h-3.5 w-3.5" />Nieuwe reis</Link>
           </Button>

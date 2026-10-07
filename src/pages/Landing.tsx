@@ -337,8 +337,6 @@ export default function Landing() {
         <div className="flex items-center gap-3">
           <p className="min-w-0 flex-1 text-xs leading-tight text-muted-foreground">
             Gratis te gebruiken.
-            <br />
-            Geen creditcard nodig.
           </p>
           <Button asChild size="sm" className="shrink-0 rounded-full px-5">
             <Link to="/signup">Gratis beginnen</Link>

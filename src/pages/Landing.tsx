@@ -29,42 +29,42 @@ const FEATURES = [
   {
     icon: Route,
     title: "Alles op één tijdlijn",
-    body: "Vluchten, verblijf, vervoer en activiteiten achter elkaar, zodat je in één blik ziet hoe de reis loopt.",
+    body: "Vluchten, verblijf, vervoer en activiteiten in de volgorde van je reis.",
   },
   {
     icon: Users,
     title: "Samen regelen",
-    body: "Taken verdelen, knopen doorhakken en kosten eerlijk splitsen met iedereen die meegaat.",
+    body: "Verdeel taken, stem over keuzes en houd bij wie wat betaalt.",
   },
   {
     icon: UserRound,
     title: "Ieder zijn wensen",
-    body: "Dieet, tempo, budget en prioriteiten per reiziger. Hansie kent die gegevens en houdt er rekening mee.",
+    body: "Leg per reiziger dieet, tempo, budget en prioriteiten vast.",
   },
   {
     icon: FileText,
     title: "Documenten bij de hand",
-    body: "Tickets, bevestigingen en vouchers veilig bewaard bij de reis waar ze bij horen.",
+    body: "Tickets, bevestigingen en vouchers privé bewaard bij je reis.",
   },
   {
     icon: Bell,
-    title: "Meldingen, geen appgroep",
-    body: "Nieuwe taken, stemmen, documenten en reisupdates komen bij je binnen. Je hoeft niets handmatig na te vragen.",
+    title: "Blijf op de hoogte",
+    body: "Krijg een melding bij nieuwe taken, stemmen, documenten en reisupdates.",
   },
   {
     icon: Sparkles,
     title: "Hansie denkt mee",
-    body: "Wat willen jullie doen? Hansie denkt mee over uitjes die bij jullie passen en laat zien wat er nog geregeld moet worden.",
+    body: "Vraag om ideeën voor uitjes die passen bij jullie wensen, of hulp bij je planning.",
   },
 ];
 
 const STEPS = [
   { title: "Start je reis", body: "Een naam is genoeg. Data en bestemming vul je later aan." },
-  { title: "Nodig je reisgenoten uit", body: "Iedereen ziet dezelfde stand van zaken, zonder eindeloze appgroep." },
-  { title: "Werk toe naar vertrek", body: "Vakansie houdt bij wat geregeld is en wat nog aandacht vraagt." },
+  { title: "Nodig je reisgenoten uit", body: "Deel je uitnodiging. Ga je alleen? Dan sla je deze stap over." },
+  { title: "Werk toe naar vertrek", body: "Voeg je boekingen toe en vink af wat geregeld is. Zo zie je wat nog aandacht vraagt." },
   {
-    title: "Onderweg kijkt Hansie mee",
-    body: "Ter plaatse: wat er vandaag en morgen staat, waar je tickets zijn en wat er nog ontbreekt. Na afloop: wie wat nog moet betalen.",
+    title: "Neem je reis mee",
+    body: "Op locatie vraag je Hansie wat er vandaag op de planning staat of welk uitje bij jullie past. Je tickets zijn bij de hand. Na afloop zie je wie nog wat moet betalen.",
   },
 ];
 

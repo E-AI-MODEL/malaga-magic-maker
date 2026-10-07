@@ -47,7 +47,7 @@ describe("Vakansie BUILD 17 visual depth contract", () => {
     // One photo per screen, at working size: no repeated full-bleed hero blocks.
     expect(trips).toContain("<TripThumb");
     expect(trips).toContain('height="h-[72px]"');
-    expect(tripHome).toContain('height="h-[140px]"');
+    expect(tripHome).toContain('height="h-[180px]"');
   });
 
   it("gives important objects soft depth without returning to card grids", () => {

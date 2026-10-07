@@ -18,9 +18,9 @@ import heroHome from "@/assets/hero-home.jpg";
 import logo from "@/assets/vakansie-logo.png";
 
 const TRUST_POINTS = [
-  "Geen creditcard nodig",
   "Je data blijft van jou",
   "Documenten privé per reis",
+  "Geen abonnement",
 ];
 
 const FEATURES = [
@@ -56,10 +56,6 @@ const FAQ = [
   {
     q: "Is Vakansie echt gratis?",
     a: "Ja. Je kunt een volledige reis van begin tot vertrek voorbereiden zonder te betalen. Wil je het project steunen, dan kan dat vrijwillig.",
-  },
-  {
-    q: "Moeten mijn reisgenoten ook betalen?",
-    a: "Nee. Wie je uitnodigt reist gratis mee en heeft geen eigen abonnement nodig.",
   },
   {
     q: "Boekt Vakansie mijn vakantie?",

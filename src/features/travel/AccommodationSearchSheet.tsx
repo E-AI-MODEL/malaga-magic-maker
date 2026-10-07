@@ -150,19 +150,13 @@ export function AccommodationSearchSheet({
   };
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="bottom" className="max-h-[92vh] overflow-y-auto">
-        <SheetHeader className="text-left">
-          <SheetTitle className="flex items-center gap-2 text-[17px]">
-            <Search className="h-[18px] w-[18px]" strokeWidth={1.75} />
-            Verblijf zoeken
-          </SheetTitle>
-          <SheetDescription>
-            Hansie zoekt op Booking, Airbnb, vakantiehuissites en het web. Prijzen zijn indicaties; controleer altijd bij de aanbieder.
-          </SheetDescription>
-        </SheetHeader>
-
-        <div className="mt-4 space-y-4">
+    <FormSheet
+      open={open}
+      onOpenChange={onOpenChange}
+      title="Verblijf zoeken"
+      description="Hansie zoekt op Booking, Airbnb, vakantiehuissites en het web. Prijzen zijn indicaties; controleer altijd bij de aanbieder."
+    >
+      <div className="mt-4 space-y-4">
           <div className="grid grid-cols-2 gap-2">
             <Input value={place} onChange={(event) => setPlace(event.target.value)} placeholder="Plaats of regio" className="col-span-2 text-base" />
             <Input value={guests} onChange={(event) => setGuests(event.target.value)} inputMode="numeric" placeholder="Personen" className="text-base" />

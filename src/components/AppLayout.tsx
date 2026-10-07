@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 import { Check, ChevronLeft, MoreHorizontal, Plane, Plus, Settings, User } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { BottomNav } from "./BottomNav";
 import { AppSidebar } from "./AppSidebar";
 import { AdminBar } from "./AdminBar";
@@ -25,10 +25,13 @@ export function AppLayout({ children }: { children: ReactNode }) {
   const { activeTrip, userTrips, isOrganizer } = useTrip();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
+  const { pathname } = useLocation();
+  // The overview already shows the trip name large in its header photo.
+  const isTripOverview = /^\/trip\/[^/]+\/?$/.test(pathname);
 
   if (isMobile) {
     return (
-      <div className="min-h-screen overflow-x-hidden bg-background pb-[calc(7.5rem+env(safe-area-inset-bottom))]">
+      <div className="min-h-screen overflow-x-hidden bg-background pb-[calc(5.5rem+env(safe-area-inset-bottom))]">
         <header className="sticky top-0 z-40 border-b border-border bg-background">
           <AdminBar />
           <div className="mx-auto grid h-12 max-w-2xl grid-cols-[40px_minmax(0,1fr)_40px] items-center px-2">
@@ -43,7 +46,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
             </Button>
 
             <h1 className="min-w-0 truncate px-2 text-center font-ui text-[15px] font-semibold leading-tight">
-              {activeTrip ? activeTrip.name : <span className="font-brand text-lg">Vakansie</span>}
+              {activeTrip ? (isTripOverview ? "" : activeTrip.name) : <span className="font-brand text-lg">Vakansie</span>}
             </h1>
 
             <DropdownMenu>
@@ -94,7 +97,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
 
         <main className="mx-auto max-w-2xl">{children}</main>
         <BottomNav />
-        <HansieWidget trip={activeTrip ? { id: activeTrip.id, name: activeTrip.name } : null} floating />
+        <HansieWidget trip={activeTrip ? { id: activeTrip.id, name: activeTrip.name, start_date: activeTrip.start_date, end_date: activeTrip.end_date } : null} floating />
       </div>
     );
   }
@@ -124,7 +127,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
           </header>
           <main className="mx-auto w-full max-w-5xl flex-1 pb-24">{children}</main>
         </div>
-        <HansieWidget trip={activeTrip ? { id: activeTrip.id, name: activeTrip.name } : null} floating={false} />
+        <HansieWidget trip={activeTrip ? { id: activeTrip.id, name: activeTrip.name, start_date: activeTrip.start_date, end_date: activeTrip.end_date } : null} floating={false} />
       </div>
     </SidebarProvider>
   );

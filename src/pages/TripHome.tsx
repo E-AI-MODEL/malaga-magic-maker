@@ -1,33 +1,71 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { AlertCircle, Bell, BellRing, CalendarClock, CheckSquare, Scale } from "lucide-react";
+import { CheckSquare, ChevronDown, Scale } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
 import { useTrip } from "@/contexts/TripContext";
 import { useAuth } from "@/lib/auth";
 import { activeReadinessChecks, getTripReadiness, readinessAction } from "@/features/readiness/data";
-import { tripTimingLabel } from "@/features/trips/presentation";
 import { listTripItems } from "@/features/travel/data";
 import { listDecisions, listTasks } from "@/features/together/data";
 import { computeReminders } from "@/features/reminders/data";
-import { formatTripDateTime } from "@/features/travel/presentation";
-import { RecentActivity } from "@/features/notifications/RecentActivity";
-import { CountBar, EmptyLine, ReadinessBar, RowItem, RowList, SectionLabel, SuggestionRow } from "@/components/primitives";
+import { travelTypeIcon } from "@/features/travel/icons";
+import { countdownLabel, firstThings, type FirstThing } from "@/features/trips/overview";
+import { Button } from "@/components/ui/button";
+import { RowItem, RowList, SectionLabel, Surface } from "@/components/primitives";
 import { TripVisual } from "@/components/TripVisual";
 
-function formatDateRange(startDate: string | null, endDate: string | null) {
-  if (!startDate && !endDate) return "Data nog te kiezen";
-  const format = (value: string) =>
-    new Date(`${value}T12:00:00`).toLocaleDateString("nl-NL", { day: "numeric", month: "short", year: "numeric" });
-  if (startDate && endDate) return `${format(startDate)} – ${format(endDate)}`;
-  return format(startDate || endDate || "");
+const TYPE_TINT: Record<string, string> = {
+  flight: "bg-tint-transport/12 text-tint-transport",
+  train: "bg-tint-transport/12 text-tint-transport",
+  ferry: "bg-tint-transport/12 text-tint-transport",
+  transfer: "bg-tint-transport/12 text-tint-transport",
+  rental_car: "bg-tint-transport/12 text-tint-transport",
+  stay: "bg-tint-stay/12 text-tint-stay",
+  activity: "bg-tint-activity/12 text-tint-activity",
+  event: "bg-tint-activity/12 text-tint-activity",
+  ticket: "bg-tint-activity/12 text-tint-activity",
+  restaurant: "bg-tint-food/12 text-tint-food",
+};
+
+function ProgressRing({ done, total }: { done: number; total: number }) {
+  const r = 15;
+  const c = 2 * Math.PI * r;
+  const share = total > 0 ? Math.min(1, done / total) : 0;
+  return (
+    <div className="flex items-center gap-1.5 rounded-full bg-background/90 py-1 pl-1 pr-2.5 shadow-soft">
+      <svg viewBox="0 0 36 36" className="h-8 w-8 -rotate-90" aria-hidden>
+        <circle cx="18" cy="18" r={r} fill="none" strokeWidth="3.5" className="stroke-secondary" />
+        <circle
+          cx="18"
+          cy="18"
+          r={r}
+          fill="none"
+          strokeWidth="3.5"
+          strokeLinecap="round"
+          className="stroke-primary"
+          strokeDasharray={c}
+          strokeDashoffset={c * (1 - share)}
+        />
+      </svg>
+      <span className="num font-ui text-[12px] font-semibold text-foreground">
+        {done}/{total} geregeld
+      </span>
+    </div>
+  );
+}
+
+function shortDate(value: string, timeZone: string) {
+  return new Date(value)
+    .toLocaleDateString("nl-NL", { weekday: "short", day: "numeric", month: "short", timeZone })
+    .replace(".", "");
 }
 
 export default function TripHome() {
   const { activeTrip } = useTrip();
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [dismissed, setDismissed] = useState<string[]>([]);
+  const [expanded, setExpanded] = useState(false);
   const tripId = activeTrip?.id || "";
   const timezone = activeTrip?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone || "Europe/Amsterdam";
 
@@ -36,19 +74,16 @@ export default function TripHome() {
     queryFn: () => getTripReadiness(tripId),
     enabled: Boolean(tripId),
   });
-
   const itemsQuery = useQuery({
     queryKey: ["trip-items", tripId],
     queryFn: () => listTripItems(tripId),
     enabled: Boolean(tripId),
   });
-
   const tasksQuery = useQuery({
     queryKey: ["trip-tasks", tripId],
     queryFn: () => listTasks(tripId),
     enabled: Boolean(tripId),
   });
-
   const decisionsQuery = useQuery({
     queryKey: ["trip-decisions", tripId],
     queryFn: () => listDecisions(tripId),
@@ -56,225 +91,210 @@ export default function TripHome() {
   });
 
   const readiness = readinessQuery.data;
+  const archived = activeTrip?.status === "archived";
 
-  /**
-   * Hansie works inside the screen: the same authorized readiness facts become
-   * short proposals you can act on or dismiss, instead of a chat you have to read.
-   */
-  const suggestions = useMemo(() => {
-    if (!readiness || !tripId || activeTrip?.status === "archived") return [];
-    const list: Array<{ key: string; title: string; meta: string; action: string; href: string }> = [];
-    if (readiness.facts.trip_item_count === 0) {
-      list.push({ key: "items", title: "Zet je heenreis en verblijf erin", meta: "Nog niets op de tijdlijn", action: "Openen", href: `/trip/${tripId}/reis` });
-    }
-    if (readiness.facts.member_count <= 1) {
-      list.push({ key: "members", title: "Nodig je reisgenoten uit", meta: "Je bent nu de enige", action: "Openen", href: `/trip/${tripId}/settings` });
-    }
-    if (readiness.facts.document_count === 0 && readiness.facts.trip_item_count > 0) {
-      list.push({ key: "docs", title: "Bewaar je tickets en bevestigingen", meta: "Nog geen documenten", action: "Openen", href: `/trip/${tripId}/reis` });
-    }
-    return list.filter((item) => !dismissed.includes(item.key)).slice(0, 2);
-  }, [readiness, tripId, dismissed, activeTrip?.status]);
+  const view = useMemo(() => {
+    if (!activeTrip) return null;
+    const now = Date.now();
+    const items = itemsQuery.data || [];
+    const tasks = tasksQuery.data || [];
+    const decisions = decisionsQuery.data || [];
+    const hasMyVote = (decision: (typeof decisions)[number]) =>
+      Boolean(user && decision.options.some((option) => option.votes.some((vote) => vote.user_id === user.id)));
 
-  if (!activeTrip) return null;
+    const myTasks = user ? tasks.filter((task) => task.status !== "done" && task.assigned_user_id === user.id) : [];
+    const myVotes = decisions.filter((decision) => decision.status === "open" && !hasMyVote(decision));
+    const samen = `/trip/${activeTrip.id}/samen`;
 
-  const attention = readiness ? activeReadinessChecks(readiness) : [];
-  const timing = tripTimingLabel(activeTrip.start_date, activeTrip.end_date);
-  const now = Date.now();
-  const upcomingItems = (itemsQuery.data || [])
-    .filter((item) => item.start_at && new Date(item.start_at).getTime() >= now)
-    .sort((a, b) => new Date(a.start_at || 0).getTime() - new Date(b.start_at || 0).getTime())
-    .slice(0, 3);
-
-  const openTasks = (tasksQuery.data || []).filter((task) => task.status !== "done");
-  const myTasks = user ? openTasks.filter((task) => task.assigned_user_id === user.id) : [];
-  const openDecisions = (decisionsQuery.data || []).filter((decision) => decision.status === "open");
-  const myOpenDecisions = user
-    ? openDecisions.filter(
-        (decision) => !decision.options.some((option) => option.votes.some((vote) => vote.user_id === user.id)),
-      )
-    : [];
-
-  const personalItems = [
-    ...myTasks.map((task) => ({ key: `task-${task.id}`, icon: CheckSquare, title: task.title, meta: "Jouw taak" })),
-    ...myOpenDecisions.map((decision) => ({ key: `decision-${decision.id}`, icon: Scale, title: decision.title, meta: "Nog niet gestemd" })),
-  ].slice(0, 3);
-
-  const attentionTotal = attention.reduce((total, check) => total + check.attention_count, 0);
-
-  const reminders =
-    activeTrip.status === "archived"
+    const reminders = archived
       ? []
       : computeReminders({
           now,
           tripStart: activeTrip.start_date,
-          items: itemsQuery.data || [],
-          tasks: tasksQuery.data || [],
-          decisions: (decisionsQuery.data || []).map((decision) => ({
+          items,
+          tasks,
+          decisions: decisions.map((decision) => ({
             id: decision.id,
             title: decision.title,
             status: decision.status,
             closes_at: decision.closes_at,
-            hasMyVote: Boolean(
-              user && decision.options.some((option) => option.votes.some((vote) => vote.user_id === user.id)),
-            ),
+            hasMyVote: hasMyVote(decision),
           })),
         });
-  const trackedTotal = (readiness?.checks.length || 0) + attentionTotal;
-  const readinessSentence = readinessQuery.isLoading
-    ? "Voorbereiding laden…"
-    : !readiness
-      ? "Voorbereiding niet beschikbaar"
-      : readiness.status === "ready"
-        ? "Alles geregeld"
-        : `${Math.max(0, trackedTotal - attentionTotal)} van ${trackedTotal} geregeld`;
+
+    const checks = readiness ? activeReadinessChecks(readiness) : [];
+    const checkThing = (key: "dates" | "destination" | "bookings"): FirstThing[] =>
+      checks
+        .filter((check) => check.key === key)
+        .map((check) => {
+          const action = readinessAction(check, activeTrip.id);
+          return { key: `check-${key}`, title: check.label, actionLabel: action.label, href: action.href };
+        });
+
+    const suggestions: FirstThing[] = [];
+    if (readiness && !archived) {
+      if (readiness.facts.trip_item_count === 0)
+        suggestions.push({ key: "s-items", title: "Zet je heenreis en verblijf erin", actionLabel: "Naar Reis", href: `/trip/${activeTrip.id}/reis` });
+      if (readiness.facts.member_count <= 1)
+        suggestions.push({ key: "s-members", title: "Nodig je reisgenoten uit", actionLabel: "Uitnodigen", href: `/trip/${activeTrip.id}/settings` });
+      if (readiness.facts.document_count === 0 && readiness.facts.trip_item_count > 0)
+        suggestions.push({ key: "s-docs", title: "Bewaar je tickets en bevestigingen", actionLabel: "Naar Reis", href: `/trip/${activeTrip.id}/reis` });
+    }
+
+    const things = firstThings({
+      urgent: reminders
+        .filter((reminder) => reminder.tone === "urgent")
+        .map((reminder) => ({
+          key: reminder.key,
+          title: reminder.title,
+          meta: reminder.meta,
+          actionLabel: "Bekijken",
+          href: `/trip/${activeTrip.id}/${reminder.target}`,
+        })),
+      mine: [
+        ...myTasks.map((task) => ({ key: `task-${task.id}`, title: task.title, meta: "Jouw taak", actionLabel: "Taak openen", href: samen })),
+        ...myVotes.map((decision) => ({ key: `decision-${decision.id}`, title: decision.title, meta: "Wacht op jouw stem", actionLabel: "Stemmen", href: samen })),
+      ],
+      basics: [...checkThing("dates"), ...checkThing("destination")],
+      bookings: checkThing("bookings"),
+      suggestions,
+    });
+
+    const upcoming = items
+      .filter((item) => item.start_at && new Date(item.start_at).getTime() >= now)
+      .sort((a, b) => new Date(a.start_at || 0).getTime() - new Date(b.start_at || 0).getTime())
+      .slice(0, 3);
+
+    const personal = [
+      ...myTasks.map((task) => ({ key: `task-${task.id}`, icon: CheckSquare, title: task.title, meta: "Jouw taak" })),
+      ...myVotes.map((decision) => ({ key: `decision-${decision.id}`, icon: Scale, title: decision.title, meta: "Nog niet gestemd" })),
+    ].slice(0, 3);
+
+    const attentionTotal = checks.reduce((total, check) => total + check.attention_count, 0);
+    const total = (readiness?.checks.length || 0) + attentionTotal;
+
+    return { things, upcoming, personal, done: Math.max(0, total - attentionTotal), total };
+  }, [activeTrip, archived, itemsQuery.data, tasksQuery.data, decisionsQuery.data, readiness, user]);
+
+  if (!activeTrip || !view) return null;
+
+  const [first, ...rest] = view.things;
 
   return (
     <AppLayout>
-      <div className="pb-10">
+      <div className="pb-8">
         <TripVisual
           name={activeTrip.name}
           coverImageUrl={activeTrip.cover_image_url}
-          height="h-[140px]"
+          height="h-[180px]"
           rounded="rounded-none"
           overlay
           showBadge={false}
         >
-          <div>
-            <p className="num font-ui text-[11px] font-semibold uppercase tracking-[0.14em] text-white/80">
-              {formatDateRange(activeTrip.start_date, activeTrip.end_date)}
-            </p>
-            <h1 className="mt-0.5 truncate font-brand text-[26px] font-semibold leading-tight text-white">{activeTrip.name}</h1>
-            <p className="num mt-0.5 truncate text-[12px] font-semibold text-white/85">
-              {timing}
-              {activeTrip.destination_name ? ` · ${activeTrip.destination_name}` : ""}
-            </p>
+          <div className="flex items-end justify-between gap-3">
+            <div className="min-w-0">
+              <h1 className="truncate font-brand text-[24px] font-semibold leading-tight text-white">{activeTrip.name}</h1>
+              {activeTrip.destination_name && (
+                <p className="truncate text-[12px] font-semibold text-white/85">{activeTrip.destination_name}</p>
+              )}
+              <p className="num mt-1 font-brand text-[30px] font-semibold leading-none text-white">
+                {countdownLabel(activeTrip.start_date, activeTrip.end_date)}
+              </p>
+            </div>
+            {readiness && <ProgressRing done={view.done} total={Math.max(1, view.total)} />}
           </div>
         </TripVisual>
 
-        <div className="px-5 sm:px-8">
-          <div className="border-b border-rule py-3.5">
-            <CountBar
-              items={[
-                { label: "Onderdelen", value: readiness?.facts.trip_item_count ?? 0, to: `/trip/${activeTrip.id}/reis` },
-                { label: "Open taken", value: openTasks.length, to: `/trip/${activeTrip.id}/samen` },
-                { label: "Keuzes", value: openDecisions.length, to: `/trip/${activeTrip.id}/samen` },
-                { label: "Documenten", value: readiness?.facts.document_count ?? 0, to: `/trip/${activeTrip.id}/reis` },
-              ]}
-            />
-          </div>
+        <div className="space-y-6 px-5 pt-4 sm:px-8">
+          <Surface as="section" className="p-4">
+            <p className="font-ui text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Eerst dit</p>
+            {readinessQuery.isLoading ? (
+              <p className="mt-2 text-[15px] text-muted-foreground">Laden…</p>
+            ) : first ? (
+              <>
+                <p className="mt-1.5 font-brand text-[19px] font-semibold leading-snug">{first.title}</p>
+                {first.meta && <p className="mt-0.5 text-[13px] text-muted-foreground">{first.meta}</p>}
+                <Button className="mt-3 h-11 w-full" onClick={() => navigate(first.href)}>
+                  {first.actionLabel}
+                </Button>
+                {rest.length > 0 && (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => setExpanded((value) => !value)}
+                      className="mt-2.5 flex items-center gap-1 font-ui text-[12px] font-semibold text-muted-foreground hover:text-foreground"
+                      aria-expanded={expanded}
+                    >
+                      +{rest.length} {rest.length === 1 ? "ander punt" : "andere punten"}
+                      <ChevronDown className={`h-3.5 w-3.5 transition-transform ${expanded ? "rotate-180" : ""}`} aria-hidden />
+                    </button>
+                    {expanded && (
+                      <RowList className="mt-1">
+                        {rest.map((thing) => (
+                          <RowItem key={thing.key} title={thing.title} meta={thing.meta || thing.actionLabel} to={thing.href} />
+                        ))}
+                      </RowList>
+                    )}
+                  </>
+                )}
+              </>
+            ) : (
+              <p className="mt-1.5 font-brand text-[19px] font-semibold">Alles geregeld. Goede reis.</p>
+            )}
+          </Surface>
 
-          <div className="py-4">
-            <ReadinessBar
-              done={Math.max(0, trackedTotal - attentionTotal)}
-              total={Math.max(1, trackedTotal)}
-              sentence={readinessSentence}
-            />
-          </div>
+          <section>
+            <SectionLabel>Eerstvolgend</SectionLabel>
+            {itemsQuery.isLoading ? (
+              <p className="py-3 text-[14px] text-muted-foreground">Laden…</p>
+            ) : view.upcoming.length === 0 ? (
+              <button
+                type="button"
+                onClick={() => navigate(`/trip/${activeTrip.id}/reis`)}
+                className="py-3 text-left text-[14px] text-muted-foreground hover:text-foreground"
+              >
+                Nog niets ingepland. Voeg vervoer, verblijf of een activiteit toe via Reis.
+              </button>
+            ) : (
+              <ol className="relative mt-1">
+                <span aria-hidden className="absolute bottom-5 left-[70px] top-5 w-px bg-border" />
+                {view.upcoming.map((item) => {
+                  const Icon = travelTypeIcon(item.type);
+                  return (
+                    <li key={item.id}>
+                      <button
+                        type="button"
+                        onClick={() => navigate(`/trip/${activeTrip.id}/reis`)}
+                        className="grid w-full grid-cols-[52px_36px_minmax(0,1fr)] items-center gap-2 py-2.5 text-left"
+                      >
+                        <span className="num font-ui text-[13px] font-semibold leading-tight">
+                          {shortDate(item.start_at as string, item.timezone || timezone)}
+                        </span>
+                        <span
+                          aria-hidden
+                          className={`relative z-10 flex h-9 w-9 items-center justify-center rounded-full ${TYPE_TINT[item.type] || "bg-tint-other/12 text-tint-other"}`}
+                        >
+                          <Icon className="h-[17px] w-[17px]" strokeWidth={1.75} />
+                        </span>
+                        <span className="truncate text-[15px] font-medium">{item.title}</span>
+                      </button>
+                    </li>
+                  );
+                })}
+              </ol>
+            )}
+          </section>
 
-          {personalItems.length > 0 && (
-            <section className="border-t border-rule pt-1">
+          {view.personal.length > 0 && (
+            <section>
               <SectionLabel>Voor jou</SectionLabel>
               <RowList className="mt-0.5">
-                {personalItems.map((item) => (
-                  <RowItem
-                    key={item.key}
-                    icon={item.icon}
-                    title={item.title}
-                    meta={item.meta}
-                    to={`/trip/${activeTrip.id}/samen`}
-                  />
+                {view.personal.map((item) => (
+                  <RowItem key={item.key} icon={item.icon} title={item.title} meta={item.meta} to={`/trip/${activeTrip.id}/samen`} />
                 ))}
               </RowList>
             </section>
           )}
-
-          <section className="mt-6 border-t border-rule pt-1">
-            <SectionLabel>Vraagt aandacht</SectionLabel>
-            {attention.length > 0 ? (
-              <RowList className="mt-0.5">
-                {attention.slice(0, 5).map((check) => {
-                  const action = readinessAction(check, activeTrip.id);
-                  return (
-                    <RowItem
-                      key={check.key}
-                      icon={AlertCircle}
-                      tone="attention"
-                      title={check.label}
-                      meta={action?.label}
-                      trailing={check.attention_count > 1 ? String(check.attention_count) : undefined}
-                      to={action?.href}
-                    />
-                  );
-                })}
-              </RowList>
-            ) : readinessQuery.isLoading ? (
-              <RowList className="mt-0.5">
-                <RowItem icon={CalendarClock} title="Laden…" />
-              </RowList>
-            ) : (
-              <EmptyLine text="Niets open." />
-            )}
-
-            {suggestions.length > 0 && (
-              <div className="mt-1 border-t border-rule">
-                {suggestions.map((suggestion) => (
-                  <SuggestionRow
-                    key={suggestion.key}
-                    title={suggestion.title}
-                    meta={suggestion.meta}
-                    actionLabel={suggestion.action}
-                    onAccept={() => navigate(suggestion.href)}
-                    onDismiss={() => setDismissed((current) => [...current, suggestion.key])}
-                  />
-                ))}
-              </div>
-            )}
-          </section>
-
-          <section className="mt-6 border-t border-rule pt-1">
-            {reminders.length > 0 && (
-              <div className="mb-6">
-                <SectionLabel>Herinneringen</SectionLabel>
-                <RowList className="mt-0.5">
-                  {reminders.map((reminder) => (
-                    <RowItem
-                      key={reminder.key}
-                      icon={reminder.tone === "urgent" ? BellRing : Bell}
-                      title={reminder.title}
-                      meta={reminder.meta}
-                      to={`/trip/${activeTrip.id}/${reminder.target}`}
-                    />
-                  ))}
-                </RowList>
-              </div>
-            )}
-            <SectionLabel>Eerstvolgend</SectionLabel>
-            <RowList className="mt-0.5">
-              {itemsQuery.isLoading ? (
-                <RowItem icon={CalendarClock} title="Laden…" />
-              ) : upcomingItems.length === 0 ? (
-                <RowItem
-                  icon={CalendarClock}
-                  title="Nog niets ingepland"
-                  meta="Vervoer, verblijf of activiteit toevoegen"
-                  to={`/trip/${activeTrip.id}/reis`}
-                />
-              ) : (
-                upcomingItems.map((item) => (
-                  <RowItem
-                    key={item.id}
-                    icon={CalendarClock}
-                    title={item.title}
-                    meta={formatTripDateTime(item.start_at, item.timezone || timezone)}
-                    to={`/trip/${activeTrip.id}/reis`}
-                  />
-                ))
-              )}
-            </RowList>
-          </section>
-
-          <RecentActivity tripId={activeTrip.id} />
         </div>
       </div>
     </AppLayout>

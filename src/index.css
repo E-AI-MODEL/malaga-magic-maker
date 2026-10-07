@@ -45,6 +45,11 @@
     --success-foreground: 0 0% 100%;
     --warning: 36 78% 46%;
     --warning-foreground: 220 20% 12%;
+    --tint-transport: 205 70% 42%;
+    --tint-stay: 172 58% 26%;
+    --tint-activity: 28 80% 46%;
+    --tint-food: 350 55% 46%;
+    --tint-other: 260 30% 48%;
 
     --sidebar-background: 220 20% 12%;
     --sidebar-foreground: 0 0% 95%;
@@ -68,6 +73,11 @@
 
     --primary: 172 45% 48%;
     --primary-foreground: 0 0% 100%;
+    --tint-transport: 205 65% 62%;
+    --tint-stay: 172 45% 52%;
+    --tint-activity: 28 80% 60%;
+    --tint-food: 350 60% 64%;
+    --tint-other: 260 40% 68%;
 
     --secondary: 220 15% 18%;
     --secondary-foreground: 0 0% 95%;

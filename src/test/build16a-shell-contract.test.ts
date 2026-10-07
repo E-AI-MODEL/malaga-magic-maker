@@ -69,7 +69,7 @@ describe("Mijn reizen", () => {
 describe("Trip overzicht", () => {
   it("answers what is personal, what needs attention and what comes next", () => {
     expect(tripHome).toContain("Voor jou");
-    expect(tripHome).toContain("Vraagt aandacht");
+    expect(tripHome).toContain("Eerst dit");
     expect(tripHome).toContain("Eerstvolgend");
   });
 

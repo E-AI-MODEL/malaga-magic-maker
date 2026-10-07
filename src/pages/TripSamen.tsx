@@ -43,6 +43,7 @@ import { computeBalances, settleBalances } from "@/features/together/settle";
 import { TripInvitesCard } from "@/features/invites/TripInvitesCard";
 import { listTravelerProfiles, summariseProfile } from "@/features/travelers/data";
 import { TravelerProfileSheet } from "@/features/travelers/TravelerProfileSheet";
+import { RecentActivity } from "@/features/notifications/RecentActivity";
 import { CountBar, EmptyLine, RowItem, RowList, SectionLabel, Segmented, StatusWord, StickyBar } from "@/components/primitives";
 
 /** The primary switcher holds only the three kinds of shared work. */
@@ -676,6 +677,7 @@ export default function TripSamen() {
             {expenses.length} {expenses.length === 1 ? "kostenregel" : "kostenregels"} in deze reis
           </p>
         )}
+        <div className="px-5 pb-6 sm:px-8"><RecentActivity tripId={activeTrip.id} /></div>
       </div>
 
       <TravelerProfileSheet

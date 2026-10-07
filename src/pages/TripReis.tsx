@@ -219,13 +219,13 @@ export default function TripReis() {
         {actionError && <p className="mt-4 text-sm font-medium text-destructive">{actionError}</p>}
 
         <StickyBar className="mt-4">
-          <div className="flex items-center gap-2">
-            <div className="min-w-0 flex-1"><FilterChips<FilterId> value={filter} onChange={setFilter} options={counts} /></div>
+          <FilterChips<FilterId> value={filter} onChange={setFilter} options={counts} />
+          <div className="mt-2">
             <select
               aria-label="Filter op status"
               value={statusFilter}
               onChange={(event) => setStatusFilter(event.target.value)}
-              className="h-9 shrink-0 rounded-full border border-border bg-background px-3 font-ui text-[13px]"
+              className="h-9 rounded-full border border-border bg-background px-3 font-ui text-base text-muted-foreground"
             >
               <option value="all">Elke status</option>
               {travelStatuses.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}

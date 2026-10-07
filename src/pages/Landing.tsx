@@ -71,7 +71,7 @@ const STEPS = [
 const FAQ = [
   {
     q: "Is Vakansie echt gratis?",
-    a: "Ja. Je kunt een volledige reis van begin tot vertrek voorbereiden zonder te betalen. Wil je het project steunen, dan kan dat vrijwillig.",
+    a: "Ja. Een volledige reis voorbereiden kost niets: één actieve reis, 5 documenten per reis en 12 Hansie-vragen per dag. Wil je meer ruimte, dan is Pro een eenmalige bijdrage.",
   },
   {
     q: "Boekt Vakansie mijn vakantie?",
@@ -260,24 +260,27 @@ export default function Landing() {
           <p className="font-ui text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
             Wat kost het
           </p>
-          <h2 className="mt-2 font-display text-[26px] font-bold uppercase tracking-wide leading-tight">Gratis. En dat blijft zo.</h2>
+          <h2 className="mt-2 font-display text-[26px] font-bold uppercase tracking-wide leading-tight">
+            Gratis. En dat blijft zo.
+          </h2>
           <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-            Je bereidt een volledige reis voor zonder te betalen. Wil je het project steunen, dan kan dat
-            vrijwillig.
+            Je bereidt een volledige reis voor zonder te betalen. Het verschil tussen gratis en Pro zit in de
+            ruimte, niet in de functies.
           </p>
 
           <div className="mt-5 grid gap-3 sm:grid-cols-2">
             <div className="rounded-[20px] border border-border bg-card p-5 shadow-soft">
               <p className="font-ui text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-                Vakansie
+                Gratis
               </p>
-              <p className="mt-2 font-display text-[38px] font-bold uppercase tracking-wide leading-none">Gratis</p>
+              <p className="mt-2 font-display text-[38px] font-bold uppercase tracking-wide leading-none">€ 0</p>
               <ul className="mt-4 space-y-2.5 text-sm text-muted-foreground">
                 {[
-                  "Je volledige reis voorbereiden",
+                  "Eén actieve reis",
                   "Onbeperkt reisgenoten uitnodigen",
                   "Taken, keuzes en kosten",
-                  "Documenten en Hansie",
+                  "5 documenten per reis",
+                  "12 Hansie-vragen per dag",
                 ].map((item) => (
                   <li key={item} className="flex gap-2">
                     <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" strokeWidth={1.75} />
@@ -296,12 +299,25 @@ export default function Landing() {
               </p>
               <p className="mt-2 flex items-baseline gap-1.5 font-display text-[38px] font-bold uppercase tracking-wide leading-none">
                 € 2
-                <span className="font-sans text-[13px] font-normal text-primary-foreground/70">eenmalig</span>
+                <span className="font-sans text-[13px] font-normal text-primary-foreground/70">
+                  eenmalig, ook € 5 of € 10
+                </span>
               </p>
               <p className="mt-4 text-sm leading-relaxed text-primary-foreground/80">
-                Vind je Vakansie de moeite waard? Met een eenmalige bijdrage ontgrendel je Pro en help je
-                hosting, documentopslag en Hansie betalen. Geen abonnement, geen verlenging.
+                Eenmalige bijdrage, geen abonnement. Je krijgt meer ruimte bovenop alles wat gratis al kan.
               </p>
+              <ul className="mt-4 space-y-2.5 text-sm text-primary-foreground/90">
+                {[
+                  "Onbeperkt reizen",
+                  "200 documenten per reis",
+                  "150 Hansie-vragen per dag",
+                ].map((item) => (
+                  <li key={item} className="flex gap-2">
+                    <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" strokeWidth={1.75} />
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
               <Button asChild variant="secondary" className="mt-5 w-full rounded-md">
                 <Link to="/steun">
                   <Heart className="mr-1.5 h-4 w-4" strokeWidth={1.75} />
@@ -310,6 +326,10 @@ export default function Landing() {
               </Button>
             </div>
           </div>
+
+          <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
+            Pro staat blijvend op je account. Geen abonnement, geen automatische verlenging.
+          </p>
         </section>
 
         <section className="mx-auto mt-14 max-w-3xl px-5">

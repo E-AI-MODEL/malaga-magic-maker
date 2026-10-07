@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import { Check, ExternalLink, Link2, Loader2, Search } from "lucide-react";
+import { Check, ExternalLink, Link2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { FormSheet } from "@/components/FormSheet";
 import {
   accommodationSources,
   addCandidateAsStay,
@@ -260,7 +260,6 @@ export function AccommodationSearchSheet({
             </>
           )}
         </div>
-      </SheetContent>
-    </Sheet>
+    </FormSheet>
   );
 }

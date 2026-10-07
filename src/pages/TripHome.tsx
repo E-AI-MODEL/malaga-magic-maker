@@ -193,11 +193,11 @@ export default function TripHome() {
         >
           <div className="flex items-end justify-between gap-3">
             <div className="min-w-0">
-              <h1 className="truncate font-brand text-[24px] font-semibold leading-tight text-white">{activeTrip.name}</h1>
+              <h1 className="truncate font-display uppercase tracking-tight text-[24px] font-extrabold leading-tight text-white">{activeTrip.name}</h1>
               {activeTrip.destination_name && (
                 <p className="truncate text-[12px] font-semibold text-white/85">{activeTrip.destination_name}</p>
               )}
-              <p className="num mt-1 font-brand text-[30px] font-semibold leading-none text-white">
+              <p className="num mt-1 font-display uppercase tracking-tight text-[30px] font-extrabold leading-none text-white">
                 {countdownLabel(activeTrip.start_date, activeTrip.end_date)}
               </p>
             </div>
@@ -212,7 +212,7 @@ export default function TripHome() {
               <p className="mt-2 text-[15px] text-muted-foreground">Laden…</p>
             ) : first ? (
               <>
-                <p className="mt-1.5 font-brand text-[19px] font-semibold leading-snug">{first.title}</p>
+                <p className="mt-1.5 font-display uppercase tracking-tight text-[19px] font-extrabold leading-snug">{first.title}</p>
                 {first.meta && <p className="mt-0.5 text-[13px] text-muted-foreground">{first.meta}</p>}
                 <Button className="mt-3 h-11 w-full" onClick={() => navigate(first.href)}>
                   {first.actionLabel}
@@ -239,7 +239,7 @@ export default function TripHome() {
                 )}
               </>
             ) : (
-              <p className="mt-1.5 font-brand text-[19px] font-semibold">Alles geregeld. Goede reis.</p>
+              <p className="mt-1.5 font-display uppercase tracking-tight text-[19px] font-extrabold">Alles geregeld. Goede reis.</p>
             )}
           </Surface>
 

@@ -29,7 +29,7 @@ export function BottomNav() {
           >
             {({ isActive }) => (
               <>
-                {isActive && <span aria-hidden className="absolute inset-x-7 top-0 h-[2px] rounded-full bg-primary" />}
+                {isActive && <span aria-hidden className="absolute inset-x-7 top-0 h-[2px] bg-primary" />}
                 <link.icon className="h-5 w-5" strokeWidth={isActive ? 2 : 1.75} aria-hidden />
                 <span>{link.label}</span>
               </>

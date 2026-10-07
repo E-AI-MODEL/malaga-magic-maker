@@ -264,7 +264,7 @@ export default function TripSamen() {
   return (
     <AppLayout>
       <div className="px-5 pb-12 pt-5 sm:px-8">
-        <h1 className="font-brand text-[24px] font-semibold leading-tight">Samen</h1>
+        <h1 className="font-display uppercase tracking-tight text-[24px] font-extrabold leading-tight">Samen</h1>
         <div className="mt-3 border-y border-rule py-3">
           <CountBar
             items={[

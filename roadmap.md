@@ -1,5 +1,9 @@
 # Roadmap
 
+- [ ] Homepage: functies en vier stappen onderscheiden, dubbele uitleg schrappen
+- [ ] Bestaande Signal-stijl en directe toon doortrekken naar overige schermen
+- [ ] Relevante tests, lint, typecontrole en visuele controle uitvoeren
+
 - [x] Beheer (ops) overzetten naar de nieuwe merkstijl
 - [x] Proefrun testaccount: actieve reis "Proefrun Toscane" aangemaakt en schermen bekeken
 - [x] Nieuw logo (V met routepunt) toegepast + favicon bijgewerkt

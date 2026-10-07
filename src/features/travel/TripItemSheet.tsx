@@ -5,7 +5,13 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { createTripItem, TripItemRow, updateTripItem } from "./data";
-import { isoToLocalInput, localInputToIso, travelStatuses, travelTypes } from "./presentation";
+import { detailFieldsFor, isoToLocalInput, localInputToIso, mergeDetails, readDetails, travelStatuses, travelTypes } from "./presentation";
+import { useQuery } from "@tanstack/react-query";
+import { useAuth } from "@/lib/auth";
+import { createExpenseWithSplits, listTripMembers } from "@/features/together/data";
+import { splitEvenly } from "@/features/together/money";
+import { createTripDocumentSignedUrl, listTripDocuments } from "@/features/documents/data";
+import type { Json } from "@/integrations/supabase/types";
 
 type Props = {
   open: boolean;
@@ -38,6 +44,51 @@ export function TripItemSheet({ open, onOpenChange, tripId, timezone, currency, 
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [deleting, setDeleting] = useState(false);
+  const [details, setDetails] = useState<Record<string, string>>({});
+  const [expenseState, setExpenseState] = useState<"idle" | "busy" | "done">("idle");
+  const { user } = useAuth();
+  const docs = useQuery({
+    queryKey: ["trip-documents", tripId],
+    queryFn: () => listTripDocuments(tripId),
+    enabled: open && Boolean(item),
+  });
+  const linkedDocs = (docs.data || []).filter((d) => item && d.trip_item_id === item.id && d.status === "ready");
+  const existingExpenseId = item ? readDetails(item.metadata).expense_id : undefined;
+
+  const openDocument = async (doc: (typeof linkedDocs)[number]) => {
+    try {
+      const url = await createTripDocumentSignedUrl(doc);
+      window.open(url, "_blank", "noopener,noreferrer");
+    } catch {
+      setError("Document openen is niet gelukt.");
+    }
+  };
+
+  const addAsExpense = async () => {
+    if (!item || !user || item.price == null || Number(item.price) <= 0) return;
+    setExpenseState("busy");
+    setError("");
+    try {
+      const members = await listTripMembers(tripId);
+      const ids = members.map((m) => m.user_id);
+      const amount = Number(item.price);
+      const expenseId = await createExpenseWithSplits(tripId, {
+        description: item.title,
+        amount,
+        paidByUserId: user.id,
+        currency: item.currency || currency || "EUR",
+        splits: splitEvenly(amount, ids.length ? ids : [user.id]),
+      });
+      const base = item.metadata && typeof item.metadata === "object" && !Array.isArray(item.metadata) ? item.metadata : {};
+      await updateTripItem(tripId, item.id, { metadata: { ...base, expense_id: String(expenseId) } as Json });
+      setExpenseState("done");
+      await onSaved();
+    } catch (caught) {
+      console.error("add expense failed", caught);
+      setError("Toevoegen aan Kosten is niet gelukt.");
+      setExpenseState("idle");
+    }
+  };
 
   useEffect(() => {
     if (!open) return;
@@ -55,6 +106,8 @@ export function TripItemSheet({ open, onOpenChange, tripId, timezone, currency, 
     setNotes(item?.notes || "");
     setError("");
     setDeleting(false);
+    setDetails(readDetails(item?.metadata));
+    setExpenseState("idle");
   }, [open, item, initialType, timezone, currency]);
 
   const handleDelete = async () => {
@@ -101,6 +154,7 @@ export function TripItemSheet({ open, onOpenChange, tripId, timezone, currency, 
         price: price === "" ? null : Number(price),
         currency: itemCurrency,
         notes: notes.trim() || null,
+        metadata: mergeDetails(item?.metadata, type, details) as Json,
       };
 
       if (item) {
@@ -169,6 +223,24 @@ export function TripItemSheet({ open, onOpenChange, tripId, timezone, currency, 
             <Input id="travel-location" value={location} onChange={(event) => setLocation(event.target.value)} placeholder="Plaats, luchthaven, adres of locatie" className="mt-2 h-11" />
           </div>
 
+          {detailFieldsFor(type).length > 0 && (
+            <div className="grid gap-3 sm:grid-cols-2">
+              {detailFieldsFor(type).map((field) => (
+                <div key={field.key}>
+                  <label className="text-sm font-semibold" htmlFor={`travel-detail-${field.key}`}>{field.label}</label>
+                  <Input
+                    id={`travel-detail-${field.key}`}
+                    value={details[field.key] || ""}
+                    onChange={(event) => setDetails((prev) => ({ ...prev, [field.key]: event.target.value }))}
+                    placeholder={field.placeholder}
+                    maxLength={200}
+                    className="mt-2 h-11"
+                  />
+                </div>
+              ))}
+            </div>
+          )}
+
           <div className="grid gap-3 sm:grid-cols-2">
             <div>
               <label className="text-sm font-semibold" htmlFor="travel-provider">Bij wie?</label>
@@ -202,6 +274,29 @@ export function TripItemSheet({ open, onOpenChange, tripId, timezone, currency, 
             <label className="text-sm font-semibold" htmlFor="travel-notes">Notitie</label>
             <Textarea id="travel-notes" value={notes} onChange={(event) => setNotes(event.target.value)} rows={3} className="mt-2" placeholder="Alleen wat handig is om bij dit onderdeel te onthouden" />
           </div>
+
+          {item && linkedDocs.length > 0 && (
+            <div>
+              <p className="text-sm font-semibold">Documenten bij dit onderdeel</p>
+              <div className="mt-2 divide-y divide-rule border-y border-rule">
+                {linkedDocs.map((doc) => (
+                  <button key={doc.id} type="button" onClick={() => void openDocument(doc)} className="block w-full truncate py-2.5 text-left text-sm font-medium underline-offset-2 hover:underline">
+                    {doc.filename}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {item && item.price != null && Number(item.price) > 0 && (
+            existingExpenseId || expenseState === "done" ? (
+              <p className="text-sm text-muted-foreground">Dit bedrag staat al bij Samen &gt; Kosten.</p>
+            ) : (
+              <Button type="button" variant="outline" className="h-11 w-full" disabled={expenseState === "busy"} onClick={() => void addAsExpense()}>
+                {expenseState === "busy" ? "Bezig…" : "Bedrag als kosten toevoegen (gelijk verdeeld)"}
+              </Button>
+            )
+          )}
 
           {error && <p className="rounded-xl bg-destructive/10 px-4 py-3 text-sm font-medium text-destructive">{error}</p>}
 

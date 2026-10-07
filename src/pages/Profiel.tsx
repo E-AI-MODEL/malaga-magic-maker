@@ -40,12 +40,12 @@ export default function Profiel() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur">
+      <header className="sticky top-0 z-40 border-b border-border bg-background">
         <div className="mx-auto flex max-w-2xl items-center gap-3 px-5 py-2.5">
           <Button variant="ghost" size="icon" onClick={() => navigate("/trips")} aria-label="Terug naar mijn reizen">
             <ArrowLeft className="h-4 w-4" />
           </Button>
-          <p className="text-sm font-semibold tracking-tight">Profiel</p>
+          <p className="font-display text-xl font-bold uppercase">Profiel</p>
         </div>
       </header>
 
@@ -55,7 +55,7 @@ export default function Profiel() {
             {(profile?.display_name || user?.email || "?").slice(0, 1).toUpperCase()}
           </span>
           <div className="min-w-0">
-            <h1 className="truncate font-display uppercase tracking-tight text-xl font-extrabold tracking-tight">{profile?.display_name || "Reiziger"}</h1>
+            <h1 className="break-words font-display uppercase text-[28px] font-bold leading-tight">{profile?.display_name || "Reiziger"}</h1>
             <p className="truncate text-xs text-muted-foreground">
               {profile?.username ? `@${profile.username}` : ""}
               {profile?.username && user?.email ? " · " : ""}

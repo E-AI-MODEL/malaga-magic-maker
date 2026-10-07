@@ -18,13 +18,14 @@ export default {
         sans: ["Barlow", "system-ui", "sans-serif"],
         display: ["Barlow Condensed", "Barlow", "sans-serif"],
         mono: ["IBM Plex Mono", "ui-monospace", "monospace"],
-        brand: ["Fraunces", "Georgia", "serif"],
+        brand: ["Barlow Condensed", "Barlow", "sans-serif"],
       },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
         background: "hsl(var(--background))",
+        "on-image": "hsl(var(--on-image))",
         foreground: "hsl(var(--foreground))",
         primary: {
           DEFAULT: "hsl(var(--primary))",

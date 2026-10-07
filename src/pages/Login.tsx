@@ -51,9 +51,9 @@ export default function Login() {
           <img src={logo.url} alt="Vakansie" width={169} height={43} className="h-10 w-auto object-contain" />
         </div>
 
-        <div className="rounded-[24px] border border-border bg-card p-7 shadow-soft">
+        <div className="rounded-lg border border-border bg-card p-7 shadow-soft">
           <p className="font-ui text-[11px] font-semibold uppercase tracking-[0.16em] text-primary">Inloggen</p>
-          <h1 className="mt-2 font-brand text-[28px] font-semibold leading-tight">Welkom terug</h1>
+          <h1 className="mt-2 font-display uppercase text-[28px] font-semibold leading-tight">Welkom terug</h1>
           <p className="mt-2 text-sm text-muted-foreground">Log in om je reizen te bekijken en verder te werken.</p>
 
           <div className="mt-6">
@@ -93,8 +93,8 @@ export default function Login() {
                 className="mt-2 h-11"
               />
             </div>
-            {error && <p className="rounded-xl bg-destructive/10 px-4 py-3 text-sm font-medium text-destructive">{error}</p>}
-            <Button type="submit" className="h-12 w-full rounded-full font-bold" disabled={loading}>
+            {error && <p className="rounded-lg bg-destructive/10 px-4 py-3 text-sm font-medium text-destructive">{error}</p>}
+            <Button type="submit" className="h-12 w-full rounded-md font-bold" disabled={loading}>
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Inloggen
             </Button>

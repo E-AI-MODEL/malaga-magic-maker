@@ -160,7 +160,7 @@ export default function TripReis() {
       <div className="px-5 pb-12 pt-5 sm:px-8">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <h1 className="font-ui text-[22px] font-semibold leading-tight">Reis</h1>
+            <h1 className="font-display text-[30px] font-bold uppercase leading-tight">Reis</h1>
             <p className="mt-1 text-sm text-muted-foreground">
               {formatDateRange(activeTrip.start_date, activeTrip.end_date)}
               {activeTrip.destination_name ? ` · ${activeTrip.destination_name}` : ""}

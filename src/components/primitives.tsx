@@ -13,7 +13,7 @@ export function Surface({
   as?: "div" | "section";
 }) {
   return (
-    <Tag className={`rounded-[18px] border border-border bg-card shadow-soft ${className}`}>{children}</Tag>
+    <Tag className={`rounded-lg border border-border bg-card shadow-soft ${className}`}>{children}</Tag>
   );
 }
 
@@ -34,7 +34,7 @@ export function IconBubble({
         ? "bg-secondary text-muted-foreground"
         : "bg-primary/10 text-primary";
   return (
-    <span aria-hidden className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-[12px] ${toneClass} ${className}`}>
+    <span aria-hidden className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-md ${toneClass} ${className}`}>
       <Icon className="h-[18px] w-[18px]" strokeWidth={1.75} />
     </span>
   );
@@ -46,7 +46,7 @@ export function StatusChip({ children, tone = "neutral" }: { children: ReactNode
     tone === "attention"
       ? "bg-warning/15 text-warning"
       : tone === "done"
-        ? "bg-primary/10 text-primary"
+        ? "bg-success/10 text-success"
         : "bg-secondary text-muted-foreground";
   return (
     <span className={`inline-flex items-center rounded-md px-2.5 py-1 font-ui text-[11px] font-semibold ${toneClass}`}>
@@ -55,11 +55,11 @@ export function StatusChip({ children, tone = "neutral" }: { children: ReactNode
   );
 }
 
-/** Quiet sentence-case section break. 13px semibold, never decorative uppercase. */
+/** Signal section break, shared by all working screens. */
 export function SectionLabel({ children, action }: { children: ReactNode; action?: ReactNode }) {
   return (
-    <div className="flex items-baseline justify-between gap-3">
-      <h2 className="font-ui text-[13px] font-semibold text-foreground">{children}</h2>
+    <div className="flex items-baseline justify-between gap-3 border-t border-border pt-3">
+      <h2 className="min-w-0 font-display text-[18px] font-bold uppercase leading-tight text-foreground">{children}</h2>
       {action}
     </div>
   );
@@ -69,7 +69,7 @@ export function SectionLabel({ children, action }: { children: ReactNode; action
 export function StatusWord({ children, tone = "neutral" }: { children: ReactNode; tone?: "neutral" | "done" | "attention" | "muted" }) {
   const toneClass =
     tone === "done"
-      ? "text-primary"
+      ? "text-success"
       : tone === "attention"
         ? "text-warning"
         : tone === "muted"
@@ -137,10 +137,10 @@ export function ReadinessBar({
   const ratio = total > 0 ? Math.min(1, Math.max(0, done / total)) : 0;
   return (
     <div>
-      <div className={`h-[3px] w-full overflow-hidden rounded-full ${invert ? "bg-white/15" : "bg-rule"}`}>
-        <div className="h-full rounded-full bg-primary transition-[width]" style={{ width: `${ratio * 100}%` }} />
+      <div className={`h-[3px] w-full overflow-hidden rounded-full ${invert ? "bg-on-image/15" : "bg-rule"}`}>
+        <div className="h-full rounded-full bg-success transition-[width]" style={{ width: `${ratio * 100}%` }} />
       </div>
-      <p className={`mt-2 text-xs ${invert ? "text-white/60" : "text-muted-foreground"}`}>{sentence}</p>
+      <p className={`mt-2 text-xs ${invert ? "text-on-image/60" : "text-muted-foreground"}`}>{sentence}</p>
     </div>
   );
 }
@@ -205,7 +205,7 @@ export function Segmented<T extends string>({
   className?: string;
 }) {
   return (
-    <div role="tablist" className={`flex w-full rounded-[14px] border border-border bg-secondary/70 p-1 ${className}`}>
+    <div role="tablist" className={`flex w-full rounded-lg border border-border bg-secondary p-1 ${className}`}>
       {options.map((option) => (
         <button
           key={option.id}
@@ -213,8 +213,8 @@ export function Segmented<T extends string>({
           type="button"
           aria-selected={value === option.id}
           onClick={() => onChange(option.id)}
-          className={`min-h-[40px] flex-1 rounded-[10px] px-2 text-[13px] font-semibold transition-colors ${
-            value === option.id ? "bg-card text-foreground shadow-soft" : "text-muted-foreground hover:text-foreground"
+          className={`min-h-[40px] flex-1 rounded-md px-2 text-[13px] font-semibold transition-colors ${
+            value === option.id ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
           }`}
         >
           {option.label}
@@ -257,12 +257,12 @@ export function FilterChips<T extends string>({
             aria-pressed={selected}
             onClick={() => onChange(option.id)}
             className={`inline-flex h-9 shrink-0 items-center gap-1.5 rounded-md border px-3 font-ui text-[13px] font-medium transition-colors ${
-              selected ? "border-foreground bg-foreground text-background" : "border-border text-muted-foreground hover:text-foreground"
+              selected ? "border-primary bg-primary text-primary-foreground" : "border-border text-muted-foreground hover:text-foreground"
             }`}
           >
             {option.label}
             {typeof option.count === "number" && (
-              <span className={`num text-[11px] ${selected ? "text-background/70" : "text-muted-foreground/70"}`}>{option.count}</span>
+              <span className={`num text-[11px] ${selected ? "text-primary-foreground/70" : "text-muted-foreground/70"}`}>{option.count}</span>
             )}
           </button>
         );

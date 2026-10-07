@@ -88,7 +88,26 @@ function omit(row: Row, keys: string[]): Row {
   return copy;
 }
 
+const BLOCKED_KEY = /(^id$|_id$|^storage_path$|email)/i;
+
+/** Defense in depth: drop id, storage-path and e-mail keys anywhere in the payload. */
+export function stripIdentifiers<T>(value: T): T {
+  if (Array.isArray(value)) return value.map((entry) => stripIdentifiers(entry)) as T;
+  if (value && typeof value === "object") {
+    const out: Row = {};
+    for (const [key, entry] of Object.entries(value as Row)) {
+      if (!BLOCKED_KEY.test(key)) out[key] = stripIdentifiers(entry);
+    }
+    return out as T;
+  }
+  return value;
+}
+
 export function buildTripContext(raw: RawTripContext) {
+  return stripIdentifiers(assembleTripContext(raw));
+}
+
+function assembleTripContext(raw: RawTripContext) {
   const names = new Map<string, string>();
   for (const profile of raw.profiles) {
     if (typeof profile.id === "string") names.set(profile.id, (profile.display_name as string) || FALLBACK_NAME);

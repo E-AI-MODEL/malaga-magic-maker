@@ -29,8 +29,10 @@ Deno.serve(async (req) => {
   const actor = userData.user.id;
 
   const admin = createClient(url, service, { auth: { persistSession: false } });
-  const { data: isAdmin } = await admin.rpc("has_role", { _user_id: actor, _role: "admin" });
-  if (isAdmin !== true) return json(403, { error: "platform_admin_required" });
+  const { data: roleRow, error: roleError } = await admin
+    .from("user_roles").select("id").eq("user_id", actor).eq("role", "admin").maybeSingle();
+  if (roleError) { console.error("role check failed", roleError); return json(500, { error: "role_check_failed" }); }
+  if (!roleRow) return json(403, { error: "platform_admin_required" });
 
   let body: Record<string, unknown>;
   try { body = await req.json(); } catch { return json(400, { error: "invalid_json" }); }

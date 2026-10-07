@@ -179,12 +179,11 @@ export default function TripHome() {
                 {countdownLabel(activeTrip.start_date, activeTrip.end_date)}
               </p>
             </div>
-            {readiness && <ProgressRing done={view.done} total={Math.max(1, view.total)} />}
           </div>
         </TripVisual>
 
         <div className="space-y-6 px-5 pt-4 sm:px-8">
-          {!archived && <HansiePanel page="overzicht" title="Ik kijk met je mee naar wat nu telt." />}
+          {!archived && <HansiePanel page="overzicht" title="Vraag Hansie over deze reis." />}
           <section className="border-l-4 border-primary bg-band p-4">
             <p className="font-ui text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Eerst dit</p>
             {readinessQuery.isLoading ? (

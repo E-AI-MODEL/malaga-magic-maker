@@ -196,16 +196,24 @@ export function HansieWidget({
   if (!trip) return null;
   if (!hansieEnabled && !isAdmin) return null;
 
+  const roundButton = floating && isMobile;
+
   return (
     <>
+      {roundButton ? (
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          className="fixed bottom-[calc(3.625rem+12px+env(safe-area-inset-bottom))] right-4 z-40 flex h-[52px] w-[52px] items-center justify-center rounded-full bg-primary text-primary-foreground shadow-soft transition-transform hover:scale-[1.03] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background motion-reduce:transition-none"
+          aria-label="Vraag het Hansie"
+        >
+          <Sparkles className="h-[22px] w-[22px]" strokeWidth={1.75} aria-hidden />
+        </button>
+      ) : (
       <div
         className={
           floating
-            ? `fixed z-40 border-t border-border bg-background px-3 pb-2 pt-1.5 ${
-                isMobile
-                  ? "bottom-[calc(3.625rem+env(safe-area-inset-bottom))] left-0 right-0"
-                  : "bottom-0 right-0 w-full max-w-md"
-              }`
+            ? "fixed bottom-0 right-0 z-40 w-full max-w-md border-t border-border bg-background px-3 pb-2 pt-1.5"
             : "sticky bottom-0 left-0 right-0 z-40 border-t border-border bg-background px-3 pb-2 pt-1.5 safe-area-pb"
         }
       >
@@ -223,6 +231,7 @@ export function HansieWidget({
           </span>
         </button>
       </div>
+      )}
 
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetContent

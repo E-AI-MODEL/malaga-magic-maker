@@ -238,7 +238,7 @@ export default function Landing() {
             <p className="font-ui text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
               Zo werkt het
             </p>
-            <h2 className="mt-2 font-display text-[26px] font-bold uppercase tracking-wide leading-tight">In drie stappen</h2>
+            <h2 className="mt-2 font-display text-[26px] font-bold uppercase tracking-wide leading-tight">In vier stappen</h2>
             <ol className="relative mt-6 space-y-7">
               <span aria-hidden className="absolute bottom-2 left-[13px] top-2 w-px bg-[hsl(var(--rule)/0.14)]" />
               {STEPS.map((step, index) => (

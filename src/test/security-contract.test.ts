@@ -53,7 +53,7 @@ describe("Vakansie BUILD 01 security contract", () => {
   });
 
   it("checks platform admin before any admin user action", () => {
-    const roleCheck = opsUsers.indexOf('admin.rpc("has_role"');
+    const roleCheck = opsUsers.indexOf('.eq("role", "admin")');
     expect(roleCheck).toBeGreaterThan(-1);
     expect(opsUsers.indexOf("auth.getUser")).toBeLessThan(roleCheck);
     for (const call of ["inviteUserByEmail", "createUser(", "updateUserById", "resetPasswordForEmail"]) {

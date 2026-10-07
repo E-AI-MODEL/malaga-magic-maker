@@ -31,7 +31,7 @@ export function OpsShell({
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-background font-sans">
+    <div className="ops-scope min-h-screen bg-background">
       <header className="sticky top-0 z-40 bg-[hsl(220_14%_13%)] text-white/90">
         <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-2.5 sm:px-6">
           <button onClick={() => navigate("/profiel")} aria-label="Terug" className="text-white/60 hover:text-white">

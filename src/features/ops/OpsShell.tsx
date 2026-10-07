@@ -31,26 +31,28 @@ export function OpsShell({
   const navigate = useNavigate();
 
   return (
-    <div className="ops-scope min-h-screen bg-background">
-      <header className="sticky top-0 z-40 bg-[hsl(220_14%_13%)] text-white/90">
-        <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-2.5 sm:px-6">
-          <button onClick={() => navigate("/profiel")} aria-label="Terug" className="text-white/60 hover:text-white">
+    <div className="min-h-screen bg-background">
+      <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur-sm">
+        <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-3 sm:px-6">
+          <button onClick={() => navigate("/profiel")} aria-label="Terug" className="text-muted-foreground hover:text-foreground">
             <ArrowLeft className="h-4 w-4" />
           </button>
-          <p className="text-sm font-semibold tracking-tight">Beheer</p>
-          <span className="hidden truncate text-xs text-white/40 sm:block">
+          <p className="font-display text-lg font-semibold uppercase tracking-wide">Beheer</p>
+          <span className="hidden truncate text-xs text-muted-foreground sm:block">
             Interne omgeving{operator ? ` · ${operator}` : ""}
           </span>
         </div>
-        <nav className="mx-auto flex max-w-6xl gap-1 overflow-x-auto px-4 pb-1 sm:px-6" aria-label="Beheer onderdelen">
+        <nav className="mx-auto flex max-w-6xl gap-1 overflow-x-auto px-4 sm:px-6" aria-label="Beheer onderdelen">
           {opsSections.map((item) => (
             <button
               key={item.id}
               type="button"
               onClick={() => onSelect(item.id)}
               aria-current={active === item.id ? "page" : undefined}
-              className={`shrink-0 border-b-2 px-3 py-2 text-[13px] font-medium transition-colors ${
-                active === item.id ? "border-white text-white" : "border-transparent text-white/50 hover:text-white/80"
+              className={`shrink-0 border-b-2 px-3 py-2.5 text-[13px] font-medium transition-colors ${
+                active === item.id
+                  ? "border-primary text-foreground"
+                  : "border-transparent text-muted-foreground hover:text-foreground"
               }`}
             >
               {item.label}

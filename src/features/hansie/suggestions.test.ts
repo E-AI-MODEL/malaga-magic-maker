@@ -33,4 +33,13 @@ describe("Hansie starter questions", () => {
     expect(list).toContain("Wie moet nog stemmen over het restaurant?");
     expect(list).toContain("Wie moet wie nog betalen?");
   });
+
+  it("never asks about departure once a trip is over or underway", () => {
+    const base = { itemCount: 2, openDecisionTitle: null, expenseCount: 0 };
+    const past = hansieSuggestions({ ...base, now: new Date(2026, 9, 7), startDate: "2026-06-01", endDate: "2026-06-08" });
+    expect(past[0]).toBe("Wat moet er na deze reis nog worden afgerond?");
+    expect(past).not.toContain("Wat moet ik nog doen voor vertrek?");
+    const during = hansieSuggestions({ ...base, now: new Date(2026, 9, 7), startDate: "2026-10-05", endDate: "2026-10-10" });
+    expect(during[0]).toBe("Wat staat er vandaag op het programma?");
+  });
 });

@@ -93,7 +93,7 @@ export default function Landing() {
             <img src={logo} alt="" width={28} height={28} className="h-7 w-7 rounded-[8px] object-cover" />
             <span className="font-display text-[19px] font-bold uppercase tracking-wide">Vakansie</span>
           </span>
-          <Button asChild variant="ghost" size="sm" className="rounded-full">
+          <Button asChild variant="ghost" size="sm" className="rounded-md">
             <Link to="/login">Inloggen</Link>
           </Button>
         </div>

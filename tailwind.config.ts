@@ -15,8 +15,9 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ["DM Sans", "sans-serif"],
-        display: ["Plus Jakarta Sans", "sans-serif"],
+        sans: ["Barlow", "system-ui", "sans-serif"],
+        display: ["Barlow Condensed", "Barlow", "sans-serif"],
+        mono: ["IBM Plex Mono", "ui-monospace", "monospace"],
         brand: ["Fraunces", "Georgia", "serif"],
       },
       colors: {
@@ -71,6 +72,7 @@ export default {
           other: "hsl(var(--tint-other))",
         },
         band: "hsl(var(--band))",
+        info: "hsl(var(--tint-transport))",
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",

@@ -1,9 +1,8 @@
 import { FormEvent, useEffect, useState } from "react";
-import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { FormError, FormField, FormSelect, FormSheet, FormSubmit } from "@/components/FormSheet";
 import { createTripItem, TripItemRow, updateTripItem } from "./data";
 import { detailFieldsFor, isoToLocalInput, localInputToIso, mergeDetails, readDetails, travelStatuses, travelTypes } from "./presentation";
 import { useQuery } from "@tanstack/react-query";
@@ -176,147 +175,136 @@ export function TripItemSheet({ open, onOpenChange, tripId, timezone, currency, 
   const selectedType = travelTypes.find((option) => option.value === type);
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="bottom" className="max-h-[92vh] overflow-y-auto rounded-t-2xl px-5 pb-8 sm:left-1/2 sm:max-w-xl sm:-translate-x-1/2">
-        <SheetHeader className="text-left">
-          <SheetTitle className="font-display text-xl font-extrabold">
-            {item ? "Reisonderdeel wijzigen" : selectedType ? `${selectedType.label} toevoegen` : "Toevoegen aan je reis"}
-          </SheetTitle>
-          <SheetDescription>Vul alleen in wat je al weet. Je kunt dit later altijd aanvullen.</SheetDescription>
-        </SheetHeader>
+    <FormSheet
+      open={open}
+      onOpenChange={onOpenChange}
+      title={item ? "Reisonderdeel wijzigen" : selectedType ? `${selectedType.label} toevoegen` : "Toevoegen aan je reis"}
+      description="Vul in wat je weet; de rest kan later."
+    >
+      <form onSubmit={handleSubmit} className="mt-6 space-y-5">
+        <div className="grid grid-cols-2 gap-3">
+          <FormField label="Soort" htmlFor="travel-type">
+            <FormSelect
+              id="travel-type"
+              value={type}
+              onChange={setType}
+              options={travelTypes.map((option) => ({ value: option.value, label: option.label }))}
+            />
+          </FormField>
+          <FormField label="Hoe staat het ervoor?" htmlFor="travel-status">
+            <FormSelect
+              id="travel-status"
+              value={status}
+              onChange={setStatus}
+              options={travelStatuses.map((option) => ({ value: option.value, label: option.label }))}
+            />
+          </FormField>
+        </div>
 
-        <form onSubmit={handleSubmit} className="mt-6 space-y-5">
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="text-sm font-semibold" htmlFor="travel-type">Soort</label>
-              <select id="travel-type" value={type} onChange={(event) => setType(event.target.value)} className="mt-2 h-11 w-full rounded-md border border-input bg-background px-3 text-sm">
-                {travelTypes.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
-              </select>
-            </div>
-            <div>
-              <label className="text-sm font-semibold" htmlFor="travel-status">Hoe staat het ervoor?</label>
-              <select id="travel-status" value={status} onChange={(event) => setStatus(event.target.value)} className="mt-2 h-11 w-full rounded-md border border-input bg-background px-3 text-sm">
-                {travelStatuses.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
-              </select>
-            </div>
+        <FormField label="Korte naam" htmlFor="travel-title" required>
+          <Input id="travel-title" value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Bijv. Vlucht naar Rome" className="h-11" autoFocus />
+        </FormField>
+
+        <div className="grid grid-cols-2 gap-3">
+          <FormField label="Begin" htmlFor="travel-start">
+            <Input id="travel-start" type="datetime-local" value={startAt} onChange={(event) => setStartAt(event.target.value)} className="h-11" />
+          </FormField>
+          <FormField label="Einde" htmlFor="travel-end">
+            <Input id="travel-end" type="datetime-local" value={endAt} onChange={(event) => setEndAt(event.target.value)} className="h-11" />
+          </FormField>
+        </div>
+        <p className="-mt-3 text-xs text-muted-foreground">Tijden worden opgeslagen in de tijdzone van deze reis.</p>
+
+        <FormField label="Waar?" htmlFor="travel-location">
+          <Input id="travel-location" value={location} onChange={(event) => setLocation(event.target.value)} placeholder="Plaats, luchthaven, adres of locatie" className="h-11" />
+        </FormField>
+
+        {detailFieldsFor(type).length > 0 && (
+          <div className="grid gap-3 sm:grid-cols-2">
+            {detailFieldsFor(type).map((field) => (
+              <FormField key={field.key} label={field.label} htmlFor={`travel-detail-${field.key}`}>
+                <Input
+                  id={`travel-detail-${field.key}`}
+                  value={details[field.key] || ""}
+                  onChange={(event) => setDetails((prev) => ({ ...prev, [field.key]: event.target.value }))}
+                  placeholder={field.placeholder}
+                  maxLength={200}
+                  className="h-11"
+                />
+              </FormField>
+            ))}
           </div>
+        )}
 
+        <div className="grid gap-3 sm:grid-cols-2">
+          <FormField label="Bij wie?" htmlFor="travel-provider">
+            <Input id="travel-provider" value={provider} onChange={(event) => setProvider(event.target.value)} placeholder="Bijv. KLM of Hertz" className="h-11" />
+          </FormField>
+          <FormField label="Boekingsnummer" htmlFor="travel-reference">
+            <Input id="travel-reference" value={bookingReference} onChange={(event) => setBookingReference(event.target.value)} className="h-11" />
+          </FormField>
+        </div>
+
+        <FormField label="Boekingslink" htmlFor="travel-url">
+          <Input id="travel-url" type="url" value={bookingUrl} onChange={(event) => setBookingUrl(event.target.value)} placeholder="https://..." className="h-11" />
+        </FormField>
+
+        <div className="grid grid-cols-[1fr_110px] gap-3">
+          <FormField label="Bedrag" htmlFor="travel-price">
+            <Input id="travel-price" type="number" min="0" step="0.01" value={price} onChange={(event) => setPrice(event.target.value)} className="h-11" />
+          </FormField>
+          <FormField label="Valuta" htmlFor="travel-currency">
+            <FormSelect
+              id="travel-currency"
+              value={itemCurrency}
+              onChange={setItemCurrency}
+              options={currencies.map((option) => ({ value: option, label: option }))}
+            />
+          </FormField>
+        </div>
+
+        <FormField label="Notitie" htmlFor="travel-notes">
+          <Textarea id="travel-notes" value={notes} onChange={(event) => setNotes(event.target.value)} rows={3} placeholder="Alleen wat handig is om bij dit onderdeel te onthouden" />
+        </FormField>
+
+        {item && linkedDocs.length > 0 && (
           <div>
-            <label className="text-sm font-semibold" htmlFor="travel-title">Korte naam *</label>
-            <Input id="travel-title" value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Bijv. Vlucht naar Rome" className="mt-2 h-11" autoFocus />
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="text-sm font-semibold" htmlFor="travel-start">Begin</label>
-              <Input id="travel-start" type="datetime-local" value={startAt} onChange={(event) => setStartAt(event.target.value)} className="mt-2 h-11" />
-            </div>
-            <div>
-              <label className="text-sm font-semibold" htmlFor="travel-end">Einde</label>
-              <Input id="travel-end" type="datetime-local" value={endAt} onChange={(event) => setEndAt(event.target.value)} className="mt-2 h-11" />
-            </div>
-          </div>
-          <p className="-mt-3 text-xs text-muted-foreground">Tijden worden opgeslagen in de tijdzone van deze reis.</p>
-
-          <div>
-            <label className="text-sm font-semibold" htmlFor="travel-location">Waar?</label>
-            <Input id="travel-location" value={location} onChange={(event) => setLocation(event.target.value)} placeholder="Plaats, luchthaven, adres of locatie" className="mt-2 h-11" />
-          </div>
-
-          {detailFieldsFor(type).length > 0 && (
-            <div className="grid gap-3 sm:grid-cols-2">
-              {detailFieldsFor(type).map((field) => (
-                <div key={field.key}>
-                  <label className="text-sm font-semibold" htmlFor={`travel-detail-${field.key}`}>{field.label}</label>
-                  <Input
-                    id={`travel-detail-${field.key}`}
-                    value={details[field.key] || ""}
-                    onChange={(event) => setDetails((prev) => ({ ...prev, [field.key]: event.target.value }))}
-                    placeholder={field.placeholder}
-                    maxLength={200}
-                    className="mt-2 h-11"
-                  />
-                </div>
+            <p className="text-sm font-semibold">Documenten bij dit onderdeel</p>
+            <div className="mt-2 divide-y divide-rule border-y border-rule">
+              {linkedDocs.map((doc) => (
+                <button key={doc.id} type="button" onClick={() => void openDocument(doc)} className="block w-full truncate py-2.5 text-left text-sm font-medium underline-offset-2 hover:underline">
+                  {doc.filename}
+                </button>
               ))}
             </div>
-          )}
-
-          <div className="grid gap-3 sm:grid-cols-2">
-            <div>
-              <label className="text-sm font-semibold" htmlFor="travel-provider">Bij wie?</label>
-              <Input id="travel-provider" value={provider} onChange={(event) => setProvider(event.target.value)} placeholder="Bijv. KLM of Hertz" className="mt-2 h-11" />
-            </div>
-            <div>
-              <label className="text-sm font-semibold" htmlFor="travel-reference">Boekingsnummer</label>
-              <Input id="travel-reference" value={bookingReference} onChange={(event) => setBookingReference(event.target.value)} className="mt-2 h-11" />
-            </div>
           </div>
+        )}
 
-          <div>
-            <label className="text-sm font-semibold" htmlFor="travel-url">Boekingslink</label>
-            <Input id="travel-url" type="url" value={bookingUrl} onChange={(event) => setBookingUrl(event.target.value)} placeholder="https://..." className="mt-2 h-11" />
-          </div>
+        {item && item.price != null && Number(item.price) > 0 && (
+          existingExpenseId || expenseState === "done" ? (
+            <p className="text-sm text-muted-foreground">Dit bedrag staat al bij Samen &gt; Kosten.</p>
+          ) : (
+            <Button type="button" variant="outline" className="h-11 w-full" disabled={expenseState === "busy"} onClick={() => void addAsExpense()}>
+              {expenseState === "busy" ? "Bezig…" : "Bedrag als kosten toevoegen (gelijk verdeeld)"}
+            </Button>
+          )
+        )}
 
-          <div className="grid grid-cols-[1fr_110px] gap-3">
-            <div>
-              <label className="text-sm font-semibold" htmlFor="travel-price">Bedrag</label>
-              <Input id="travel-price" type="number" min="0" step="0.01" value={price} onChange={(event) => setPrice(event.target.value)} className="mt-2 h-11" />
-            </div>
-            <div>
-              <label className="text-sm font-semibold" htmlFor="travel-currency">Valuta</label>
-              <select id="travel-currency" value={itemCurrency} onChange={(event) => setItemCurrency(event.target.value)} className="mt-2 h-11 w-full rounded-md border border-input bg-background px-3 text-sm">
-                {currencies.map((option) => <option key={option} value={option}>{option}</option>)}
-              </select>
-            </div>
-          </div>
+        <FormError message={error} />
 
-          <div>
-            <label className="text-sm font-semibold" htmlFor="travel-notes">Notitie</label>
-            <Textarea id="travel-notes" value={notes} onChange={(event) => setNotes(event.target.value)} rows={3} className="mt-2" placeholder="Alleen wat handig is om bij dit onderdeel te onthouden" />
-          </div>
+        <FormSubmit saving={saving}>{item ? "Wijzigingen opslaan" : "Toevoegen aan reisplan"}</FormSubmit>
 
-          {item && linkedDocs.length > 0 && (
-            <div>
-              <p className="text-sm font-semibold">Documenten bij dit onderdeel</p>
-              <div className="mt-2 divide-y divide-rule border-y border-rule">
-                {linkedDocs.map((doc) => (
-                  <button key={doc.id} type="button" onClick={() => void openDocument(doc)} className="block w-full truncate py-2.5 text-left text-sm font-medium underline-offset-2 hover:underline">
-                    {doc.filename}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {item && item.price != null && Number(item.price) > 0 && (
-            existingExpenseId || expenseState === "done" ? (
-              <p className="text-sm text-muted-foreground">Dit bedrag staat al bij Samen &gt; Kosten.</p>
-            ) : (
-              <Button type="button" variant="outline" className="h-11 w-full" disabled={expenseState === "busy"} onClick={() => void addAsExpense()}>
-                {expenseState === "busy" ? "Bezig…" : "Bedrag als kosten toevoegen (gelijk verdeeld)"}
-              </Button>
-            )
-          )}
-
-          {error && <p className="rounded-xl bg-destructive/10 px-4 py-3 text-sm font-medium text-destructive">{error}</p>}
-
-          <Button type="submit" className="h-12 w-full font-bold" disabled={saving}>
-            {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            {item ? "Wijzigingen opslaan" : "Toevoegen aan reisplan"}
-          </Button>
-
-          {item && onDelete && (
-            <button
-              type="button"
-              onClick={() => void handleDelete()}
-              disabled={deleting || saving}
-              className="w-full py-2 text-center text-sm font-medium text-destructive underline-offset-4 hover:underline disabled:opacity-60"
-            >
-              {deleting ? "Verwijderen…" : "Dit onderdeel verwijderen"}
-            </button>
-          )}
-        </form>
-      </SheetContent>
-    </Sheet>
+        {item && onDelete && (
+          <button
+            type="button"
+            onClick={() => void handleDelete()}
+            disabled={deleting || saving}
+            className="w-full py-2 text-center text-sm font-medium text-destructive underline-offset-4 hover:underline disabled:opacity-60"
+          >
+            {deleting ? "Verwijderen…" : "Dit onderdeel verwijderen"}
+          </button>
+        )}
+      </form>
+    </FormSheet>
   );
 }

@@ -17,7 +17,7 @@ describe("Hansie starter questions", () => {
 
   it("asks about today and tomorrow while travelling", () => {
     const list = hansieSuggestions({ ...base, now: new Date(2026, 9, 7, 14), startDate: "2026-10-05", endDate: "2026-10-10" });
-    expect(list).toContain("Wat staat er vandaag en morgen?");
+    expect(list).toContain("Wat staat er morgen?");
   });
 
   it("adds decision, expense and planning questions and caps at four", () => {

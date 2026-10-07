@@ -63,6 +63,13 @@ export default {
         },
         rule: "hsl(var(--rule) / 0.08)",
         rail: "hsl(var(--rail))",
+        tint: {
+          transport: "hsl(var(--tint-transport))",
+          stay: "hsl(var(--tint-stay))",
+          activity: "hsl(var(--tint-activity))",
+          food: "hsl(var(--tint-food))",
+          other: "hsl(var(--tint-other))",
+        },
         band: "hsl(var(--band))",
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",

@@ -1,3 +1,4 @@
+import { HansiePanel } from "@/features/hansie/HansiePanel";
 import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -265,6 +266,7 @@ export default function TripSamen() {
     <AppLayout>
       <div className="px-5 pb-12 pt-5 sm:px-8">
         <h1 className="font-display uppercase text-[30px] font-bold leading-tight">Samen</h1>
+        {activeTrip?.status !== "archived" && <HansiePanel page="samen" title="Ik zet op een rij wie wat moet doen." className="mt-3" />}
         <div className="mt-3 border-y border-rule py-3">
           <CountBar
             items={[

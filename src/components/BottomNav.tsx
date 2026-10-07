@@ -7,8 +7,8 @@ export function BottomNav() {
   if (!activeTrip) return null;
 
   const base =
-    "relative flex h-[58px] flex-1 flex-col items-center justify-center gap-1 text-[11px] font-semibold tracking-tight transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring";
-  const active = "text-primary";
+    "relative flex h-[58px] flex-1 flex-col items-center justify-center gap-1 text-[11px] font-semibold uppercase tracking-wider transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring";
+  const active = "text-foreground";
   const inactive = "text-muted-foreground";
 
   const links = [
@@ -29,7 +29,7 @@ export function BottomNav() {
           >
             {({ isActive }) => (
               <>
-                {isActive && <span aria-hidden className="absolute inset-x-7 top-0 h-[2px] bg-primary" />}
+                {isActive && <span aria-hidden className="absolute inset-x-7 top-0 h-[3px] bg-primary" />}
                 <link.icon className="h-5 w-5" strokeWidth={isActive ? 2 : 1.75} aria-hidden />
                 <span>{link.label}</span>
               </>

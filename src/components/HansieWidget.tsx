@@ -219,10 +219,10 @@ export function HansieWidget({
       >
         <button
           onClick={() => setOpen(true)}
-          className="mx-auto flex h-[46px] w-full max-w-2xl items-center gap-2.5 rounded-[16px] border border-border bg-card px-3.5 text-left shadow-soft transition-colors hover:bg-secondary/35 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+          className="mx-auto flex h-[46px] w-full max-w-2xl items-center gap-2.5 rounded-md border border-foreground/20 bg-card px-3.5 text-left transition-colors hover:bg-secondary/35 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
           aria-label="Vraag het Hansie"
         >
-          <span aria-hidden className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[11px] bg-primary/10 text-primary">
+          <span aria-hidden className="flex h-8 w-8 shrink-0 items-center justify-center rounded-sm bg-foreground text-background">
             <Sparkles className="h-[17px] w-[17px]" strokeWidth={1.75} />
           </span>
           <span className="min-w-0 flex-1 truncate font-ui text-[13px] text-muted-foreground">Vraag Hansie over deze reis…</span>
@@ -236,12 +236,12 @@ export function HansieWidget({
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetContent
           side={isMobile ? "bottom" : "right"}
-          className={isMobile ? "h-[87vh] rounded-t-[18px] p-0" : "w-full p-0 sm:max-w-md"}
+          className={isMobile ? "h-[87vh] rounded-t-md p-0" : "w-full p-0 sm:max-w-md"}
         >
           <div className="flex h-full flex-col bg-background">
             <SheetHeader className="border-b border-border bg-card px-5 py-4 text-left">
-              <SheetTitle className="flex items-center gap-2.5 font-brand text-xl font-semibold">
-                <span aria-hidden className="flex h-9 w-9 items-center justify-center rounded-[12px] bg-primary/10 text-primary">
+              <SheetTitle className="flex items-center gap-2.5 font-display text-xl font-extrabold uppercase tracking-tight">
+                <span aria-hidden className="flex h-9 w-9 items-center justify-center rounded-sm bg-foreground text-background">
                   <MessageCircle className="h-[18px] w-[18px]" strokeWidth={1.75} />
                 </span>
                 <span className="min-w-0">
@@ -258,7 +258,7 @@ export function HansieWidget({
               {messages.length === 0 ? (
                 <div className="flex h-full flex-col justify-center gap-5 py-8">
                   <div>
-                    <p className="font-brand text-2xl font-semibold">Waar kan ik mee helpen?</p>
+                    <p className="font-display text-2xl font-extrabold uppercase tracking-tight">Waar kan ik mee helpen?</p>
                     <p className="mt-1 text-sm text-muted-foreground">
                       Ik ken het dossier van {trip.name}. Vraag maar raak.
                     </p>
@@ -268,7 +268,7 @@ export function HansieWidget({
                       <button
                         key={suggestion}
                         onClick={() => void send(suggestion)}
-                        className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 font-ui text-[13px] font-medium shadow-soft transition-colors hover:bg-secondary/50"
+                        className="inline-flex items-center gap-1.5 rounded-md border border-foreground/20 bg-card px-3 py-1.5 font-ui text-[13px] font-medium transition-colors hover:bg-secondary/50"
                       >
                         <Sparkles className="h-3.5 w-3.5 text-primary" aria-hidden />
                         {suggestion}
@@ -288,7 +288,7 @@ export function HansieWidget({
                           <ReactMarkdown>{message.content}</ReactMarkdown>
                         </div>
                       ) : (
-                        <p className="max-w-[85%] rounded-2xl rounded-br-md border border-border bg-card px-3.5 py-2 text-sm font-medium shadow-soft">
+                        <p className="max-w-[85%] rounded-md rounded-br-none bg-foreground px-3.5 py-2 text-sm font-medium text-background">
                           {message.content}
                         </p>
                       )}

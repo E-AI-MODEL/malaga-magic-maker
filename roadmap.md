@@ -1,5 +1,8 @@
 # Roadmap
 
+- [ ] Startscherm: actieve/laatste reis openen, Mijn reizen vereenvoudigen en voortgang alleen op Overzicht
+- [ ] Startscherm: regels testen, ingelogd op 390px en desktop controleren, kwaliteitscontroles afronden
+
 - [x] Homepage: functies en vier stappen onderscheiden, dubbele uitleg schrappen
 - [x] Bestaande Signal-stijl en directe toon doortrekken naar overige schermen
 - [x] 102 tests geslaagd, lint 0 fouten/18 waarschuwingen, automatische build OK; homepage, inloggen en Pro mobiel/desktop gecontroleerd

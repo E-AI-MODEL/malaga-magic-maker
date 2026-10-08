@@ -63,3 +63,13 @@ describe("Hansie message history", () => {
     expect(normalizeMessages([{ role: "system", content: "a" }, { role: "user", content: "b" }])).toBeNull();
   });
 });
+
+describe("Beheer invite and recovery redirect", () => {
+  const allowed = parseAllowedOrigins("https://vakansie.app,https://www.vakansie.app,https://hansie.lovable.app");
+  it("accepts reset-password on an allowed origin", () => {
+    expect(isAllowedReturnUrl("https://www.vakansie.app/reset-password", allowed)).toBe(true);
+  });
+  it.each(["https://evil.example/reset-password", "http://vakansie.app/reset-password", "https://vakansie.app:444/reset-password"])(
+    "rejects %s", (url) => expect(isAllowedReturnUrl(url, allowed)).toBe(false),
+  );
+});

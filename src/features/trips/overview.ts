@@ -47,6 +47,12 @@ export function firstThings(groups: {
   );
 }
 
+/** Keep personal follow-ups out of "Voor jou" when they already appear in "Eerst dit". */
+export function excludeFirstThings<T extends { key: string }>(personal: T[], things: FirstThing[]): T[] {
+  const firstThingKeys = new Set(things.map((thing) => thing.key));
+  return personal.filter((item) => !firstThingKeys.has(item.key));
+}
+
 /** Preparation score: each check counts once; an empty plan or nights without a stay are never "geregeld". */
 export function preparationScore(input: { checks: { attention_count: number }[]; itemCount: number; missingStay: boolean }) {
   const results = [

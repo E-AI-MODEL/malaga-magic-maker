@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { countdownLabel, firstThings } from "./overview";
+import { countdownLabel, excludeFirstThings, firstThings } from "./overview";
 
 const now = new Date(2026, 9, 7, 14);
 
@@ -29,6 +29,17 @@ describe("Eerst dit order", () => {
   it("falls back to a suggestion when nothing else is open", () => {
     const list = firstThings({ urgent: [], mine: [], basics: [], bookings: [], suggestions: [thing("s")] });
     expect(list[0].key).toBe("s");
+  });
+
+  it("keeps items out of Voor jou when they already occur anywhere in Eerst dit", () => {
+    const first = [thing("task-a"), thing("decision-b")];
+    const personal = [
+      { key: "task-a", title: "Paspoort controleren" },
+      { key: "decision-b", title: "Kies het vervoer" },
+      { key: "task-c", title: "Koffer pakken" },
+    ];
+
+    expect(excludeFirstThings(personal, first)).toEqual([{ key: "task-c", title: "Koffer pakken" }]);
   });
 });
 

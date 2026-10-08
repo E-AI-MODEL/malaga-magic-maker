@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { SYSTEM_RULES } from "./system-rules.ts";
 import { buildTripContext } from "./context.ts";
+import { normalizeMessages } from "./messages.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -10,8 +11,6 @@ const corsHeaders = {
 };
 
 const jsonHeaders = { ...corsHeaders, "Content-Type": "application/json" };
-const MAX_MESSAGES = 20;
-const MAX_MESSAGE_LENGTH = 6000;
 
 function jsonError(status: number, error: string) {
   return new Response(JSON.stringify({ error }), { status, headers: jsonHeaders });
@@ -19,20 +18,6 @@ function jsonError(status: number, error: string) {
 
 function isUuid(value: unknown): value is string {
   return typeof value === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
-}
-
-function normalizeMessages(value: unknown) {
-  if (!Array.isArray(value)) return null;
-  const messages = value.slice(-MAX_MESSAGES).map((message) => {
-    if (!message || typeof message !== "object") return null;
-    const role = (message as Record<string, unknown>).role;
-    const content = (message as Record<string, unknown>).content;
-    if ((role !== "user" && role !== "assistant") || typeof content !== "string") return null;
-    const trimmed = content.trim();
-    if (!trimmed || trimmed.length > MAX_MESSAGE_LENGTH) return null;
-    return { role, content: trimmed };
-  });
-  return messages.every(Boolean) ? messages : null;
 }
 
 serve(async (req) => {

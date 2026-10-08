@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { isSafePublicHttpsUrl } from "../_shared/url-guards.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -223,7 +224,7 @@ serve(async (req) => {
 
     if (mode === "lookup") {
       const url = clampText(body.url, 600);
-      if (!/^https?:\/\//i.test(url)) return jsonError(400, "Plak een volledige link (https://…).");
+      if (!isSafePublicHttpsUrl(url)) return jsonError(400, "Plak een volledige link (https://…).");
 
       const scraped = await firecrawlScrape(firecrawlKey, url);
       if (!scraped || !scraped.markdown) {

@@ -26,6 +26,7 @@ Support signup, login, existing-user invite, logged-out invite then signup/login
 
 ## Routing
 URL tripId is authoritative (`/trips`, `/new-trip`, `/trip/:tripId[/reis|/samen]`, `/join/:inviteCode`). localStorage may only remember the last trip.
+- Resolve signed-in entry destinations with the shared trip-start helper only at `/` or default login; never redirect explicit `/trips` or trip URLs based on localStorage. Why: entry convenience must not override intentional navigation or invite destinations.
 
 ## Travel model
 One generic `trip_items` model; type-specific details in metadata, no destination-specific columns. Golf is an activity; accommodation comparison is a generic decision.

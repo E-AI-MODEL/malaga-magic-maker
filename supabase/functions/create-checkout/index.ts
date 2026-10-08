@@ -1,5 +1,6 @@
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { isAllowedReturnUrl, parseAllowedOrigins } from "../_shared/url-guards.ts";
 import { type StripeEnv, createStripeClient, getServerStripeEnv } from "../_shared/stripe.ts";
 
 const ALLOWED_PRICE_IDS = new Set(["vakansie_pro_2", "vakansie_pro_5", "vakansie_pro_10"]);
@@ -59,7 +60,7 @@ Deno.serve(async (req) => {
     const returnUrl = typeof body?.returnUrl === "string" ? body.returnUrl : "";
 
     if (!ALLOWED_PRICE_IDS.has(priceId)) return json({ error: "Onbekend product" }, 400);
-    if (!returnUrl.startsWith("http")) return json({ error: "Ongeldige return url" }, 400);
+    if (!isAllowedReturnUrl(returnUrl, parseAllowedOrigins(Deno.env.get("ALLOWED_APP_ORIGINS")))) return json({ error: "Ongeldige return url" }, 400);
 
     // Optional auth: anonymous supporters are allowed, but a signed-in user is
     // resolved server-side so the purchase can never be attributed to someone else.

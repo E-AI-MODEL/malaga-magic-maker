@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Archive,
@@ -65,7 +66,8 @@ export default function TripSamen() {
   const { user } = useAuth();
   const { activeTrip, isOrganizer } = useTrip();
   const queryClient = useQueryClient();
-  const [section, setSection] = useState<Section>("tasks");
+  const [searchParams] = useSearchParams();
+  const [section, setSection] = useState<Section>(() => searchParams.get("section") === "expenses" ? "expenses" : "tasks");
   const [taskSheetOpen, setTaskSheetOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<TaskRow | null>(null);
   const [decisionSheetOpen, setDecisionSheetOpen] = useState(false);

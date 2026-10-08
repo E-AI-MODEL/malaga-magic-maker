@@ -199,7 +199,7 @@ export default function TripHome() {
           {ended ? (
             <section className="border-b border-border py-4">
               <p className="text-[15px] font-medium">Deze reis is afgelopen.</p>
-              {hasOpenAmounts && <Button variant="outline" className="mt-3" onClick={() => navigate(`/trip/${activeTrip.id}/samen`)}>Naar Knaakie</Button>}
+              {hasOpenAmounts && <Button variant="outline" className="mt-3" onClick={() => navigate(`/trip/${activeTrip.id}/samen?section=expenses`)}>Naar Knaakie</Button>}
             </section>
           ) : <>
           <section className="border-l-4 border-primary bg-band p-4">

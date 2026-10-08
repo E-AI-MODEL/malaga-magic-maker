@@ -10,7 +10,8 @@ import { formatIban, isValidIban, normalizeIban } from "@/features/together/iban
 import { SectionLabel } from "@/components/primitives";
 import { NotificationPreferences } from "@/features/notifications/NotificationPreferences";
 import { toast } from "sonner";
-import { ArrowLeft, ChevronRight, LogOut, Sparkles } from "lucide-react";
+import { ChevronRight, LogOut, Sparkles } from "lucide-react";
+import { AppLayout } from "@/components/AppLayout";
 import { usePro } from "@/features/pro/usePro";
 import { usePlanStatus } from "@/features/pro/limits";
 import { PaymentHistory } from "@/features/pro/PaymentHistory";
@@ -104,17 +105,8 @@ export default function Profiel() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="sticky top-0 z-40 border-b border-border bg-background">
-        <div className="mx-auto flex max-w-2xl items-center gap-3 px-5 py-2.5">
-          <Button variant="ghost" size="icon" onClick={() => navigate("/trips")} aria-label="Terug naar mijn reizen">
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-          <p className="font-display text-xl font-bold uppercase">Profiel</p>
-        </div>
-      </header>
-
-      <main className="mx-auto max-w-2xl px-5 py-7">
+    <AppLayout>
+      <div className="mx-auto max-w-2xl px-5 py-7">
         <div className="flex items-center gap-3 border-b border-rule/10 pb-5">
           <span className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 font-brand text-lg font-semibold text-primary">
             {(profile?.display_name || user?.email || "?").slice(0, 1).toUpperCase()}
@@ -294,7 +286,7 @@ export default function Profiel() {
             </button>
           </div>
         </section>
-      </main>
-    </div>
+      </div>
+    </AppLayout>
   );
 }

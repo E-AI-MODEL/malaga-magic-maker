@@ -137,8 +137,8 @@ export function ReadinessBar({
   const ratio = total > 0 ? Math.min(1, Math.max(0, done / total)) : 0;
   return (
     <div>
-      <div className={`h-[3px] w-full overflow-hidden rounded-full ${invert ? "bg-on-image/15" : "bg-rule"}`}>
-        <div className="h-full rounded-full bg-success transition-[width]" style={{ width: `${ratio * 100}%` }} />
+      <div className={`h-[3px] w-full overflow-hidden rounded-full ${invert ? "bg-on-image/15" : "bg-foreground/15"}`}>
+        <div className="h-full rounded-full bg-foreground" style={{ width: `${ratio * 100}%` }} />
       </div>
       <p className={`mt-2 text-xs ${invert ? "text-on-image/60" : "text-muted-foreground"}`}>{sentence}</p>
     </div>

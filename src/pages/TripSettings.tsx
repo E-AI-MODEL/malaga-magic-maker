@@ -5,6 +5,7 @@ import { useTrip } from "@/contexts/TripContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { AppLayout } from "@/components/AppLayout";
 
 const currencies = ["EUR", "USD", "GBP", "CHF"];
 
@@ -40,13 +41,13 @@ export default function TripSettings() {
 
   if (!isOrganizer) {
     return (
-      <div className="mx-auto max-w-xl px-5 py-10">
+      <AppLayout><div className="mx-auto max-w-xl px-5 py-10">
         <Button asChild variant="ghost" className="-ml-3 mb-6">
           <Link to={`/trip/${activeTrip.id}`}><ArrowLeft className="mr-2 h-4 w-4" />Terug</Link>
         </Button>
         <h1 className="font-display text-2xl font-extrabold">Reisinstellingen</h1>
         <p className="mt-3 text-sm text-muted-foreground">Alleen de organisator van deze reis kan deze gegevens wijzigen.</p>
-      </div>
+      </div></AppLayout>
     );
   }
 
@@ -102,7 +103,7 @@ export default function TripSettings() {
   };
 
   return (
-    <div className="mx-auto max-w-xl px-5 py-8 sm:py-12">
+    <AppLayout><div className="mx-auto max-w-xl px-5 py-8 sm:py-12">
       <Button asChild variant="ghost" className="-ml-3 mb-6">
         <Link to={`/trip/${activeTrip.id}`}><ArrowLeft className="mr-2 h-4 w-4" />Overzicht</Link>
       </Button>
@@ -185,6 +186,6 @@ export default function TripSettings() {
           </Button>
         )}
       </div>
-    </div>
+    </div></AppLayout>
   );
 }

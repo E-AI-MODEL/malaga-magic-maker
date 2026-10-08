@@ -28,25 +28,29 @@ export function AppLayout({ children }: { children: ReactNode }) {
   const { pathname } = useLocation();
   // The overview already shows the trip name large in its header photo.
   const isTripOverview = /^\/trip\/[^/]+\/?$/.test(pathname);
+  const isTripScreen = /^\/trip\/[^/]+(?:\/(?:reis|samen|settings))?\/?$/.test(pathname);
+  const showHansie = isTripScreen && activeTrip?.status !== "archived";
+  const title = pathname === "/trips" ? "Mijn reizen" : pathname === "/profiel" ? "Profiel" : activeTrip?.name;
+  const backPath = isTripScreen && !isTripOverview && activeTrip ? `/trip/${activeTrip.id}` : "/trips";
 
   if (isMobile) {
     return (
-      <div className="min-h-screen overflow-x-hidden bg-background pb-[calc(8rem+env(safe-area-inset-bottom))]">
+      <div className={`min-h-screen overflow-x-hidden bg-background ${isTripScreen ? (showHansie ? "pb-[calc(8rem+env(safe-area-inset-bottom))]" : "pb-[calc(4rem+env(safe-area-inset-bottom))]") : "pb-[env(safe-area-inset-bottom)]"}`}>
         <header className="sticky top-0 z-40 border-b border-border bg-background">
           <AdminBar />
           <div className="mx-auto grid h-12 max-w-2xl grid-cols-[40px_minmax(0,1fr)_40px] items-center px-2">
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => navigate("/trips")}
+              onClick={() => navigate(backPath)}
               className="h-9 w-9 text-muted-foreground"
-              aria-label="Terug naar mijn reizen"
+              aria-label={backPath === "/trips" ? "Terug naar mijn reizen" : "Terug naar overzicht"}
             >
               <ChevronLeft className="h-5 w-5" strokeWidth={1.75} />
             </Button>
 
             <h1 className="min-w-0 truncate px-2 text-center font-ui text-[15px] font-semibold leading-tight">
-              {activeTrip ? (isTripOverview ? "" : activeTrip.name) : <span className="font-brand text-lg">Vakansie</span>}
+              {isTripOverview ? "" : title || <span className="font-brand text-lg">Vakansie</span>}
             </h1>
 
             <DropdownMenu>
@@ -56,7 +60,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-64">
-                {activeTrip && isOrganizer && (
+                {isTripScreen && activeTrip && isOrganizer && (
                   <>
                     <DropdownMenuItem onClick={() => navigate(`/trip/${activeTrip.id}/settings`)}>
                       <Settings className="mr-2 h-4 w-4" />Reisinstellingen
@@ -96,8 +100,8 @@ export function AppLayout({ children }: { children: ReactNode }) {
         </header>
 
         <main className="mx-auto max-w-2xl">{children}</main>
-        <BottomNav />
-        <HansieWidget trip={activeTrip ? { id: activeTrip.id, name: activeTrip.name, start_date: activeTrip.start_date, end_date: activeTrip.end_date } : null} floating />
+        {isTripScreen && <BottomNav />}
+        {showHansie && <HansieWidget trip={activeTrip} floating />}
       </div>
     );
   }
@@ -112,12 +116,12 @@ export function AppLayout({ children }: { children: ReactNode }) {
             <div className="flex h-12 items-center justify-between px-4">
             <div className="flex min-w-0 items-center gap-2">
               <SidebarTrigger className="text-muted-foreground" />
-              <button
+              <Button variant="ghost"
                 onClick={() => navigate("/trips")}
                 className="truncate font-ui text-sm font-semibold text-muted-foreground transition-colors hover:text-foreground"
               >
-                {activeTrip?.name || <span className="font-brand text-base">Vakansie</span>}
-              </button>
+                {title || <span className="font-brand text-base">Vakansie</span>}
+              </Button>
             </div>
             <div className="flex items-center gap-2">
               <NotificationCenter />
@@ -125,9 +129,9 @@ export function AppLayout({ children }: { children: ReactNode }) {
             </div>
             </div>
           </header>
-          <main className="mx-auto w-full max-w-5xl flex-1 pb-24">{children}</main>
+          <main className="mx-auto w-full max-w-5xl flex-1 pb-8">{children}</main>
+          {showHansie && <div className="sticky bottom-0 z-40 mx-auto w-full max-w-5xl"><HansieWidget trip={activeTrip} floating={false} /></div>}
         </div>
-        <HansieWidget trip={activeTrip ? { id: activeTrip.id, name: activeTrip.name, start_date: activeTrip.start_date, end_date: activeTrip.end_date } : null} floating={false} />
       </div>
     </SidebarProvider>
   );

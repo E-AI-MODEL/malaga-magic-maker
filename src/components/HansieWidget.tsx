@@ -250,7 +250,7 @@ export function HansieWidget({
           onClick={() => setOpen(true)}
           className={floating
             ? "mx-auto flex h-[48px] w-full max-w-lg items-center gap-2.5 rounded-md border border-border bg-background px-2 text-left hover:bg-secondary/35"
-            : "mx-auto flex h-[48px] w-full max-w-2xl items-center gap-2.5 rounded-md border border-primary/40 bg-card px-3.5 text-left transition-colors hover:bg-secondary/35 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"}
+            : "mx-auto flex h-[48px] w-full items-center gap-2.5 rounded-md border border-border bg-card px-3.5 text-left transition-colors hover:bg-secondary/35 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"}
           aria-label="Vraag het Hansie"
         >
           <HansieMark className="h-8 w-8 text-[15px]" />

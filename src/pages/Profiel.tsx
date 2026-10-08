@@ -255,45 +255,6 @@ export default function Profiel() {
             </button>
           </div>
         </section>
-
-        {user && (
-          <section className="mt-8">
-            <SectionLabel>Betaalgegevens</SectionLabel>
-            <p className="mt-2 text-xs text-muted-foreground">Alleen jij ziet dit. Het komt alleen in betaalverzoeken die jij zelf verstuurt.</p>
-            <div className="mt-3 space-y-3">
-              <div>
-                <label className="mb-1.5 block text-xs text-muted-foreground" htmlFor="iban-input">IBAN</label>
-                <Input
-                  id="iban-input"
-                  value={iban}
-                  onChange={(event) => setIban(event.target.value)}
-                  placeholder="NL91 ABNA 0417 1643 00"
-                  className="h-10"
-                  autoComplete="off"
-                />
-              </div>
-              <div>
-                <label className="mb-1.5 block text-xs text-muted-foreground" htmlFor="account-name-input">Ten name van</label>
-                <Input
-                  id="account-name-input"
-                  value={accountName}
-                  onChange={(event) => setAccountName(event.target.value)}
-                  className="h-10"
-                  autoComplete="off"
-                />
-              </div>
-              {ibanError && <FormError message={ibanError} />}
-              <div className="flex gap-2">
-                <Button onClick={() => void handleSavePayment()} disabled={ibanSaving} className="h-10">
-                  {ibanSaving ? "..." : "Opslaan"}
-                </Button>
-                <Button variant="outline" onClick={() => void handleDeletePayment()} disabled={ibanSaving} className="h-10">
-                  Verwijderen
-                </Button>
-              </div>
-            </div>
-          </section>
-        )}
       </main>
     </div>
   );

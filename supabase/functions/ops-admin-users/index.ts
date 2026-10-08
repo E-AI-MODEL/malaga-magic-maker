@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { isAllowedReturnUrl, parseAllowedOrigins } from "../_shared/url-guards.ts";
 
 // Platform-admin user management. Validates the caller token and the admin
 // role server-side BEFORE any service-role call.
@@ -39,7 +40,13 @@ Deno.serve(async (req) => {
   const action = body.action;
   const audit = (a: string, target: string, metadata: Record<string, unknown> = {}) =>
     admin.from("admin_audit_log").insert({ actor_user_id: actor, action: a, target_type: "user", target_id: target, metadata });
-  const redirectTo = typeof body.redirectTo === "string" && /^https:\/\//.test(body.redirectTo) ? body.redirectTo : undefined;
+  let redirectTo: string | undefined;
+  if (body.redirectTo !== undefined && body.redirectTo !== null && body.redirectTo !== "") {
+    if (!isAllowedReturnUrl(body.redirectTo, parseAllowedOrigins(Deno.env.get("ALLOWED_APP_ORIGINS")))) {
+      return json(400, { error: "invalid_redirect" });
+    }
+    redirectTo = body.redirectTo;
+  }
 
   if (action === "create") {
     const email = String(body.email ?? "").trim().toLowerCase();

@@ -21,7 +21,7 @@ function sample() {
     profiles: [{ id: ME, display_name: "Hans" }, { id: ANNA, display_name: "Anna" }, { id: BOB, display_name: "Bob" }],
     travelerProfiles: [{ user_id: ANNA, diet: "vegetarisch" }],
     expenses: [{ description: "Huur", amount: 300, currency: "EUR", paid_by_user_id: BOB }],
-    documents: [{ filename: "ticket.pdf", trip_item_id: "77777777-7777-4777-8777-777777777777", storage_path: "x/y.pdf" }],
+    documents: [{ filename: "ticket.pdf", trip_item_id: "55555555-5555-4555-8555-555555555555", storage_path: "x/y.pdf" }],
   });
 }
 
@@ -38,6 +38,10 @@ describe("Hansie trip context", () => {
     expect(ctx.jij).toEqual({ naam: "Hans", rol: "organizer" });
     expect(ctx.tasks[0].toegewezen_aan).toBe("Anna");
     expect(ctx.expenses.recent[0].betaald_door).toBe("Bob");
+  });
+
+  it("replaces a document trip item id with the linked item title", () => {
+    expect(sample().documents[0].hoort_bij).toBe("Vlucht");
   });
 
   it("lists votes per option and who has not voted yet", () => {

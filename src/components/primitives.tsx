@@ -29,7 +29,7 @@ export function IconBubble({
 }) {
   const toneClass =
     tone === "attention"
-      ? "bg-warning/12 text-warning"
+      ? "bg-warning/10 text-warning"
       : tone === "muted"
         ? "bg-secondary text-muted-foreground"
         : "bg-primary/10 text-primary";
@@ -59,7 +59,7 @@ export function StatusChip({ children, tone = "neutral" }: { children: ReactNode
 export function SectionLabel({ children, action }: { children: ReactNode; action?: ReactNode }) {
   return (
     <div className="flex items-baseline justify-between gap-3 border-t border-border pt-3">
-      <h2 className="min-w-0 font-display text-[18px] font-bold uppercase leading-tight text-foreground">{children}</h2>
+      <h2 className="min-w-0 font-display text-[18px] font-bold leading-tight text-foreground">{children}</h2>
       {action}
     </div>
   );

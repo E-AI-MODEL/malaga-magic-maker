@@ -115,6 +115,11 @@ function assembleTripContext(raw: RawTripContext) {
   const nameOf = (id: unknown) => (typeof id === "string" && id ? names.get(id) || FALLBACK_NAME : null);
 
   const travelerProfiles = new Map(raw.travelerProfiles.map((p) => [p.user_id as string, p]));
+  const itemTitles = new Map(
+    raw.items
+      .filter((item) => typeof item.id === "string" && typeof item.title === "string")
+      .map((item) => [item.id as string, item.title as string]),
+  );
   const memberIds = raw.members.map((m) => m.user_id as string);
   const self = raw.members.find((m) => m.user_id === raw.userId);
 
@@ -183,6 +188,7 @@ function assembleTripContext(raw: RawTripContext) {
     documents: raw.documents.map((document) => ({
       filename: document.filename,
       document_type: document.document_type,
+      hoort_bij: typeof document.trip_item_id === "string" ? itemTitles.get(document.trip_item_id) || null : null,
       size_bytes: document.size_bytes,
       ready_at: document.ready_at,
       extracted: document.extracted_summary || document.extracted_text

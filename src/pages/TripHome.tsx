@@ -10,23 +10,23 @@ import { listTripItems } from "@/features/travel/data";
 import { listDecisions, listTasks } from "@/features/together/data";
 import { computeReminders } from "@/features/reminders/data";
 import { travelTypeIcon } from "@/features/travel/icons";
-import { countdownLabel, firstThings, preparationScore, type FirstThing } from "@/features/trips/overview";
+import { countdownLabel, excludeFirstThings, firstThings, preparationScore, type FirstThing } from "@/features/trips/overview";
 import { timelineWarnings } from "@/features/travel/presentation";
 import { Button } from "@/components/ui/button";
 import { RowItem, RowList, SectionLabel } from "@/components/primitives";
 import { TripVisual } from "@/components/TripVisual";
 
 const TYPE_TINT: Record<string, string> = {
-  flight: "bg-tint-transport/12 text-tint-transport",
-  train: "bg-tint-transport/12 text-tint-transport",
-  ferry: "bg-tint-transport/12 text-tint-transport",
-  transfer: "bg-tint-transport/12 text-tint-transport",
-  rental_car: "bg-tint-transport/12 text-tint-transport",
-  stay: "bg-tint-stay/12 text-tint-stay",
-  activity: "bg-tint-activity/12 text-tint-activity",
-  event: "bg-tint-activity/12 text-tint-activity",
-  ticket: "bg-tint-activity/12 text-tint-activity",
-  restaurant: "bg-tint-food/12 text-tint-food",
+  flight: "bg-tint-transport/10 text-tint-transport",
+  train: "bg-tint-transport/10 text-tint-transport",
+  ferry: "bg-tint-transport/10 text-tint-transport",
+  transfer: "bg-tint-transport/10 text-tint-transport",
+  rental_car: "bg-tint-transport/10 text-tint-transport",
+  stay: "bg-tint-stay/10 text-tint-stay",
+  activity: "bg-tint-activity/10 text-tint-activity",
+  event: "bg-tint-activity/10 text-tint-activity",
+  ticket: "bg-tint-activity/10 text-tint-activity",
+  restaurant: "bg-tint-food/10 text-tint-food",
 };
 
 function shortDate(value: string, timeZone: string) {
@@ -139,10 +139,10 @@ export default function TripHome() {
       .sort((a, b) => new Date(a.start_at || 0).getTime() - new Date(b.start_at || 0).getTime())
       .slice(0, 3);
 
-    const personal = [
+    const personal = excludeFirstThings([
       ...myTasks.map((task) => ({ key: `task-${task.id}`, icon: CheckSquare, title: task.title, meta: "Jouw taak" })),
       ...myVotes.map((decision) => ({ key: `decision-${decision.id}`, icon: Scale, title: decision.title, meta: "Nog niet gestemd" })),
-    ].slice(0, 3);
+    ], things).slice(0, 3);
 
     const score = preparationScore({
       checks: readiness?.checks || [],
@@ -170,7 +170,7 @@ export default function TripHome() {
         >
           <div className="flex items-end justify-between gap-3">
             <div className="min-w-0">
-              <h1 className="break-words font-display uppercase text-[28px] font-bold leading-tight text-on-image">{activeTrip.name}</h1>
+              <h1 className="break-words font-brand text-[24px] font-bold leading-tight text-on-image">{activeTrip.name}</h1>
               {activeTrip.destination_name && (
                 <p className="truncate text-[12px] font-semibold text-on-image/85">{activeTrip.destination_name}</p>
               )}
@@ -233,7 +233,7 @@ export default function TripHome() {
               </button>
             ) : (
               <ol className="relative mt-1">
-                <span aria-hidden className="absolute bottom-5 left-[70px] top-5 w-px bg-border" />
+                <span aria-hidden className="absolute bottom-5 left-[82px] top-5 w-px bg-border" />
                 {view.upcoming.map((item) => {
                   const Icon = travelTypeIcon(item.type);
                   return (
@@ -241,14 +241,14 @@ export default function TripHome() {
                       <button
                         type="button"
                         onClick={() => navigate(`/trip/${activeTrip.id}/reis`)}
-                        className="grid w-full grid-cols-[52px_36px_minmax(0,1fr)] items-center gap-2 py-2.5 text-left"
+                        className="grid w-full grid-cols-[64px_36px_minmax(0,1fr)] items-center gap-2 py-2.5 text-left"
                       >
-                        <span className="num font-ui text-[13px] font-semibold leading-tight">
+                        <span className="num whitespace-nowrap font-ui text-[13px] font-semibold leading-tight">
                           {shortDate(item.start_at as string, item.timezone || timezone)}
                         </span>
                         <span
                           aria-hidden
-                          className={`relative z-10 flex h-9 w-9 items-center justify-center rounded-full ${TYPE_TINT[item.type] || "bg-tint-other/12 text-tint-other"}`}
+                          className={`relative z-10 flex h-9 w-9 items-center justify-center rounded-full ${TYPE_TINT[item.type] || "bg-tint-other/10 text-tint-other"}`}
                         >
                           <Icon className="h-[17px] w-[17px]" strokeWidth={1.75} />
                         </span>

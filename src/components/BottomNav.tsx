@@ -7,7 +7,7 @@ export function BottomNav() {
   if (!activeTrip) return null;
 
   const base =
-    "relative flex h-[58px] flex-1 flex-col items-center justify-center gap-1 text-[11px] font-semibold uppercase tracking-wider transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring";
+    "relative flex h-[58px] flex-1 flex-col items-center justify-center gap-1 text-[11px] font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring";
   const active = "text-foreground";
   const inactive = "text-muted-foreground";
 

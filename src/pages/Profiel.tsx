@@ -1,10 +1,12 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/lib/auth";
 import { useTrip } from "@/contexts/TripContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { FormError } from "@/components/FormSheet";
+import { formatIban, isValidIban, normalizeIban } from "@/features/together/iban";
 import { SectionLabel } from "@/components/primitives";
 import { NotificationPreferences } from "@/features/notifications/NotificationPreferences";
 import { toast } from "sonner";
@@ -21,6 +23,10 @@ export default function Profiel() {
   const navigate = useNavigate();
   const [displayName, setDisplayName] = useState(profile?.display_name || "");
   const [saving, setSaving] = useState(false);
+  const [iban, setIban] = useState("");
+  const [accountName, setAccountName] = useState("");
+  const [ibanSaving, setIbanSaving] = useState(false);
+  const [ibanError, setIbanError] = useState("");
   const activeTrips = userTrips.filter((trip) => trip.status !== "archived");
 
   const handleSave = async () => {
@@ -36,6 +42,65 @@ export default function Profiel() {
       toast.success("Naam bijgewerkt");
     }
     setSaving(false);
+  };
+
+  useEffect(() => {
+    if (!user) return;
+    let active = true;
+    supabase
+      .from("payment_details")
+      .select("iban, account_name")
+      .eq("user_id", user.id)
+      .maybeSingle()
+      .then(({ data, error }) => {
+        if (!active) return;
+        if (!error && data) {
+          setIban(data.iban ? formatIban(data.iban) : "");
+          setAccountName(data.account_name || "");
+        }
+      });
+    return () => {
+      active = false;
+    };
+  }, [user]);
+
+  const handleSavePayment = async () => {
+    if (!user) return;
+    setIbanError("");
+    const clean = normalizeIban(iban);
+    if (clean && !isValidIban(clean)) {
+      setIbanError("Dit IBAN lijkt niet te kloppen. Controleer de letters en cijfers.");
+      return;
+    }
+    setIbanSaving(true);
+    if (!clean && !accountName.trim()) {
+      const { error } = await supabase.from("payment_details").delete().eq("user_id", user.id);
+      if (error) toast.error("Kon betaalgegevens niet verwijderen");
+      else toast.success("Betaalgegevens verwijderd");
+    } else {
+      const { error } = await supabase.from("payment_details").upsert({
+        user_id: user.id,
+        iban: clean || null,
+        account_name: accountName.trim() || null,
+        updated_at: new Date().toISOString(),
+      });
+      if (error) toast.error("Kon betaalgegevens niet opslaan");
+      else toast.success("Betaalgegevens opgeslagen");
+    }
+    setIbanSaving(false);
+  };
+
+  const handleDeletePayment = async () => {
+    if (!user) return;
+    setIbanSaving(true);
+    const { error } = await supabase.from("payment_details").delete().eq("user_id", user.id);
+    if (error) toast.error("Kon betaalgegevens niet verwijderen");
+    else {
+      setIban("");
+      setAccountName("");
+      toast.success("Betaalgegevens verwijderd");
+    }
+    setIbanSaving(false);
   };
 
   return (
@@ -190,6 +255,45 @@ export default function Profiel() {
             </button>
           </div>
         </section>
+
+        {user && (
+          <section className="mt-8">
+            <SectionLabel>Betaalgegevens</SectionLabel>
+            <p className="mt-2 text-xs text-muted-foreground">Alleen jij ziet dit. Het komt alleen in betaalverzoeken die jij zelf verstuurt.</p>
+            <div className="mt-3 space-y-3">
+              <div>
+                <label className="mb-1.5 block text-xs text-muted-foreground" htmlFor="iban-input">IBAN</label>
+                <Input
+                  id="iban-input"
+                  value={iban}
+                  onChange={(event) => setIban(event.target.value)}
+                  placeholder="NL91 ABNA 0417 1643 00"
+                  className="h-10"
+                  autoComplete="off"
+                />
+              </div>
+              <div>
+                <label className="mb-1.5 block text-xs text-muted-foreground" htmlFor="account-name-input">Ten name van</label>
+                <Input
+                  id="account-name-input"
+                  value={accountName}
+                  onChange={(event) => setAccountName(event.target.value)}
+                  className="h-10"
+                  autoComplete="off"
+                />
+              </div>
+              {ibanError && <FormError message={ibanError} />}
+              <div className="flex gap-2">
+                <Button onClick={() => void handleSavePayment()} disabled={ibanSaving} className="h-10">
+                  {ibanSaving ? "..." : "Opslaan"}
+                </Button>
+                <Button variant="outline" onClick={() => void handleDeletePayment()} disabled={ibanSaving} className="h-10">
+                  Verwijderen
+                </Button>
+              </div>
+            </div>
+          </section>
+        )}
       </main>
     </div>
   );

@@ -7,10 +7,11 @@ import { useTrip } from "@/contexts/TripContext";
 import { useAuth } from "@/lib/auth";
 import { activeReadinessChecks, getTripReadiness, readinessAction } from "@/features/readiness/data";
 import { listTripItems } from "@/features/travel/data";
-import { listDecisions, listTasks } from "@/features/together/data";
+import { listDecisions, listExpenses, listTasks } from "@/features/together/data";
+import { computeBalances, settleBalances } from "@/features/together/settle";
 import { computeReminders } from "@/features/reminders/data";
 import { travelTypeIcon } from "@/features/travel/icons";
-import { countdownLabel, excludeFirstThings, firstThings, preparationScore, type FirstThing } from "@/features/trips/overview";
+import { countdownLabel, excludeFirstThings, firstThings, preparationScore, tripHasEnded, upcomingTripItems, type FirstThing } from "@/features/trips/overview";
 import { timelineWarnings } from "@/features/travel/presentation";
 import { Button } from "@/components/ui/button";
 import { ReadinessBar, RowItem, RowList, SectionLabel } from "@/components/primitives";
@@ -42,6 +43,7 @@ export default function TripHome() {
   const [expanded, setExpanded] = useState(false);
   const tripId = activeTrip?.id || "";
   const timezone = activeTrip?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone || "Europe/Amsterdam";
+  const ended = activeTrip ? tripHasEnded(activeTrip, timezone) : false;
 
   const readinessQuery = useQuery({
     queryKey: ["trip-readiness", tripId],
@@ -65,7 +67,16 @@ export default function TripHome() {
   });
 
   const readiness = readinessQuery.data;
-  const archived = activeTrip?.status === "archived";
+  const expensesQuery = useQuery({
+    queryKey: ["together-expenses", tripId],
+    queryFn: () => listExpenses(tripId),
+    enabled: Boolean(tripId && ended),
+  });
+  const hasOpenAmounts = settleBalances(computeBalances((expensesQuery.data || []).map((expense) => ({
+    paidByUserId: expense.paid_by_user_id,
+    amount: Number(expense.amount) || 0,
+    splits: expense.splits.map((split) => ({ user_id: split.user_id, amount: Number(split.amount) || 0 })),
+  })))).length > 0;
 
   const view = useMemo(() => {
     if (!activeTrip) return null;
@@ -80,7 +91,7 @@ export default function TripHome() {
     const myVotes = decisions.filter((decision) => decision.status === "open" && !hasMyVote(decision));
     const samen = `/trip/${activeTrip.id}/samen`;
 
-    const reminders = archived
+    const reminders = ended
       ? []
       : computeReminders({
           now,
@@ -106,7 +117,7 @@ export default function TripHome() {
         });
 
     const suggestions: FirstThing[] = [];
-    if (readiness && !archived) {
+    if (readiness && !ended) {
       if (readiness.facts.trip_item_count === 0)
         suggestions.push({ key: "s-items", title: "Zet je heenreis en verblijf erin", actionLabel: "Naar Reis", href: `/trip/${activeTrip.id}/reis` });
       if (readiness.facts.member_count <= 1)
@@ -134,10 +145,7 @@ export default function TripHome() {
       suggestions,
     });
 
-    const upcoming = items
-      .filter((item) => item.start_at && new Date(item.start_at).getTime() >= now)
-      .sort((a, b) => new Date(a.start_at || 0).getTime() - new Date(b.start_at || 0).getTime())
-      .slice(0, 3);
+    const upcoming = upcomingTripItems(items, now);
 
     const personal = excludeFirstThings([
       ...myTasks.map((task) => ({ key: `task-${task.id}`, icon: CheckSquare, title: task.title, meta: "Jouw taak" })),
@@ -151,7 +159,7 @@ export default function TripHome() {
     });
 
     return { things, upcoming, personal, done: score.done, total: score.total };
-  }, [activeTrip, archived, itemsQuery.data, tasksQuery.data, decisionsQuery.data, readiness, user]);
+  }, [activeTrip, ended, itemsQuery.data, tasksQuery.data, decisionsQuery.data, readiness, user]);
 
   if (!activeTrip || !view) return null;
 
@@ -181,13 +189,19 @@ export default function TripHome() {
           </div>
         </TripVisual>
 
-        {!readinessQuery.isLoading && !itemsQuery.isLoading && (
+        {!ended && !readinessQuery.isLoading && !itemsQuery.isLoading && (
           <div className="px-5 pt-3 sm:px-8">
             <ReadinessBar done={view.done} total={view.total} sentence={`${view.done} van ${view.total} geregeld`} />
           </div>
         )}
 
         <div className="space-y-6 px-5 pt-4 sm:px-8">
+          {ended ? (
+            <section className="border-b border-border py-4">
+              <p className="text-[15px] font-medium">Deze reis is afgelopen.</p>
+              {hasOpenAmounts && <Button variant="outline" className="mt-3" onClick={() => navigate(`/trip/${activeTrip.id}/samen`)}>Naar Knaakie</Button>}
+            </section>
+          ) : <>
           <section className="border-l-4 border-primary bg-band p-4">
             <p className="font-ui text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Eerst dit</p>
             {readinessQuery.isLoading ? (
@@ -277,6 +291,7 @@ export default function TripHome() {
               </RowList>
             </section>
           )}
+          </>}
         </div>
       </div>
     </AppLayout>

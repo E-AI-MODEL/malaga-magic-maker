@@ -1,6 +1,6 @@
 # Roadmap
 
-- [ ] Startscherm: actieve/laatste reis openen, Mijn reizen vereenvoudigen en voortgang alleen op Overzicht
+- [x] Startscherm: actieve/laatste reis openen, Mijn reizen vereenvoudigen en voortgang alleen op Overzicht
 - [ ] Startscherm: regels testen, ingelogd op 390px en desktop controleren, kwaliteitscontroles afronden
 
 - [x] Homepage: functies en vier stappen onderscheiden, dubbele uitleg schrappen

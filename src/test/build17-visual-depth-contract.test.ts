@@ -54,7 +54,6 @@ describe("Vakansie BUILD 17 visual depth contract", () => {
     expect(primitives).toContain("export function Surface");
     expect(primitives).toContain("shadow-soft");
     expect(primitives).toContain("export function IconBubble");
-    expect(trips).toContain("Dit vraagt aandacht");
     expect(tripHome).toContain("Voor jou");
     expect(primitives).toContain("export function DayHeader");
     expect(primitives).toContain("export function CountBar");

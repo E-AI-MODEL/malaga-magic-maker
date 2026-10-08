@@ -23,7 +23,6 @@ describe("Hansie trip scoping", () => {
 
   it("receives its placement explicitly instead of deriving a hidden context", () => {
     expect(hansie).toContain("floating = true");
-    expect(trips).toContain("floating={false}");
   });
 
   it("resets its state when the trip changes", () => {
@@ -61,8 +60,6 @@ describe("Mijn reizen", () => {
   it("uses the existing readiness contract and shows what matters now", () => {
     expect(trips).toContain("getTripReadiness");
     expect(trips).toContain("activeReadinessChecks");
-    expect(trips).toContain("readinessAction");
-    expect(trips).toContain("Dit vraagt aandacht");
   });
 });
 

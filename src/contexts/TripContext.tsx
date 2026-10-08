@@ -89,9 +89,11 @@ export function TripProvider({ children }: { children: ReactNode }) {
   const [tripMembers, setTripMembers] = useState<TripMember[]>([]);
   const [isOrganizer, setIsOrganizer] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [loadedUserId, setLoadedUserId] = useState<string | null>(null);
 
   const fetchTrips = useCallback(async () => {
     if (!user) {
+      setLoadedUserId(null);
       setUserTrips([]);
       setActiveTrip(null);
       setTripMembers([]);
@@ -107,6 +109,7 @@ export function TripProvider({ children }: { children: ReactNode }) {
       .eq("user_id", user.id);
 
     if (!memberships || memberships.length === 0) {
+      setLoadedUserId(user.id);
       setUserTrips([]);
       setActiveTrip(null);
       setTripMembers([]);
@@ -122,6 +125,7 @@ export function TripProvider({ children }: { children: ReactNode }) {
       .in("id", tripIds);
 
     const typedTrips = (trips as Trip[] | null) || [];
+    setLoadedUserId(user.id);
     setUserTrips(typedTrips);
     setActiveTrip((current) => {
       if (!current) return null;
@@ -272,7 +276,7 @@ export function TripProvider({ children }: { children: ReactNode }) {
         userTrips,
         tripMembers,
         isOrganizer,
-        loading,
+        loading: loading || (user != null && loadedUserId !== user.id),
         openTrip,
         switchTrip,
         createTrip,

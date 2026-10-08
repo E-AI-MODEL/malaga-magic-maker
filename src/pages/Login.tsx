@@ -1,22 +1,18 @@
 import { FormEvent, useState } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { Link, Navigate, useNavigate, useSearchParams } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/lib/auth";
 import { GoogleAuthButton } from "@/components/GoogleAuthButton";
 import logo from "@/assets/vakansie_primary_complete.png.asset.json";
-
-function safeNext(value: string | null) {
-  if (!value || !value.startsWith("/") || value.startsWith("//")) return "/trips";
-  return value;
-}
+import { loginDestination } from "@/features/trips/start";
 
 export default function Login() {
-  const { signIn, signInWithGoogle } = useAuth();
+  const { user, signIn, signInWithGoogle } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const next = safeNext(searchParams.get("next"));
+  const next = loginDestination(searchParams.get("next"));
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -43,6 +39,8 @@ export default function Login() {
     }
     navigate(next, { replace: true });
   };
+
+  if (user) return <Navigate to={next} replace />;
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-background px-5 py-10">

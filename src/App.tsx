@@ -11,6 +11,7 @@ import { ActivityLogProvider } from "@/contexts/ActivityLogContext";
 import { ClientErrorReporter } from "@/features/observability/ClientErrorReporter";
 import { AppErrorBoundary } from "@/features/observability/AppErrorBoundary";
 import Login from "./pages/Login";
+import { signedInStartPath } from "@/features/trips/start";
 
 const Trips = lazy(() => import("./pages/Trips"));
 const Landing = lazy(() => import("./pages/Landing"));
@@ -91,6 +92,12 @@ function TripRouteGuard({ children }: { children: ReactNode }) {
   return <>{children}</>;
 }
 
+function SignedInStart() {
+  const { userTrips, loading } = useTrip();
+  if (loading) return <PageLoader />;
+  return <Navigate to={signedInStartPath(userTrips, localStorage.getItem("vakansie_recent_trip"))} replace />;
+}
+
 function AppRoutes() {
   const { user, loading } = useAuth();
   if (loading) return <PageLoader />;
@@ -98,14 +105,14 @@ function AppRoutes() {
   return (
     <Suspense fallback={<PageLoader />}>
       <Routes>
-        <Route path="/login" element={user ? <Navigate to="/trips" replace /> : <Login />} />
+        <Route path="/login" element={<Login />} />
         <Route path="/signup" element={user ? <Navigate to="/trips" replace /> : <Signup />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/steun" element={<Steun />} />
         <Route path="/terms" element={<TermsPage />} />
         <Route path="/privacy" element={<PrivacyPage />} />
-        <Route path="/" element={user ? <Navigate to="/trips" replace /> : <Landing />} />
+        <Route path="/" element={user ? <SignedInStart /> : <Landing />} />
         <Route path="/boot" element={<Navigate to={user ? "/trips" : "/login"} replace />} />
 
         <Route path="/trips" element={<ProtectedRoute><Trips /></ProtectedRoute>} />

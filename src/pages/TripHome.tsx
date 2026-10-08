@@ -13,7 +13,7 @@ import { travelTypeIcon } from "@/features/travel/icons";
 import { countdownLabel, excludeFirstThings, firstThings, preparationScore, type FirstThing } from "@/features/trips/overview";
 import { timelineWarnings } from "@/features/travel/presentation";
 import { Button } from "@/components/ui/button";
-import { RowItem, RowList, SectionLabel } from "@/components/primitives";
+import { ReadinessBar, RowItem, RowList, SectionLabel } from "@/components/primitives";
 import { TripVisual } from "@/components/TripVisual";
 
 const TYPE_TINT: Record<string, string> = {
@@ -180,6 +180,12 @@ export default function TripHome() {
             </div>
           </div>
         </TripVisual>
+
+        {!readinessQuery.isLoading && !itemsQuery.isLoading && (
+          <div className="px-5 pt-3 sm:px-8">
+            <ReadinessBar done={view.done} total={view.total} sentence={`${view.done} van ${view.total} geregeld`} />
+          </div>
+        )}
 
         <div className="space-y-6 px-5 pt-4 sm:px-8">
           <section className="border-l-4 border-primary bg-band p-4">

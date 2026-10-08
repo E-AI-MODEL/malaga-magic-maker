@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { AlertTriangle, Archive, ChevronDown, FileText, Mail, Pencil, Plus, Search, Trash2 } from "lucide-react";
+import { AlertTriangle, Archive, ChevronDown, FileText, Mail, MapPin, Pencil, Plus, Search, Trash2 } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
 import { Button } from "@/components/ui/button";
 import {
@@ -28,6 +28,7 @@ import {
   SwipeRow,
 } from "@/components/primitives";
 import { travelTypeIcon } from "@/features/travel/icons";
+import { currentMapsPlatform, mapsUrl } from "@/features/travel/maps";
 import {
   formatTripDateTime,
   formatTripDay,
@@ -284,6 +285,19 @@ export default function TripReis() {
                         .filter(Boolean)
                         .join(" · ");
                       const TypeIcon = travelTypeIcon(item.type);
+                      const mapHref = mapsUrl(item, activeTrip.destination_name, currentMapsPlatform());
+                      const mapLink = mapHref ? (
+                        <a
+                          href={mapHref}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          aria-label={`Open ${item.title} in Kaarten`}
+                          onClick={(event) => event.stopPropagation()}
+                          className="flex h-11 w-9 shrink-0 items-center justify-center text-muted-foreground hover:text-foreground"
+                        >
+                          <MapPin className="h-4 w-4" strokeWidth={1.75} />
+                        </a>
+                      ) : null;
 
                       const row = (
                         <div className="flex min-h-[56px] items-center gap-3 border-b border-rule py-2.5">
@@ -308,7 +322,7 @@ export default function TripReis() {
                         </div>
                       );
 
-                      if (!canEdit) return <div key={item.id}>{row}</div>;
+                      if (!canEdit) return <div key={item.id} className="flex items-center"><div className="min-w-0 flex-1">{row}</div>{mapLink}</div>;
 
                       return (
                         <SwipeRow
@@ -318,9 +332,12 @@ export default function TripReis() {
                             { label: "Wissen", icon: Trash2, tone: "danger", onClick: () => void handleDelete(item) },
                           ]}
                         >
-                          <button type="button" onClick={() => openEdit(item)} className="w-full text-left">
-                            {row}
-                          </button>
+                          <div className="flex items-center border-b border-rule">
+                            <button type="button" onClick={() => openEdit(item)} className="min-w-0 flex-1 text-left [&>div]:border-b-0">
+                              {row}
+                            </button>
+                            {mapLink}
+                          </div>
                         </SwipeRow>
                       );
                     })}
@@ -350,6 +367,7 @@ export default function TripReis() {
         initialType={editingItem ? undefined : createType}
         onSaved={refreshItems}
         onDelete={readOnly ? undefined : handleDelete}
+        destination={activeTrip.destination_name}
       />
       <AccommodationSearchSheet
         open={staySearchOpen}

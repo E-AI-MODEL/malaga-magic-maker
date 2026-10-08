@@ -21,3 +21,6 @@
 - [x] Overzicht: "x/y geregeld" telt lege reis en nachten zonder verblijf niet meer als geregeld
 - [x] Dubbele Hansie-blokken verwijderd; één geïntegreerde vraagbalk past zich aan per scherm aan
 - [ ] Geïntegreerde Hansie-balk ingelogd op telefoon bekijken — wacht op de gebruiker
+
+- [x] Koppelingen stap 1: Open in Kaarten
+- [ ] Koppelingen stap 2-5 (Knaakie, agenda, weer, push)

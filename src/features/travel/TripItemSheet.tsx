@@ -11,6 +11,8 @@ import { createExpenseWithSplits, listTripMembers } from "@/features/together/da
 import { splitEvenly } from "@/features/together/money";
 import { createTripDocumentSignedUrl, listTripDocuments } from "@/features/documents/data";
 import type { Json } from "@/integrations/supabase/types";
+import { MapPin } from "lucide-react";
+import { currentMapsPlatform, mapsUrl } from "./maps";
 
 type Props = {
   open: boolean;
@@ -23,11 +25,12 @@ type Props = {
   onSaved: () => void | Promise<void>;
   /** Optional destructive action. Lives in the detail form, never on every timeline row. */
   onDelete?: (item: TripItemRow) => void | Promise<void>;
+  destination?: string | null;
 };
 
 const currencies = ["EUR", "USD", "GBP", "CHF"];
 
-export function TripItemSheet({ open, onOpenChange, tripId, timezone, currency, item, initialType, onSaved, onDelete }: Props) {
+export function TripItemSheet({ open, onOpenChange, tripId, timezone, currency, item, initialType, onSaved, onDelete, destination }: Props) {
   const [type, setType] = useState("custom");
   const [title, setTitle] = useState("");
   const [status, setStatus] = useState("planned");
@@ -181,6 +184,20 @@ export function TripItemSheet({ open, onOpenChange, tripId, timezone, currency, 
       title={item ? "Reisonderdeel wijzigen" : selectedType ? `${selectedType.label} toevoegen` : "Toevoegen aan je reis"}
       description="Vul in wat je weet; de rest kan later."
     >
+      {item && (() => {
+        const href = mapsUrl(item, destination, currentMapsPlatform());
+        return href ? (
+          <a
+            href={href}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-4 inline-flex min-h-[44px] items-center gap-2 text-sm font-medium text-foreground underline-offset-4 hover:underline"
+          >
+            <MapPin className="h-4 w-4" strokeWidth={1.75} />
+            Open in Kaarten
+          </a>
+        ) : null;
+      })()}
       <form onSubmit={handleSubmit} className="mt-6 space-y-5">
         <div className="grid grid-cols-2 gap-3">
           <FormField label="Soort" htmlFor="travel-type">

@@ -721,6 +721,27 @@ export type Database = {
           },
         ]
       }
+      payment_details: {
+        Row: {
+          account_name: string | null
+          iban: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          account_name?: string | null
+          iban?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          account_name?: string | null
+          iban?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       poi_categories: {
         Row: {
           color_threshold_good: number

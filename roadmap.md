@@ -28,4 +28,5 @@
 - [ ] Geïntegreerde Hansie-balk ingelogd op telefoon bekijken — wacht op de gebruiker
 
 - [x] Koppelingen stap 1: Open in Kaarten
-- [ ] Koppelingen stap 2-5 (Knaakie, agenda, weer, push)
+- [x] Koppelingen stap 2: Verrekenen heet nu Knaakie, met betaalverzoek (delen/WhatsApp/kopiëren) en privé-IBAN in Profiel
+- [ ] Koppelingen stap 3-5 (agenda, weer, push)

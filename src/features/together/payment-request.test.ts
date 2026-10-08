@@ -10,7 +10,7 @@ describe("buildPaymentRequestText", () => {
       currency: "EUR",
     });
     expect(text).toBe(
-      "Hoi Sanne, voor Zomer in Italië krijg ik nog € 123,50 van je (jouw deel van de gedeelde kosten).",
+      `Hoi Sanne, voor Zomer in Italië krijg ik nog €\u00A0123,50 van je (jouw deel van de gedeelde kosten).`,
     );
   });
 

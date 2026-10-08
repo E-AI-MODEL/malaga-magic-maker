@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
 import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { useTrip } from "@/contexts/TripContext";
 import { formatTripDateTime } from "@/features/travel/presentation";
@@ -39,6 +40,7 @@ import {
 import { TaskSheet } from "@/features/together/TaskSheet";
 import { DecisionSheet } from "@/features/together/DecisionSheet";
 import { ExpenseSheet } from "@/features/together/ExpenseSheet";
+import { PaymentRequestSheet } from "@/features/together/PaymentRequestSheet";
 import { computeBalances, settleBalances } from "@/features/together/settle";
 import { TripInvitesCard } from "@/features/invites/TripInvitesCard";
 import { listTravelerProfiles, summariseProfile } from "@/features/travelers/data";
@@ -75,6 +77,7 @@ export default function TripSamen() {
   const [actionError, setActionError] = useState("");
   const [inviteOpen, setInviteOpen] = useState(false);
   const [profileSheetOpen, setProfileSheetOpen] = useState(false);
+  const [paymentRequest, setPaymentRequest] = useState<{ recipientName: string; amount: number } | null>(null);
 
   const tripId = activeTrip?.id || "";
   const timezone = activeTrip?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone || "Europe/Amsterdam";
@@ -106,6 +109,20 @@ export default function TripSamen() {
     queryKey: ["trip-traveler-profiles", tripId],
     queryFn: () => listTravelerProfiles(tripId),
     enabled: Boolean(tripId),
+  });
+
+  const paymentDetailsQuery = useQuery({
+    queryKey: ["payment-details-me", user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("payment_details")
+        .select("iban, account_name")
+        .eq("user_id", user!.id)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+    enabled: Boolean(user?.id),
   });
 
   const members = useMemo(() => membersQuery.data || [], [membersQuery.data]);
@@ -258,7 +275,7 @@ export default function TripSamen() {
       ? { label: "Nieuwe taak", run: openNewTask }
       : section === "decisions"
         ? { label: "Nieuwe keuze", run: () => setDecisionSheetOpen(true) }
-        : { label: "Kosten toevoegen", run: openNewExpense }
+        : { label: "Bonnetje toevoegen", run: openNewExpense }
     : null;
 
   return (
@@ -547,7 +564,7 @@ export default function TripSamen() {
             expensesQuery.isLoading ? (
               <LoadingRows />
             ) : expenses.length === 0 ? (
-              <EmptyLine text="Nog geen gedeelde kosten. Voeg een bedrag toe zodra iemand iets voor de reis heeft betaald." actionLabel={readOnly ? undefined : "Kosten toevoegen"} onClick={readOnly ? undefined : openNewExpense} />
+              <EmptyLine text="Nog geen gedeelde kosten. Voeg een bedrag toe zodra iemand iets voor de reis heeft betaald." actionLabel={readOnly ? undefined : "Bonnetje toevoegen"} onClick={readOnly ? undefined : openNewExpense} />
             ) : (
               <RowList className="mt-1">
                 {expenses.map((expense) => {
@@ -602,9 +619,9 @@ export default function TripSamen() {
 
           {section === "expenses" && expenses.length > 0 && (
             <div className="mt-7">
-              <SectionLabel>Verrekenen</SectionLabel>
+              <SectionLabel>Knaakie</SectionLabel>
               {balances.length === 0 ? (
-                <EmptyLine text="Koppel een betaler en verdeling aan de kostenregels om te kunnen verrekenen." />
+                <EmptyLine text="Voeg kosten in als bonnetjes met een betaler en verdeling, dan zie je hier wie wie nog moet betalen." />
               ) : (
                 <>
                   <RowList className="mt-1">
@@ -637,18 +654,37 @@ export default function TripSamen() {
                       </p>
                     ) : (
                       <RowList className="mt-1">
-                        {transfers.map((transfer, index) => (
-                          <div key={`${transfer.fromUserId}-${transfer.toUserId}-${index}`} className="flex min-h-[44px] items-center gap-2 py-2.5">
-                            <span className="min-w-0 flex-1 truncate text-[15px]">
-                              {memberMap.get(transfer.fromUserId)?.displayName || "Medereiziger"}
-                            </span>
-                            <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground/70" strokeWidth={1.75} />
-                            <span className="min-w-0 flex-1 truncate text-[15px]">
-                              {memberMap.get(transfer.toUserId)?.displayName || "Medereiziger"}
-                            </span>
-                            <span className="num shrink-0 text-[15px] font-semibold">{formatMoney(transfer.cents / 100, currency)}</span>
-                          </div>
-                        ))}
+                        {transfers.map((transfer, index) => {
+                          const from = memberMap.get(transfer.fromUserId)?.displayName || "Medereiziger";
+                          const to = memberMap.get(transfer.toUserId)?.displayName || "Medereiziger";
+                          const iAmReceiver = transfer.toUserId === user.id;
+                          const iAmPayer = transfer.fromUserId === user.id;
+                          return (
+                            <div key={`${transfer.fromUserId}-${transfer.toUserId}-${index}`} className="flex min-h-[44px] items-center gap-2 py-2.5">
+                              {iAmPayer ? (
+                                <span className="min-w-0 flex-1 truncate text-[15px]">Jij betaalt {to}</span>
+                              ) : (
+                                <>
+                                  <span className="min-w-0 flex-1 truncate text-[15px]">{from}</span>
+                                  <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground/70" strokeWidth={1.75} />
+                                  <span className="min-w-0 flex-1 truncate text-[15px]">{iAmReceiver ? "Jij" : to}</span>
+                                </>
+                              )}
+                              <span className="num shrink-0 text-[15px] font-semibold">{formatMoney(transfer.cents / 100, currency)}</span>
+                              {iAmReceiver && !readOnly && (
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  size="sm"
+                                  className="shrink-0 rounded-lg"
+                                  onClick={() => setPaymentRequest({ recipientName: from, amount: transfer.cents / 100 })}
+                                >
+                                  Vraag om betaling
+                                </Button>
+                              )}
+                            </div>
+                          );
+                        })}
                       </RowList>
                     )}
                     {transfers.length > 0 && (
@@ -714,6 +750,18 @@ export default function TripSamen() {
         members={members}
         expense={editingExpense}
         onSaved={refreshExpenses}
+      />
+      <PaymentRequestSheet
+        open={paymentRequest !== null}
+        onOpenChange={(open) => {
+          if (!open) setPaymentRequest(null);
+        }}
+        recipientName={paymentRequest?.recipientName || ""}
+        tripName={activeTrip.name}
+        amount={paymentRequest?.amount || 0}
+        currency={currency}
+        iban={paymentDetailsQuery.data?.iban}
+        accountName={paymentDetailsQuery.data?.account_name}
       />
     </AppLayout>
   );

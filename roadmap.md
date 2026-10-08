@@ -1,5 +1,10 @@
 # Roadmap
 
+- [ ] Lay-outcorrecties: lichte hover, gedeelde zijbalk, Hansie onder desktopinhoud, afgelopen reizen en filtering Eerstvolgend
+- [ ] Privacy: ops_delete_user wist trip_traveler_profiles via nieuwe migratie en contracttest
+- [ ] Controles: tests, lint, automatische typecheck/build en ingelogde schermen op 390/768/1024/1280px
+- [ ] Volgende stap: agenda (stap 3), nog niet starten in deze correctieronde
+
 - [x] Startscherm: actieve/laatste reis openen, Mijn reizen vereenvoudigen en voortgang alleen op Overzicht
 - [x] Startscherm: 148 tests geslaagd; lint 0 fouten/18 bestaande waarschuwingen; automatische build OK
 - [ ] Startscherm: afzonderlijke typecheck nog niet geverifieerd

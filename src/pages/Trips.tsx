@@ -1,16 +1,14 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { Archive, ChevronDown, ChevronRight, Plus, User } from "lucide-react";
-import { useAuth } from "@/lib/auth";
+import { Archive, ChevronDown, ChevronRight, Plus } from "lucide-react";
 import { Trip, useTrip } from "@/contexts/TripContext";
 import { tripTimingLabel } from "@/features/trips/presentation";
 import { activeReadinessChecks, getTripReadiness } from "@/features/readiness/data";
-import { NotificationCenter } from "@/components/NotificationCenter";
+import { AppLayout } from "@/components/AppLayout";
 import { Button } from "@/components/ui/button";
 import { RowList, SectionLabel } from "@/components/primitives";
 import { TripThumb, TripVisual } from "@/components/TripVisual";
-import logo from "@/assets/vakansie_primary_complete.png.asset.json";
 
 function formatDateRange(startDate: string | null, endDate: string | null) {
   if (!startDate && !endDate) return "Data nog te kiezen";
@@ -106,7 +104,6 @@ function TripRow({ trip }: { trip: Trip }) {
 }
 
 export default function Trips() {
-  const { profile } = useAuth();
   const { userTrips, loading } = useTrip();
   const [archiveOpen, setArchiveOpen] = useState(false);
 
@@ -118,24 +115,8 @@ export default function Trips() {
   const [heroTrip, ...otherTrips] = activeTrips;
 
   return (
-    <div className="min-h-screen overflow-x-hidden bg-background pb-[env(safe-area-inset-bottom)]">
-      <header className="sticky top-0 z-40 border-b border-border bg-background">
-        <div className="mx-auto flex h-12 max-w-3xl items-center justify-between px-5">
-          <img src={logo.url} alt="Vakansie" width={169} height={43} className="h-8 w-auto object-contain" />
-          <div className="flex items-center gap-1">
-            <NotificationCenter />
-            <Button asChild variant="ghost" size="icon" className="h-9 w-9 text-muted-foreground">
-              <Link to="/profiel" aria-label="Profiel en voorkeuren">
-                <span className="flex h-8 w-8 items-center justify-center rounded-full border border-border bg-card text-[11px] font-semibold text-foreground">
-                  {profile?.display_name?.slice(0, 1).toUpperCase() || <User className="h-4 w-4" />}
-                </span>
-              </Link>
-            </Button>
-          </div>
-        </div>
-      </header>
-
-      <main className="mx-auto max-w-3xl px-5 pb-16 pt-5">
+    <AppLayout>
+      <div className="mx-auto max-w-3xl px-5 pb-16 pt-5">
         <div className="flex items-center justify-between gap-3">
           <h1 className="font-display uppercase text-[30px] font-bold leading-tight">Mijn reizen</h1>
           <Button asChild variant="outline" size="sm" className="shrink-0 rounded-md bg-card">
@@ -188,8 +169,7 @@ export default function Trips() {
             )}
           </section>
         )}
-      </main>
-
-    </div>
+      </div>
+    </AppLayout>
   );
 }

@@ -32,13 +32,11 @@ export function AppSidebar() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  if (!activeTrip) return null;
-
-  const mainLinks = [
+  const mainLinks = activeTrip ? [
     { to: `/trip/${activeTrip.id}`, icon: Home, label: "Overzicht", end: true },
     { to: `/trip/${activeTrip.id}/reis`, icon: Route, label: "Reis", end: false },
     { to: `/trip/${activeTrip.id}/samen`, icon: Users, label: "Samen", end: false },
-  ];
+  ] : [];
 
   const isActive = (path: string, end = false) =>
     end ? location.pathname === path : location.pathname === path || location.pathname.startsWith(`${path}/`);
@@ -47,7 +45,7 @@ export function AppSidebar() {
     <Sidebar collapsible="icon" className="border-r border-sidebar-border">
       <SidebarContent className="pt-4">
         <div className="px-4 pb-4">
-          {!collapsed && (
+          {!collapsed && activeTrip && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button className="flex w-full items-center gap-1.5 text-left transition-opacity hover:opacity-80">
@@ -84,9 +82,10 @@ export function AppSidebar() {
               </DropdownMenuContent>
             </DropdownMenu>
           )}
+          {!collapsed && !activeTrip && <span className="font-brand text-xl font-bold text-sidebar-foreground">Vakansie</span>}
         </div>
 
-        <SidebarGroup>
+        {activeTrip && <SidebarGroup>
           <SidebarGroupLabel className="text-sidebar-foreground/40">Deze reis</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
@@ -121,7 +120,7 @@ export function AppSidebar() {
               )}
             </SidebarMenu>
           </SidebarGroupContent>
-        </SidebarGroup>
+        </SidebarGroup>}
 
         <SidebarGroup>
           <SidebarGroupLabel className="text-sidebar-foreground/40">Account</SidebarGroupLabel>

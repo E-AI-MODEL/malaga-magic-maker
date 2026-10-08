@@ -36,6 +36,13 @@
       "when": 1791459827974,
       "tag": "0004_payment_details_revoke_anon",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1791461175293,
+      "tag": "0005_ops_delete_user_traveler_privacy",
+      "breakpoints": true
     }
   ]
 }

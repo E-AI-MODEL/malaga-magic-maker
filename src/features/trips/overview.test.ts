@@ -1,7 +1,23 @@
 import { describe, expect, it } from "vitest";
-import { countdownLabel, excludeFirstThings, firstThings } from "./overview";
+import { countdownLabel, excludeFirstThings, firstThings, tripHasEnded, upcomingTripItems } from "./overview";
 
 const now = new Date(2026, 9, 7, 14);
+
+describe("trip overview lifecycle", () => {
+  it("only includes planned, confirmed and paid upcoming items", () => {
+    const items = ["idea", "planned", "confirmed", "paid", "cancelled", "done"].map((status) => ({ status, start_at: "2026-10-09T12:00:00Z" }));
+    expect(upcomingTripItems(items, Date.parse("2026-10-08T12:00:00Z")).map((i) => i.status)).toEqual(["planned", "confirmed", "paid"]);
+  });
+  it("keeps the final trip day active in the trip time zone", () => {
+    const trip = { status: "active", end_date: "2026-10-08" };
+    expect(tripHasEnded(trip, "Europe/Amsterdam", new Date("2026-10-08T21:59:59Z"))).toBe(false);
+    expect(tripHasEnded(trip, "Europe/Amsterdam", new Date("2026-10-08T22:00:00Z"))).toBe(true);
+    expect(tripHasEnded({ status: "active", end_date: null }, "Europe/Amsterdam", now)).toBe(false);
+  });
+  it("treats an archived trip as ended even with future dates", () => {
+    expect(tripHasEnded({ status: "archived", end_date: "2027-10-08" }, "Europe/Amsterdam", now)).toBe(true);
+  });
+});
 
 describe("overview countdown", () => {
   it("counts down, names departure day and shows the trip day", () => {

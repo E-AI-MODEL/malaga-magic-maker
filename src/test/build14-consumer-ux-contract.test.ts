@@ -20,7 +20,7 @@ describe("Vakansie BUILD 14 consumer UX contract", () => {
   });
 
   it("opens Samen on the consumer overview and surfaces personal attention", () => {
-    expect(samen).toContain('useState<Section>("tasks")');
+    expect(samen).toContain('searchParams.get("section") === "expenses" ? "expenses" : "tasks"');
     expect(samen).toContain('Voor jou');
     expect(samen).toContain('myTasks');
     expect(samen).toContain('myPendingDecisions');

@@ -1,5 +1,21 @@
 const DAY = 86_400_000;
 
+/** Date-only trip boundaries follow the trip's local calendar; the final day is still on-trip. */
+export function tripHasEnded(trip: { status: string; end_date: string | null }, timeZone: string, now = new Date()): boolean {
+  if (trip.status === "archived") return true;
+  if (!trip.end_date) return false;
+  const parts = new Intl.DateTimeFormat("en", { timeZone, year: "numeric", month: "2-digit", day: "2-digit" }).formatToParts(now);
+  const part = (type: string) => parts.find((p) => p.type === type)?.value || "";
+  return trip.end_date < `${part("year")}-${part("month")}-${part("day")}`;
+}
+
+export function upcomingTripItems<T extends { status: string; start_at: string | null }>(items: T[], now = Date.now()): T[] {
+  return items
+    .filter((item) => ["planned", "confirmed", "paid"].includes(item.status) && item.start_at && new Date(item.start_at).getTime() >= now)
+    .sort((a, b) => new Date(a.start_at || 0).getTime() - new Date(b.start_at || 0).getTime())
+    .slice(0, 3);
+}
+
 function dateKey(value: string) {
   const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(value);
   return match ? Date.UTC(Number(match[1]), Number(match[2]) - 1, Number(match[3])) : null;

@@ -35,6 +35,7 @@ One generic `trip_items` model; type-specific details in metadata, no destinatio
 - Shared presentation primitives and semantic tokens carry the approved homepage style across working screens; keep page-specific data logic unchanged.
 - Load the shared font stylesheet from the application entry point, not CSS URL imports, so font loading does not depend on CSS import resolution.
 - Mobile Hansie uses a full-width entry strip directly above trip navigation with the same surface; reserve page space for both controls to keep content reachable.
+- Account and trip screens use AppLayout; desktop Hansie stays inside its content column, and route-scoped visibility excludes account and archived screens. Why: preserve one navigation shell without stale trip context or a third column.
 Bounded builds; no unrelated redesigns, extra features, duplicated concepts or branding changes during backend/security work. Mobile first, desktop functional.
 
 ## Quality gate

@@ -39,7 +39,7 @@ describe("Vakansie production UI contract", () => {
   });
 
   it("limits the Samen primary switcher to Taken, Keuzes and Kosten", () => {
-    expect(samen).toContain('useState<Section>("tasks")');
+    expect(samen).toContain('searchParams.get("section") === "expenses" ? "expenses" : "tasks"');
     expect(samen).toContain('type Section = "tasks" | "decisions" | "expenses"');
     expect(samen).toContain('{ id: "tasks", label: "Taken" }');
     expect(samen).toContain('{ id: "decisions", label: "Keuzes" }');

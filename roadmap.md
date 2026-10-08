@@ -1,7 +1,9 @@
 # Roadmap
 
 - [x] Startscherm: actieve/laatste reis openen, Mijn reizen vereenvoudigen en voortgang alleen op Overzicht
-- [ ] Startscherm: regels testen, ingelogd op 390px en desktop controleren, kwaliteitscontroles afronden
+- [x] Startscherm: 148 tests geslaagd; lint 0 fouten/18 bestaande waarschuwingen; automatische build OK
+- [ ] Startscherm: afzonderlijke typecheck nog niet geverifieerd
+- [ ] Startscherm: ingelogd op 390px en desktop controleren — geblokkeerd: sessie maken lukt niet voor de verzoeker; inloggen in preview nodig
 
 - [x] Homepage: functies en vier stappen onderscheiden, dubbele uitleg schrappen
 - [x] Bestaande Signal-stijl en directe toon doortrekken naar overige schermen

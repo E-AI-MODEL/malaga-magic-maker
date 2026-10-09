@@ -3,10 +3,6 @@ import { Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-/** Placeholder the product owner still has to fill in; styled so it stands out. */
-function Todo({ children }: { children: ReactNode }) {
-  return <mark className="rounded bg-warning/20 px-1 font-semibold text-foreground">{children}</mark>;
-}
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (

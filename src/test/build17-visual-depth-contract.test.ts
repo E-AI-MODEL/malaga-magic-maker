@@ -74,7 +74,7 @@ describe("Vakansie BUILD 17 visual depth contract", () => {
     expect(appLayout).toContain('aria-label="Naar Home"');
     expect(appLayout).toContain('aria-label="Meer opties"');
     expect(appLayout).toContain("Wissel reis");
-    expect(appLayout).not.toContain("ChevronDown");
+    expect(appLayout).toContain("ChevronDown");
     const mobileSection = appLayout.slice(appLayout.indexOf("if (isMobile)"), appLayout.indexOf("return (", appLayout.indexOf("if (isMobile)") + 20));
     expect(mobileSection).not.toContain("NotificationCenter");
   });

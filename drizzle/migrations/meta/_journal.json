@@ -78,6 +78,13 @@
       "when": 1791538741276,
       "tag": "0010_send_reminders_cron",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1791547284201,
+      "tag": "0011_reminder_test_events",
+      "breakpoints": true
     }
   ]
 }

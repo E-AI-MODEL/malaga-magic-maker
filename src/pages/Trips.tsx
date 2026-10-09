@@ -152,6 +152,7 @@ export default function Trips() {
             <Button asChild size="lg" className="mt-4 w-full rounded-md sm:w-auto">
               <Link to="/new-trip"><Plus className="mr-1.5 h-4 w-4" />Je eerste reis starten</Link>
             </Button>
+            <GettingStarted trip={null} hasAnyTrip={userTrips.length > 0} />
           </div>
         )}
 

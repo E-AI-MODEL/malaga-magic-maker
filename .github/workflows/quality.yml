@@ -44,6 +44,7 @@ jobs:
       - name: Check Edge Functions
         run: |
           deno check supabase/functions/accommodation-search/index.ts
+          deno check supabase/functions/auth-email-hook/index.ts
           deno check supabase/functions/booking-parse/index.ts
           deno check supabase/functions/create-checkout/index.ts
           deno check supabase/functions/document-extract/index.ts
@@ -52,6 +53,7 @@ jobs:
           deno check supabase/functions/payments-account/index.ts
           deno check supabase/functions/payments-webhook/index.ts
           deno check supabase/functions/trip-ai-chat/index.ts
+          deno check supabase/functions/trip-calendar/index.ts
 
       - name: Lint
         run: npm run lint

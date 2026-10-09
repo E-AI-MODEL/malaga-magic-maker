@@ -21,3 +21,5 @@ project_id = "wuvmcxjdyxhtqbbqoahy"
     verify_jwt = false
   [functions.trip-ai-chat]
     verify_jwt = false
+  [functions.trip-calendar]
+    verify_jwt = false

@@ -46,3 +46,10 @@
 - [x] Testmelding beperkt tot 3 per uur per gebruiker
 - [x] Livegang-rapport in docs/LIVEGANG_RAPPORT.md
 - [ ] Openstaande punten product owner: zie "Te doen" in het livegang-rapport
+
+## Privacy-ronde vóór livegang
+- [x] Account zelf verwijderen in Profiel (e-mailbevestiging, organisator-overdracht, solo-reizen met documenten weg, admin geblokkeerd, log zonder e-mail)
+- [x] Dieet en allergieën alleen met toestemming; Hansie krijgt ze alleen met toestemming
+- [x] Privacyverklaring herschreven (placeholders bedrijfsgegevens nog invullen)
+- [x] Runtime dependency audit op Node 22
+- [ ] Account verwijderen echt doorlopen met een testaccount

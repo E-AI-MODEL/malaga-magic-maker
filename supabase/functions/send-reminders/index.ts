@@ -74,7 +74,8 @@ Deno.serve(async (req) => {
     .or(`end_date.gte.${yesterday},and(end_date.is.null,start_date.gte.${yesterday})`);
   if (tripsError) return json(500, { error: "trips" });
 
-  let server: webpush.ApplicationServer | null = null;
+  // Always ensure the key pair exists, so devices can subscribe before the first reminder.
+  let server: webpush.ApplicationServer | null = await pushServer(db);
   let emailPaused = false;
   const stats = { push: 0, email: 0, removed: 0 };
 

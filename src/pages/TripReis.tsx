@@ -164,7 +164,7 @@ export default function TripReis() {
     try {
       const undo = await chooseIdeaAsFinal(activeTrip, item, items as never, timezone);
       await refreshItems();
-      if (undo.closedDecisionId) await queryClient.invalidateQueries({ queryKey: ["decisions", activeTrip.id] });
+      if (undo.closedDecisionId) await queryClient.invalidateQueries();
       if (item.type === "stay") {
         const n = undo.removed.length;
         toast(
@@ -178,7 +178,7 @@ export default function TripReis() {
                 void undoIdeaChoice(activeTrip.id, undo)
                   .then(async () => {
                     await refreshItems();
-                    await queryClient.invalidateQueries({ queryKey: ["decisions", activeTrip.id] });
+                    await queryClient.invalidateQueries();
                   })
                   .catch((error) => {
                     console.error("undo choice failed", error);

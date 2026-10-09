@@ -255,7 +255,7 @@ export function HansieWidget({
         >
           <HansieMark className="h-8 w-8 text-[15px]" />
           <span className="min-w-0 flex-1 truncate font-ui text-[14px] font-medium text-foreground/80">{hansieBarLabel(page)}</span>
-          <span aria-hidden className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground">
+          <span aria-hidden className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-foreground/85 text-background">
             <Send className="h-3.5 w-3.5" strokeWidth={1.9} />
           </span>
         </Button>
@@ -337,7 +337,7 @@ export function HansieWidget({
                 disabled={loading}
                 autoComplete="off"
               />
-              <Button type="submit" size="icon" disabled={loading || !input.trim()} aria-label="Verstuur vraag">
+              <Button type="submit" size="icon" className="bg-foreground/85 text-background hover:bg-foreground" disabled={loading || !input.trim()} aria-label="Verstuur vraag">
                 {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
               </Button>
             </form>

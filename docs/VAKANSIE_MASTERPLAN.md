@@ -65,7 +65,7 @@ Hansie may become a final customer-facing name, but technical components should 
 Words a normal traveler should understand without knowing our architecture.
 
 Examples:
-- Mijn reizen
+- Home
 - Nieuwe reis
 - Reis
 - Medereizigers
@@ -121,6 +121,22 @@ Example:
 | Technical name | `tasks` |
 | Work name | task management |
 | Customer copy | Taken or Nog regelen, depending on context |
+
+Current customer labels (technical contracts remain unchanged):
+
+| Route / technical concept | Customer label |
+|---|---|
+| `/trips` | Home |
+| `/trip/:tripId` | Overzicht |
+| `/trip/:tripId/reis` | Reis |
+| `/trip/:tripId/samen` | Samen |
+| `tasks` | Taken |
+| `decisions` | Keuzes |
+| `expenses` | Kosten; Knaakie for settlement |
+| `/profiel` | Profiel |
+| `/ops`, `/ops/errors` | Beheer |
+
+Signed-in entry opens Home, with pending invitations and explicit next destinations taking precedence.
 
 ## 3. Roles and authorization model
 

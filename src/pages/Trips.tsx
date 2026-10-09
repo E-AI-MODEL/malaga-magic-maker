@@ -86,7 +86,7 @@ function NextTrip({ trip, facts, userId }: { trip: Trip; facts: HomeFacts; userI
 
       {ended ? <p className="mt-3 text-xs text-muted-foreground">Deze reis is afgelopen.</p> : readinessQuery.data && itemsQuery.data ? (
         <div className="mt-3 space-y-3">
-          <ReadinessBar done={preparation.done} total={preparation.total} />
+          <ReadinessBar done={preparation.done} total={preparation.total} sentence={`${preparation.done} van ${preparation.total} geregeld`} />
           {first && <Link to={first.href} className="block text-sm text-muted-foreground hover:text-foreground">{first.title}</Link>}
         </div>
       ) : <p className="mt-3 text-xs text-muted-foreground">Voorbereiding laden…</p>}
@@ -145,7 +145,7 @@ export default function Trips() {
           <div className="mt-5 h-20 animate-pulse rounded-[14px] bg-secondary" />
         ) : heroTrip ? (
           <>
-            <SectionLabel className="mt-6">Eerstvolgende reis</SectionLabel>
+            <div className="mt-6"><SectionLabel>Eerstvolgende reis</SectionLabel></div>
             <NextTrip trip={heroTrip} facts={facts} userId={user?.id} />
             <GettingStarted trip={heroTrip} hasAnyTrip={userTrips.length > 0} />
           </>

@@ -1,5 +1,15 @@
 import { describe, expect, it } from "vitest";
-import { loginDestination, pendingInvitePath } from "./start";
+import { loginDestination, pendingInvitePath, signedInEntryPath } from "./start";
+
+describe("Home landing", () => {
+  it("always opens Home at signed-in entry", () => {
+    expect(signedInEntryPath(null)).toBe("/trips");
+    expect(signedInEntryPath(pendingInvitePath(() => ""))).toBe("/trips");
+  });
+  it("gives an invitation priority over Home", () => {
+    expect(signedInEntryPath(pendingInvitePath(() => "invitation"))).toBe("/join/invitation");
+  });
+});
 
 describe("pending invite", () => {
   it("continues a stored invite after login", () => {

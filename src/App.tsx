@@ -11,7 +11,7 @@ import { ActivityLogProvider } from "@/contexts/ActivityLogContext";
 import { ClientErrorReporter } from "@/features/observability/ClientErrorReporter";
 import { AppErrorBoundary } from "@/features/observability/AppErrorBoundary";
 import Login from "./pages/Login";
-import { pendingInvitePath } from "@/features/trips/start";
+import { pendingInvitePath, signedInEntryPath } from "@/features/trips/start";
 
 const Trips = lazy(() => import("./pages/Trips"));
 const Landing = lazy(() => import("./pages/Landing"));
@@ -99,7 +99,7 @@ function SignedInStart() {
     localStorage.removeItem("vakansie_pending_invite");
     return <Navigate to={invite} replace />;
   }
-  return <Navigate to="/trips" replace />;
+  return <Navigate to={signedInEntryPath(null)} replace />;
 }
 
 function AppRoutes() {

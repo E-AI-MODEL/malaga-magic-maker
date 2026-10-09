@@ -1,4 +1,8 @@
 /** Pending invite stored when a logged-out visitor opens /join/:code; consumed once at signed-in entry. */
+export function signedInEntryPath(invite: string | null): string {
+  return invite || "/trips";
+}
+
 export function pendingInvitePath(read: () => string | null): string | null {
   const code = read();
   if (!code || !/^[A-Za-z0-9_-]+$/.test(code)) return null;

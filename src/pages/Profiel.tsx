@@ -16,6 +16,7 @@ import { AppLayout } from "@/components/AppLayout";
 import { usePro } from "@/features/pro/usePro";
 import { usePlanStatus } from "@/features/pro/limits";
 import { PaymentHistory } from "@/features/pro/PaymentHistory";
+import { DeleteAccountSection } from "@/features/account/DeleteAccountSection";
 
 export default function Profiel() {
   const { profile, isAdmin, user, signOut } = useAuth();
@@ -289,6 +290,18 @@ export default function Profiel() {
             </button>
           </div>
         </section>
+
+        {user?.email && (
+          <DeleteAccountSection
+            email={user.email}
+            isAdmin={isAdmin}
+            onDeleted={async () => {
+              await supabase.auth.signOut().catch(() => undefined);
+              localStorage.clear();
+              window.location.replace("/");
+            }}
+          />
+        )}
       </div>
     </AppLayout>
   );

@@ -85,6 +85,13 @@
       "when": 1791547284201,
       "tag": "0011_reminder_test_events",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1791548199989,
+      "tag": "0012_self_delete_account_and_health_consent",
+      "breakpoints": true
     }
   ]
 }

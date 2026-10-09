@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { loginDestination, signedInStartPath } from "./start";
+import { loginDestination, pendingInvitePath, signedInStartPath } from "./start";
 
 const first = { id: "first", status: "planning" };
 const second = { id: "second", status: "planning" };
@@ -26,6 +26,17 @@ describe("signed-in entry destination", () => {
   });
   it("shows the list rather than opening an archived trip", () => {
     expect(signedInStartPath([archived], archived.id)).toBe("/trips");
+  });
+});
+
+describe("pending invite", () => {
+  it("continues a stored invite after login", () => {
+    expect(pendingInvitePath(() => "abc123_X-Y")).toBe("/join/abc123_X-Y");
+  });
+  it("ignores missing or unsafe codes", () => {
+    expect(pendingInvitePath(() => null)).toBeNull();
+    expect(pendingInvitePath(() => "../etc")).toBeNull();
+    expect(pendingInvitePath(() => "a b")).toBeNull();
   });
 });
 

@@ -123,6 +123,8 @@ export default function NewTrip() {
             priorities: profile.priorities,
             diet: profile.diet,
             allergies: profile.allergies,
+            healthConsent: profile.healthConsent,
+            healthConsentAt: profile.healthConsentAt,
             pace: profile.pace,
             comfort: profile.comfort,
             budgetFeel: profile.budgetFeel,

@@ -193,7 +193,7 @@ serve(async (req) => {
     const travelerProfilesRes = memberIds.length
       ? await db
         .from("trip_traveler_profiles")
-        .select("user_id, priorities, diet, allergies, pace, comfort, budget_feel, mobility, notes")
+        .select("user_id, priorities, diet, allergies, health_consent_at, pace, comfort, budget_feel, mobility, notes")
         .eq("trip_id", tripId)
       : { data: [], error: null };
     if (travelerProfilesRes.error) {

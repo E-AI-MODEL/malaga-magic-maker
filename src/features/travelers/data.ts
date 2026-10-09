@@ -7,6 +7,7 @@ export type TravelerProfile = {
   priorities: string[];
   diet: string[];
   allergies: string | null;
+  health_consent_at: string | null;
   pace: string | null;
   comfort: string | null;
   budget_feel: string | null;
@@ -20,6 +21,9 @@ export type TravelerProfileInput = {
   priorities: string[];
   diet: string[];
   allergies?: string | null;
+  /** Explicit consent to share diet and allergies; without it both are cleared. */
+  healthConsent: boolean;
+  healthConsentAt?: string | null;
   pace?: string | null;
   comfort?: string | null;
   budgetFeel?: string | null;
@@ -76,6 +80,16 @@ export async function listTravelerProfiles(tripId: string): Promise<TravelerProf
   return (data || []) as TravelerProfile[];
 }
 
+/** Diet and allergies are health data: stored only with consent, cleared when it is withdrawn. */
+export function healthFields(input: Pick<TravelerProfileInput, "diet" | "allergies" | "healthConsent" | "healthConsentAt">, now = new Date()) {
+  if (!input.healthConsent) return { diet: [] as string[], allergies: null, health_consent_at: null };
+  return {
+    diet: input.diet,
+    allergies: input.allergies?.trim() || null,
+    health_consent_at: input.healthConsentAt || now.toISOString(),
+  };
+}
+
 export async function saveTravelerProfile(input: TravelerProfileInput) {
   const { error } = await supabase
     .from("trip_traveler_profiles")
@@ -84,8 +98,7 @@ export async function saveTravelerProfile(input: TravelerProfileInput) {
         trip_id: input.tripId,
         user_id: input.userId,
         priorities: input.priorities,
-        diet: input.diet,
-        allergies: input.allergies?.trim() || null,
+        ...healthFields(input),
         pace: input.pace || null,
         comfort: input.comfort || null,
         budget_feel: input.budgetFeel || null,

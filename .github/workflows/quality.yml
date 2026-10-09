@@ -47,6 +47,7 @@ jobs:
           (cd supabase/functions/auth-email-hook && deno check --node-modules-dir=auto index.ts)
           deno check supabase/functions/booking-parse/index.ts
           deno check supabase/functions/create-checkout/index.ts
+          deno check supabase/functions/delete-account/index.ts
           deno check supabase/functions/document-extract/index.ts
           deno check supabase/functions/firecrawl-scrape/index.ts
           deno check supabase/functions/ops-admin-users/index.ts

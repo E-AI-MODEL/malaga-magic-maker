@@ -13,6 +13,8 @@ export type TravelerProfileDraft = {
   priorities: string[];
   diet: string[];
   allergies: string;
+  healthConsent: boolean;
+  healthConsentAt: string | null;
   pace: string;
   comfort: string;
   budgetFeel: string;
@@ -24,6 +26,8 @@ export const emptyTravelerDraft: TravelerProfileDraft = {
   priorities: [],
   diet: [],
   allergies: "",
+  healthConsent: false,
+  healthConsentAt: null,
   pace: "",
   comfort: "",
   budgetFeel: "",
@@ -37,6 +41,8 @@ export function draftFromProfile(profile: TravelerProfile | undefined): Traveler
     priorities: profile.priorities || [],
     diet: profile.diet || [],
     allergies: profile.allergies || "",
+    healthConsent: Boolean(profile.health_consent_at),
+    healthConsentAt: profile.health_consent_at,
     pace: profile.pace || "",
     comfort: profile.comfort || "",
     budgetFeel: profile.budget_feel || "",
@@ -145,6 +151,24 @@ export function TravelerProfileForm({
         onToggle={(option) => toggle("priorities", option)}
       />
 
+      <div className="border-t border-rule/20 pt-4">
+        <p className="text-xs leading-relaxed text-muted-foreground">Je reisgenoten zien dit, en Hansie gebruikt het om rekening met je te houden.</p>
+        <label className="mt-3 flex cursor-pointer items-start gap-3">
+          <input
+            type="checkbox"
+            checked={value.healthConsent}
+            onChange={(event) =>
+              onChange(event.target.checked
+                ? { ...value, healthConsent: true }
+                : { ...value, healthConsent: false, healthConsentAt: null, diet: [], allergies: "" })
+            }
+            className="mt-0.5 h-5 w-5 shrink-0 rounded border-border accent-primary"
+          />
+          <span className="text-sm leading-relaxed">Ik geef toestemming om mijn allergieën en dieetwensen te delen met mijn reisgenoten en Hansie.</span>
+        </label>
+      </div>
+
+      {value.healthConsent && (
       <ChipGroup
         legend="Eten en drinken"
         hint="Optioneel"
@@ -153,6 +177,7 @@ export function TravelerProfileForm({
         onToggle={(option) => toggle("diet", option)}
       />
 
+      {value.healthConsent && (
       <div className="border-t border-rule/20 pt-4">
         <label className="font-ui text-[15px] font-semibold" htmlFor={`${idPrefix}-allergies`}>
           Allergieën
@@ -165,6 +190,7 @@ export function TravelerProfileForm({
           className="mt-2 h-11"
         />
       </div>
+      )}
 
       <SingleChoice legend="Tempo" options={paceOptions} value={value.pace} onChange={(next) => onChange({ ...value, pace: next })} />
       <SingleChoice

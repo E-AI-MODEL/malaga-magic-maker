@@ -1,35 +1,23 @@
 project_id = "wuvmcxjdyxhtqbbqoahy"
 
-[functions.trip-ai-chat]
-# Hansie performs an explicit token + trip-membership check in function code
-# before any service-role trip read.
-verify_jwt = false
-
-[functions.firecrawl-scrape]
-verify_jwt = true
-
-[functions.document-extract]
-# Explicit token + trip-membership check in function code before any
-# service-role document read.
-verify_jwt = false
-
-[functions.create-donation-checkout]
-verify_jwt = false
-
-[functions.create-checkout]
-verify_jwt = false
-
-[functions.payments-webhook]
-verify_jwt = false
-
-[functions.payments-account]
-verify_jwt = false
-
-[functions.accommodation-search]
-# Explicit token + trip-membership check in function code before any
-# service-role read.
-verify_jwt = false
-
-[functions.ops-admin-users]
-# Explicit token + platform-admin role check in code before service-role calls.
-verify_jwt = false
+[functions]
+  [functions.accommodation-search]
+    verify_jwt = false
+  [functions.auth-email-hook]
+    verify_jwt = false
+  [functions.create-checkout]
+    verify_jwt = false
+  [functions.create-donation-checkout]
+    verify_jwt = false
+  [functions.document-extract]
+    verify_jwt = false
+  [functions.firecrawl-scrape]
+    verify_jwt = true
+  [functions.ops-admin-users]
+    verify_jwt = false
+  [functions.payments-account]
+    verify_jwt = false
+  [functions.payments-webhook]
+    verify_jwt = false
+  [functions.trip-ai-chat]
+    verify_jwt = false

@@ -27,3 +27,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+supabase/functions/auth-email-hook/node_modules
+supabase/functions/auth-email-hook/deno.lock

@@ -1,6 +1,6 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
-import { cacheIsFresh, dailyForecast, expiryFrom, geocodeKey, needsGeocode, roundCoord, weatherWindow, type MetEntry } from "./weather.ts";
+import { cacheIsFresh, dailyForecast, expiryFrom, geocodeKey, geocodeUpdate, needsGeocode, roundCoord, weatherWindow, type GeocodeOutcome, type MetEntry } from "./weather.ts";
 
 const USER_AGENT = "Vakansie/1.0 (https://vakansie.app)";
 const json = (status: number, body: unknown) =>
@@ -10,35 +10,45 @@ const isUuid = (v: unknown): v is string =>
 
 // Nominatim policy: max 1 request per second (per instance; lookups are cached per trip).
 let lastGeocodeAt = 0;
-async function geocode(query: string): Promise<{ lat: number; lon: number } | null> {
+const TIMEOUT_MS = 8000;
+function coords(lat: unknown, lon: unknown): GeocodeOutcome {
+  const a = Number(lat), b = Number(lon);
+  return Number.isFinite(a) && Number.isFinite(b) ? { kind: "found", lat: a, lon: b } : { kind: "not_found" };
+}
+async function geocode(query: string): Promise<GeocodeOutcome> {
   const wait = lastGeocodeAt + 1000 - Date.now();
   if (wait > 0) await new Promise((r) => setTimeout(r, wait));
   lastGeocodeAt = Date.now();
-  const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=jsonv2&limit=1`;
-  const res = await fetch(url, { headers: { "User-Agent": USER_AGENT, Referer: "https://vakansie.app/", Accept: "application/json", "Accept-Language": "nl,en" } });
-  if (res.status === 403) {
-    // Nominatim blocks some cloud networks; Photon serves the same OpenStreetMap data.
-    await res.text();
-    return photon(query);
+  try {
+    const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=jsonv2&limit=1`;
+    const res = await fetch(url, { signal: AbortSignal.timeout(TIMEOUT_MS), headers: { "User-Agent": USER_AGENT, Referer: "https://vakansie.app/", Accept: "application/json", "Accept-Language": "nl,en" } });
+    if (res.status === 403) {
+      // Nominatim blocks some cloud networks; Photon serves the same OpenStreetMap data.
+      await res.text();
+      return photon(query);
+    }
+    if (!res.ok) { console.error("nominatim status", res.status); await res.text(); return { kind: "error" }; }
+    const rows = JSON.parse(await res.text());
+    if (!Array.isArray(rows)) return { kind: "error" };
+    return rows.length ? coords(rows[0]?.lat, rows[0]?.lon) : { kind: "not_found" };
+  } catch (e) {
+    console.error("nominatim failed", e instanceof Error ? e.message : e);
+    return { kind: "error" };
   }
-  if (!res.ok) { console.error("nominatim status", res.status); await res.text(); return null; }
-  const raw = await res.text();
-  let rows: Array<{ lat?: string; lon?: string }> = [];
-  try { rows = JSON.parse(raw); } catch { console.error("nominatim unreadable", raw.slice(0, 200)); }
-  if (!rows.length) console.warn("nominatim no result for destination");
-  const lat = Number(rows?.[0]?.lat);
-  const lon = Number(rows?.[0]?.lon);
-  return Number.isFinite(lat) && Number.isFinite(lon) ? { lat, lon } : null;
 }
 
-async function photon(query: string): Promise<{ lat: number; lon: number } | null> {
-  const res = await fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&limit=1`, { headers: { "User-Agent": USER_AGENT } });
-  if (!res.ok) { console.error("photon status", res.status); await res.text(); return null; }
-  const data = await res.json().catch(() => null);
-  const coords = data?.features?.[0]?.geometry?.coordinates;
-  const lon = Number(coords?.[0]);
-  const lat = Number(coords?.[1]);
-  return Number.isFinite(lat) && Number.isFinite(lon) ? { lat, lon } : null;
+async function photon(query: string): Promise<GeocodeOutcome> {
+  try {
+    const res = await fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&limit=1`, { signal: AbortSignal.timeout(TIMEOUT_MS), headers: { "User-Agent": USER_AGENT } });
+    if (!res.ok) { console.error("photon status", res.status); await res.text(); return { kind: "error" }; }
+    const data = await res.json();
+    if (!Array.isArray(data?.features)) return { kind: "error" };
+    const c = data.features[0]?.geometry?.coordinates;
+    return data.features.length ? coords(c?.[1], c?.[0]) : { kind: "not_found" };
+  } catch (e) {
+    console.error("photon failed", e instanceof Error ? e.message : e);
+    return { kind: "error" };
+  }
 }
 
 Deno.serve(async (req) => {
@@ -70,7 +80,7 @@ Deno.serve(async (req) => {
 
   try {
     const { data: trip } = await db.from("trip")
-      .select("status, start_date, end_date, timezone, destination_name, destination_country, destination_latitude, destination_longitude, destination_geocoded_for")
+      .select("status, start_date, end_date, timezone, destination_name, destination_country, destination_latitude, destination_longitude, destination_geocoded_for, destination_geocode_failed_at")
       .eq("id", tripId).single();
     if (!trip) return json(404, { error: "Not found" });
 
@@ -89,16 +99,13 @@ Deno.serve(async (req) => {
     let lon = stays?.[0] ? Number(stays[0].longitude) : NaN;
 
     if (!Number.isFinite(lat) || !Number.isFinite(lon)) {
-      if (needsGeocode(trip)) {
+      if (needsGeocode(trip, now)) {
         const key = geocodeKey(trip.destination_name, trip.destination_country)!;
-        const found = await geocode(key);
-        // Also remember a failed lookup, so the same destination is not asked again.
-        const { error: geoSaveError } = await db.from("trip").update({
-          destination_latitude: found?.lat ?? null, destination_longitude: found?.lon ?? null, destination_geocoded_for: key,
-        }).eq("id", tripId);
+        const outcome = await geocode(key);
+        // Remember "not found" only after a clean answer; a service failure retries after 24 hours.
+        const { error: geoSaveError } = await db.from("trip").update(geocodeUpdate(outcome, key, now)).eq("id", tripId);
         if (geoSaveError) console.error("trip-weather geocode save failed:", geoSaveError.message);
-        trip.destination_latitude = found?.lat ?? null;
-        trip.destination_longitude = found?.lon ?? null;
+        if (outcome.kind === "found") { trip.destination_latitude = outcome.lat; trip.destination_longitude = outcome.lon; }
       }
       lat = Number(trip.destination_latitude);
       lon = Number(trip.destination_longitude);

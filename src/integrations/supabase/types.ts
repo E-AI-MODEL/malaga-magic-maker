@@ -1207,6 +1207,9 @@ export type Database = {
           currency: string
           description: string | null
           destination_country: string | null
+          destination_geocoded_for: string | null
+          destination_latitude: number | null
+          destination_longitude: number | null
           destination_name: string | null
           end_date: string | null
           flights_note: string | null
@@ -1227,6 +1230,9 @@ export type Database = {
           currency?: string
           description?: string | null
           destination_country?: string | null
+          destination_geocoded_for?: string | null
+          destination_latitude?: number | null
+          destination_longitude?: number | null
           destination_name?: string | null
           end_date?: string | null
           flights_note?: string | null
@@ -1247,6 +1253,9 @@ export type Database = {
           currency?: string
           description?: string | null
           destination_country?: string | null
+          destination_geocoded_for?: string | null
+          destination_latitude?: number | null
+          destination_longitude?: number | null
           destination_name?: string | null
           end_date?: string | null
           flights_note?: string | null
@@ -1582,6 +1591,38 @@ export type Database = {
             foreignKeyName: "trip_traveler_profiles_trip_id_fkey"
             columns: ["trip_id"]
             isOneToOne: false
+            referencedRelation: "trip"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trip_weather_cache: {
+        Row: {
+          expires_at: string
+          fetched_at: string
+          last_modified: string | null
+          payload: Json
+          trip_id: string
+        }
+        Insert: {
+          expires_at: string
+          fetched_at?: string
+          last_modified?: string | null
+          payload?: Json
+          trip_id: string
+        }
+        Update: {
+          expires_at?: string
+          fetched_at?: string
+          last_modified?: string | null
+          payload?: Json
+          trip_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trip_weather_cache_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: true
             referencedRelation: "trip"
             referencedColumns: ["id"]
           },

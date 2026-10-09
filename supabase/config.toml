@@ -23,3 +23,5 @@ project_id = "wuvmcxjdyxhtqbbqoahy"
     verify_jwt = false
   [functions.trip-calendar]
     verify_jwt = false
+  [functions.trip-weather]
+    verify_jwt = false

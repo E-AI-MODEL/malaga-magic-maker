@@ -36,4 +36,5 @@
 
 - [x] Koppelingen stap 1: Open in Kaarten
 - [x] Koppelingen stap 2: Verrekenen heet nu Knaakie, met betaalverzoek (delen/WhatsApp/kopiëren) en privé-IBAN in Profiel
-- [ ] Koppelingen stap 4-5 (weer, push)
+- [x] Stap 4 weer: MET Norway + Nominatim, weerstrook op Overzicht, weer voor Hansie, actieve agenda-link tonen
+- [ ] Koppelingen stap 5 (push)

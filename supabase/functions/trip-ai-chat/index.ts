@@ -201,6 +201,12 @@ serve(async (req) => {
       return jsonError(500, "Reiscontext kon niet worden geladen.");
     }
 
+    const weatherRes = await db.from("trip_weather_cache").select("payload").eq("trip_id", tripId).maybeSingle();
+    const weatherPayload = weatherRes.data?.payload as { available?: boolean; fetched_at?: string; days?: unknown[] } | null;
+    const weather = weatherPayload?.available && weatherPayload.fetched_at && Array.isArray(weatherPayload.days)
+      ? { fetched_at: weatherPayload.fetched_at, days: weatherPayload.days }
+      : null;
+
     const context = buildTripContext({
       now: new Date(),
       userId,
@@ -216,6 +222,7 @@ serve(async (req) => {
       travelerProfiles: travelerProfilesRes.data || [],
       expenses: expensesRes.data || [],
       documents: documentsRes.data || [],
+      weather,
     });
 
     const systemPrompt = `${SYSTEM_RULES}\n\nREISFEITEN (alleen deze geautoriseerde reis):\n${JSON.stringify(context)}`;

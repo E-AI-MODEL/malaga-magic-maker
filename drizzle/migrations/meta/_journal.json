@@ -50,6 +50,13 @@
       "when": 1791529082739,
       "tag": "0006_calendar_feeds",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1791529792714,
+      "tag": "0007_trip_weather",
+      "breakpoints": true
     }
   ]
 }

@@ -48,7 +48,7 @@ Deno.serve(async (req) => {
   let server: webpush.ApplicationServer | null = await pushServer(db);
   let emailPaused = false;
   const { data: unsubRow } = await db.from("server_job_secrets").select("secret").eq("name", "reminders_unsubscribe").maybeSingle();
-  const unsubscribeBase = `${supabaseUrl}/functions/v1/reminders-unsubscribe?token=`;
+  const unsubscribeBase = `${APP_URL}/afmelden?token=`;
   const stats = { push: 0, email: 0, removed: 0 };
 
   for (const trip of trips || []) {

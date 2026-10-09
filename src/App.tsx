@@ -30,6 +30,7 @@ const JoinTrip = lazy(() => import("./pages/JoinTrip"));
 const Profiel = lazy(() => import("./pages/Profiel"));
 const Ops = lazy(() => import("./pages/Ops"));
 const OpsErrors = lazy(() => import("./pages/OpsErrors"));
+const Afmelden = lazy(() => import("./pages/Afmelden"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
@@ -117,6 +118,7 @@ function AppRoutes() {
         <Route path="/steun" element={<Steun />} />
         <Route path="/terms" element={<TermsPage />} />
         <Route path="/privacy" element={<PrivacyPage />} />
+        <Route path="/afmelden" element={<Afmelden />} />
         <Route path="/" element={user ? <SignedInStart /> : <Landing />} />
         <Route path="/boot" element={<Navigate to={user ? "/trips" : "/login"} replace />} />
 

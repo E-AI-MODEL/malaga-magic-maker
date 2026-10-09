@@ -16,7 +16,7 @@ export const page = (status: number, inner: string) =>
       `<body style="margin:0;background:#f4f1ea;font-family:Barlow,Arial,sans-serif;color:#1d201f">` +
       `<main style="max-width:420px;margin:15vh auto;padding:0 24px"><p style="font-weight:bold;letter-spacing:2px;text-transform:uppercase;color:#ff6a00;font-size:13px">Vakansie</p>` +
       `${inner}<p><a href="https://vakansie.app/profiel" style="color:#1d201f">Naar Profiel</a></p></main></body></html>`,
-    { status, headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store", "X-Robots-Tag": "noindex" } },
+    { status, headers: { "Access-Control-Allow-Origin": "*", "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store", "X-Robots-Tag": "noindex" } },
   );
 
 const text = (message: string) => `<p style="font-size:18px;line-height:1.5">${message}</p>`;

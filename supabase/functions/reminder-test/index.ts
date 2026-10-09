@@ -57,7 +57,7 @@ Deno.serve(async (req) => {
       templateData: {
         title: TITLE, body: BODY, url: "https://vakansie.app/profiel",
         unsubscribeUrl: unsub?.secret
-          ? `${supabaseUrl}/functions/v1/reminders-unsubscribe?token=${encodeURIComponent(await signUnsubscribeToken(user.id, unsub.secret))}`
+          ? `https://vakansie.app/afmelden?token=${encodeURIComponent(await signUnsubscribeToken(user.id, unsub.secret))}`
           : undefined,
       },
     });

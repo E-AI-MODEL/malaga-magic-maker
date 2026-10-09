@@ -27,8 +27,7 @@ export function NotificationPreferences({ userId }: { userId: string }) {
 
   return (
     <section>
-      <h2 className="font-display text-sm font-extrabold uppercase tracking-wider text-muted-foreground">Meldingen</h2>
-      <p className="mt-1 text-xs leading-relaxed text-muted-foreground">Kies welke in-app meldingen je wilt ontvangen. Belangrijke account- en beveiligingsmeldingen staan hier los van.</p>
+      <p className="text-xs leading-relaxed text-muted-foreground">Kies welke in-app meldingen je wilt ontvangen. Belangrijke account- en beveiligingsmeldingen staan hier los van.</p>
       <div className="mt-3 overflow-hidden rounded-2xl border border-border bg-card">
         {options.map((option, index) => (
           <label key={option.key} className={`flex cursor-pointer items-start gap-4 px-4 py-4 ${index > 0 ? "border-t border-border" : ""}`}>

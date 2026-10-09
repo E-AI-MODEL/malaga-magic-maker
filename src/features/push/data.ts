@@ -52,8 +52,17 @@ export async function disablePushOnThisDevice() {
   await sub.unsubscribe().catch(() => false);
 }
 
-/** Shows a local notification through the service worker, so you see how it looks on this device. */
-export async function showTestNotification() {
-  const reg = await registration();
-  await reg.showNotification("Testmelding van Vakansie", { body: "Zo ziet een herinnering eruit op dit apparaat.", icon: "/icons/app-icon-192.png", data: { url: "/trips" } });
+/** Sends a real test reminder: push when it is on and works, otherwise an e-mail. */
+export async function sendTestReminder(): Promise<{ channel: "push" } | { channel: "email"; email: string }> {
+  const { data, error } = await supabase.functions.invoke("reminder-test", { method: "POST" });
+  if (error) {
+    let reason = error.message;
+    const ctx = (error as { context?: Response }).context;
+    if (ctx && typeof ctx.json === "function") {
+      const body = await ctx.json().catch(() => null) as { error?: string } | null;
+      if (body?.error) reason = body.error;
+    }
+    throw new Error(reason);
+  }
+  return data;
 }

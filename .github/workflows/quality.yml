@@ -54,6 +54,7 @@ jobs:
           deno check supabase/functions/payments-webhook/index.ts
           deno check supabase/functions/trip-ai-chat/index.ts
           deno check supabase/functions/trip-calendar/index.ts
+          deno check supabase/functions/trip-weather/index.ts
 
       - name: Lint
         run: npm run lint

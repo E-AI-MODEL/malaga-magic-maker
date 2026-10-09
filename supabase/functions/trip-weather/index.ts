@@ -85,7 +85,7 @@ Deno.serve(async (req) => {
       lat = Number(trip.destination_latitude);
       lon = Number(trip.destination_longitude);
     }
-    if (trip.destination_latitude === null && !stays?.length || !Number.isFinite(lat) || !Number.isFinite(lon)) {
+    if (!Number.isFinite(lat) || !Number.isFinite(lon) || (lat === 0 && lon === 0)) {
       return json(200, { available: false, reason: "no_location" });
     }
 

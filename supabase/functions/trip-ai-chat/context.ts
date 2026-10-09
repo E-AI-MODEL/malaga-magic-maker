@@ -78,6 +78,7 @@ export interface RawTripContext {
   travelerProfiles: Row[];
   expenses: Row[];
   documents: Row[];
+  weather?: { fetched_at: string; days: unknown[] } | null;
 }
 
 const FALLBACK_NAME = "Medereiziger";
@@ -136,6 +137,9 @@ function assembleTripContext(raw: RawTripContext) {
     nu: formatNow(raw.now, tz),
     dagen_tot_vertrek: timing.dagen_tot_vertrek,
     fase: timing.fase,
+    weer: raw.weather && Array.isArray(raw.weather.days) && raw.weather.days.length
+      ? { opgehaald_op: formatNow(new Date(raw.weather.fetched_at), tz), dagen: raw.weather.days }
+      : null,
     jij: { naam: nameOf(raw.userId) || FALLBACK_NAME, rol: (self?.role as string) || "member" },
     trip: omit(raw.trip, ["id"]),
     readiness: raw.readiness,

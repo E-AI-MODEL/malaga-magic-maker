@@ -16,6 +16,8 @@ import { timelineWarnings } from "@/features/travel/presentation";
 import { Button } from "@/components/ui/button";
 import { ReadinessBar, RowItem, RowList, SectionLabel } from "@/components/primitives";
 import { TripVisual } from "@/components/TripVisual";
+import { WeatherStrip } from "@/features/trips/WeatherStrip";
+import { showWeatherStrip } from "@/features/trips/weather";
 
 const TYPE_TINT: Record<string, string> = {
   flight: "bg-tint-transport/10 text-tint-transport",
@@ -188,6 +190,8 @@ export default function TripHome() {
             </div>
           </div>
         </TripVisual>
+
+        {!ended && showWeatherStrip(activeTrip, timezone) && <WeatherStrip tripId={activeTrip.id} timeZone={timezone} />}
 
         {!ended && !readinessQuery.isLoading && !itemsQuery.isLoading && (
           <div className="px-5 pt-3 sm:px-8">

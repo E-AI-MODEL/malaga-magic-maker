@@ -94,7 +94,7 @@ export function candidateFacts(candidate: AccommodationCandidate) {
 export async function createAccommodationDecision(tripId: string, candidates: AccommodationCandidate[]) {
   return createDecisionWithOptions({
     tripId,
-    title: "Waar verblijven we?",
+    title: ACCOMMODATION_DECISION_TITLE,
     description: "Shortlist gevonden via zoeken. Prijzen zijn indicaties, controleer altijd de aanbieder.",
     options: candidates.map((candidate) => ({
       label: candidate.name.slice(0, 120),
@@ -103,11 +103,28 @@ export async function createAccommodationDecision(tripId: string, candidates: Ac
   });
 }
 
-/** Puts one candidate on the timeline as a stay. */
+export const ACCOMMODATION_DECISION_TITLE = "Waar verblijven we?";
+
+/** Search candidates are ideas; only an explicit choice ("Dit wordt het" or a vote winner) becomes planned. */
+export function candidateStayStatus(chosen: boolean): "idea" | "planned" {
+  return chosen ? "planned" : "idea";
+}
+
+/** The option with the most votes (first on a tie), with the offer url from its description. */
+export function decisionWinner<T extends { label: string; description: string | null; votes: unknown[] }>(options: T[]) {
+  let best: T | null = null;
+  for (const option of options) if (option.votes.length > 0 && (!best || option.votes.length > best.votes.length)) best = option;
+  if (!best) return null;
+  const url = /(https?:\/\/\S+)/.exec(best.description || "")?.[1] || null;
+  return { option: best, url };
+}
+
+/** Puts one candidate on the timeline as a stay: an idea by default, planned when chosen. */
 export async function addCandidateAsStay(
   tripId: string,
   candidate: AccommodationCandidate,
   period: { startDate: string; endDate: string },
+  status: "idea" | "planned" = candidateStayStatus(false),
 ) {
   const itemId = await createItemFromSuggestion(
     tripId,
@@ -126,6 +143,26 @@ export async function addCandidateAsStay(
     `Gevonden via zoeken — ${candidate.url}`,
   );
 
-  await supabase.from("trip_items").update({ status: "planned", booking_url: candidate.url }).eq("id", itemId);
+  await supabase.from("trip_items").update({ status, booking_url: candidate.url }).eq("id", itemId);
+  return itemId;
+}
+
+/** Closed "Waar verblijven we?": the winner becomes a planned stay on the current trip dates; matching ideas go. */
+export async function promoteDecisionWinner(
+  tripId: string,
+  option: { label: string; description: string | null },
+  url: string | null,
+  period: { startDate: string; endDate: string },
+) {
+  const itemId = await addCandidateAsStay(
+    tripId,
+    { name: option.label, location: null, price: null, currency: null, price_note: null, url: url || "", source: "web", summary: null },
+    period,
+    candidateStayStatus(true),
+  );
+  if (url) {
+    await supabase.from("trip_items").delete()
+      .eq("trip_id", tripId).eq("type", "stay").eq("status", "idea").eq("booking_url", url);
+  }
   return itemId;
 }

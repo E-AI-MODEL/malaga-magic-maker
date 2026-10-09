@@ -4,6 +4,7 @@ import * as webpush from "jsr:@negrel/webpush@0.5.0";
 import { sendTemplateEmail } from "../_shared/transactional-email-templates/send-email.ts";
 import { signUnsubscribeToken } from "../_shared/unsubscribe-token.ts";
 import { isPushEndpoint, pushServer } from "../_shared/push-server.ts";
+import { TEST_REMINDER_LIMIT_MESSAGE, testReminderAllowed } from "../_shared/test-reminder-limit.ts";
 
 // Test reminder for the signed-in user only: push when it is on and works, otherwise e-mail.
 const json = (status: number, body: unknown) =>
@@ -25,6 +26,11 @@ Deno.serve(async (req) => {
   const { data: auth } = token ? await db.auth.getUser(token) : { data: null };
   const user = auth?.user;
   if (!user) return json(401, { error: "Je bent niet ingelogd." });
+
+  const { count: recent } = await db.from("reminder_test_events").select("id", { count: "exact", head: true })
+    .eq("user_id", user.id).gte("created_at", new Date(Date.now() - 3_600_000).toISOString());
+  if (!testReminderAllowed(recent || 0)) return json(429, { error: TEST_REMINDER_LIMIT_MESSAGE });
+  await db.from("reminder_test_events").insert({ user_id: user.id });
 
   const { data: prefs } = await db.from("notification_preferences").select("push_reminders").eq("user_id", user.id).maybeSingle();
   let pushError = "";

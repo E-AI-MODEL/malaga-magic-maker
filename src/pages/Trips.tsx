@@ -9,6 +9,7 @@ import { AppLayout } from "@/components/AppLayout";
 import { Button } from "@/components/ui/button";
 import { RowList, SectionLabel } from "@/components/primitives";
 import { TripThumb, TripVisual } from "@/components/TripVisual";
+import heroHome from "@/assets/hero-home.jpg";
 
 function formatDateRange(startDate: string | null, endDate: string | null) {
   if (!startDate && !endDate) return "Data nog te kiezen";
@@ -131,11 +132,23 @@ export default function Trips() {
             <NextTrip trip={heroTrip} />
           </>
         ) : (
-          <div className="mt-8 border-t border-rule pt-6">
-            <p className="font-brand text-[22px] font-bold leading-snug">Nog geen reis</p>
-            <p className="mt-1.5 text-sm text-muted-foreground">Een naam is genoeg om te beginnen.</p>
-            <Button asChild size="lg" className="mt-4 rounded-md">
-              <Link to="/new-trip"><Plus className="mr-1.5 h-4 w-4" />Reis starten</Link>
+          <div className="mt-6">
+            <div className="relative h-[340px] w-full overflow-hidden rounded-[20px]">
+              <img src={heroHome} alt="Terras met uitzicht op zee en een opengeslagen reisnotitieboek" width={1280} height={720} loading="eager" className="h-full w-full object-cover" />
+              <div aria-hidden className="absolute inset-0 bg-foreground/60" />
+              <div className="absolute inset-x-0 bottom-0 p-5">
+                <h2 className="font-display text-[30px] font-bold uppercase leading-[1.08] tracking-wide text-white">
+                  Je hele vakantie
+                  <br />
+                  in je broekzak
+                </h2>
+                <p className="mt-3 max-w-sm text-[15px] leading-relaxed text-white/90">
+                  Begin met een naam. Data, mensen en plannen voeg je toe wanneer je wilt.
+                </p>
+              </div>
+            </div>
+            <Button asChild size="lg" className="mt-4 w-full rounded-md sm:w-auto">
+              <Link to="/new-trip"><Plus className="mr-1.5 h-4 w-4" />Je eerste reis starten</Link>
             </Button>
           </div>
         )}

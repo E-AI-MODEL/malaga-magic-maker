@@ -1,5 +1,5 @@
 import { FormEvent, useState } from "react";
-import { Link, Navigate, useNavigate, useSearchParams } from "react-router-dom";
+import { Link, Navigate, useSearchParams } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,7 +10,6 @@ import { loginDestination } from "@/features/trips/start";
 
 export default function Login() {
   const { user, signIn, signInWithGoogle } = useAuth();
-  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const next = loginDestination(searchParams.get("next"));
 
@@ -33,11 +32,8 @@ export default function Login() {
     setLoading(true);
     const result = await signIn(email, password);
     setLoading(false);
-    if (result.error) {
-      setError(result.error);
-      return;
-    }
-    navigate(next, { replace: true });
+    if (result.error) setError(result.error);
+    // Successful sign-in: the `user` redirect below navigates once; a second navigate here raced it and could leave "/" blank.
   };
 
   if (user) return <Navigate to={next} replace />;

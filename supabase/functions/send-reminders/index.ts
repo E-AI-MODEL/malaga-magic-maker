@@ -6,6 +6,7 @@ import {
   deliveryReminders, inQuietHours, nextChannel, pushFailureAction, withinDailyLimit, type Channel,
 } from "../_shared/reminders.ts";
 import { signUnsubscribeToken } from "../_shared/unsubscribe-token.ts";
+import { isPushEndpoint, pushServer, type Db } from "../_shared/push-server.ts";
 
 const APP_URL = "https://vakansie.app";
 const json = (status: number, body: unknown) =>
@@ -16,39 +17,6 @@ function safeEqual(a: string, b: string): boolean {
   let diff = 0;
   for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
   return diff === 0;
-}
-
-/** Only well-known browser push services; never arbitrary URLs from the database. */
-export function isPushEndpoint(endpoint: string): boolean {
-  try {
-    const u = new URL(endpoint);
-    if (u.protocol !== "https:" || (u.port && u.port !== "443")) return false;
-    const h = u.hostname;
-    return h === "fcm.googleapis.com" || h === "updates.push.services.mozilla.com" || h === "web.push.apple.com"
-      || h.endsWith(".push.apple.com") || h.endsWith(".notify.windows.com");
-  } catch { return false; }
-}
-
-// Untyped service client: generated table types are not available inside Edge Functions.
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type Db = any;
-
-async function pushServer(db: Db) {
-  const { data } = await db.from("push_server_keys").select("public_jwk, private_jwk").eq("id", 1).maybeSingle();
-  let keys: CryptoKeyPair;
-  if (data) {
-    keys = await webpush.importVapidKeys({ publicKey: data.public_jwk, privateKey: data.private_jwk });
-  } else {
-    // First run: generate the server key pair here so the private key never leaves the backend.
-    keys = await webpush.generateVapidKeys({ extractable: true });
-    const exported = await webpush.exportVapidKeys(keys);
-    const { error } = await db.from("push_server_keys").insert({
-      id: 1, public_key: await webpush.exportApplicationServerKey(keys),
-      public_jwk: exported.publicKey, private_jwk: exported.privateKey,
-    });
-    if (error) return pushServer(db); // another run won the race
-  }
-  return webpush.ApplicationServer.new({ contactInformation: APP_URL, vapidKeys: keys });
 }
 
 Deno.serve(async (req) => {
@@ -80,7 +48,7 @@ Deno.serve(async (req) => {
   let server: webpush.ApplicationServer | null = await pushServer(db);
   let emailPaused = false;
   const { data: unsubRow } = await db.from("server_job_secrets").select("secret").eq("name", "reminders_unsubscribe").maybeSingle();
-  const unsubscribeBase = `${supabaseUrl}/functions/v1/reminders-unsubscribe?token=`;
+  const unsubscribeBase = `${APP_URL}/afmelden?token=`;
   const stats = { push: 0, email: 0, removed: 0 };
 
   for (const trip of trips || []) {

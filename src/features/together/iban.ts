@@ -20,3 +20,10 @@ export function isValidIban(input: string): boolean {
 export function formatIban(iban: string): string {
   return normalizeIban(iban).replace(/(.{4})(?=.)/g, "$1 ");
 }
+
+/** Validation message for the Profiel payment details form, or null when it may be saved. */
+export function paymentDetailsError(cleanIban: string, accountName: string): string | null {
+  if (cleanIban && !isValidIban(cleanIban)) return "Dit IBAN lijkt niet te kloppen. Controleer de letters en cijfers.";
+  if (cleanIban && !accountName.trim()) return "Vul ook de naam van de rekeninghouder in, anders staat je IBAN niet in betaalverzoeken.";
+  return null;
+}

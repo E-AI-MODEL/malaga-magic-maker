@@ -52,6 +52,7 @@ jobs:
           deno check supabase/functions/ops-admin-users/index.ts
           deno check supabase/functions/payments-account/index.ts
           deno check supabase/functions/payments-webhook/index.ts
+          (cd supabase/functions/reminder-test && deno check --node-modules-dir=auto index.ts)
           deno check supabase/functions/reminders-unsubscribe/index.ts
           (cd supabase/functions/send-reminders && deno check --node-modules-dir=auto index.ts)
           deno check supabase/functions/trip-ai-chat/index.ts

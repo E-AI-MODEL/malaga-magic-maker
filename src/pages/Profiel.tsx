@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { FormError } from "@/components/FormSheet";
-import { formatIban, isValidIban, normalizeIban } from "@/features/together/iban";
+import { formatIban, normalizeIban, paymentDetailsError } from "@/features/together/iban";
 import { SectionLabel } from "@/components/primitives";
 import { NotificationPreferences } from "@/features/notifications/NotificationPreferences";
 import { ReminderPreferences } from "@/features/notifications/ReminderPreferences";
@@ -70,8 +70,9 @@ export default function Profiel() {
     if (!user) return;
     setIbanError("");
     const clean = normalizeIban(iban);
-    if (clean && !isValidIban(clean)) {
-      setIbanError("Dit IBAN lijkt niet te kloppen. Controleer de letters en cijfers.");
+    const ibanCheck = paymentDetailsError(clean, accountName);
+    if (ibanCheck) {
+      setIbanError(ibanCheck);
       return;
     }
     setIbanSaving(true);

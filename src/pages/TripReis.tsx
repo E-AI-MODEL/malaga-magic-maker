@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { AlertTriangle, Archive, ChevronDown, FileText, Mail, MapPin, Pencil, Plus, Search, Trash2 } from "lucide-react";
+import { AlertTriangle, Archive, ChevronDown, Mail, Pencil, Plus, Search, Trash2 } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
 import { Button } from "@/components/ui/button";
 import {
@@ -31,9 +31,7 @@ import {
   SwipeRow,
 } from "@/components/primitives";
 import { travelTypeIcon } from "@/features/travel/icons";
-import { currentMapsPlatform, mapsUrl } from "@/features/travel/maps";
 import {
-  formatTripDateTime,
   formatTripDay,
   getTravelStatus,
   getTravelType,

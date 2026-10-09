@@ -178,7 +178,7 @@ export function readDetails(metadata: unknown): Record<string, string> {
 
 const BOOKABLE = new Set(["flight", "train", "ferry", "stay", "rental_car", "transfer", "ticket"]);
 
-export type TimelineWarning = { kind: "overlap" | "missing_stay" | "no_reference"; message: string; itemIds: string[] };
+export type TimelineWarning = { kind: "overlap" | "missing_stay" | "no_reference" | "outside_trip"; message: string; itemIds: string[] };
 
 type WarnItem = { id: string; type: string; title: string; status: string; start_at: string | null; end_at: string | null; booking_reference: string | null };
 
@@ -190,7 +190,8 @@ const dayStart = (iso: string) => Date.UTC(+iso.slice(0, 4), +iso.slice(5, 7) - 
  * without a stay, and booked items without a booking reference.
  */
 export function timelineWarnings(items: WarnItem[], tripStart: string | null, tripEnd: string | null): TimelineWarning[] {
-  const active = items.filter((i) => i.status !== "cancelled");
+  // Ideas are not bookings: like cancelled items they never overlap, cover a night or fall outside the trip.
+  const active = items.filter((i) => i.status !== "cancelled" && i.status !== "idea");
   const warnings: TimelineWarning[] = [];
 
   const timed = active.filter((i) => i.start_at && i.end_at && (i.type === "stay" || BOOKABLE.has(i.type)));
@@ -222,5 +223,32 @@ export function timelineWarnings(items: WarnItem[], tripStart: string | null, tr
   if (noRef.length > 0) {
     warnings.push({ kind: "no_reference", message: `${noRef.length} geboekt ${noRef.length === 1 ? "onderdeel heeft" : "onderdelen hebben"} nog geen boekingsnummer.`, itemIds: noRef.map((i) => i.id) });
   }
+  if (tripStart && tripEnd) {
+    const outside = itemsOutsideTrip(active, tripStart, tripEnd);
+    if (outside.length > 0) {
+      const n = outside.length;
+      warnings.push({ kind: "outside_trip", message: `${n} ${n === 1 ? "onderdeel valt" : "onderdelen vallen"} buiten je reisdata.`, itemIds: outside.map((i) => i.id) });
+    }
+  }
   return warnings;
+}
+
+/** Items (not ideas or cancelled) with a start before the first or after the last trip day (UTC date). */
+export function itemsOutsideTrip<T extends { status: string; start_at: string | null }>(items: T[], tripStart: string, tripEnd: string): T[] {
+  return items.filter((i) => {
+    if (i.status === "idea" || i.status === "cancelled" || !i.start_at) return false;
+    const day = i.start_at.slice(0, 10);
+    return day < tripStart || day > tripEnd;
+  });
+}
+
+/** Shift dates by the same number of days the trip start moved. */
+export function shiftItemDates(
+  item: { start_at: string | null; end_at: string | null },
+  oldStart: string,
+  newStart: string,
+): { start_at: string | null; end_at: string | null } {
+  const days = Math.round((dayStart(newStart) - dayStart(oldStart)) / DAY);
+  const shift = (v: string | null) => (v ? new Date(new Date(v).getTime() + days * DAY).toISOString() : null);
+  return { start_at: shift(item.start_at), end_at: shift(item.end_at) };
 }

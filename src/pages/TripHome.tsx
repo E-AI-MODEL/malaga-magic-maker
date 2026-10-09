@@ -147,7 +147,7 @@ export default function TripHome() {
       suggestions,
     });
 
-    const upcoming = upcomingTripItems(items, now);
+    const upcoming = upcomingTripItems(items, now, activeTrip);
 
     const personal = excludeFirstThings([
       ...myTasks.map((task) => ({ key: `task-${task.id}`, icon: CheckSquare, title: task.title, meta: "Jouw taak" })),
@@ -156,7 +156,7 @@ export default function TripHome() {
 
     const score = preparationScore({
       checks: readiness?.checks || [],
-      itemCount: items.length,
+      itemCount: items.filter((item) => item.status !== "idea" && item.status !== "cancelled").length,
       missingStay: timelineWarnings(items, activeTrip.start_date ?? null, activeTrip.end_date ?? null).some((w) => w.kind === "missing_stay"),
     });
 

@@ -1,5 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import { createDecisionWithOptions } from "@/features/together/data";
+import { localInputToIso } from "./presentation";
 import { createItemFromSuggestion, type DocumentSuggestion } from "@/features/documents/data";
 
 export type AccommodationSource = "booking" | "airbnb" | "micazu" | "web";
@@ -165,4 +166,27 @@ export async function promoteDecisionWinner(
       .eq("trip_id", tripId).eq("type", "stay").eq("status", "idea").eq("booking_url", url);
   }
   return itemId;
+}
+
+/** "Dit wordt het" on an idea: planned; stays move onto the current trip dates (check-in 15:00, out 11:00). */
+export function chosenIdeaUpdate(
+  item: { type: string },
+  trip: { start_date: string | null; end_date: string | null },
+  timezone: string,
+) {
+  const update: { status: "planned"; start_at?: string | null; end_at?: string | null } = { status: candidateStayStatus(true) };
+  if (item.type === "stay" && trip.start_date && trip.end_date) {
+    update.start_at = localInputToIso(`${trip.start_date}T15:00`, timezone);
+    update.end_at = localInputToIso(`${trip.end_date}T11:00`, timezone);
+  }
+  return update;
+}
+
+export async function chooseIdeaItem(
+  trip: { id: string; start_date: string | null; end_date: string | null },
+  item: { id: string; type: string },
+  timezone: string,
+) {
+  const { error } = await supabase.from("trip_items").update(chosenIdeaUpdate(item, trip, timezone)).eq("id", item.id).eq("trip_id", trip.id);
+  if (error) throw error;
 }

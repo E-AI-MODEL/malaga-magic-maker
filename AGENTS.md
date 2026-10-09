@@ -42,8 +42,7 @@ Bounded builds; no unrelated redesigns, extra features, duplicated concepts or b
 Run build, lint, typecheck and tests; browser-test relevant flows. Report changed files, migrations, tests, failures and risks. Never report done while acceptance criteria fail.
 
 ## Koppelingen
-- Agenda-feed `trip-calendar`: secret per-user link; only the SHA-256 hash of the token is stored, feeds are revocable and return a generic 404 for unknown/revoked tokens or former members. Why: the link is a bearer secret.
-- Weather `trip-weather`: MET Norway forecast, geocoding via Nominatim with Photon as fallback; only clean "not found" answers are remembered, service failures retry after 24 hours; source attribution (MET Norway / OpenStreetMap) is mandatory in the UI. Why: licence terms and resilient geocoding.
-- Reminders `send-reminders`: called by pg_cron every 15 minutes with `x-cron-secret`; URL and secret live in `server_job_secrets` (server-only); push uses VAPID keys generated server-side in `push_server_keys`; e-mail fallback via Lovable Emails on notify.vakansie.app, whose managed footer handles unsubscribe. Why: no secret ever leaves the backend.
-- Ideas (`status = 'idea'`) never count as a booking anywhere: not in readiness, overlap, nights, outside-trip checks, upcoming items or reminders. Why: candidates are not plans.
-- IBANs and e-mail content never go to Hansie or any external service. Why: private financial and personal data.
+- `trip-calendar`: secret link per user; store only the token hash. Why: bearer secret.
+- `trip-weather`: MET Norway, Nominatim with Photon fallback; credit sources in UI. Why: licence terms.
+- `send-reminders`: pg_cron + `x-cron-secret`, URL/secret in `server_job_secrets`, VAPID keys in `push_server_keys`, e-mail via Lovable Emails. Why: secrets stay server-side.
+- Ideas never count as bookings; IBANs and mail text never go to Hansie or external services. Why: plans and privacy.

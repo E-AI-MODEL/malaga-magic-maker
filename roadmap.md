@@ -53,3 +53,6 @@
 - [x] Privacyverklaring herschreven (placeholders bedrijfsgegevens nog invullen)
 - [x] Runtime dependency audit op Node 22
 - [ ] Account verwijderen echt doorlopen met een testaccount
+
+- [x] Aan de slag: afvinklijst op Mijn reizen (5 stappen organisator, 3 voor reisgenoot), verbergen per gebruiker, verdwijnt als alles af is; ai_usage_events SELECT-policy via migratie 0013; 239 tests, typecheck, build en lint OK; ingelogd gecontroleerd op /trips
+- [x] Uitlegpagina /uitleg uit planonderdeel 5 geschrapt: homepage-stappen en FAQ dekken die uitleg al

@@ -33,7 +33,7 @@ export default function PrivacyPage() {
         <div className="mt-8 space-y-6 text-sm leading-relaxed text-foreground/90">
           <Section title="Wie wij zijn">
             <p>
-              Vakansie is een dienst van <Todo>[BEDRIJFSNAAM]</Todo>, <Todo>[ADRES]</Todo>, KvK <Todo>[KVK-NUMMER]</Todo>.
+              Vakansie is een dienst van EAI Analyse en Advies, Jacobus Visserstraat 10, 2662 JL Bergschenhoek, KvK 97303305.
               Wij zijn verantwoordelijk voor de verwerking van je gegevens. Vragen? Mail{" "}
               <a href="mailto:hello@vakansie.app" className="font-semibold text-primary hover:underline">hello@vakansie.app</a>.
             </p>

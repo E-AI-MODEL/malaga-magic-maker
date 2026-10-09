@@ -69,7 +69,10 @@ export default function TripSamen() {
   const { activeTrip, isOrganizer } = useTrip();
   const queryClient = useQueryClient();
   const [searchParams] = useSearchParams();
-  const [section, setSection] = useState<Section>(() => searchParams.get("section") === "expenses" ? "expenses" : "tasks");
+  const [section, setSection] = useState<Section>(() => {
+    const requested = searchParams.get("section");
+    return requested === "expenses" || requested === "decisions" ? requested : "tasks";
+  });
   const [taskSheetOpen, setTaskSheetOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<TaskRow | null>(null);
   const [decisionSheetOpen, setDecisionSheetOpen] = useState(false);

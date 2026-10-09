@@ -1,5 +1,14 @@
 # Roadmap
 
+## Home-ronde
+- [x] Vaste landing /trips met voorrang voor uitnodiging en expliciete next
+- [x] Home-labels, begroeting, eerstvolgende reis, Aan de slag en accountregel
+- [x] Voor jou over actieve reizen: taken, keuzes en Knaakie; gebundelde reads
+- [x] 240 tests geslaagd; lint 0 fouten/24 bestaande waarschuwingen; automatische typecheck/build OK; ingelogd Home, Naar reis en Keuzes gecontroleerd op desktop en 390px, geen overflow/runtimefouten
+- [x] Klantnamen en architectuurafspraken bijwerken
+
+Home-ronde: gewijzigd `src/App.tsx`, `src/features/trips/start.ts` en tests, `src/components/AppSidebar.tsx`, `src/components/AppLayout.tsx`, `src/pages/Trips.tsx`, `src/pages/TripHome.tsx`, `src/pages/TripSamen.tsx`; toegevoegd `src/features/trips/home-data.ts` en tests, `src/features/trips/preparation.ts`; bestaande contracttests aangepast voor de gedeelde logica. Klantnamen bijgewerkt in `docs/VAKANSIE_MASTERPLAN.md` en knowledge; afspraken in `AGENTS.md`. Geen migraties/tabellen. Knaakie met meerdere reizen/valuta getest in selectie-tests; beschikbaar ingelogd account had alleen een open keuze, geen uitgaand bedrag voor een echte betalingstest. Handmatige typecheck/build niet gestart: deze omgeving voert beide automatisch uit.
+
 - [x] Lay-outcorrecties: lichte hover, gedeelde zijbalk, Hansie onder desktopinhoud, afgelopen reizen en filtering Eerstvolgend
 - [x] Privacy: ops_delete_user wist trip_traveler_profiles via nieuwe migratie en contracttest
 - [x] Controles: 162 tests geslaagd, lint 0 fouten/18 bestaande waarschuwingen, automatische build OK; ingelogde schermen op 390/768/1024/1280px zonder horizontale overflow

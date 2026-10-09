@@ -26,9 +26,11 @@ Support signup, login, existing-user invite, logged-out invite then signup/login
 
 ## Routing
 URL tripId is authoritative (`/trips`, `/new-trip`, `/trip/:tripId[/reis|/samen]`, `/join/:inviteCode`). localStorage may only remember the last trip.
-- Resolve signed-in entry destinations with the shared trip-start helper only at `/` or default login; never redirect explicit `/trips` or trip URLs based on localStorage. Why: entry convenience must not override intentional navigation or invite destinations.
+- Signed-in `/` and default login open `/trips`; preserve pending invites and explicit next destinations, never auto-open a remembered trip. Why: the account Home is the entry point without overriding deliberate navigation.
 
 ## Travel model
+Home reads tasks, decisions, expenses and membership once per kind across authorized trip IDs; use protected parents for child reads and settle each trip/currency independently. Why: avoid per-trip query loops and unrelated debt offsets.
+Home and trip overview share trip preparation derivation. Why: their score and first action must agree.
 One generic `trip_items` model; type-specific details in metadata, no destination-specific columns. Golf is an activity; accommodation comparison is a generic decision.
 
 ## Code changes

@@ -1,13 +1,19 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { Archive, ChevronDown, ChevronRight, Plus } from "lucide-react";
+import { Archive, ArrowRight, CheckSquare, ChevronDown, ChevronRight, Plus, Receipt, Scale } from "lucide-react";
 import { Trip, useTrip } from "@/contexts/TripContext";
 import { tripTimingLabel } from "@/features/trips/presentation";
-import { activeReadinessChecks, getTripReadiness } from "@/features/readiness/data";
+import { getTripReadiness } from "@/features/readiness/data";
+import { getHomeFacts, emptyHomeFacts, personalFollowUps, type HomeFacts } from "@/features/trips/home-data";
+import { tripPreparation } from "@/features/trips/preparation";
+import { tripHasEnded } from "@/features/trips/overview";
+import { listTripItems } from "@/features/travel/data";
+import { useAuth } from "@/lib/auth";
+import { usePlanStatus } from "@/features/pro/limits";
 import { AppLayout } from "@/components/AppLayout";
 import { Button } from "@/components/ui/button";
-import { RowList, SectionLabel } from "@/components/primitives";
+import { ReadinessBar, RowItem, RowList, SectionLabel } from "@/components/primitives";
 import { TripThumb, TripVisual } from "@/components/TripVisual";
 import { GettingStarted } from "@/features/onboarding/GettingStarted";
 import heroHome from "@/assets/hero-home.jpg";
@@ -43,22 +49,16 @@ function sortTrips(trips: Trip[]) {
  * row with a small photo, the dates, the countdown and the preparation line.
  * Everything else stays a plain list row.
  */
-function NextTrip({ trip }: { trip: Trip }) {
+function NextTrip({ trip, facts, userId }: { trip: Trip; facts: HomeFacts; userId?: string }) {
   const readinessQuery = useQuery({
     queryKey: ["trip-readiness", trip.id],
     queryFn: () => getTripReadiness(trip.id),
   });
 
-  const readiness = readinessQuery.data;
-  const attention = readiness ? activeReadinessChecks(readiness) : [];
-  const attentionTotal = attention.reduce((total, check) => total + check.attention_count, 0);
-  const sentence = readinessQuery.isLoading
-    ? "Voorbereiding laden…"
-    : !readiness
-      ? "Voorbereiding laden…"
-      : readiness.status === "ready"
-        ? "Alles geregeld"
-        : `${Math.max(1, attentionTotal)} dingen te doen`;
+  const itemsQuery = useQuery({ queryKey: ["trip-items", trip.id], queryFn: () => listTripItems(trip.id) });
+  const ended = tripHasEnded(trip, trip.timezone || "Europe/Amsterdam");
+  const preparation = tripPreparation({ activeTrip: trip, items: itemsQuery.data || [], tasks: facts.tasks.filter((task) => task.trip_id === trip.id), decisions: facts.decisions.filter((decision) => decision.trip_id === trip.id), readiness: readinessQuery.data, userId, ended });
+  const first = preparation.things[0];
 
   return (
     <section className="mt-5 border-y border-border bg-card px-4 py-4">
@@ -84,7 +84,13 @@ function NextTrip({ trip }: { trip: Trip }) {
         <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground/60" />
       </Link>
 
-      <p className="mt-3 text-xs text-muted-foreground">{sentence}</p>
+      {ended ? <p className="mt-3 text-xs text-muted-foreground">Deze reis is afgelopen.</p> : readinessQuery.data && itemsQuery.data ? (
+        <div className="mt-3 space-y-3">
+          <ReadinessBar done={preparation.done} total={preparation.total} sentence={`${preparation.done} van ${preparation.total} geregeld`} />
+          {first && <Link to={first.href} className="block text-sm text-muted-foreground hover:text-foreground">{first.title}</Link>}
+        </div>
+      ) : <p className="mt-3 text-xs text-muted-foreground">Voorbereiding laden…</p>}
+      <Button asChild variant="outline" size="sm" className="mt-4"><Link to={`/trip/${trip.id}`}>Naar reis<ArrowRight className="ml-2 h-4 w-4" /></Link></Button>
     </section>
   );
 }
@@ -107,6 +113,8 @@ function TripRow({ trip }: { trip: Trip }) {
 
 export default function Trips() {
   const { userTrips, loading } = useTrip();
+  const { user, profile } = useAuth();
+  const { status: plan } = usePlanStatus();
   const [archiveOpen, setArchiveOpen] = useState(false);
 
   const { activeTrips, archivedTrips } = useMemo(() => ({
@@ -114,13 +122,20 @@ export default function Trips() {
     archivedTrips: sortTrips(userTrips.filter((trip) => trip.status === "archived")),
   }), [userTrips]);
 
-  const [heroTrip, ...otherTrips] = activeTrips;
+  const nextTrips = activeTrips.filter((trip) => !tripHasEnded(trip, trip.timezone || "Europe/Amsterdam"));
+  const heroTrip = nextTrips[0];
+  const otherTrips = activeTrips.filter((trip) => trip.id !== heroTrip?.id);
+  const tripIds = activeTrips.map((trip) => trip.id);
+  const factsQuery = useQuery({ queryKey: ["home-facts", user?.id, tripIds], queryFn: () => getHomeFacts(tripIds), enabled: Boolean(user && !loading), staleTime: 0 });
+  const facts = factsQuery.data || emptyHomeFacts;
+  const personal = user ? personalFollowUps(activeTrips, facts, user.id) : [];
+  const firstName = profile?.display_name.trim().split(/\s+/)[0];
 
   return (
     <AppLayout>
       <div className="mx-auto max-w-3xl px-5 pb-16 pt-5">
         <div className="flex items-center justify-between gap-3">
-          <h1 className="font-display uppercase text-[30px] font-bold leading-tight">Mijn reizen</h1>
+          <h1 className="min-w-0 break-words font-display text-[30px] font-bold leading-tight">{firstName ? `Hoi ${firstName}` : "Hoi"}</h1>
           <Button asChild variant="outline" size="sm" className="shrink-0 rounded-md bg-card">
             <Link to="/new-trip"><Plus className="mr-1.5 h-3.5 w-3.5" />Nieuwe reis</Link>
           </Button>
@@ -130,10 +145,11 @@ export default function Trips() {
           <div className="mt-5 h-20 animate-pulse rounded-[14px] bg-secondary" />
         ) : heroTrip ? (
           <>
-            <NextTrip trip={heroTrip} />
+            <div className="mt-6"><SectionLabel>Eerstvolgende reis</SectionLabel></div>
+            <NextTrip trip={heroTrip} facts={facts} userId={user?.id} />
             <GettingStarted trip={heroTrip} hasAnyTrip={userTrips.length > 0} />
           </>
-        ) : (
+        ) : activeTrips.length ? <GettingStarted trip={activeTrips[0]} hasAnyTrip={userTrips.length > 0} /> : (
           <div className="mt-6">
             <div className="relative h-[340px] w-full overflow-hidden rounded-[20px]">
               <img src={heroHome} alt="Terras met uitzicht op zee en een opengeslagen reisnotitieboek" width={1280} height={720} loading="eager" className="h-full w-full object-cover" />
@@ -156,15 +172,21 @@ export default function Trips() {
           </div>
         )}
 
+        {!loading && <section className="mt-7 border-t border-rule pt-1">
+          <SectionLabel>Voor jou</SectionLabel>
+          {factsQuery.isPending ? <p className="py-3 text-sm text-muted-foreground">Laden…</p> : factsQuery.isError ? <p className="py-3 text-sm text-muted-foreground">Je overzicht is nu niet beschikbaar. <Button variant="link" onClick={() => void factsQuery.refetch()}>Opnieuw proberen</Button></p> : personal.length ? <RowList>
+            {personal.map((item) => <RowItem key={item.key} icon={item.kind === "task" ? CheckSquare : item.kind === "decision" ? Scale : Receipt} title={item.title} meta={item.tripName} to={item.href} />)}
+          </RowList> : <p className="py-3 text-sm text-muted-foreground">Niets dat op jou wacht.</p>}
+        </section>}
+
         {otherTrips.length > 0 && (
           <section className="mt-8 border-t border-rule pt-1">
             <SectionLabel>Andere reizen</SectionLabel>
             <RowList className="mt-0.5">
-              {otherTrips.map((trip) => <NextTrip key={trip.id} trip={trip} />)}
+              {otherTrips.map((trip) => <TripRow key={trip.id} trip={trip} />)}
             </RowList>
           </section>
         )}
-
         {archivedTrips.length > 0 && (
           <section className="mt-6 border-t border-rule">
             <Button
@@ -185,6 +207,10 @@ export default function Trips() {
             )}
           </section>
         )}
+        <footer className="mt-8 flex flex-wrap items-center justify-between gap-3 border-t border-rule py-4 text-sm text-muted-foreground">
+          <span>{plan ? plan.plan === "free" ? `Gratis · ${plan.tripLimit ?? 1} reis · ${plan.hansieDayLimit} Hansie-vragen per dag` : "Pro" : "Account laden…"}</span>
+          <Button asChild variant="link" className="h-auto p-0"><Link to="/profiel">Profiel</Link></Button>
+        </footer>
       </div>
     </AppLayout>
   );

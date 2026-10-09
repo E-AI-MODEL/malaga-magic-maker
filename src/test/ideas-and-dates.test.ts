@@ -3,6 +3,9 @@ import { readFileSync } from "node:fs";
 import { candidateStayStatus, chosenIdeaUpdate, decisionWinner } from "@/features/travel/accommodation";
 import { dateShiftAnchor, itemsOutsideTrip, shiftItemDates, timelineWarnings } from "@/features/travel/presentation";
 import { preparationScore, upcomingTripItems } from "@/features/trips/overview";
+import { tripPreparation } from "@/features/trips/preparation";
+import type { Trip } from "@/contexts/TripContext";
+import type { TripItemRow } from "@/integrations/supabase/database";
 
 const item = (id: string, status: string, start: string, end: string | null = null, type = "stay") =>
   ({ id, type, title: id, status, start_at: start, end_at: end, booking_reference: null });
@@ -43,8 +46,11 @@ describe("ideas never count as bookings", () => {
     expect(sql).toContain("i.status NOT IN ('idea','cancelled')");
   });
   it("preparation score item count excludes ideas", () => {
-    const home = readFileSync("src/pages/TripHome.tsx", "utf8");
-    expect(home).toContain('itemCount: items.filter((item) => item.status !== "idea" && item.status !== "cancelled").length');
+    const activeTrip = { id: "trip", start_date: null, end_date: null } as Trip;
+    const result = tripPreparation({ activeTrip, items: [item("idea", "idea", "2026-10-15"), item("cancelled", "cancelled", "2026-10-15")] as TripItemRow[], tasks: [], decisions: [], ended: false });
+    expect(result.done).toBe(1);
+    const planned = tripPreparation({ activeTrip, items: [item("planned", "planned", "2026-10-15")] as TripItemRow[], tasks: [], decisions: [], ended: false });
+    expect(planned.done).toBe(2);
     expect(preparationScore({ checks: [], itemCount: 0, missingStay: false }).done).toBe(1);
   });
 });

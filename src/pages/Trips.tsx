@@ -9,6 +9,7 @@ import { AppLayout } from "@/components/AppLayout";
 import { Button } from "@/components/ui/button";
 import { RowList, SectionLabel } from "@/components/primitives";
 import { TripThumb, TripVisual } from "@/components/TripVisual";
+import { GettingStarted } from "@/features/onboarding/GettingStarted";
 import heroHome from "@/assets/hero-home.jpg";
 
 function formatDateRange(startDate: string | null, endDate: string | null) {

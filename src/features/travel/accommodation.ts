@@ -190,3 +190,64 @@ export async function chooseIdeaItem(
   const { error } = await supabase.from("trip_items").update(chosenIdeaUpdate(item, trip, timezone)).eq("id", item.id).eq("trip_id", trip.id);
   if (error) throw error;
 }
+
+type IdeaLike = { id: string; type: string; status: string };
+
+/** Choosing a stay idea makes it the stay: the other stay ideas go. Other idea types may be chosen many times. */
+export function ideasRemovedByChoice<T extends IdeaLike>(chosen: IdeaLike, items: T[]): T[] {
+  if (chosen.type !== "stay") return [];
+  return items.filter((item) => item.id !== chosen.id && item.type === "stay" && item.status === "idea");
+}
+
+/** The open "Waar verblijven we?" choice that a chosen stay settles, if any. */
+export function accommodationDecisionClosedByChoice<T extends { title: string; status: string }>(chosen: { type: string }, decisions: T[]): T | null {
+  if (chosen.type !== "stay") return null;
+  return decisions.find((d) => d.status === "open" && d.title.trim() === ACCOMMODATION_DECISION_TITLE) || null;
+}
+
+export type ChoiceUndo = {
+  item: { id: string; status: string; start_at: string | null; end_at: string | null };
+  removed: Record<string, unknown>[];
+  closedDecisionId: string | null;
+};
+
+/** "Dit wordt het" with cleanup; returns what is needed to put everything back. */
+export async function chooseIdeaAsFinal(
+  trip: { id: string; start_date: string | null; end_date: string | null },
+  item: { id: string; type: string; status: string; start_at: string | null; end_at: string | null },
+  items: Array<IdeaLike & Record<string, unknown>>,
+  timezone: string,
+): Promise<ChoiceUndo> {
+  const removed = ideasRemovedByChoice(item, items);
+  let closedDecisionId: string | null = null;
+  if (item.type === "stay") {
+    const { data } = await supabase.from("decisions").select("id,title,status").eq("trip_id", trip.id).eq("status", "open");
+    const decision = accommodationDecisionClosedByChoice(item, data || []);
+    if (decision) {
+      const { error } = await supabase.from("decisions").update({ status: "closed" }).eq("id", decision.id).eq("trip_id", trip.id);
+      if (error) throw error;
+      closedDecisionId = decision.id;
+    }
+  }
+  await chooseIdeaItem(trip, item, timezone);
+  if (removed.length > 0) {
+    const { error } = await supabase.from("trip_items").delete().eq("trip_id", trip.id).in("id", removed.map((r) => r.id));
+    if (error) throw error;
+  }
+  return { item: { id: item.id, status: item.status, start_at: item.start_at, end_at: item.end_at }, removed, closedDecisionId };
+}
+
+export async function undoIdeaChoice(tripId: string, undo: ChoiceUndo) {
+  const { error } = await supabase.from("trip_items")
+    .update({ status: undo.item.status, start_at: undo.item.start_at, end_at: undo.item.end_at })
+    .eq("id", undo.item.id).eq("trip_id", tripId);
+  if (error) throw error;
+  if (undo.removed.length > 0) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error: insertError } = await supabase.from("trip_items").insert(undo.removed as any);
+    if (insertError) throw insertError;
+  }
+  if (undo.closedDecisionId) {
+    await supabase.from("decisions").update({ status: "open" }).eq("id", undo.closedDecisionId).eq("trip_id", tripId);
+  }
+}

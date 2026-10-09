@@ -17,6 +17,8 @@ import { deleteTripItem, listTripItems, TripItemRow } from "@/features/travel/da
 import { TripItemSheet } from "@/features/travel/TripItemSheet";
 import { BookingPasteSheet } from "@/features/travel/BookingPasteSheet";
 import { AccommodationSearchSheet } from "@/features/travel/AccommodationSearchSheet";
+import { CalendarFeedSheet } from "@/features/travel/CalendarFeedSheet";
+import { CalendarPlus } from "lucide-react";
 import { DocumentsSection } from "@/features/documents/DocumentsSection";
 import {
   DayHeader,
@@ -85,6 +87,7 @@ export default function TripReis() {
   const queryClient = useQueryClient();
   const [sheetOpen, setSheetOpen] = useState(false);
   const [bookingSheetOpen, setBookingSheetOpen] = useState(false);
+  const [calendarOpen, setCalendarOpen] = useState(false);
   const [staySearchOpen, setStaySearchOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<TripItemRow | null>(null);
   const [createType, setCreateType] = useState<string>("custom");
@@ -188,6 +191,9 @@ export default function TripReis() {
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => setStaySearchOpen(true)}>
                   <Search className="mr-2 h-4 w-4" strokeWidth={1.75} />Verblijf zoeken
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setCalendarOpen(true)}>
+                  <CalendarPlus className="mr-2 h-4 w-4" strokeWidth={1.75} />Zet in je agenda
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuLabel className="text-[11px] font-semibold uppercase text-muted-foreground">Zelf invullen</DropdownMenuLabel>
@@ -379,6 +385,7 @@ export default function TripReis() {
         groupSize={activeTrip.group_size ?? null}
         onSaved={refreshItems}
       />
+      {!readOnly && <CalendarFeedSheet open={calendarOpen} onOpenChange={setCalendarOpen} tripId={activeTrip.id} />}
       <BookingPasteSheet
         open={bookingSheetOpen}
         onOpenChange={setBookingSheetOpen}

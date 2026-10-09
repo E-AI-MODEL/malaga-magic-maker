@@ -313,6 +313,41 @@ export type Database = {
         }
         Relationships: []
       }
+      calendar_feeds: {
+        Row: {
+          created_at: string
+          id: string
+          revoked_at: string | null
+          token_hash: string
+          trip_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          revoked_at?: string | null
+          token_hash: string
+          trip_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          revoked_at?: string | null
+          token_hash?: string
+          trip_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "calendar_feeds_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "trip"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       client_error_events: {
         Row: {
           area: string
@@ -1577,6 +1612,7 @@ export type Database = {
     Functions: {
       accept_trip_invite: { Args: { p_token: string }; Returns: string }
       consume_hansie_quota: { Args: { p_trip_id: string }; Returns: Json }
+      create_calendar_feed: { Args: { p_trip_id: string }; Returns: string }
       create_decision_with_options: {
         Args: {
           p_description: string
@@ -1746,6 +1782,8 @@ export type Database = {
         }
         Returns: Json
       }
+      resolve_calendar_feed: { Args: { p_token_hash: string }; Returns: string }
+      revoke_calendar_feed: { Args: { p_trip_id: string }; Returns: boolean }
       revoke_invites_for_user_deletion: {
         Args: { p_user_id: string }
         Returns: number

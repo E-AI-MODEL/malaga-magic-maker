@@ -5,7 +5,7 @@
 - [x] Controles: 162 tests geslaagd, lint 0 fouten/18 bestaande waarschuwingen, automatische build OK; ingelogde schermen op 390/768/1024/1280px zonder horizontale overflow
 - [ ] Automatische typecheck-uitkomst bevestigen — geen afzonderlijk resultaat beschikbaar; handmatig uitvoeren is in deze omgeving niet toegestaan
 - [ ] Naar Knaakie met openstaande bedragen browsertesten — gecontroleerde afgelopen reis heeft geen openstaande bedragen; filter en einddatumregels wel getest
-- [ ] Volgende stap: agenda (stap 3), nog niet starten in deze correctieronde
+- [x] Stap 3 agenda (.ics): persoonlijke link, intrekken, Reis-menu, tests; TripSettings-label en workflowchecks
 
 - [x] Startscherm: actieve/laatste reis openen, Mijn reizen vereenvoudigen en voortgang alleen op Overzicht
 - [x] Startscherm: 148 tests geslaagd; lint 0 fouten/18 bestaande waarschuwingen; automatische build OK
@@ -36,4 +36,4 @@
 
 - [x] Koppelingen stap 1: Open in Kaarten
 - [x] Koppelingen stap 2: Verrekenen heet nu Knaakie, met betaalverzoek (delen/WhatsApp/kopiëren) en privé-IBAN in Profiel
-- [ ] Koppelingen stap 3-5 (agenda, weer, push)
+- [ ] Koppelingen stap 4-5 (weer, push)

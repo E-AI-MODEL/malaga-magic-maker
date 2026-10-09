@@ -104,11 +104,7 @@ export default function TripSettings() {
 
   return (
     <AppLayout><div className="mx-auto max-w-xl px-5 py-8 sm:py-12">
-      <Button asChild variant="ghost" className="-ml-3 mb-6">
-        <Link to={`/trip/${activeTrip.id}`}><ArrowLeft className="mr-2 h-4 w-4" />Overzicht</Link>
-      </Button>
-
-      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">Beheer</p>
+      <p className="text-xs font-semibold text-primary">Deze reis</p>
       <h1 className="mt-2 font-display text-3xl font-extrabold tracking-normal">Reisinstellingen</h1>
       <p className="mt-2 text-sm text-muted-foreground">Wijzig de naam, bestemming en data van je reis.</p>
 

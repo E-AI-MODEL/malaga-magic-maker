@@ -122,7 +122,7 @@ Deno.serve(async (req) => {
         if (channel === "push") {
           server ??= await pushServer(db);
           let ok = false;
-          for (const sub of liveSubs) {
+          for (const sub of [...liveSubs]) {
             try {
               await server.subscribe({ endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } })
                 .pushTextMessage(JSON.stringify({ title: reminder.title, body: reminder.body, url }), { ttl: 6 * 3600 });
@@ -133,13 +133,13 @@ Deno.serve(async (req) => {
               if (e instanceof webpush.PushMessageError) await e.response.text().catch(() => "");
               if (pushFailureAction(status) === "delete") {
                 await db.from("push_subscriptions").delete().eq("id", sub.id);
+                liveSubs = liveSubs.filter((s: { id: string }) => s.id !== sub.id);
                 stats.removed++;
               } else {
                 await db.from("push_subscriptions").update({ failed_count: (sub.failed_count || 0) + 1 }).eq("id", sub.id);
               }
             }
           }
-          liveSubs = liveSubs.filter(() => true);
           if (ok) delivered = "push";
           channel = nextChannel({ ...opts, pushSucceeded: ok });
         }

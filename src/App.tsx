@@ -11,7 +11,7 @@ import { ActivityLogProvider } from "@/contexts/ActivityLogContext";
 import { ClientErrorReporter } from "@/features/observability/ClientErrorReporter";
 import { AppErrorBoundary } from "@/features/observability/AppErrorBoundary";
 import Login from "./pages/Login";
-import { pendingInvitePath, signedInStartPath } from "@/features/trips/start";
+import { pendingInvitePath } from "@/features/trips/start";
 
 const Trips = lazy(() => import("./pages/Trips"));
 const Landing = lazy(() => import("./pages/Landing"));
@@ -94,14 +94,12 @@ function TripRouteGuard({ children }: { children: ReactNode }) {
 }
 
 function SignedInStart() {
-  const { userTrips, loading } = useTrip();
-  if (loading) return <PageLoader />;
   const invite = pendingInvitePath(() => localStorage.getItem("vakansie_pending_invite"));
   if (invite) {
     localStorage.removeItem("vakansie_pending_invite");
     return <Navigate to={invite} replace />;
   }
-  return <Navigate to={signedInStartPath(userTrips, localStorage.getItem("vakansie_recent_trip"))} replace />;
+  return <Navigate to="/trips" replace />;
 }
 
 function AppRoutes() {

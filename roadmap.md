@@ -1,5 +1,12 @@
 # Roadmap
 
+## Home-ronde
+- [ ] Vaste landing /trips met voorrang voor uitnodiging en expliciete next
+- [ ] Home-labels, begroeting, eerstvolgende reis, Aan de slag en accountregel
+- [ ] Voor jou over actieve reizen: taken, keuzes en Knaakie; gebundelde reads
+- [ ] Selectie- en landingtests, lint, automatische typecheck/build en ingelogde browsercontrole
+- [ ] Klantnamen en architectuurafspraken bijwerken
+
 - [x] Lay-outcorrecties: lichte hover, gedeelde zijbalk, Hansie onder desktopinhoud, afgelopen reizen en filtering Eerstvolgend
 - [x] Privacy: ops_delete_user wist trip_traveler_profiles via nieuwe migratie en contracttest
 - [x] Controles: 162 tests geslaagd, lint 0 fouten/18 bestaande waarschuwingen, automatische build OK; ingelogde schermen op 390/768/1024/1280px zonder horizontale overflow

@@ -1,5 +1,5 @@
 import { ReactNode } from "react";
-import { Check, ChevronLeft, MoreHorizontal, Plane, Plus, Settings, User } from "lucide-react";
+import { Check, ChevronLeft, Home, MoreHorizontal, Plus, Settings, User } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { BottomNav } from "./BottomNav";
 import { AppSidebar } from "./AppSidebar";
@@ -30,7 +30,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
   const isTripOverview = /^\/trip\/[^/]+\/?$/.test(pathname);
   const isTripScreen = /^\/trip\/[^/]+(?:\/(?:reis|samen|settings))?\/?$/.test(pathname);
   const showHansie = isTripScreen && activeTrip?.status !== "archived";
-  const title = pathname === "/trips" ? "Mijn reizen" : pathname === "/profiel" ? "Profiel" : activeTrip?.name;
+  const title = pathname === "/trips" ? "Home" : pathname === "/profiel" ? "Profiel" : activeTrip?.name;
   const backPath = isTripScreen && !isTripOverview && activeTrip ? `/trip/${activeTrip.id}` : "/trips";
 
   if (isMobile) {
@@ -44,9 +44,9 @@ export function AppLayout({ children }: { children: ReactNode }) {
               size="icon"
               onClick={() => navigate(backPath)}
               className="h-9 w-9 text-muted-foreground"
-              aria-label={backPath === "/trips" ? "Terug naar mijn reizen" : "Terug naar overzicht"}
+              aria-label={backPath === "/trips" ? "Naar Home" : "Terug naar overzicht"}
             >
-              <ChevronLeft className="h-5 w-5" strokeWidth={1.75} />
+              {pathname === "/trips" ? <Home className="h-5 w-5" strokeWidth={1.75} /> : <ChevronLeft className="h-5 w-5" strokeWidth={1.75} />}
             </Button>
 
             <h1 className="min-w-0 truncate px-2 text-center font-ui text-[15px] font-semibold leading-tight">
@@ -85,7 +85,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
                 )}
 
                 <DropdownMenuItem onClick={() => navigate("/trips")}>
-                  <Plane className="mr-2 h-4 w-4" />Mijn reizen
+                  <Home className="mr-2 h-4 w-4" />Home
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => navigate("/profiel")}>
                   <User className="mr-2 h-4 w-4" />Profiel

@@ -131,6 +131,7 @@ export default function Trips() {
         ) : heroTrip ? (
           <>
             <NextTrip trip={heroTrip} />
+            <GettingStarted trip={heroTrip} hasAnyTrip={userTrips.length > 0} />
           </>
         ) : (
           <div className="mt-6">

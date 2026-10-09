@@ -28,8 +28,7 @@ export function isPushEndpoint(endpoint: string): boolean {
   } catch { return false; }
 }
 
-// deno-lint-ignore no-explicit-any
-type Db = any;
+type Db = ReturnType<typeof createClient>;
 
 async function pushServer(db: Db) {
   const { data } = await db.from("push_server_keys").select("public_jwk, private_jwk").eq("id", 1).maybeSingle();

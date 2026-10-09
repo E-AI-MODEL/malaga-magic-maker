@@ -233,13 +233,20 @@ export function timelineWarnings(items: WarnItem[], tripStart: string | null, tr
   return warnings;
 }
 
-/** Items (not ideas or cancelled) with a start before the first or after the last trip day (UTC date). */
-export function itemsOutsideTrip<T extends { status: string; start_at: string | null }>(items: T[], tripStart: string, tripEnd: string): T[] {
+/** Items (not ideas or cancelled) starting before the first or after the last trip day, or ending after the last trip day (UTC date). */
+export function itemsOutsideTrip<T extends { status: string; start_at: string | null; end_at?: string | null }>(items: T[], tripStart: string, tripEnd: string): T[] {
   return items.filter((i) => {
     if (i.status === "idea" || i.status === "cancelled" || !i.start_at) return false;
     const day = i.start_at.slice(0, 10);
-    return day < tripStart || day > tripEnd;
+    if (day < tripStart || day > tripEnd) return true;
+    return !!i.end_at && i.end_at.slice(0, 10) > tripEnd;
   });
+}
+
+/** Which date pair to shift by: the start move, or the end move when only the end changed. */
+export function dateShiftAnchor(oldStart: string, newStart: string, oldEnd: string | null, newEnd: string): [string, string] {
+  if (oldStart !== newStart || !oldEnd) return [oldStart, newStart];
+  return [oldEnd, newEnd];
 }
 
 /** Shift dates by the same number of days the trip start moved. */

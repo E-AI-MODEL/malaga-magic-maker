@@ -9,7 +9,7 @@ import { AppLayout } from "@/components/AppLayout";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { listTripItems } from "@/features/travel/data";
-import { itemsOutsideTrip, shiftItemDates } from "@/features/travel/presentation";
+import { dateShiftAnchor, itemsOutsideTrip, shiftItemDates } from "@/features/travel/presentation";
 
 const currencies = ["EUR", "USD", "GBP", "CHF"];
 
@@ -96,9 +96,10 @@ export default function TripSettings() {
       const items = await listTripItems(activeTrip.id).catch(() => []);
       const outside = itemsOutsideTrip(items, startDate, endDate);
       const n = outside.length;
-      if (n > 0 && oldStart !== startDate && window.confirm(`Wil je ${n} ${n === 1 ? "onderdeel" : "onderdelen"} meeschuiven met je nieuwe reisdata?`)) {
+      const [fromDate, toDate] = dateShiftAnchor(oldStart, startDate, activeTrip.end_date, endDate);
+      if (n > 0 && fromDate !== toDate && window.confirm(`Wil je ${n} ${n === 1 ? "onderdeel" : "onderdelen"} meeschuiven met je nieuwe reisdata?`)) {
         const results = await Promise.all(outside.map((item) =>
-          supabase.from("trip_items").update(shiftItemDates(item, oldStart, startDate)).eq("id", item.id).eq("trip_id", activeTrip.id),
+          supabase.from("trip_items").update(shiftItemDates(item, fromDate, toDate)).eq("id", item.id).eq("trip_id", activeTrip.id),
         ));
         if (results.some((r) => r.error)) setError("Niet alle onderdelen konden worden verschoven.");
         await queryClient.invalidateQueries({ queryKey: ["trip-items", activeTrip.id] });

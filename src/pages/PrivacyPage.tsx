@@ -43,7 +43,7 @@ export default function PrivacyPage() {
               <li>Kosten en verdeling binnen de reis. Je IBAN en rekeninghouder zie alleen jij; ze komen alleen in betaalverzoeken die jij zelf verstuurt.</li>
               <li>Reizigerswensen. Dieet en allergieën zijn gezondheidsgegevens; die bewaren we alleen als je daar toestemming voor geeft.</li>
               <li>Betalingen voor Pro lopen via Stripe. Wij zien geen kaartgegevens, alleen dat en wanneer je betaald hebt.</li>
-              <li>Je vragen aan Hansie en zijn antwoorden.</li>
+              <li>Je vragen aan Hansie. Die gaan samen met de benodigde reisgegevens naar de AI-dienst om een antwoord te maken. Wij bewaren de gesprekken niet; we tellen alleen hoeveel vragen je stelt, voor de dagelijkse limiet.</li>
               <li>Pushabonnementen als je meldingen aanzet op een apparaat.</li>
               <li>Technische foutmeldingen. Die zijn aan je account gekoppeld, zodat we fouten kunnen oplossen; ze zijn dus niet anoniem.</li>
               <li>Lokale opslag in je browser, bijvoorbeeld om ingelogd te blijven en je laatste reis te onthouden. We gebruiken geen trackingcookies.</li>
@@ -83,7 +83,7 @@ export default function PrivacyPage() {
 
           <Section title="Hoe lang we gegevens bewaren">
             <p>
-              Zolang je account bestaat. Verwijder je je account, dan wissen we alles direct. Alleen wat we wettelijk moeten
+              Zolang je account bestaat. Verwijder je je account, dan wissen we je account, je wensen, je betaalgegevens, je meldingen en je eigen reizen direct. Wat je in een gedeelde reis hebt gezet (zoals onderdelen, kosten en documenten) blijft beschikbaar voor je reisgenoten, omdat het bij die reis hoort. Wil je dat ook laten verwijderen, mail ons dan. Alleen wat we wettelijk moeten
               bewaren blijft: betaalgegevens worden 7 jaar bewaard bij Stripe.
             </p>
           </Section>

@@ -57,6 +57,13 @@
       "when": 1791529792714,
       "tag": "0007_trip_weather",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1791532438885,
+      "tag": "0008_readiness_ignores_ideas",
+      "breakpoints": true
     }
   ]
 }

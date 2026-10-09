@@ -124,7 +124,7 @@ export function AccommodationSearchSheet({
     setSavingUrl(candidate.url);
     setError("");
     try {
-      await addCandidateAsStay(tripId, candidate, period);
+      await addCandidateAsStay(tripId, candidate, { startDate: startDate || period.startDate, endDate: endDate || period.endDate }, "planned");
       setAddedUrls((current) => [...current, candidate.url]);
       await onSaved();
     } catch (cause) {
@@ -225,10 +225,10 @@ export function AccommodationSearchSheet({
                           Bekijk aanbieding
                         </a>
                       </div>
-                      {added ? (
+                      {shortlisted ? null : added ? (
                         <span className="flex shrink-0 items-center gap-1 text-[13px] font-medium text-muted-foreground">
                           <Check className="h-3.5 w-3.5" strokeWidth={2} />
-                          Op tijdlijn
+                          Gekozen
                         </span>
                       ) : (
                         <Button
@@ -239,7 +239,7 @@ export function AccommodationSearchSheet({
                           disabled={savingUrl === candidate.url}
                           onClick={() => void addStay(candidate)}
                         >
-                          {savingUrl === candidate.url ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Op tijdlijn"}
+                          {savingUrl === candidate.url ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Dit wordt het"}
                         </Button>
                       )}
                     </div>
@@ -251,11 +251,11 @@ export function AccommodationSearchSheet({
                 type="button"
                 variant="outline"
                 className="w-full"
-                disabled={shortlisting || shortlisted}
+                disabled={shortlisting || shortlisted || addedUrls.length > 0}
                 onClick={() => void makeShortlist()}
               >
                 {shortlisting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                {shortlisted ? "Shortlist staat bij Samen > Keuzes" : "Shortlist als keuze voor de groep"}
+                {shortlisted ? "Shortlist staat bij Samen > Keuzes" : "Laat de groep kiezen"}
               </Button>
             </>
           )}

@@ -48,7 +48,9 @@ describe("geocoding and cache", () => {
   it("re-geocodes only when the destination changes or coordinates are missing", () => {
     expect(needsGeocode(base)).toBe(false);
     expect(needsGeocode({ ...base, destination_name: "Rome" })).toBe(true);
-    expect(needsGeocode({ ...base, destination_latitude: null })).toBe(true);
+    expect(needsGeocode({ ...base, destination_latitude: null, destination_geocoded_for: null })).toBe(true);
+    // A failed lookup is remembered: same destination, no coordinates → no new request.
+    expect(needsGeocode({ ...base, destination_latitude: null, destination_longitude: null })).toBe(false);
     expect(needsGeocode({ ...base, destination_name: null })).toBe(false);
   });
   it("treats the cache as fresh until expires_at", () => {

@@ -6,12 +6,17 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { AppLayout } from "@/components/AppLayout";
+import { useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { listTripItems } from "@/features/travel/data";
+import { itemsOutsideTrip, shiftItemDates } from "@/features/travel/presentation";
 
 const currencies = ["EUR", "USD", "GBP", "CHF"];
 
 export default function TripSettings() {
   const { activeTrip, isOrganizer, updateTrip, archiveTrip, restoreTrip } = useTrip();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [name, setName] = useState("");
   const [destination, setDestination] = useState("");
   const [country, setCountry] = useState("");
@@ -84,6 +89,21 @@ export default function TripSettings() {
       return;
     }
     setSaved(true);
+
+    // Offer to move items that now fall outside the new trip dates along with the trip.
+    const oldStart = activeTrip.start_date;
+    if (oldStart && startDate && endDate && (oldStart !== startDate || activeTrip.end_date !== endDate)) {
+      const items = await listTripItems(activeTrip.id).catch(() => []);
+      const outside = itemsOutsideTrip(items, startDate, endDate);
+      const n = outside.length;
+      if (n > 0 && oldStart !== startDate && window.confirm(`Wil je ${n} ${n === 1 ? "onderdeel" : "onderdelen"} meeschuiven met je nieuwe reisdata?`)) {
+        const results = await Promise.all(outside.map((item) =>
+          supabase.from("trip_items").update(shiftItemDates(item, oldStart, startDate)).eq("id", item.id).eq("trip_id", activeTrip.id),
+        ));
+        if (results.some((r) => r.error)) setError("Niet alle onderdelen konden worden verschoven.");
+        await queryClient.invalidateQueries({ queryKey: ["trip-items", activeTrip.id] });
+      }
+    }
   };
 
   const handleArchive = async () => {

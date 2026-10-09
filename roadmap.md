@@ -37,4 +37,5 @@
 - [x] Koppelingen stap 1: Open in Kaarten
 - [x] Koppelingen stap 2: Verrekenen heet nu Knaakie, met betaalverzoek (delen/WhatsApp/kopiëren) en privé-IBAN in Profiel
 - [x] Stap 4 weer: MET Norway + Nominatim, weerstrook op Overzicht, weer voor Hansie, actieve agenda-link tonen
+- [x] Verblijfsideeën: kandidaten als idee, winnaar op tijdlijn, ideeën apart op Reis, buiten-reisdata waarschuwing en meeschuiven, rustigere rijen, weerstrook Toscane opgelost
 - [ ] Koppelingen stap 5 (push)

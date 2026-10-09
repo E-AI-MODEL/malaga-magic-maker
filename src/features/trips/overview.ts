@@ -9,9 +9,19 @@ export function tripHasEnded(trip: { status: string; end_date: string | null }, 
   return trip.end_date < `${part("year")}-${part("month")}-${part("day")}`;
 }
 
-export function upcomingTripItems<T extends { status: string; start_at: string | null }>(items: T[], now = Date.now()): T[] {
+export function upcomingTripItems<T extends { status: string; start_at: string | null }>(
+  items: T[],
+  now = Date.now(),
+  trip?: { start_date: string | null; end_date: string | null },
+): T[] {
+  const withinTrip = (startAt: string) => {
+    const day = startAt.slice(0, 10);
+    if (trip?.start_date && day < trip.start_date) return false;
+    if (trip?.end_date && day > trip.end_date) return false;
+    return true;
+  };
   return items
-    .filter((item) => ["planned", "confirmed", "paid"].includes(item.status) && item.start_at && new Date(item.start_at).getTime() >= now)
+    .filter((item) => ["planned", "confirmed", "paid"].includes(item.status) && item.start_at && new Date(item.start_at).getTime() >= now && withinTrip(item.start_at))
     .sort((a, b) => new Date(a.start_at || 0).getTime() - new Date(b.start_at || 0).getTime())
     .slice(0, 3);
 }

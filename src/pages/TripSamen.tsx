@@ -1,3 +1,5 @@
+import { ACCOMMODATION_DECISION_TITLE, decisionWinner, promoteDecisionWinner } from "@/features/travel/accommodation";
+import { toast } from "sonner";
 import { useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -225,6 +227,22 @@ export default function TripSamen() {
     } catch (error) {
       console.error("decision vote failed", error);
       setActionError("Je stem kon niet worden opgeslagen.");
+    }
+  };
+
+  const placeWinner = async (decision: DecisionBundle) => {
+    const winner = decisionWinner(decision.options);
+    if (!winner || !activeTrip) return;
+    setActionError("");
+    try {
+      await promoteDecisionWinner(activeTrip.id, winner.option, winner.url, {
+        startDate: activeTrip.start_date || "",
+        endDate: activeTrip.end_date || "",
+      });
+      toast.success(`${winner.option.label} staat op de tijdlijn.`);
+    } catch (error) {
+      console.error("promote winner failed", error);
+      setActionError("Op de tijdlijn zetten lukte niet.");
     }
   };
 
@@ -548,6 +566,11 @@ export default function TripSamen() {
                               <button type="button" onClick={() => void toggleDecisionClosed(decision)} className="text-[13px] font-semibold text-primary underline-offset-4 hover:underline">
                                 {decision.status === "open" ? "Keuze sluiten" : "Keuze heropenen"}
                               </button>
+                              {decision.status === "closed" && decision.title === ACCOMMODATION_DECISION_TITLE && decisionWinner(decision.options) && (
+                                <button type="button" onClick={() => void placeWinner(decision)} className="text-[13px] font-semibold text-primary underline-offset-4 hover:underline">
+                                  Zet winnaar op de tijdlijn
+                                </button>
+                              )}
                               <button type="button" onClick={() => void removeDecision(decision)} className="text-[13px] font-medium text-destructive underline-offset-4 hover:underline">
                                 Verwijderen
                               </button>

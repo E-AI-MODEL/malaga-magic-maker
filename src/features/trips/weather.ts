@@ -8,7 +8,7 @@ export type WeatherDay = {
   symbol_code: string | null;
 };
 
-export type WeatherResult = { available: true; fetched_at: string; days: WeatherDay[] } | { available: false; reason: string };
+export type WeatherResult = { available: true; fetched_at: string; days: WeatherDay[] } | { available: false; reason: string; destination?: string | null };
 
 export type WeatherIconKey = "sun" | "partly" | "cloud" | "fog" | "drizzle" | "rain" | "snow" | "thunder";
 

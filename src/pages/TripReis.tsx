@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { AlertTriangle, Archive, ChevronDown, FileText, Mail, MapPin, Pencil, Plus, Search, Trash2 } from "lucide-react";
+import { AlertTriangle, Archive, ChevronDown, Mail, Pencil, Plus, Search, Trash2 } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
 import { Button } from "@/components/ui/button";
 import {
@@ -18,7 +18,8 @@ import { TripItemSheet } from "@/features/travel/TripItemSheet";
 import { BookingPasteSheet } from "@/features/travel/BookingPasteSheet";
 import { AccommodationSearchSheet } from "@/features/travel/AccommodationSearchSheet";
 import { CalendarFeedSheet } from "@/features/travel/CalendarFeedSheet";
-import { CalendarPlus } from "lucide-react";
+import { CalendarPlus, ChevronRight } from "lucide-react";
+import { chooseIdeaItem } from "@/features/travel/accommodation";
 import { DocumentsSection } from "@/features/documents/DocumentsSection";
 import {
   DayHeader,
@@ -30,9 +31,7 @@ import {
   SwipeRow,
 } from "@/components/primitives";
 import { travelTypeIcon } from "@/features/travel/icons";
-import { currentMapsPlatform, mapsUrl } from "@/features/travel/maps";
 import {
-  formatTripDateTime,
   formatTripDay,
   getTravelStatus,
   getTravelType,
@@ -118,7 +117,7 @@ export default function TripReis() {
   const groups = useMemo(() => {
     const allowed = filters.find((entry) => entry.id === filter)?.types || [];
     const visible = (itemsQuery.data || []).filter(
-      (item) => (allowed.length === 0 || allowed.includes(item.type)) && (statusFilter === "all" || item.status === statusFilter),
+      (item) => item.status !== "idea" && (allowed.length === 0 || allowed.includes(item.type)) && (statusFilter === "all" || item.status === statusFilter),
     );
     const grouped = new Map<string, TripItemRow[]>();
     for (const item of visible) {
@@ -132,6 +131,8 @@ export default function TripReis() {
       return a.localeCompare(b);
     });
   }, [itemsQuery.data, timezone, filter, statusFilter]);
+
+  const ideas = useMemo(() => (itemsQuery.data || []).filter((item) => item.status === "idea"), [itemsQuery.data]);
 
   const warnings = useMemo(
     () => timelineWarnings(itemsQuery.data || [], activeTrip?.start_date ?? null, activeTrip?.end_date ?? null),
@@ -159,6 +160,17 @@ export default function TripReis() {
     setCreateType("custom");
     setActionError("");
     setSheetOpen(true);
+  };
+
+  const chooseIdea = async (item: TripItemRow) => {
+    setActionError("");
+    try {
+      await chooseIdeaItem(activeTrip, item, timezone);
+      await refreshItems();
+    } catch (error) {
+      console.error("choose idea failed", error);
+      setActionError("Dit onderdeel kiezen lukte niet.");
+    }
   };
 
   const handleDelete = async (item: TripItemRow) => {
@@ -245,12 +257,19 @@ export default function TripReis() {
             <summary className="flex cursor-pointer list-none items-center gap-2 py-3 text-sm font-medium">
               <AlertTriangle className="h-4 w-4 shrink-0 text-warning" strokeWidth={1.75} />
               {warnings.length === 1 ? warnings[0].message : `${warnings.length} punten om na te kijken`}
-              {warnings.length > 1 && <ChevronDown className="ml-auto h-4 w-4 text-muted-foreground transition-transform group-open:rotate-180" />}
+              {(warnings.length > 1 || warnings[0]?.kind === "outside_trip") && <ChevronDown className="ml-auto h-4 w-4 text-muted-foreground transition-transform group-open:rotate-180" />}
             </summary>
-            {warnings.length > 1 && (
+            {(warnings.length > 1 || warnings[0]?.kind === "outside_trip") && (
               <div className="divide-y divide-rule border-t border-rule">
                 {warnings.map((w) => (
-                  <p key={w.kind + w.message} className="py-2 pl-6 text-sm text-muted-foreground">{w.message}</p>
+                  <div key={w.kind + w.message} className="py-2 pl-6 text-sm text-muted-foreground">
+                    <p>{w.message}</p>
+                    {w.kind === "outside_trip" && (
+                      <ul className="mt-1 list-disc pl-4">
+                        {items.filter((i) => w.itemIds.includes(i.id)).map((i) => <li key={i.id}>{i.title}</li>)}
+                      </ul>
+                    )}
+                  </div>
                 ))}
               </div>
             )}
@@ -267,7 +286,7 @@ export default function TripReis() {
           ) : groups.length === 0 ? (
             <EmptyLine
               text={
-                items.length === 0
+                items.length === ideas.length
                   ? "Nog niets ingepland. Begin met vervoer of verblijf; wat nog niet vaststaat mag op Nog regelen."
                   : "Niets in deze filter."
               }
@@ -287,24 +306,7 @@ export default function TripReis() {
                       const type = getTravelType(item.type);
                       const canEdit = !readOnly && (isOrganizer || item.created_by === user?.id);
                       const displayTimezone = item.timezone || timezone;
-                      const facts = [item.location_name, item.provider, item.booking_reference]
-                        .filter(Boolean)
-                        .join(" · ");
                       const TypeIcon = travelTypeIcon(item.type);
-                      const mapHref = mapsUrl(item, activeTrip.destination_name, currentMapsPlatform());
-                      const mapLink = mapHref ? (
-                        <a
-                          href={mapHref}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          aria-label={`Open ${item.title} in Kaarten`}
-                          onClick={(event) => event.stopPropagation()}
-                          className="flex h-11 w-9 shrink-0 items-center justify-center text-muted-foreground hover:text-foreground"
-                        >
-                          <MapPin className="h-4 w-4" strokeWidth={1.75} />
-                        </a>
-                      ) : null;
-
                       const row = (
                         <div className="flex min-h-[56px] items-center gap-3 border-b border-rule py-2.5">
                           {/* Time gutter keeps every row aligned on one vertical rhythm. */}
@@ -316,19 +318,17 @@ export default function TripReis() {
                           </span>
                           <IconBubble icon={TypeIcon} tone="muted" />
                           <span className="min-w-0 flex-1">
-                            <span className="block truncate text-[15px] font-medium leading-tight">{item.title}</span>
+                            <span className="line-clamp-2 break-words text-[15px] font-medium leading-tight">{item.title}</span>
                             <span className="mt-0.5 block truncate text-xs text-muted-foreground">
-                              {type.label}
-                              {facts ? ` · ${facts}` : ""}
-                              {item.end_at ? ` · tot ${formatTripDateTime(item.end_at, displayTimezone)}` : ""}
+                              {[type.label, item.provider].filter(Boolean).join(" · ")} ·{" "}
+                              <StatusWord tone={statusTone(item.status)}>{getTravelStatus(item.status)}</StatusWord>
                             </span>
                           </span>
-                          {item.booking_url && <FileText className="h-4 w-4 shrink-0 text-muted-foreground/60" strokeWidth={1.75} />}
-                          <StatusWord tone={statusTone(item.status)}>{getTravelStatus(item.status)}</StatusWord>
+                          <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground/60" strokeWidth={1.75} aria-hidden />
                         </div>
                       );
 
-                      if (!canEdit) return <div key={item.id} className="flex items-center"><div className="min-w-0 flex-1">{row}</div>{mapLink}</div>;
+                      if (!canEdit) return <div key={item.id}>{row}</div>;
 
                       return (
                         <SwipeRow
@@ -342,7 +342,6 @@ export default function TripReis() {
                             <button type="button" onClick={() => openEdit(item)} className="min-w-0 flex-1 text-left [&>div]:border-b-0">
                               {row}
                             </button>
-                            {mapLink}
                           </div>
                         </SwipeRow>
                       );
@@ -353,6 +352,32 @@ export default function TripReis() {
             </div>
           )}
         </section>
+
+        {ideas.length > 0 && (
+          <details className="group mt-4 border-y border-rule">
+            <summary className="flex cursor-pointer list-none items-center gap-2 py-3 text-sm font-medium">
+              Ideeën ({ideas.length})
+              <ChevronDown className="ml-auto h-4 w-4 text-muted-foreground transition-transform group-open:rotate-180" />
+            </summary>
+            <div className="divide-y divide-rule border-t border-rule">
+              {ideas.map((idea) => (
+                <div key={idea.id} className="flex items-center gap-3 py-2.5">
+                  <button type="button" onClick={() => openEdit(idea)} className="min-w-0 flex-1 text-left">
+                    <span className="line-clamp-2 break-words text-[15px] font-medium leading-tight">{idea.title}</span>
+                    <span className="mt-0.5 block truncate text-xs text-muted-foreground">
+                      {[getTravelType(idea.type).label, idea.provider || (idea.booking_url ? new URL(idea.booking_url).hostname.replace(/^www\./, "") : null)].filter(Boolean).join(" · ")}
+                    </span>
+                  </button>
+                  {!readOnly && (
+                    <Button size="sm" variant="outline" className="shrink-0 rounded-full" onClick={() => void chooseIdea(idea)}>
+                      Dit wordt het
+                    </Button>
+                  )}
+                </div>
+              ))}
+            </div>
+          </details>
+        )}
 
         <DocumentsSection
           tripId={activeTrip.id}

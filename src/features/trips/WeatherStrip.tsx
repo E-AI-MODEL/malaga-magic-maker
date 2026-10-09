@@ -16,6 +16,13 @@ export function WeatherStrip({ tripId, timeZone }: { tripId: string; timeZone: s
     },
     staleTime: 15 * 60_000,
   });
+  if (data && data.available === false && data.reason === "no_location") {
+    return (
+      <p className="border-b border-border px-5 py-2.5 text-[13px] text-muted-foreground sm:px-8">
+        Geen weer gevonden voor {data.destination || "je bestemming"}. Vul het land in bij Reisinstellingen.
+      </p>
+    );
+  }
   if (!data || !data.available || data.days.length === 0) return null;
 
   return (

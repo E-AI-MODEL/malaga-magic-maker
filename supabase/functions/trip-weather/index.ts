@@ -15,11 +15,29 @@ async function geocode(query: string): Promise<{ lat: number; lon: number } | nu
   if (wait > 0) await new Promise((r) => setTimeout(r, wait));
   lastGeocodeAt = Date.now();
   const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=jsonv2&limit=1`;
-  const res = await fetch(url, { headers: { "User-Agent": USER_AGENT, Accept: "application/json" } });
-  if (!res.ok) { await res.text(); return null; }
-  const rows = await res.json().catch(() => []);
+  const res = await fetch(url, { headers: { "User-Agent": USER_AGENT, Referer: "https://vakansie.app/", Accept: "application/json", "Accept-Language": "nl,en" } });
+  if (res.status === 403) {
+    // Nominatim blocks some cloud networks; Photon serves the same OpenStreetMap data.
+    await res.text();
+    return photon(query);
+  }
+  if (!res.ok) { console.error("nominatim status", res.status); await res.text(); return null; }
+  const raw = await res.text();
+  let rows: Array<{ lat?: string; lon?: string }> = [];
+  try { rows = JSON.parse(raw); } catch { console.error("nominatim unreadable", raw.slice(0, 200)); }
+  if (!rows.length) console.warn("nominatim no result for destination");
   const lat = Number(rows?.[0]?.lat);
   const lon = Number(rows?.[0]?.lon);
+  return Number.isFinite(lat) && Number.isFinite(lon) ? { lat, lon } : null;
+}
+
+async function photon(query: string): Promise<{ lat: number; lon: number } | null> {
+  const res = await fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&limit=1`, { headers: { "User-Agent": USER_AGENT } });
+  if (!res.ok) { console.error("photon status", res.status); await res.text(); return null; }
+  const data = await res.json().catch(() => null);
+  const coords = data?.features?.[0]?.geometry?.coordinates;
+  const lon = Number(coords?.[0]);
+  const lat = Number(coords?.[1]);
   return Number.isFinite(lat) && Number.isFinite(lon) ? { lat, lon } : null;
 }
 
@@ -74,19 +92,19 @@ Deno.serve(async (req) => {
       if (needsGeocode(trip)) {
         const key = geocodeKey(trip.destination_name, trip.destination_country)!;
         const found = await geocode(key);
-        if (found) {
-          await db.from("trip").update({
-            destination_latitude: found.lat, destination_longitude: found.lon, destination_geocoded_for: key,
-          }).eq("id", tripId);
-          trip.destination_latitude = found.lat;
-          trip.destination_longitude = found.lon;
-        }
+        // Also remember a failed lookup, so the same destination is not asked again.
+        const { error: geoSaveError } = await db.from("trip").update({
+          destination_latitude: found?.lat ?? null, destination_longitude: found?.lon ?? null, destination_geocoded_for: key,
+        }).eq("id", tripId);
+        if (geoSaveError) console.error("trip-weather geocode save failed:", geoSaveError.message);
+        trip.destination_latitude = found?.lat ?? null;
+        trip.destination_longitude = found?.lon ?? null;
       }
       lat = Number(trip.destination_latitude);
       lon = Number(trip.destination_longitude);
     }
     if (!Number.isFinite(lat) || !Number.isFinite(lon) || (lat === 0 && lon === 0)) {
-      return json(200, { available: false, reason: "no_location" });
+      return json(200, { available: false, reason: "no_location", destination: trip.destination_name });
     }
 
     // Only coordinates go to MET Norway.

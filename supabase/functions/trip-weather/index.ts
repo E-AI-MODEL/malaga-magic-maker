@@ -17,7 +17,10 @@ async function geocode(query: string): Promise<{ lat: number; lon: number } | nu
   const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=jsonv2&limit=1`;
   const res = await fetch(url, { headers: { "User-Agent": USER_AGENT, Accept: "application/json" } });
   if (!res.ok) { console.error("nominatim status", res.status, (await res.text()).slice(0, 200)); return null; }
-  const rows = await res.json().catch(() => []);
+  const raw = await res.text();
+  let rows: Array<{ lat?: string; lon?: string }> = [];
+  try { rows = JSON.parse(raw); } catch { console.error("nominatim unreadable", raw.slice(0, 200)); }
+  if (!rows.length) console.warn("nominatim no result for destination");
   const lat = Number(rows?.[0]?.lat);
   const lon = Number(rows?.[0]?.lon);
   return Number.isFinite(lat) && Number.isFinite(lon) ? { lat, lon } : null;

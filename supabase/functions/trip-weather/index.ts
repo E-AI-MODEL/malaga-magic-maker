@@ -16,13 +16,28 @@ async function geocode(query: string): Promise<{ lat: number; lon: number } | nu
   lastGeocodeAt = Date.now();
   const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=jsonv2&limit=1`;
   const res = await fetch(url, { headers: { "User-Agent": USER_AGENT, Referer: "https://vakansie.app/", Accept: "application/json", "Accept-Language": "nl,en" } });
-  if (!res.ok) { console.error("nominatim status", res.status, (await res.text()).slice(0, 200)); return null; }
+  if (res.status === 403) {
+    // Nominatim blocks some cloud networks; Photon serves the same OpenStreetMap data.
+    await res.text();
+    return photon(query);
+  }
+  if (!res.ok) { console.error("nominatim status", res.status); await res.text(); return null; }
   const raw = await res.text();
   let rows: Array<{ lat?: string; lon?: string }> = [];
   try { rows = JSON.parse(raw); } catch { console.error("nominatim unreadable", raw.slice(0, 200)); }
   if (!rows.length) console.warn("nominatim no result for destination");
   const lat = Number(rows?.[0]?.lat);
   const lon = Number(rows?.[0]?.lon);
+  return Number.isFinite(lat) && Number.isFinite(lon) ? { lat, lon } : null;
+}
+
+async function photon(query: string): Promise<{ lat: number; lon: number } | null> {
+  const res = await fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&limit=1`, { headers: { "User-Agent": USER_AGENT } });
+  if (!res.ok) { console.error("photon status", res.status); await res.text(); return null; }
+  const data = await res.json().catch(() => null);
+  const coords = data?.features?.[0]?.geometry?.coordinates;
+  const lon = Number(coords?.[0]);
+  const lat = Number(coords?.[1]);
   return Number.isFinite(lat) && Number.isFinite(lon) ? { lat, lon } : null;
 }
 

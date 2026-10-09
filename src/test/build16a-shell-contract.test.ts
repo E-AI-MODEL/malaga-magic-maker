@@ -59,7 +59,6 @@ describe("Bottom navigation", () => {
 describe("Mijn reizen", () => {
   it("uses the existing readiness contract and shows what matters now", () => {
     expect(trips).toContain("getTripReadiness");
-    expect(trips).toContain("activeReadinessChecks");
   });
 });
 

@@ -187,11 +187,6 @@ export default function Trips() {
             </RowList>
           </section>
         )}
-        <footer className="mt-8 flex flex-wrap items-center justify-between gap-3 border-t border-rule py-4 text-sm text-muted-foreground">
-          <span>{plan ? plan.plan === "free" ? `Gratis · ${plan.tripLimit ?? 1} reis · ${plan.hansieDayLimit} Hansie-vragen per dag` : "Pro" : "Account laden…"}</span>
-          <Button asChild variant="link" className="h-auto p-0"><Link to="/profiel">Profiel</Link></Button>
-        </footer>
-
         {archivedTrips.length > 0 && (
           <section className="mt-6 border-t border-rule">
             <Button
@@ -212,6 +207,10 @@ export default function Trips() {
             )}
           </section>
         )}
+        <footer className="mt-8 flex flex-wrap items-center justify-between gap-3 border-t border-rule py-4 text-sm text-muted-foreground">
+          <span>{plan ? plan.plan === "free" ? `Gratis · ${plan.tripLimit ?? 1} reis · ${plan.hansieDayLimit} Hansie-vragen per dag` : "Pro" : "Account laden…"}</span>
+          <Button asChild variant="link" className="h-auto p-0"><Link to="/profiel">Profiel</Link></Button>
+        </footer>
       </div>
     </AppLayout>
   );

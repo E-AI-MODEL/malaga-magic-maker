@@ -30,3 +30,5 @@ dist-ssr
 
 supabase/functions/auth-email-hook/node_modules
 supabase/functions/auth-email-hook/deno.lock
+supabase/functions/send-reminders/node_modules
+supabase/functions/send-reminders/deno.lock

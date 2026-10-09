@@ -19,9 +19,13 @@ project_id = "wuvmcxjdyxhtqbbqoahy"
     verify_jwt = false
   [functions.payments-webhook]
     verify_jwt = false
+  [functions.send-reminders]
+    verify_jwt = false
   [functions.trip-ai-chat]
     verify_jwt = false
   [functions.trip-calendar]
     verify_jwt = false
   [functions.trip-weather]
+    verify_jwt = false
+  [functions.preview-transactional-email]
     verify_jwt = false

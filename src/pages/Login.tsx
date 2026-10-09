@@ -33,11 +33,8 @@ export default function Login() {
     setLoading(true);
     const result = await signIn(email, password);
     setLoading(false);
-    if (result.error) {
-      setError(result.error);
-      return;
-    }
-    navigate(next, { replace: true });
+    if (result.error) setError(result.error);
+    // Successful sign-in: the `user` redirect below navigates once; a second navigate here raced it and could leave "/" blank.
   };
 
   if (user) return <Navigate to={next} replace />;

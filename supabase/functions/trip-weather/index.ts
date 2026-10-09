@@ -16,7 +16,7 @@ async function geocode(query: string): Promise<{ lat: number; lon: number } | nu
   lastGeocodeAt = Date.now();
   const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=jsonv2&limit=1`;
   const res = await fetch(url, { headers: { "User-Agent": USER_AGENT, Accept: "application/json" } });
-  if (!res.ok) { await res.text(); return null; }
+  if (!res.ok) { console.error("nominatim status", res.status, (await res.text()).slice(0, 200)); return null; }
   const rows = await res.json().catch(() => []);
   const lat = Number(rows?.[0]?.lat);
   const lon = Number(rows?.[0]?.lon);

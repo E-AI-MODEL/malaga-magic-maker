@@ -5,6 +5,7 @@ import { sendTemplateEmail } from "../_shared/transactional-email-templates/send
 import {
   deliveryReminders, inQuietHours, nextChannel, pushFailureAction, withinDailyLimit, type Channel,
 } from "../_shared/reminders.ts";
+import { signUnsubscribeToken } from "../_shared/unsubscribe-token.ts";
 
 const APP_URL = "https://vakansie.app";
 const json = (status: number, body: unknown) =>
@@ -78,6 +79,8 @@ Deno.serve(async (req) => {
   // Always ensure the key pair exists, so devices can subscribe before the first reminder.
   let server: webpush.ApplicationServer | null = await pushServer(db);
   let emailPaused = false;
+  const { data: unsubRow } = await db.from("server_job_secrets").select("secret").eq("name", "reminders_unsubscribe").maybeSingle();
+  const unsubscribeBase = `${supabaseUrl}/functions/v1/reminders-unsubscribe?token=`;
   const stats = { push: 0, email: 0, removed: 0 };
 
   for (const trip of trips || []) {
@@ -152,7 +155,12 @@ Deno.serve(async (req) => {
           if (email) {
             try {
               const result = await sendTemplateEmail("reminder", email, {
-                templateData: { title: reminder.title, body: reminder.body, url },
+                templateData: {
+                  title: reminder.title, body: reminder.body, url,
+                  unsubscribeUrl: unsubRow?.secret
+                    ? unsubscribeBase + encodeURIComponent(await signUnsubscribeToken(userId, unsubRow.secret, now))
+                    : undefined,
+                },
                 idempotencyKey: `reminder-${userId}-${reminder.key}`,
               });
               if (result.sent) delivered = "email";

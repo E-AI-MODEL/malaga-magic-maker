@@ -71,7 +71,7 @@ describe("Vakansie BUILD 17 visual depth contract", () => {
   });
 
   it("uses the simple mobile trip header from the chosen direction", () => {
-    expect(appLayout).toContain("ChevronLeft");
+    expect(appLayout).toContain('aria-label="Naar Home"');
     expect(appLayout).toContain('aria-label="Meer opties"');
     expect(appLayout).toContain("Wissel reis");
     expect(appLayout).not.toContain("ChevronDown");

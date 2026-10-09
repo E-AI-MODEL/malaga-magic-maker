@@ -65,3 +65,9 @@ Home-ronde: gewijzigd `src/App.tsx`, `src/features/trips/start.ts` en tests, `sr
 
 - [x] Aan de slag: afvinklijst op Mijn reizen (5 stappen organisator, 3 voor reisgenoot), verbergen per gebruiker, verdwijnt als alles af is; ai_usage_events SELECT-policy via migratie 0013; 239 tests, typecheck, build en lint OK; ingelogd gecontroleerd op /trips
 - [x] Uitlegpagina /uitleg uit planonderdeel 5 geschrapt: homepage-stappen en FAQ dekken die uitleg al
+
+## UX-ronde reisschermen
+- [x] "Dit wordt het" kiest het verblijf: andere verblijf-ideeën weg, keuze "Waar verblijven we?" dicht, ongedaan maken
+- [x] Mobiele bovenbalk: Home-icoon, reiswisselaar, ⋯ met Reisinstellingen/Zet in je agenda/Nieuwe reis
+- [x] Geen grote paginatitel; grijze regel met outline "+ Toevoegen" op Reis en Samen; neutrale Hansie-verzendknop
+- [x] Reis: filters vanaf 6 onderdelen, geen 0-chips, Status-menu, geen streepje bij één onderdeel, nette aanbiedernamen, lege staat met alleen ideeën

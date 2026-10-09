@@ -105,7 +105,7 @@ export function dailyForecast(series: MetEntry[], tz: string | null, startDate: 
     if (Number.isNaN(time.getTime())) continue;
     const date = localDate(time, tz);
     if (date < start || date > end) continue;
-    const day = days.get(date) || { temps: [], precip: 0, symbols: new Map() };
+    const day = days.get(date) || { temps: [] as number[], precip: 0, symbols: new Map<string, number>() };
     days.set(date, day);
 
     const temp = entry.data.instant?.details?.air_temperature;

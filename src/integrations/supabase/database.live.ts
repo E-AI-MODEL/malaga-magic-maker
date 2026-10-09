@@ -79,6 +79,8 @@ export type NotificationPreferencesRow = {
   task_assignments: boolean;
   decisions: boolean;
   trip_updates: boolean;
+  push_reminders: boolean;
+  email_reminders: boolean;
   updated_at: string;
 };
 
@@ -89,12 +91,16 @@ type NotificationPreferencesTable = {
     task_assignments?: boolean;
     decisions?: boolean;
     trip_updates?: boolean;
+    push_reminders?: boolean;
+    email_reminders?: boolean;
     updated_at?: string;
   };
   Update: {
     task_assignments?: boolean;
     decisions?: boolean;
     trip_updates?: boolean;
+    push_reminders?: boolean;
+    email_reminders?: boolean;
     updated_at?: string;
   };
   Relationships: [];
@@ -120,6 +126,11 @@ export type ClientErrorEventRow = {
   created_at: string;
 };
 
+import type { Tables as GenTables, TablesInsert as GenInsert, TablesUpdate as GenUpdate } from "./types";
+type PushSubscriptionsTable = {
+  Row: GenTables<"push_subscriptions">; Insert: GenInsert<"push_subscriptions">; Update: GenUpdate<"push_subscriptions">; Relationships: [];
+};
+
 type ClientErrorEventsTable = { Row: ClientErrorEventRow; Insert: never; Update: never; Relationships: [] };
 
 export type Database = Omit<Build06Database, "public"> & {
@@ -132,6 +143,7 @@ export type Database = Omit<Build06Database, "public"> & {
       notification_preferences: NotificationPreferencesTable;
       ai_usage_events: AiUsageEventsTable;
       client_error_events: ClientErrorEventsTable;
+      push_subscriptions: PushSubscriptionsTable;
     };
     Functions: ExistingFunctions & {
       reserve_trip_document: {
@@ -139,6 +151,7 @@ export type Database = Omit<Build06Database, "public"> & {
         Returns: Json;
       };
       finalize_trip_document: { Args: { p_document_id: string; p_size_bytes: number }; Returns: boolean };
+      get_push_public_key: { Args: Record<string, never>; Returns: string };
       get_trip_readiness: { Args: { p_trip_id: string }; Returns: Json };
       ops_get_system_summary: { Args: Record<string, never>; Returns: Json };
       ops_search_users: { Args: { p_query?: string; p_limit?: number }; Returns: Json };

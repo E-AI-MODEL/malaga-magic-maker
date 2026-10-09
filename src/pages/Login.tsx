@@ -1,5 +1,5 @@
 import { FormEvent, useState } from "react";
-import { Link, Navigate, useNavigate, useSearchParams } from "react-router-dom";
+import { Link, Navigate, useSearchParams } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,7 +10,6 @@ import { loginDestination } from "@/features/trips/start";
 
 export default function Login() {
   const { user, signIn, signInWithGoogle } = useAuth();
-  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const next = loginDestination(searchParams.get("next"));
 

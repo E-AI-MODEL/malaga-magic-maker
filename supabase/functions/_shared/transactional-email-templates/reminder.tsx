@@ -26,7 +26,7 @@ const ReminderEmail = ({ title, body, url }: ReminderProps) => (
 
 export const template = {
   component: ReminderEmail,
-  subject: (data: Record<string, any>) => (typeof data.title === 'string' && data.title ? data.title : 'Herinnering voor je reis'),
+  subject: (data: Record<string, unknown>) => (typeof data.title === 'string' && data.title ? data.title : 'Herinnering voor je reis'),
   displayName: 'Herinnering',
   previewData: { title: 'Morgen vertrek je', body: 'Zomer in Italië begint morgen.', url: 'https://vakansie.app/trips' },
 } satisfies TemplateEntry

@@ -40,3 +40,9 @@ Bounded builds; no unrelated redesigns, extra features, duplicated concepts or b
 
 ## Quality gate
 Run build, lint, typecheck and tests; browser-test relevant flows. Report changed files, migrations, tests, failures and risks. Never report done while acceptance criteria fail.
+
+## Koppelingen
+- `trip-calendar`: secret link per user; store only the token hash. Why: bearer secret.
+- `trip-weather`: MET Norway, Nominatim with Photon fallback; credit sources in UI. Why: licence terms.
+- `send-reminders`: pg_cron + `x-cron-secret`, URL/secret in `server_job_secrets`, VAPID keys in `push_server_keys`, e-mail via Lovable Emails. Why: secrets stay server-side.
+- Ideas never count as bookings; IBANs and mail text never go to Hansie or external services. Why: plans and privacy.

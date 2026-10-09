@@ -28,7 +28,8 @@ export function isPushEndpoint(endpoint: string): boolean {
   } catch { return false; }
 }
 
-// deno-lint-ignore no-explicit-any
+// Untyped service client: generated table types are not available inside Edge Functions.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Db = any;
 
 async function pushServer(db: Db) {

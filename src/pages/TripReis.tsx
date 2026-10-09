@@ -19,7 +19,10 @@ import { BookingPasteSheet } from "@/features/travel/BookingPasteSheet";
 import { AccommodationSearchSheet } from "@/features/travel/AccommodationSearchSheet";
 import { CalendarFeedSheet } from "@/features/travel/CalendarFeedSheet";
 import { CalendarPlus, ChevronRight } from "lucide-react";
-import { chooseIdeaItem } from "@/features/travel/accommodation";
+import { chooseIdeaAsFinal, undoIdeaChoice } from "@/features/travel/accommodation";
+import { providerLabel } from "@/features/travel/providers";
+import { TripPageHeader } from "@/components/TripPageHeader";
+import { toast } from "sonner";
 import { DocumentsSection } from "@/features/documents/DocumentsSection";
 import {
   DayHeader,
@@ -51,17 +54,6 @@ const filters: ReadonlyArray<{ id: "all" | "transport" | "stay" | "doing"; label
 
 type FilterId = (typeof filters)[number]["id"];
 
-function formatDateRange(startDate: string | null, endDate: string | null) {
-  if (!startDate && !endDate) return "Data nog niet gekozen";
-  const format = (value: string) =>
-    new Date(`${value}T12:00:00`).toLocaleDateString("nl-NL", {
-      day: "numeric",
-      month: "short",
-      year: "numeric",
-    });
-  if (startDate && endDate) return `${format(startDate)} – ${format(endDate)}`;
-  return format(startDate || endDate || "");
-}
 
 function statusTone(status: string): "done" | "attention" | "muted" | "neutral" {
   if (status === "confirmed" || status === "paid") return "done";
@@ -105,14 +97,19 @@ export default function TripReis() {
     enabled: Boolean(tripId),
   });
 
+  // Ideas are not on the timeline, so they never count towards the filters.
+  const timelineItems = useMemo(() => (itemsQuery.data || []).filter((item) => item.status !== "idea"), [itemsQuery.data]);
   const counts = useMemo(() => {
-    const all = itemsQuery.data || [];
-    return filters.map((entry) => ({
-      id: entry.id,
-      label: entry.label,
-      count: entry.types.length === 0 ? all.length : all.filter((item) => entry.types.includes(item.type)).length,
-    }));
-  }, [itemsQuery.data]);
+    return filters
+      .map((entry) => ({
+        id: entry.id,
+        label: entry.label,
+        count: entry.types.length === 0 ? timelineItems.length : timelineItems.filter((item) => entry.types.includes(item.type)).length,
+      }))
+      .filter((entry) => entry.id === "all" || entry.count > 0);
+  }, [timelineItems]);
+  const showFilters = timelineItems.length >= 6;
+  const usedStatuses = travelStatuses.filter((s) => s.value !== "idea" && timelineItems.some((item) => item.status === s.value));
 
   const groups = useMemo(() => {
     const allowed = filters.find((entry) => entry.id === filter)?.types || [];
@@ -165,8 +162,33 @@ export default function TripReis() {
   const chooseIdea = async (item: TripItemRow) => {
     setActionError("");
     try {
-      await chooseIdeaItem(activeTrip, item, timezone);
+      const undo = await chooseIdeaAsFinal(activeTrip, item, items as never, timezone);
       await refreshItems();
+      if (undo.closedDecisionId) await queryClient.invalidateQueries();
+      if (item.type === "stay") {
+        const n = undo.removed.length;
+        toast(
+          n > 0
+            ? `${item.title} is je verblijf. De andere ${n} ${n === 1 ? "idee is" : "ideeën zijn"} weggehaald.`
+            : `${item.title} is je verblijf.`,
+          {
+            action: {
+              label: "Ongedaan maken",
+              onClick: () => {
+                void undoIdeaChoice(activeTrip.id, undo)
+                  .then(async () => {
+                    await refreshItems();
+                    await queryClient.invalidateQueries();
+                  })
+                  .catch((error) => {
+                    console.error("undo choice failed", error);
+                    toast.error("Ongedaan maken lukte niet.");
+                  });
+              },
+            },
+          },
+        );
+      }
     } catch (error) {
       console.error("choose idea failed", error);
       setActionError("Dit onderdeel kiezen lukte niet.");
@@ -181,47 +203,36 @@ export default function TripReis() {
 
   return (
     <AppLayout>
-      <div className="px-5 pb-12 pt-5 sm:px-8">
-        <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0">
-            <h1 className="font-display text-[30px] font-bold uppercase leading-tight">Reis</h1>
-            <p className="mt-1 text-sm text-muted-foreground">
-              {formatDateRange(activeTrip.start_date, activeTrip.end_date)}
-              {activeTrip.destination_name ? ` · ${activeTrip.destination_name}` : ""}
-            </p>
-          </div>
-          {!readOnly && (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button size="sm" className="mt-0.5 shrink-0 rounded-md">
-                  <Plus className="mr-1.5 h-3.5 w-3.5" />Toevoegen
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-60">
-                <DropdownMenuItem onClick={() => setBookingSheetOpen(true)}>
-                  <Mail className="mr-2 h-4 w-4" strokeWidth={1.75} />Boeking plakken
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setStaySearchOpen(true)}>
-                  <Search className="mr-2 h-4 w-4" strokeWidth={1.75} />Verblijf zoeken
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setCalendarOpen(true)}>
-                  <CalendarPlus className="mr-2 h-4 w-4" strokeWidth={1.75} />Zet in je agenda
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuLabel className="text-[11px] font-semibold uppercase text-muted-foreground">Zelf invullen</DropdownMenuLabel>
-                {quickAddTypes.map((value) => {
-                  const type = getTravelType(value);
-                  const TypeIcon = travelTypeIcon(value);
-                  return (
-                    <DropdownMenuItem key={value} onClick={() => openCreate(value)}>
-                      <TypeIcon className="mr-2 h-4 w-4" strokeWidth={1.75} />{type.label}
-                    </DropdownMenuItem>
-                  );
-                })}
-              </DropdownMenuContent>
-            </DropdownMenu>
+      <div className="px-5 pb-12 pt-4 sm:px-8">
+        <TripPageHeader
+          startDate={activeTrip.start_date}
+          endDate={activeTrip.end_date}
+          destination={activeTrip.destination_name}
+          addMenu={readOnly ? undefined : (
+            <>
+              <DropdownMenuItem onClick={() => setBookingSheetOpen(true)}>
+                <Mail className="mr-2 h-4 w-4" strokeWidth={1.75} />Boeking plakken
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setStaySearchOpen(true)}>
+                <Search className="mr-2 h-4 w-4" strokeWidth={1.75} />Verblijf zoeken
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setCalendarOpen(true)}>
+                <CalendarPlus className="mr-2 h-4 w-4" strokeWidth={1.75} />Zet in je agenda
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuLabel className="text-[11px] font-semibold text-muted-foreground">Zelf invullen</DropdownMenuLabel>
+              {quickAddTypes.map((value) => {
+                const type = getTravelType(value);
+                const TypeIcon = travelTypeIcon(value);
+                return (
+                  <DropdownMenuItem key={value} onClick={() => openCreate(value)}>
+                    <TypeIcon className="mr-2 h-4 w-4" strokeWidth={1.75} />{type.label}
+                  </DropdownMenuItem>
+                );
+              })}
+            </>
           )}
-        </div>
+        />
 
         {readOnly && (
           <div className="mt-4 flex items-center gap-2 border-t border-rule/10 pt-3 text-sm text-muted-foreground">
@@ -233,21 +244,26 @@ export default function TripReis() {
 
         {actionError && <p className="mt-4 text-sm font-medium text-destructive">{actionError}</p>}
 
-        {items.length > 0 && (
+        {showFilters && (
           <StickyBar className="mt-4">
-            <div className="flex items-center gap-2">
-              <div className="min-w-0 flex-1 overflow-x-auto">
-                <FilterChips<FilterId> value={filter} onChange={setFilter} options={counts} />
-              </div>
-              <select
-                aria-label="Filter op status"
-                value={statusFilter}
-                onChange={(event) => setStatusFilter(event.target.value)}
-                className="h-9 w-28 shrink-0 rounded-md border border-border bg-background px-2 font-ui text-base text-muted-foreground"
-              >
-                <option value="all">Status</option>
-                {travelStatuses.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
-              </select>
+            <div className="flex items-center gap-2 overflow-x-auto">
+              <FilterChips<FilterId> value={filter} onChange={setFilter} options={counts} />
+              {usedStatuses.length > 0 && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button size="sm" variant="outline" className="h-8 shrink-0 rounded-md text-[13px]" aria-label="Filter op status">
+                      {statusFilter === "all" ? "Status" : getTravelStatus(statusFilter)}
+                      <ChevronDown className="ml-1 h-3.5 w-3.5" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48">
+                    <DropdownMenuItem onClick={() => setStatusFilter("all")}>Alle statussen</DropdownMenuItem>
+                    {usedStatuses.map((s) => (
+                      <DropdownMenuItem key={s.value} onClick={() => setStatusFilter(s.value)}>{s.label}</DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
             </div>
           </StickyBar>
         )}
@@ -286,9 +302,11 @@ export default function TripReis() {
           ) : groups.length === 0 ? (
             <EmptyLine
               text={
-                items.length === ideas.length
+                items.length === 0
                   ? "Nog niets ingepland. Begin met vervoer of verblijf; wat nog niet vaststaat mag op Nog regelen."
-                  : "Niets in deze filter."
+                  : items.length === ideas.length
+                    ? "Nog niets vastgelegd. Kies hieronder een idee of voeg zelf iets toe."
+                    : "Niets in deze filter."
               }
               actionLabel={readOnly || items.length > 0 ? undefined : "Eerste onderdeel toevoegen"}
               onClick={readOnly || items.length > 0 ? undefined : () => openCreate()}
@@ -314,13 +332,13 @@ export default function TripReis() {
                             <span className="num font-ui text-[12px] font-semibold leading-5 text-foreground">
                               {timeAnchor(item, displayTimezone)}
                             </span>
-                            <span aria-hidden className="mt-1 w-px flex-1 bg-rail" />
+                            {dayItems.length > 1 && <span aria-hidden className="mt-1 w-px flex-1 bg-rail" />}
                           </span>
                           <IconBubble icon={TypeIcon} tone="muted" />
                           <span className="min-w-0 flex-1">
                             <span className="line-clamp-2 break-words text-[15px] font-medium leading-tight">{item.title}</span>
                             <span className="mt-0.5 block truncate text-xs text-muted-foreground">
-                              {[type.label, item.provider].filter(Boolean).join(" · ")} ·{" "}
+                              {[type.label, providerLabel(item.provider)].filter(Boolean).join(" · ")} ·{" "}
                               <StatusWord tone={statusTone(item.status)}>{getTravelStatus(item.status)}</StatusWord>
                             </span>
                           </span>
@@ -365,11 +383,11 @@ export default function TripReis() {
                   <button type="button" onClick={() => openEdit(idea)} className="min-w-0 flex-1 text-left">
                     <span className="line-clamp-2 break-words text-[15px] font-medium leading-tight">{idea.title}</span>
                     <span className="mt-0.5 block truncate text-xs text-muted-foreground">
-                      {[getTravelType(idea.type).label, idea.provider || (idea.booking_url ? new URL(idea.booking_url).hostname.replace(/^www\./, "") : null)].filter(Boolean).join(" · ")}
+                      {[getTravelType(idea.type).label, providerLabel(idea.provider) || (idea.booking_url ? new URL(idea.booking_url).hostname.replace(/^www\./, "") : null)].filter(Boolean).join(" · ")}
                     </span>
                   </button>
                   {!readOnly && (
-                    <Button size="sm" variant="outline" className="shrink-0 rounded-full" onClick={() => void chooseIdea(idea)}>
+                    <Button size="sm" variant="outline" className="shrink-0 rounded-md" onClick={() => void chooseIdea(idea)}>
                       Dit wordt het
                     </Button>
                   )}

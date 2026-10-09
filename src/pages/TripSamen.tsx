@@ -50,6 +50,7 @@ import { listTravelerProfiles, summariseProfile } from "@/features/travelers/dat
 import { TravelerProfileSheet } from "@/features/travelers/TravelerProfileSheet";
 import { RecentActivity } from "@/features/notifications/RecentActivity";
 import { CountBar, EmptyLine, RowItem, RowList, SectionLabel, Segmented, StatusWord, StickyBar } from "@/components/primitives";
+import { TripPageHeader } from "@/components/TripPageHeader";
 
 /** The primary switcher holds only the three kinds of shared work. */
 type Section = "tasks" | "decisions" | "expenses";
@@ -304,7 +305,16 @@ export default function TripSamen() {
   return (
     <AppLayout>
       <div className="px-5 pb-12 pt-5 sm:px-8">
-        <h1 className="font-display uppercase text-[30px] font-bold leading-tight">Samen</h1>
+        <TripPageHeader
+          startDate={activeTrip.start_date}
+          endDate={activeTrip.end_date}
+          destination={activeTrip.destination_name}
+          addActions={addAction ? [
+            { label: "Nieuwe taak", onClick: openNewTask },
+            { label: "Nieuwe keuze", onClick: () => setDecisionSheetOpen(true) },
+            { label: "Bonnetje toevoegen", onClick: openNewExpense },
+          ] : undefined}
+        />
         <div className="mt-3 border-y border-rule py-3">
           <CountBar
             items={[
@@ -439,19 +449,7 @@ export default function TripSamen() {
         {actionError && <p className="mt-4 text-sm font-medium text-destructive">{actionError}</p>}
 
         <section className="mt-5">
-          <SectionLabel
-            action={
-              addAction ? (
-                <button
-                  type="button"
-                  onClick={addAction.run}
-                  className="inline-flex items-center gap-1 text-[13px] font-semibold text-primary underline-offset-4 hover:underline"
-                >
-                  <Plus className="h-3.5 w-3.5" strokeWidth={2} />{addAction.label}
-                </button>
-              ) : null
-            }
-          >
+          <SectionLabel>
             {section === "tasks" ? "Taken" : section === "decisions" ? "Keuzes" : "Kosten"}
           </SectionLabel>
 

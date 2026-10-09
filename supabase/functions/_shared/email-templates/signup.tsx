@@ -41,7 +41,7 @@ export const SignupEmail = ({
           <Link href={siteUrl} style={link}>
             <strong>{siteName}</strong>
           </Link>
-          ! Je hele vakantie geregeld op één plek begint hier.
+          ! Je hele vakantie in je broekzak begint hier.
         </Text>
         <Text style={text}>
           Bevestig je e-mailadres (

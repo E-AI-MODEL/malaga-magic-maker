@@ -9,6 +9,8 @@ project_id = "wuvmcxjdyxhtqbbqoahy"
     verify_jwt = false
   [functions.create-donation-checkout]
     verify_jwt = false
+  [functions.delete-account]
+    verify_jwt = false
   [functions.document-extract]
     verify_jwt = false
   [functions.firecrawl-scrape]

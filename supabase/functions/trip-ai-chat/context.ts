@@ -171,8 +171,8 @@ function assembleTripContext(raw: RawTripContext) {
         wensen: profile
           ? {
             prioriteiten: profile.priorities,
-            dieet: profile.diet,
-            allergieen: profile.allergies,
+            // Health data only with the traveler's explicit consent.
+            ...(profile.health_consent_at ? { dieet: profile.diet, allergieen: profile.allergies } : {}),
             tempo: profile.pace,
             comfort: profile.comfort,
             budgetgevoel: profile.budget_feel,

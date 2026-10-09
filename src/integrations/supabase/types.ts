@@ -206,7 +206,7 @@ export type Database = {
       admin_audit_log: {
         Row: {
           action: string
-          actor_user_id: string
+          actor_user_id: string | null
           created_at: string
           id: string
           metadata: Json
@@ -215,7 +215,7 @@ export type Database = {
         }
         Insert: {
           action: string
-          actor_user_id: string
+          actor_user_id?: string | null
           created_at?: string
           id?: string
           metadata?: Json
@@ -224,7 +224,7 @@ export type Database = {
         }
         Update: {
           action?: string
-          actor_user_id?: string
+          actor_user_id?: string | null
           created_at?: string
           id?: string
           metadata?: Json
@@ -1687,6 +1687,7 @@ export type Database = {
           comfort: string | null
           created_at: string
           diet: string[]
+          health_consent_at: string | null
           id: string
           mobility: string | null
           notes: string | null
@@ -1702,6 +1703,7 @@ export type Database = {
           comfort?: string | null
           created_at?: string
           diet?: string[]
+          health_consent_at?: string | null
           id?: string
           mobility?: string | null
           notes?: string | null
@@ -1717,6 +1719,7 @@ export type Database = {
           comfort?: string | null
           created_at?: string
           diet?: string[]
+          health_consent_at?: string | null
           id?: string
           mobility?: string | null
           notes?: string | null
@@ -1837,6 +1840,7 @@ export type Database = {
         }
         Returns: string
       }
+      delete_my_account: { Args: { p_email: string }; Returns: Json }
       emit_trip_activity: {
         Args: {
           p_actor: string

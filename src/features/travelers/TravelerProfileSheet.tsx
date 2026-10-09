@@ -37,6 +37,8 @@ export function TravelerProfileSheet({ open, onOpenChange, tripId, userId, profi
         priorities: draft.priorities,
         diet: draft.diet,
         allergies: draft.allergies,
+        healthConsent: draft.healthConsent,
+        healthConsentAt: draft.healthConsentAt,
         pace: draft.pace,
         comfort: draft.comfort,
         budgetFeel: draft.budgetFeel,

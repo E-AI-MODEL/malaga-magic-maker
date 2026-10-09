@@ -17,7 +17,7 @@ export default function JoinTrip() {
 
     if (!user) {
       if (inviteCode) localStorage.setItem("vakansie_pending_invite", inviteCode);
-      navigate("/login", { replace: true });
+      navigate(inviteCode ? `/login?next=${encodeURIComponent(`/join/${inviteCode}`)}` : "/login", { replace: true });
       return;
     }
 

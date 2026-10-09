@@ -83,7 +83,7 @@ export default function PrivacyPage() {
 
           <Section title="Hoe lang we gegevens bewaren">
             <p>
-              Verwijder je je account, dan wissen we je account, je wensen, je betaalgegevens, je meldingen en je eigen reizen direct. Wat je in een gedeelde reis hebt gezet (zoals onderdelen, kosten en documenten) blijft beschikbaar voor je reisgenoten, omdat het bij die reis hoort. Wil je dat ook laten verwijderen, mail ons dan. Alleen wat we wettelijk moeten
+              Zolang je account bestaat. Verwijder je je account, dan wissen we je account, je wensen, je betaalgegevens, je meldingen en je eigen reizen direct. Wat je in een gedeelde reis hebt gezet (zoals onderdelen, kosten en documenten) blijft beschikbaar voor je reisgenoten, omdat het bij die reis hoort. Wil je dat ook laten verwijderen, mail ons dan. Alleen wat we wettelijk moeten
               bewaren blijft: betaalgegevens worden 7 jaar bewaard bij Stripe.
             </p>
           </Section>

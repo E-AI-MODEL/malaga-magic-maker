@@ -176,6 +176,7 @@ export function TravelerProfileForm({
         values={value.diet}
         onToggle={(option) => toggle("diet", option)}
       />
+      )}
 
       {value.healthConsent && (
       <div className="border-t border-rule/20 pt-4">

@@ -1795,6 +1795,7 @@ export type Database = {
     }
     Functions: {
       accept_trip_invite: { Args: { p_token: string }; Returns: string }
+      choose_trip_idea: { Args: { p_item_id: string }; Returns: Json }
       consume_hansie_quota: { Args: { p_trip_id: string }; Returns: Json }
       create_calendar_feed: { Args: { p_trip_id: string }; Returns: string }
       create_decision_with_options: {
@@ -1981,6 +1982,10 @@ export type Database = {
       }
       shares_trip_with: {
         Args: { _other_id: string; _viewer_id: string }
+        Returns: boolean
+      }
+      undo_trip_idea_choice: {
+        Args: { p_payload: Json; p_trip_id: string }
         Returns: boolean
       }
       update_expense_with_splits: {

@@ -64,7 +64,7 @@ export function needsGeocode(trip: {
 }): boolean {
   const key = geocodeKey(trip.destination_name, trip.destination_country);
   if (!key) return false;
-  if (trip.destination_latitude === null || trip.destination_longitude === null) return true;
+  // A lookup for this exact destination already happened (found or not): never ask again.
   return trip.destination_geocoded_for !== key;
 }
 

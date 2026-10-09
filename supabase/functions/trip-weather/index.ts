@@ -92,19 +92,19 @@ Deno.serve(async (req) => {
       if (needsGeocode(trip)) {
         const key = geocodeKey(trip.destination_name, trip.destination_country)!;
         const found = await geocode(key);
-        if (found) {
-          await db.from("trip").update({
-            destination_latitude: found.lat, destination_longitude: found.lon, destination_geocoded_for: key,
-          }).eq("id", tripId);
-          trip.destination_latitude = found.lat;
-          trip.destination_longitude = found.lon;
-        }
+        // Also remember a failed lookup, so the same destination is not asked again.
+        const { error: geoSaveError } = await db.from("trip").update({
+          destination_latitude: found?.lat ?? null, destination_longitude: found?.lon ?? null, destination_geocoded_for: key,
+        }).eq("id", tripId);
+        if (geoSaveError) console.error("trip-weather geocode save failed:", geoSaveError.message);
+        trip.destination_latitude = found?.lat ?? null;
+        trip.destination_longitude = found?.lon ?? null;
       }
       lat = Number(trip.destination_latitude);
       lon = Number(trip.destination_longitude);
     }
     if (!Number.isFinite(lat) || !Number.isFinite(lon) || (lat === 0 && lon === 0)) {
-      return json(200, { available: false, reason: "no_location" });
+      return json(200, { available: false, reason: "no_location", destination: trip.destination_name });
     }
 
     // Only coordinates go to MET Norway.

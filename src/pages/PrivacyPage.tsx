@@ -3,10 +3,6 @@ import { Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-/** Placeholder the product owner still has to fill in; styled so it stands out. */
-function Todo({ children }: { children: ReactNode }) {
-  return <mark className="rounded bg-warning/20 px-1 font-semibold text-foreground">{children}</mark>;
-}
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
@@ -33,7 +29,7 @@ export default function PrivacyPage() {
         <div className="mt-8 space-y-6 text-sm leading-relaxed text-foreground/90">
           <Section title="Wie wij zijn">
             <p>
-              Vakansie is een dienst van <Todo>[BEDRIJFSNAAM]</Todo>, <Todo>[ADRES]</Todo>, KvK <Todo>[KVK-NUMMER]</Todo>.
+              Vakansie is een dienst van EAI Analyse en Advies, Jacobus Visserstraat 10, 2662 JL Bergschenhoek, KvK 97303305.
               Wij zijn verantwoordelijk voor de verwerking van je gegevens. Vragen? Mail{" "}
               <a href="mailto:hello@vakansie.app" className="font-semibold text-primary hover:underline">hello@vakansie.app</a>.
             </p>

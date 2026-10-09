@@ -41,3 +41,8 @@
 - [x] Koppelingen stap 5: herinneringen via push en e-mail (elke 15 min, max 3 per dag, stille uren)
 - [x] Afronding stap 5: herinneringsschema in repository, lintpunten, Koppelingen in AGENTS.md
 - [ ] Stap 5 echt testen: pushmelding op Android/desktop en iPhone-beginscherm, e-mail na DNS-verificatie
+
+## Afronding stap 5 en livegang
+- [x] Testmelding beperkt tot 3 per uur per gebruiker
+- [x] Livegang-rapport in docs/LIVEGANG_RAPPORT.md
+- [ ] Openstaande punten product owner: zie "Te doen" in het livegang-rapport

@@ -174,7 +174,7 @@ export function chosenIdeaUpdate(
   trip: { start_date: string | null; end_date: string | null },
   timezone: string,
 ) {
-  const update: { status: "planned"; start_at?: string | null; end_at?: string | null } = { status: candidateStayStatus(true) };
+  const update: { status: "idea" | "planned"; start_at?: string | null; end_at?: string | null } = { status: candidateStayStatus(true) };
   if (item.type === "stay" && trip.start_date && trip.end_date) {
     update.start_at = localInputToIso(`${trip.start_date}T15:00`, timezone);
     update.end_at = localInputToIso(`${trip.end_date}T11:00`, timezone);

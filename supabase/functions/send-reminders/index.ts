@@ -28,7 +28,9 @@ export function isPushEndpoint(endpoint: string): boolean {
   } catch { return false; }
 }
 
-type Db = ReturnType<typeof createClient>;
+// Untyped service client: generated table types are not available inside Edge Functions.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type Db = any;
 
 async function pushServer(db: Db) {
   const { data } = await db.from("push_server_keys").select("public_jwk, private_jwk").eq("id", 1).maybeSingle();

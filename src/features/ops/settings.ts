@@ -6,13 +6,15 @@ export type PlatformSwitchKey =
   | "hansie_enabled"
   | "payments_enabled"
   | "maintenance_mode"
-  | "sandbox_pro_enabled";
+  | "sandbox_pro_enabled"
+  | "reminders_enabled";
 
 export const PLATFORM_SWITCHES: Array<{ key: PlatformSwitchKey; label: string; description: string }> = [
   { key: "signups_open", label: "Registratie open", description: "Nieuwe bezoekers kunnen een account maken." },
   { key: "hansie_enabled", label: "Hansie actief", description: "Reizigers kunnen Hansie vragen stellen." },
   { key: "payments_enabled", label: "Pro en betalen actief", description: "Afrekenen en Pro-aankopen zijn beschikbaar." },
   { key: "maintenance_mode", label: "Onderhoudsmodus", description: "Toon een onderhoudsmelding in de app." },
+  { key: "reminders_enabled", label: "Herinneringen versturen", description: "Push- en e-mailherinneringen gaan de deur uit." },
   { key: "sandbox_pro_enabled", label: "Testbetalingen geven Pro", description: "Alleen gebruiken tijdens testen." },
 ];
 

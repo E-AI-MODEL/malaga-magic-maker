@@ -61,11 +61,30 @@ export function needsGeocode(trip: {
   destination_latitude: number | string | null;
   destination_longitude: number | string | null;
   destination_geocoded_for: string | null;
-}): boolean {
+  destination_geocode_failed_at?: string | null;
+}, now: Date = new Date()): boolean {
   const key = geocodeKey(trip.destination_name, trip.destination_country);
   if (!key) return false;
+  // After a service failure, wait 24 hours before asking again.
+  const failedAt = trip.destination_geocode_failed_at ? Date.parse(trip.destination_geocode_failed_at) : NaN;
+  if (Number.isFinite(failedAt) && now.getTime() - failedAt < GEOCODE_RETRY_MS) return false;
   // A lookup for this exact destination already happened (found or not): never ask again.
   return trip.destination_geocoded_for !== key;
+}
+
+export const GEOCODE_RETRY_MS = 24 * 60 * 60 * 1000;
+
+export type GeocodeOutcome = { kind: "found"; lat: number; lon: number } | { kind: "not_found" } | { kind: "error" };
+
+/** What to store on the trip after a lookup: only a clean answer is remembered; a failure only records when. */
+export function geocodeUpdate(outcome: GeocodeOutcome, key: string, now: Date): Record<string, unknown> {
+  if (outcome.kind === "error") return { destination_geocode_failed_at: now.toISOString() };
+  return {
+    destination_latitude: outcome.kind === "found" ? outcome.lat : null,
+    destination_longitude: outcome.kind === "found" ? outcome.lon : null,
+    destination_geocoded_for: key,
+    destination_geocode_failed_at: null,
+  };
 }
 
 export function cacheIsFresh(expiresAt: string | null | undefined, now: Date): boolean {

@@ -9,6 +9,7 @@ import { FormError } from "@/components/FormSheet";
 import { formatIban, isValidIban, normalizeIban } from "@/features/together/iban";
 import { SectionLabel } from "@/components/primitives";
 import { NotificationPreferences } from "@/features/notifications/NotificationPreferences";
+import { ReminderPreferences } from "@/features/notifications/ReminderPreferences";
 import { toast } from "sonner";
 import { ChevronRight, LogOut, Sparkles } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
@@ -232,6 +233,7 @@ export default function Profiel() {
             <SectionLabel>Meldingen</SectionLabel>
             <div className="mt-2">
               <NotificationPreferences userId={user.id} />
+              <ReminderPreferences userId={user.id} />
             </div>
           </section>
         )}

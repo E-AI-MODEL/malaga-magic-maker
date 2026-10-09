@@ -28,3 +28,18 @@ describe("detectMapsPlatform", () => {
     expect(detectMapsPlatform("Mozilla/5.0 (Linux; Android 14; Pixel 8)")).toBe("other");
   });
 });
+
+import { itemAddress } from "./maps";
+import { itemLocation } from "../../../supabase/functions/trip-calendar/calendar";
+
+describe("shared address rule", () => {
+  it("maps and calendar produce the same address", () => {
+    const cases = [
+      { address: "Via Roma 1", metadata: { address: "x" }, location_name: "Hotel" },
+      { address: "", metadata: { address: "Piazza 2" }, location_name: "Hotel" },
+      { address: null, metadata: {}, location_name: "Hotel Firenze" },
+      { address: "  ", metadata: null, location_name: null },
+    ];
+    for (const c of cases) expect(itemAddress(c)).toBe(itemLocation(c as never));
+  });
+});

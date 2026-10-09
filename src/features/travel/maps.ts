@@ -23,6 +23,11 @@ function text(value: unknown): string {
   return typeof value === "string" ? value.trim() : "";
 }
 
+/** Display address for an item: address, then metadata address, then location name. Shared rule with the calendar feed. */
+export function itemAddress(item: MapsItem): string {
+  return text(item.address) || text(meta(item).address) || text(item.location_name);
+}
+
 /** iOS, iPadOS and macOS open Apple Kaarten; everything else Google Maps. */
 export function detectMapsPlatform(userAgent: string, maxTouchPoints = 0): MapsPlatform {
   if (/iPhone|iPad|iPod|Macintosh|Mac OS X/i.test(userAgent)) return "apple";
@@ -35,7 +40,7 @@ export function mapsUrl(item: MapsItem, tripDestination: string | null | undefin
   const m = meta(item);
   const lat = num(item.latitude ?? m.latitude);
   const lon = num(item.longitude ?? m.longitude);
-  const address = text(item.address ?? m.address);
+  const address = text(item.address) || text(m.address);
   const locationName = text(item.location_name);
   const name = text(item.title) || locationName;
 

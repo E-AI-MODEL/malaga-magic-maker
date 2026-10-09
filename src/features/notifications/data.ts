@@ -58,13 +58,15 @@ export async function getNotificationPreferences(userId: string) {
     task_assignments: true,
     decisions: true,
     trip_updates: true,
+    push_reminders: false,
+    email_reminders: true,
     updated_at: new Date(0).toISOString(),
   };
 }
 
 export async function saveNotificationPreferences(
   userId: string,
-  preferences: Pick<NotificationPreferencesRow, "task_assignments" | "decisions" | "trip_updates">,
+  preferences: Partial<Pick<NotificationPreferencesRow, "task_assignments" | "decisions" | "trip_updates" | "push_reminders" | "email_reminders">>,
 ) {
   const { error } = await supabase
     .from("notification_preferences")

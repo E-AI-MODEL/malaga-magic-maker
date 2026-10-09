@@ -38,4 +38,5 @@
 - [x] Koppelingen stap 2: Verrekenen heet nu Knaakie, met betaalverzoek (delen/WhatsApp/kopiëren) en privé-IBAN in Profiel
 - [x] Stap 4 weer: MET Norway + Nominatim, weerstrook op Overzicht, weer voor Hansie, actieve agenda-link tonen
 - [x] Verblijfsideeën: kandidaten als idee, winnaar op tijdlijn, ideeën apart op Reis, buiten-reisdata waarschuwing en meeschuiven, rustigere rijen, weerstrook Toscane opgelost
-- [ ] Koppelingen stap 5 (push)
+- [x] Koppelingen stap 5: herinneringen via push en e-mail (elke 15 min, max 3 per dag, stille uren)
+- [ ] Stap 5 echt testen: pushmelding op Android/desktop en iPhone-beginscherm, e-mail na DNS-verificatie

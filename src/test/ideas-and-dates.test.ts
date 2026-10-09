@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { candidateStayStatus, chosenIdeaUpdate, decisionWinner } from "@/features/travel/accommodation";
-import { itemsOutsideTrip, shiftItemDates, timelineWarnings } from "@/features/travel/presentation";
+import { dateShiftAnchor, itemsOutsideTrip, shiftItemDates, timelineWarnings } from "@/features/travel/presentation";
 import { preparationScore, upcomingTripItems } from "@/features/trips/overview";
 
 const item = (id: string, status: string, start: string, end: string | null = null, type = "stay") =>
@@ -65,5 +65,16 @@ describe("trip dates", () => {
     const now = Date.parse("2026-10-01T00:00:00Z");
     const up = upcomingTripItems([item("in", "planned", "2026-10-16T10:00:00Z"), item("out", "planned", "2027-06-10T10:00:00Z")], now, { start_date: "2026-10-15", end_date: "2026-10-24" });
     expect(up.map((x) => x.id)).toEqual(["in"]);
+  });
+});
+
+describe("trip end date", () => {
+  it("outside_trip counts an item ending after the trip end", () => {
+    const w = timelineWarnings([item("late", "planned", "2026-10-22T15:00:00Z", "2026-10-26T11:00:00Z")], "2026-10-15", "2026-10-24");
+    expect(w.find((x) => x.kind === "outside_trip")?.itemIds).toEqual(["late"]);
+  });
+  it("shifts by the end move when only the end date changed", () => {
+    expect(dateShiftAnchor("2026-10-15", "2026-10-15", "2026-10-24", "2026-10-21")).toEqual(["2026-10-24", "2026-10-21"]);
+    expect(dateShiftAnchor("2026-10-15", "2026-10-16", "2026-10-24", "2026-10-25")).toEqual(["2026-10-15", "2026-10-16"]);
   });
 });

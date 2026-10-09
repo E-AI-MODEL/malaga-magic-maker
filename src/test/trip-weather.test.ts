@@ -86,3 +86,19 @@ describe("Hansie weather context", () => {
     expect(ctx.weer?.opgehaald_op).toBeTruthy();
   });
 });
+
+import { geocodeUpdate } from "../../supabase/functions/trip-weather/weather";
+describe("geocode failures", () => {
+  const now = new Date("2026-10-09T10:00:00Z");
+  const trip = { destination_name: "Florence", destination_country: "Italië", destination_latitude: null, destination_longitude: null, destination_geocoded_for: null };
+  it("a service failure stores only the failure time", () => {
+    expect(geocodeUpdate({ kind: "error" }, "Florence, Italië", now)).toEqual({ destination_geocode_failed_at: now.toISOString() });
+  });
+  it("a clean empty answer is remembered", () => {
+    expect(geocodeUpdate({ kind: "not_found" }, "Florence, Italië", now)).toMatchObject({ destination_geocoded_for: "Florence, Italië", destination_latitude: null });
+  });
+  it("retries only 24 hours after a failure", () => {
+    expect(needsGeocode({ ...trip, destination_geocode_failed_at: "2026-10-09T00:00:00Z" }, now)).toBe(false);
+    expect(needsGeocode({ ...trip, destination_geocode_failed_at: "2026-10-08T09:00:00Z" }, now)).toBe(true);
+  });
+});

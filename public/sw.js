@@ -1,5 +1,5 @@
-const SHELL_CACHE = "vakansie-shell-v1";
-const RUNTIME_CACHE = "vakansie-runtime-v1";
+const SHELL_CACHE = "vakansie-shell-v2";
+const RUNTIME_CACHE = "vakansie-runtime-v2";
 const OFFLINE_URL = "/offline.html";
 
 self.addEventListener("install", (event) => {
@@ -46,4 +46,35 @@ self.addEventListener("fetch", (event) => {
       })
     );
   }
+});
+
+self.addEventListener("push", (event) => {
+  let data = {};
+  try { data = event.data ? event.data.json() : {}; } catch { data = { title: "Vakansie", body: event.data ? event.data.text() : "" }; }
+  const url = typeof data.url === "string" && data.url.startsWith("https://vakansie.app/") ? data.url : "/trips";
+  event.waitUntil(
+    self.registration.showNotification(data.title || "Vakansie", {
+      body: data.body || "",
+      icon: "/icons/app-icon-192.png",
+      badge: "/icons/app-icon-192.png",
+      data: { url },
+    })
+  );
+});
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const target = new URL((event.notification.data && event.notification.data.url) || "/trips", self.location.origin);
+  const path = target.pathname + target.search;
+  event.waitUntil(
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((clients) => {
+      for (const client of clients) {
+        if (new URL(client.url).origin === self.location.origin && "focus" in client) {
+          client.navigate(path);
+          return client.focus();
+        }
+      }
+      return self.clients.openWindow(path);
+    })
+  );
 });

@@ -675,6 +675,8 @@ export type Database = {
       notification_preferences: {
         Row: {
           decisions: boolean
+          email_reminders: boolean
+          push_reminders: boolean
           task_assignments: boolean
           trip_updates: boolean
           updated_at: string
@@ -682,6 +684,8 @@ export type Database = {
         }
         Insert: {
           decisions?: boolean
+          email_reminders?: boolean
+          push_reminders?: boolean
           task_assignments?: boolean
           trip_updates?: boolean
           updated_at?: string
@@ -689,6 +693,8 @@ export type Database = {
         }
         Update: {
           decisions?: boolean
+          email_reminders?: boolean
+          push_reminders?: boolean
           task_assignments?: boolean
           trip_updates?: boolean
           updated_at?: string
@@ -886,6 +892,66 @@ export type Database = {
         }
         Relationships: []
       }
+      push_server_keys: {
+        Row: {
+          created_at: string
+          id: number
+          private_jwk: Json
+          public_jwk: Json
+          public_key: string
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          private_jwk: Json
+          public_jwk: Json
+          public_key: string
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          private_jwk?: Json
+          public_jwk?: Json
+          public_key?: string
+        }
+        Relationships: []
+      }
+      push_subscriptions: {
+        Row: {
+          auth: string
+          created_at: string
+          endpoint: string
+          failed_count: number
+          id: string
+          last_success_at: string | null
+          p256dh: string
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          auth: string
+          created_at?: string
+          endpoint: string
+          failed_count?: number
+          id?: string
+          last_success_at?: string | null
+          p256dh: string
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          auth?: string
+          created_at?: string
+          endpoint?: string
+          failed_count?: number
+          id?: string
+          last_success_at?: string | null
+          p256dh?: string
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       reactions: {
         Row: {
           created_at: string
@@ -920,6 +986,59 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      reminder_deliveries: {
+        Row: {
+          channel: string
+          id: string
+          reminder_key: string
+          sent_at: string
+          trip_id: string
+          user_id: string
+        }
+        Insert: {
+          channel: string
+          id?: string
+          reminder_key: string
+          sent_at?: string
+          trip_id: string
+          user_id: string
+        }
+        Update: {
+          channel?: string
+          id?: string
+          reminder_key?: string
+          sent_at?: string
+          trip_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reminder_deliveries_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "trip"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      server_job_secrets: {
+        Row: {
+          created_at: string
+          name: string
+          secret: string
+        }
+        Insert: {
+          created_at?: string
+          name: string
+          secret: string
+        }
+        Update: {
+          created_at?: string
+          name?: string
+          secret?: string
+        }
+        Relationships: []
       }
       submissions: {
         Row: {
@@ -1207,6 +1326,7 @@ export type Database = {
           currency: string
           description: string | null
           destination_country: string | null
+          destination_geocode_failed_at: string | null
           destination_geocoded_for: string | null
           destination_latitude: number | null
           destination_longitude: number | null
@@ -1230,6 +1350,7 @@ export type Database = {
           currency?: string
           description?: string | null
           destination_country?: string | null
+          destination_geocode_failed_at?: string | null
           destination_geocoded_for?: string | null
           destination_latitude?: number | null
           destination_longitude?: number | null
@@ -1253,6 +1374,7 @@ export type Database = {
           currency?: string
           description?: string | null
           destination_country?: string | null
+          destination_geocode_failed_at?: string | null
           destination_geocoded_for?: string | null
           destination_latitude?: number | null
           destination_longitude?: number | null
@@ -1730,6 +1852,7 @@ export type Database = {
       }
       get_my_account_deletion_blockers: { Args: never; Returns: Json }
       get_my_plan_status: { Args: never; Returns: Json }
+      get_push_public_key: { Args: never; Returns: string }
       get_trip_invite_preview: { Args: { p_token: string }; Returns: Json }
       get_trip_readiness: { Args: { p_trip_id: string }; Returns: Json }
       get_username: { Args: { _user_id: string }; Returns: string }

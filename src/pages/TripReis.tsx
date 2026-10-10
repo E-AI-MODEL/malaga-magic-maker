@@ -19,7 +19,7 @@ import { BookingPasteSheet } from "@/features/travel/BookingPasteSheet";
 import { AccommodationSearchSheet } from "@/features/travel/AccommodationSearchSheet";
 import { CalendarFeedSheet } from "@/features/travel/CalendarFeedSheet";
 import { CalendarPlus, ChevronRight } from "lucide-react";
-import { chooseIdeaAsFinal, undoIdeaChoice } from "@/features/travel/accommodation";
+import { ACCOMMODATION_DECISION_TITLE, chooseTripIdea, undoTripIdeaChoice } from "@/features/travel/accommodation";
 import { providerLabel } from "@/features/travel/providers";
 import { TripPageHeader } from "@/components/TripPageHeader";
 import { toast } from "sonner";
@@ -162,9 +162,9 @@ export default function TripReis() {
   const chooseIdea = async (item: TripItemRow) => {
     setActionError("");
     try {
-      const undo = await chooseIdeaAsFinal(activeTrip, item, items as never, timezone);
+      const undo = await chooseTripIdea(item.id);
       await refreshItems();
-      if (undo.closedDecisionId) await queryClient.invalidateQueries();
+      if (undo.closed_decision_id) await queryClient.invalidateQueries();
       if (item.type === "stay") {
         const n = undo.removed.length;
         toast(
@@ -175,7 +175,7 @@ export default function TripReis() {
             action: {
               label: "Ongedaan maken",
               onClick: () => {
-                void undoIdeaChoice(activeTrip.id, undo)
+                void undoTripIdeaChoice(activeTrip.id, undo)
                   .then(async () => {
                     await refreshItems();
                     await queryClient.invalidateQueries();

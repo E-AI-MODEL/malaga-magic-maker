@@ -1,4 +1,4 @@
-import { LayoutDashboard, Home, Route, Users } from "lucide-react";
+import { LayoutDashboard, Route, Users } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { useTrip } from "@/contexts/TripContext";
 

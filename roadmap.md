@@ -71,3 +71,9 @@ Home-ronde: gewijzigd `src/App.tsx`, `src/features/trips/start.ts` en tests, `sr
 - [x] Mobiele bovenbalk: Home-icoon, reiswisselaar, ⋯ met Reisinstellingen/Zet in je agenda/Nieuwe reis
 - [x] Geen grote paginatitel; grijze regel met outline "+ Toevoegen" op Reis en Samen; neutrale Hansie-verzendknop
 - [x] Reis: filters vanaf 6 onderdelen, geen 0-chips, Status-menu, geen streepje bij één onderdeel, nette aanbiedernamen, lege staat met alleen ideeën
+
+## Keuze-ronde
+- [x] "Dit wordt het" via server-transacties choose_trip_idea / undo_trip_idea_choice; alleen organisator of admin; ongedaan maken binnen 10 minuten
+- [x] Reisgenoten zien "De organisator kiest; stem mee via Samen" bij een open keuze
+- [x] Overzicht-icoon LayoutDashboard; korte datumregel; desktop geen dubbele reisnaam; tijdlijnlijn alleen tussen onderdelen
+- [ ] Echte rechten-test in de database (organisator / reisgenoot / maker terug) — testomgeving staat alleen lezen toe

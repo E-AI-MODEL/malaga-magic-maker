@@ -365,7 +365,7 @@ export default function TripSamen() {
                     </span>
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-[15px] font-medium">
-                        {member.displayName}{isMe ? " (jij)" : ""}
+                        {member.displayName}{isMe ? ` (jij · ${member.role === "organizer" ? "organisator" : "reiziger"})` : ""}
                       </p>
                       <p className="mt-0.5 truncate text-[13px] text-muted-foreground">
                         {summary || (isMe ? "Nog geen wensen ingevuld" : "Wensen nog niet ingevuld")}

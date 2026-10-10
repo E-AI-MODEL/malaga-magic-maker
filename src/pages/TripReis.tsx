@@ -19,7 +19,7 @@ import { BookingPasteSheet } from "@/features/travel/BookingPasteSheet";
 import { AccommodationSearchSheet } from "@/features/travel/AccommodationSearchSheet";
 import { CalendarFeedSheet } from "@/features/travel/CalendarFeedSheet";
 import { CalendarPlus, ChevronRight } from "lucide-react";
-import { ACCOMMODATION_DECISION_TITLE, chooseTripIdea, undoTripIdeaChoice } from "@/features/travel/accommodation";
+import { ACCOMMODATION_DECISION_TITLE, chooseTripIdea, ideaActionMessage, undoTripIdeaChoice } from "@/features/travel/accommodation";
 import { providerLabel } from "@/features/travel/providers";
 import { TripPageHeader } from "@/components/TripPageHeader";
 import { toast } from "sonner";
@@ -183,6 +183,7 @@ export default function TripReis() {
             ? `${item.title} is je verblijf. De andere ${n} ${n === 1 ? "idee is" : "ideeën zijn"} weggehaald.`
             : `${item.title} is je verblijf.`,
           {
+            duration: 10000,
             action: {
               label: "Ongedaan maken",
               onClick: () => {
@@ -193,7 +194,7 @@ export default function TripReis() {
                   })
                   .catch((error) => {
                     console.error("undo choice failed", error);
-                    toast.error("Ongedaan maken lukte niet.");
+                    toast.error(ideaActionMessage(error, "Ongedaan maken lukte niet."));
                   });
               },
             },
@@ -202,7 +203,7 @@ export default function TripReis() {
       }
     } catch (error) {
       console.error("choose idea failed", error);
-      setActionError("Dit onderdeel kiezen lukte niet.");
+      setActionError(ideaActionMessage(error, "Dit onderdeel kiezen lukte niet."));
     }
   };
 

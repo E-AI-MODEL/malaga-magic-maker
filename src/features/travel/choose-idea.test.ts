@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { accommodationDecisionClosedByChoice, ideasRemovedByChoice } from "./accommodation";
+import { accommodationDecisionClosedByChoice, ideaActionMessage, ideasRemovedByChoice } from "./accommodation";
 
 const items = [
   { id: "a", type: "stay", status: "idea" },
@@ -32,5 +32,22 @@ describe("Dit wordt het", () => {
     expect(accommodationDecisionClosedByChoice({ type: "stay" }, decisions)?.id).toBe("y");
     expect(accommodationDecisionClosedByChoice({ type: "activity" }, decisions)).toBeNull();
     expect(accommodationDecisionClosedByChoice({ type: "stay" }, [{ id: "y", title: "Waar verblijven we?", status: "closed" }])).toBeNull();
+  });
+});
+
+describe("foutmeldingen bij kiezen in gewone taal", () => {
+  const cases: Array<[string, string]> = [
+    ["not_allowed", "Alleen de organisator kan kiezen."],
+    ["undo_expired", "Ongedaan maken kan tot 10 minuten na kiezen."],
+    ["not_an_idea", "Dit is al gekozen."],
+    ["trip_archived", "Deze reis is gearchiveerd."],
+    ["item_not_found", "Dit onderdeel bestaat niet meer."],
+  ];
+  it.each(cases)("vertaalt %s", (message, expected) => {
+    expect(ideaActionMessage(new Error(message), "fallback")).toBe(expected);
+  });
+  it("houdt de bestaande tekst voor onbekende en lege fouten", () => {
+    expect(ideaActionMessage(new Error("something else"), "Dit onderdeel kiezen lukte niet.")).toBe("Dit onderdeel kiezen lukte niet.");
+    expect(ideaActionMessage(undefined, "Ongedaan maken lukte niet.")).toBe("Ongedaan maken lukte niet.");
   });
 });

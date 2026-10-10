@@ -224,3 +224,22 @@ export async function undoTripIdeaChoice(tripId: string, undo: ChoiceUndo) {
   const { error } = await supabase.rpc("undo_trip_idea_choice", { p_trip_id: tripId, p_payload: undo as any });
   if (error) throw error;
 }
+
+/** Server errors from choosing/undoing an idea, in plain customer language. */
+export function ideaActionMessage(error: unknown, fallback: string): string {
+  const message = error instanceof Error ? error.message : "";
+  switch (message) {
+    case "not_allowed":
+      return "Alleen de organisator kan kiezen.";
+    case "undo_expired":
+      return "Ongedaan maken kan tot 10 minuten na kiezen.";
+    case "not_an_idea":
+      return "Dit is al gekozen.";
+    case "trip_archived":
+      return "Deze reis is gearchiveerd.";
+    case "item_not_found":
+      return "Dit onderdeel bestaat niet meer.";
+    default:
+      return fallback;
+  }
+}

@@ -1,15 +1,8 @@
 import { ReactNode } from "react";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { formatTripDateRange } from "@/features/trips/presentation";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-
-export function formatTripDateRange(startDate: string | null, endDate: string | null) {
-  if (!startDate && !endDate) return "Data nog niet gekozen";
-  const format = (value: string) =>
-    new Date(`${value}T12:00:00`).toLocaleDateString("nl-NL", { day: "numeric", month: "short", year: "numeric" });
-  if (startDate && endDate) return `${format(startDate)} – ${format(endDate)}`;
-  return format(startDate || endDate || "");
-}
 
 /** Shared top line for trip work screens: dates and destination, with one outline add action. */
 export function TripPageHeader({
@@ -28,7 +21,7 @@ export function TripPageHeader({
   const hasMenu = Boolean(addMenu) || Boolean(addActions?.length);
   return (
     <div className="flex min-h-9 items-center justify-between gap-3">
-      <p className="min-w-0 truncate text-sm text-muted-foreground">
+      <p className="min-w-0 text-sm leading-snug text-muted-foreground">
         {formatTripDateRange(startDate, endDate)}
         {destination ? ` · ${destination}` : ""}
       </p>

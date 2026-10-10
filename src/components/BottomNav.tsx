@@ -1,4 +1,4 @@
-import { Home, Route, Users } from "lucide-react";
+import { LayoutDashboard, Route, Users } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { useTrip } from "@/contexts/TripContext";
 
@@ -12,7 +12,7 @@ export function BottomNav() {
   const inactive = "text-muted-foreground";
 
   const links = [
-    { to: `/trip/${activeTrip.id}`, icon: Home, label: "Overzicht", end: true },
+    { to: `/trip/${activeTrip.id}`, icon: LayoutDashboard, label: "Overzicht", end: true },
     { to: `/trip/${activeTrip.id}/reis`, icon: Route, label: "Reis", end: false },
     { to: `/trip/${activeTrip.id}/samen`, icon: Users, label: "Samen", end: false },
   ];

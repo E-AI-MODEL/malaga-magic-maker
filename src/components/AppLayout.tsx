@@ -124,7 +124,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
                 onClick={() => navigate("/trips")}
                 className="truncate font-ui text-sm font-semibold text-muted-foreground transition-colors hover:text-foreground"
               >
-                {title || <span className="font-brand text-base">Vakansie</span>}
+                {isTripScreen ? "Home" : title || <span className="font-brand text-base">Vakansie</span>}
               </Button>
             </div>
             <div className="flex items-center gap-2">

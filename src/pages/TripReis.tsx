@@ -19,10 +19,11 @@ import { BookingPasteSheet } from "@/features/travel/BookingPasteSheet";
 import { AccommodationSearchSheet } from "@/features/travel/AccommodationSearchSheet";
 import { CalendarFeedSheet } from "@/features/travel/CalendarFeedSheet";
 import { CalendarPlus, ChevronRight } from "lucide-react";
-import { chooseIdeaAsFinal, undoIdeaChoice } from "@/features/travel/accommodation";
+import { ACCOMMODATION_DECISION_TITLE, chooseTripIdea, undoTripIdeaChoice } from "@/features/travel/accommodation";
 import { providerLabel } from "@/features/travel/providers";
 import { TripPageHeader } from "@/components/TripPageHeader";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 import { DocumentsSection } from "@/features/documents/DocumentsSection";
 import {
   DayHeader,
@@ -73,7 +74,7 @@ function timeAnchor(item: TripItemRow, timezone: string) {
 }
 
 export default function TripReis() {
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const { activeTrip, isOrganizer } = useTrip();
   const queryClient = useQueryClient();
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -129,6 +130,16 @@ export default function TripReis() {
     });
   }, [itemsQuery.data, timezone, filter, statusFilter]);
 
+  const canChoose = isOrganizer || isAdmin;
+  const openStayDecision = useQuery({
+    queryKey: ["open-stay-decision", tripId],
+    queryFn: async () => {
+      const { data } = await supabase.from("decisions").select("id").eq("trip_id", tripId).eq("status", "open").eq("title", ACCOMMODATION_DECISION_TITLE).limit(1);
+      return Boolean(data && data.length > 0);
+    },
+    enabled: Boolean(tripId) && !canChoose,
+  });
+
   const ideas = useMemo(() => (itemsQuery.data || []).filter((item) => item.status === "idea"), [itemsQuery.data]);
 
   const warnings = useMemo(
@@ -162,9 +173,9 @@ export default function TripReis() {
   const chooseIdea = async (item: TripItemRow) => {
     setActionError("");
     try {
-      const undo = await chooseIdeaAsFinal(activeTrip, item, items as never, timezone);
+      const undo = await chooseTripIdea(item.id);
       await refreshItems();
-      if (undo.closedDecisionId) await queryClient.invalidateQueries();
+      if (undo.closed_decision_id) await queryClient.invalidateQueries();
       if (item.type === "stay") {
         const n = undo.removed.length;
         toast(
@@ -175,7 +186,7 @@ export default function TripReis() {
             action: {
               label: "Ongedaan maken",
               onClick: () => {
-                void undoIdeaChoice(activeTrip.id, undo)
+                void undoTripIdeaChoice(activeTrip.id, undo)
                   .then(async () => {
                     await refreshItems();
                     await queryClient.invalidateQueries();
@@ -320,7 +331,7 @@ export default function TripReis() {
                     meta={`${dayItems.length}`}
                   />
                   <div className="border-t border-rule">
-                    {dayItems.map((item) => {
+                    {dayItems.map((item, index) => {
                       const type = getTravelType(item.type);
                       const canEdit = !readOnly && (isOrganizer || item.created_by === user?.id);
                       const displayTimezone = item.timezone || timezone;
@@ -332,7 +343,7 @@ export default function TripReis() {
                             <span className="num font-ui text-[12px] font-semibold leading-5 text-foreground">
                               {timeAnchor(item, displayTimezone)}
                             </span>
-                            {dayItems.length > 1 && <span aria-hidden className="mt-1 w-px flex-1 bg-rail" />}
+                            {index < dayItems.length - 1 && <span aria-hidden className="mt-1 w-px flex-1 bg-rail" />}
                           </span>
                           <IconBubble icon={TypeIcon} tone="muted" />
                           <span className="min-w-0 flex-1">
@@ -377,6 +388,9 @@ export default function TripReis() {
               Ideeën ({ideas.length})
               <ChevronDown className="ml-auto h-4 w-4 text-muted-foreground transition-transform group-open:rotate-180" />
             </summary>
+            {!readOnly && !canChoose && openStayDecision.data && (
+              <p className="border-t border-rule py-2.5 text-sm text-muted-foreground">De organisator kiest; stem mee via Samen.</p>
+            )}
             <div className="divide-y divide-rule border-t border-rule">
               {ideas.map((idea) => (
                 <div key={idea.id} className="flex items-center gap-3 py-2.5">
@@ -386,7 +400,7 @@ export default function TripReis() {
                       {[getTravelType(idea.type).label, providerLabel(idea.provider) || (idea.booking_url ? new URL(idea.booking_url).hostname.replace(/^www\./, "") : null)].filter(Boolean).join(" · ")}
                     </span>
                   </button>
-                  {!readOnly && (
+                  {!readOnly && canChoose && (
                     <Button size="sm" variant="outline" className="shrink-0 rounded-md" onClick={() => void chooseIdea(idea)}>
                       Dit wordt het
                     </Button>

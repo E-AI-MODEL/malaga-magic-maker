@@ -27,7 +27,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
   const isMobile = useIsMobile();
   const { pathname } = useLocation();
   const [calendarOpen, setCalendarOpen] = useState(false);
-  const isTripScreen = /^\/trip\/[^/]+(?:\/(?:reis|samen|settings))?\/?$/.test(pathname);
+  const isTripScreen = /^\/trip\/[^/]+(?:\/(?:reis|samen|knaakie|settings))?\/?$/.test(pathname);
   const showHansie = isTripScreen && activeTrip?.status !== "archived";
   const title = pathname === "/trips" ? "Home" : pathname === "/profiel" ? "Profiel" : activeTrip?.name;
 

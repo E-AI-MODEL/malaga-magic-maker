@@ -1,39 +1,32 @@
 import { ACCOMMODATION_DECISION_TITLE, decisionWinner, promoteDecisionWinner } from "@/features/travel/accommodation";
 import { toast } from "sonner";
 import { useMemo, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { Navigate, useSearchParams } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Archive,
-  ArrowRight,
   CalendarClock,
   Check,
   CheckCircle2,
   ChevronDown,
   Circle,
-  Copy,
   ListChecks,
   Plus,
-  Receipt,
   Trash2,
   UserPlus,
   UserRound,
 } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
 import { Button } from "@/components/ui/button";
-import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { useTrip } from "@/contexts/TripContext";
 import { formatTripDateTime } from "@/features/travel/presentation";
 import type { TaskRow } from "@/integrations/supabase/database";
 import {
   deleteDecision,
-  deleteExpense,
   deleteTask,
   type DecisionBundle,
-  type ExpenseBundle,
   listDecisions,
-  listExpenses,
   listTasks,
   listTripMembers,
   setDecisionStatus,
@@ -42,9 +35,6 @@ import {
 } from "@/features/together/data";
 import { TaskSheet } from "@/features/together/TaskSheet";
 import { DecisionSheet } from "@/features/together/DecisionSheet";
-import { ExpenseSheet } from "@/features/together/ExpenseSheet";
-import { PaymentRequestSheet } from "@/features/together/PaymentRequestSheet";
-import { computeBalances, settleBalances } from "@/features/together/settle";
 import { TripInvitesCard } from "@/features/invites/TripInvitesCard";
 import { listTravelerProfiles, summariseProfile } from "@/features/travelers/data";
 import { TravelerProfileSheet } from "@/features/travelers/TravelerProfileSheet";
@@ -52,18 +42,13 @@ import { RecentActivity } from "@/features/notifications/RecentActivity";
 import { CountBar, EmptyLine, RowItem, RowList, SectionLabel, Segmented, StatusWord, StickyBar } from "@/components/primitives";
 import { TripPageHeader } from "@/components/TripPageHeader";
 
-/** The primary switcher holds only the three kinds of shared work. */
-type Section = "tasks" | "decisions" | "expenses";
+/** Costs live on Knaakie; Samen holds tasks, choices and travelers. */
+type Section = "tasks" | "decisions";
 
 const sectionOptions: Array<{ id: Section; label: string }> = [
   { id: "tasks", label: "Taken" },
   { id: "decisions", label: "Keuzes" },
-  { id: "expenses", label: "Kosten" },
 ];
-
-function formatMoney(amount: number, currency: string) {
-  return new Intl.NumberFormat("nl-NL", { style: "currency", currency }).format(amount);
-}
 
 export default function TripSamen() {
   const { user } = useAuth();
@@ -72,24 +57,18 @@ export default function TripSamen() {
   const [searchParams] = useSearchParams();
   const [section, setSection] = useState<Section>(() => {
     const requested = searchParams.get("section");
-    return requested === "expenses" || requested === "decisions" ? requested : "tasks";
+    return requested === "decisions" ? requested : "tasks";
   });
   const [taskSheetOpen, setTaskSheetOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<TaskRow | null>(null);
   const [decisionSheetOpen, setDecisionSheetOpen] = useState(false);
-  const [expenseSheetOpen, setExpenseSheetOpen] = useState(false);
-  const [editingExpense, setEditingExpense] = useState<ExpenseBundle | null>(null);
   const [expandedDecision, setExpandedDecision] = useState<string | null>(null);
-  const [expandedExpense, setExpandedExpense] = useState<string | null>(null);
-  const [copied, setCopied] = useState(false);
   const [actionError, setActionError] = useState("");
   const [inviteOpen, setInviteOpen] = useState(false);
   const [profileSheetOpen, setProfileSheetOpen] = useState(false);
-  const [paymentRequest, setPaymentRequest] = useState<{ recipientName: string; amount: number } | null>(null);
 
   const tripId = activeTrip?.id || "";
   const timezone = activeTrip?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone || "Europe/Amsterdam";
-  const currency = activeTrip?.currency || "EUR";
   const readOnly = activeTrip?.status === "archived";
 
   const membersQuery = useQuery({
@@ -107,30 +86,10 @@ export default function TripSamen() {
     queryFn: () => listDecisions(tripId),
     enabled: Boolean(tripId),
   });
-  const expensesQuery = useQuery({
-    queryKey: ["together-expenses", tripId],
-    queryFn: () => listExpenses(tripId),
-    enabled: Boolean(tripId),
-  });
-
   const profilesQuery = useQuery({
     queryKey: ["trip-traveler-profiles", tripId],
     queryFn: () => listTravelerProfiles(tripId),
     enabled: Boolean(tripId),
-  });
-
-  const paymentDetailsQuery = useQuery({
-    queryKey: ["payment-details-me", user?.id],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("payment_details")
-        .select("iban, account_name")
-        .eq("user_id", user!.id)
-        .maybeSingle();
-      if (error) throw error;
-      return data;
-    },
-    enabled: Boolean(user?.id),
   });
 
   const members = useMemo(() => membersQuery.data || [], [membersQuery.data]);
@@ -143,42 +102,11 @@ export default function TripSamen() {
   const memberMap = useMemo(() => new Map(members.map((member) => [member.userId, member])), [members]);
   const tasks = tasksQuery.data || [];
   const decisions = decisionsQuery.data || [];
-  const expenses = useMemo(() => expensesQuery.data || [], [expensesQuery.data]);
-
-
-  const balances = useMemo(
-    () =>
-      computeBalances(
-        expenses.map((expense) => ({
-          paidByUserId: expense.paid_by_user_id,
-          amount: Number(expense.amount) || 0,
-          splits: expense.splits.map((split) => ({ user_id: split.user_id, amount: Number(split.amount) || 0 })),
-        }))
-      ),
-    [expenses]
-  );
-  const transfers = useMemo(() => settleBalances(balances), [balances]);
-
   if (!activeTrip || !user) return null;
-
-  const copySettlement = async () => {
-    const lines = transfers.map((transfer) => {
-      const from = memberMap.get(transfer.fromUserId)?.displayName || "Medereiziger";
-      const to = memberMap.get(transfer.toUserId)?.displayName || "Medereiziger";
-      return `${from} betaalt ${to} ${formatMoney(transfer.cents / 100, currency)}`;
-    });
-    try {
-      await navigator.clipboard.writeText(lines.join("\n"));
-      setCopied(true);
-      window.setTimeout(() => setCopied(false), 2000);
-    } catch {
-      setActionError("Kopiëren lukte niet op dit apparaat.");
-    }
-  };
+  if (searchParams.get("section") === "expenses") return <Navigate to={`/trip/${activeTrip.id}/knaakie`} replace />;
 
   const refreshTasks = () => queryClient.invalidateQueries({ queryKey: ["together-tasks", activeTrip.id] });
   const refreshDecisions = () => queryClient.invalidateQueries({ queryKey: ["together-decisions", activeTrip.id] });
-  const refreshExpenses = () => queryClient.invalidateQueries({ queryKey: ["together-expenses", activeTrip.id] });
 
   const openNewTask = () => {
     setEditingTask(null);
@@ -188,15 +116,6 @@ export default function TripSamen() {
     setEditingTask(task);
     setTaskSheetOpen(true);
   };
-  const openNewExpense = () => {
-    setEditingExpense(null);
-    setExpenseSheetOpen(true);
-  };
-  const openExpenseEdit = (expense: ExpenseBundle) => {
-    setEditingExpense(expense);
-    setExpenseSheetOpen(true);
-  };
-
   const toggleTask = async (task: TaskRow) => {
     setActionError("");
     const completed = task.status === "done" || task.progress >= 100;
@@ -271,17 +190,6 @@ export default function TripSamen() {
     }
   };
 
-  const removeExpense = async (expense: ExpenseBundle) => {
-    if (!window.confirm(`Kosten '${expense.description}' verwijderen?`)) return;
-    try {
-      await deleteExpense(activeTrip.id, expense.id);
-      await refreshExpenses();
-    } catch (error) {
-      console.error("expense delete failed", error);
-      setActionError("De kosten konden niet worden verwijderd.");
-    }
-  };
-
   const openTasks = tasks.filter((task) => task.status !== "done" && task.progress < 100);
   const openDecisions = decisions.filter((decision) => decision.status === "open");
   const myTasks = openTasks.filter((task) => task.assigned_user_id === user.id || task.backup_user_id === user.id);
@@ -290,16 +198,10 @@ export default function TripSamen() {
   );
   const personalAttentionCount = myTasks.length + myPendingDecisions.length;
 
-  const groupLine = `${members.length} ${members.length === 1 ? "reiziger" : "reizigers"} · ${openTasks.length} open ${
-    openTasks.length === 1 ? "taak" : "taken"
-  } · ${openDecisions.length} open ${openDecisions.length === 1 ? "keuze" : "keuzes"}`;
-
   const addAction = !readOnly
     ? section === "tasks"
       ? { label: "Nieuwe taak", run: openNewTask }
-      : section === "decisions"
-        ? { label: "Nieuwe keuze", run: () => setDecisionSheetOpen(true) }
-        : { label: "Bonnetje toevoegen", run: openNewExpense }
+      : { label: "Nieuwe keuze", run: () => setDecisionSheetOpen(true) }
     : null;
 
   return (
@@ -312,7 +214,6 @@ export default function TripSamen() {
           addActions={addAction ? [
             { label: "Nieuwe taak", onClick: openNewTask },
             { label: "Nieuwe keuze", onClick: () => setDecisionSheetOpen(true) },
-            { label: "Bonnetje toevoegen", onClick: openNewExpense },
           ] : undefined}
         />
         <div className="mt-3 border-y border-rule py-3">
@@ -321,7 +222,6 @@ export default function TripSamen() {
               { label: "Reizigers", value: members.length },
               { label: "Open taken", value: openTasks.length, onClick: () => setSection("tasks") },
               { label: "Open keuzes", value: openDecisions.length, onClick: () => setSection("decisions") },
-              { label: "Kostenregels", value: expenses.length, onClick: () => setSection("expenses") },
             ]}
           />
         </div>
@@ -440,7 +340,7 @@ export default function TripSamen() {
             options={sectionOptions.map((option) => ({
               ...option,
               label: `${option.label} ${
-                option.id === "tasks" ? openTasks.length : option.id === "decisions" ? openDecisions.length : expenses.length
+                option.id === "tasks" ? openTasks.length : openDecisions.length
               }`,
             }))}
           />
@@ -450,7 +350,7 @@ export default function TripSamen() {
 
         <section className="mt-5">
           <SectionLabel>
-            {section === "tasks" ? "Taken" : section === "decisions" ? "Keuzes" : "Kosten"}
+            {section === "tasks" ? "Taken" : "Keuzes"}
           </SectionLabel>
 
           {section === "tasks" && (
@@ -586,159 +486,8 @@ export default function TripSamen() {
             )
           )}
 
-          {section === "expenses" && (
-            expensesQuery.isLoading ? (
-              <LoadingRows />
-            ) : expenses.length === 0 ? (
-              <EmptyLine text="Nog geen gedeelde kosten. Voeg een bedrag toe zodra iemand iets voor de reis heeft betaald." actionLabel={readOnly ? undefined : "Bonnetje toevoegen"} onClick={readOnly ? undefined : openNewExpense} />
-            ) : (
-              <RowList className="mt-1">
-                {expenses.map((expense) => {
-                  const manager = isOrganizer || expense.created_by === user.id;
-                  const payer = expense.paid_by_user_id ? memberMap.get(expense.paid_by_user_id) : null;
-                  const expanded = expandedExpense === expense.id;
-                  return (
-                    <div key={expense.id} className="py-3">
-                      <div className="flex min-h-[46px] items-center gap-3">
-                        <button
-                          type="button"
-                          onClick={() => setExpandedExpense(expanded ? null : expense.id)}
-                          aria-expanded={expanded}
-                          className="min-w-0 flex-1 text-left"
-                        >
-                          <span className="block truncate text-[15px] font-medium leading-tight">{expense.description}</span>
-                          <span className="mt-0.5 block truncate text-xs text-muted-foreground">
-                            Betaald door {payer?.displayName || "nog te koppelen"} ·{" "}
-                            {expense.splits.length > 0 ? `verdeeld over ${expense.splits.length}` : "verdeling nog niet ingevuld"}
-                          </span>
-                        </button>
-                        <span className="shrink-0 text-[15px] font-semibold num">{formatMoney(expense.amount, expense.currency)}</span>
-                        <ChevronDown className={`h-4 w-4 shrink-0 text-muted-foreground/60 transition-transform ${expanded ? "rotate-180" : ""}`} />
-                      </div>
-
-                      {expanded && (
-                        <div className="mt-2 space-y-1 pl-1">
-                          {expense.splits.map((split) => (
-                            <div key={split.id} className="flex items-center justify-between gap-3 text-sm">
-                              <span className="truncate text-muted-foreground">{memberMap.get(split.user_id)?.displayName || "Medereiziger"}</span>
-                              <span className="num font-medium">{formatMoney(split.amount, expense.currency)}</span>
-                            </div>
-                          ))}
-                          {!readOnly && manager && (
-                            <div className="flex gap-3 pt-1.5">
-                              <button type="button" onClick={() => openExpenseEdit(expense)} className="text-[13px] font-semibold text-primary underline-offset-4 hover:underline">
-                                Wijzigen
-                              </button>
-                              <button type="button" onClick={() => void removeExpense(expense)} className="text-[13px] font-medium text-destructive underline-offset-4 hover:underline">
-                                Verwijderen
-                              </button>
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </RowList>
-            )
-          )}
-
-          {section === "expenses" && expenses.length > 0 && (
-            <div className="mt-7">
-              <SectionLabel>Knaakie</SectionLabel>
-              {balances.length === 0 ? (
-                <EmptyLine text="Voeg kosten in als bonnetjes met een betaler en verdeling, dan zie je hier wie wie nog moet betalen." />
-              ) : (
-                <>
-                  <RowList className="mt-1">
-                    {balances.map((balance) => {
-                      const settled = balance.cents === 0;
-                      return (
-                        <div key={balance.userId} className="flex min-h-[44px] items-center gap-3 py-2.5">
-                          <span className="min-w-0 flex-1 truncate text-[15px]">
-                            {memberMap.get(balance.userId)?.displayName || "Medereiziger"}
-                          </span>
-                          <span className="shrink-0 text-xs text-muted-foreground">
-                            {settled ? "staat gelijk" : balance.cents > 0 ? "krijgt terug" : "moet betalen"}
-                          </span>
-                          <span
-                            className={`num shrink-0 text-[15px] font-semibold ${settled ? "text-muted-foreground" : balance.cents > 0 ? "text-primary" : "text-foreground"}`}
-                          >
-                            {formatMoney(Math.abs(balance.cents) / 100, currency)}
-                          </span>
-                        </div>
-                      );
-                    })}
-                  </RowList>
-
-                  <div className="mt-4">
-                    <SectionLabel>Wie betaalt wie</SectionLabel>
-                    {transfers.length === 0 ? (
-                      <p className="mt-2 flex items-center gap-2 text-sm text-muted-foreground">
-                        <CheckCircle2 className="h-4 w-4" strokeWidth={1.75} />
-                        Alles is al verrekend.
-                      </p>
-                    ) : (
-                      <RowList className="mt-1">
-                        {transfers.map((transfer, index) => {
-                          const from = memberMap.get(transfer.fromUserId)?.displayName || "Medereiziger";
-                          const to = memberMap.get(transfer.toUserId)?.displayName || "Medereiziger";
-                          const iAmReceiver = transfer.toUserId === user.id;
-                          const iAmPayer = transfer.fromUserId === user.id;
-                          return (
-                            <div key={`${transfer.fromUserId}-${transfer.toUserId}-${index}`} className="flex min-h-[44px] items-center gap-2 py-2.5">
-                              {iAmPayer ? (
-                                <span className="min-w-0 flex-1 truncate text-[15px]">Jij betaalt {to}</span>
-                              ) : (
-                                <>
-                                  <span className="min-w-0 flex-1 truncate text-[15px]">{from}</span>
-                                  <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground/70" strokeWidth={1.75} />
-                                  <span className="min-w-0 flex-1 truncate text-[15px]">{iAmReceiver ? "Jij" : to}</span>
-                                </>
-                              )}
-                              <span className="num shrink-0 text-[15px] font-semibold">{formatMoney(transfer.cents / 100, currency)}</span>
-                              {iAmReceiver && !readOnly && (
-                                <Button
-                                  type="button"
-                                  variant="outline"
-                                  size="sm"
-                                  className="shrink-0 rounded-lg"
-                                  onClick={() => setPaymentRequest({ recipientName: from, amount: transfer.cents / 100 })}
-                                >
-                                  Vraag om betaling
-                                </Button>
-                              )}
-                            </div>
-                          );
-                        })}
-                      </RowList>
-                    )}
-                    {transfers.length > 0 && (
-                      <button
-                        type="button"
-                        onClick={copySettlement}
-                        className="mt-3 inline-flex items-center gap-2 text-[13px] font-semibold text-primary underline-offset-4 hover:underline"
-                      >
-                        <Copy className="h-3.5 w-3.5" strokeWidth={1.75} />
-                        {copied ? "Gekopieerd" : "Overzicht kopiëren"}
-                      </button>
-                    )}
-                  </div>
-                </>
-              )}
-            </div>
-          )}
         </section>
 
-
-
-
-        {expenses.length > 0 && (
-          <p className="mt-6 flex items-center gap-2 text-xs text-muted-foreground">
-            <Receipt className="h-4 w-4" strokeWidth={1.75} />
-            {expenses.length} {expenses.length === 1 ? "kostenregel" : "kostenregels"} in deze reis
-          </p>
-        )}
         <div className="px-5 pb-6 sm:px-8"><RecentActivity tripId={activeTrip.id} /></div>
       </div>
 
@@ -766,28 +515,6 @@ export default function TripSamen() {
         onOpenChange={setDecisionSheetOpen}
         tripId={activeTrip.id}
         onSaved={refreshDecisions}
-      />
-      <ExpenseSheet
-        open={expenseSheetOpen}
-        onOpenChange={setExpenseSheetOpen}
-        tripId={activeTrip.id}
-        tripCurrency={currency}
-        currentUserId={user.id}
-        members={members}
-        expense={editingExpense}
-        onSaved={refreshExpenses}
-      />
-      <PaymentRequestSheet
-        open={paymentRequest !== null}
-        onOpenChange={(open) => {
-          if (!open) setPaymentRequest(null);
-        }}
-        recipientName={paymentRequest?.recipientName || ""}
-        tripName={activeTrip.name}
-        amount={paymentRequest?.amount || 0}
-        currency={currency}
-        iban={paymentDetailsQuery.data?.iban}
-        accountName={paymentDetailsQuery.data?.account_name}
       />
     </AppLayout>
   );

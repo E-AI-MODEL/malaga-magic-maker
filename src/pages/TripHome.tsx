@@ -8,7 +8,7 @@ import { useAuth } from "@/lib/auth";
 import { getTripReadiness } from "@/features/readiness/data";
 import { listTripItems } from "@/features/travel/data";
 import { listDecisions, listExpenses, listTasks } from "@/features/together/data";
-import { computeBalances, settleBalances } from "@/features/together/settle";
+import { settlementByCurrency } from "@/features/together/settlement";
 import { travelTypeIcon } from "@/features/travel/icons";
 import { countdownLabel, excludeFirstThings, tripHasEnded, upcomingTripItems } from "@/features/trips/overview";
 import { tripPreparation } from "@/features/trips/preparation";
@@ -73,11 +73,7 @@ export default function TripHome() {
     queryFn: () => listExpenses(tripId),
     enabled: Boolean(tripId && ended),
   });
-  const hasOpenAmounts = settleBalances(computeBalances((expensesQuery.data || []).map((expense) => ({
-    paidByUserId: expense.paid_by_user_id,
-    amount: Number(expense.amount) || 0,
-    splits: expense.splits.map((split) => ({ user_id: split.user_id, amount: Number(split.amount) || 0 })),
-  })))).length > 0;
+  const hasOpenAmounts = settlementByCurrency(expensesQuery.data || []).some((group) => group.transfers.length > 0);
 
   const view = useMemo(() => {
     if (!activeTrip) return null;
@@ -139,7 +135,7 @@ export default function TripHome() {
           {ended ? (
             <section className="border-b border-border py-4">
               <p className="text-[15px] font-medium">Deze reis is afgelopen.</p>
-              {hasOpenAmounts && <Button variant="outline" className="mt-3" onClick={() => navigate(`/trip/${activeTrip.id}/samen?section=expenses`)}>Naar Knaakie</Button>}
+              {hasOpenAmounts && <Button variant="outline" className="mt-3" onClick={() => navigate(`/trip/${activeTrip.id}/knaakie`)}>Naar Knaakie</Button>}
             </section>
           ) : <>
           <section className="border-l-4 border-primary bg-band p-4">

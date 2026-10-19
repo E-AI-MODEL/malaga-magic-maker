@@ -2,10 +2,8 @@ import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowDownLeft, ArrowUpRight, Archive, Check, ChevronDown, Copy, Pencil, Plus, Receipt, Trash2 } from "lucide-react";
 import { toast } from "sonner";
-import { AppLayout } from "@/components/AppLayout";
 import { Button } from "@/components/ui/button";
 import { RowList, SectionLabel } from "@/components/primitives";
-import { TripPageHeader } from "@/components/TripPageHeader";
 import { useTrip } from "@/contexts/TripContext";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
@@ -14,9 +12,9 @@ import { ExpenseSheet } from "@/features/together/ExpenseSheet";
 import { PaymentRequestSheet } from "@/features/together/PaymentRequestSheet";
 import { formatExpenseMoney as money, settlementByCurrency } from "@/features/together/settlement";
 
-export default function TripKnaakie() {
+export function KostenSection() {
   const { activeTrip, isOrganizer } = useTrip();
-  const { user, isAdmin } = useAuth();
+  const { user } = useAuth();
   const queryClient = useQueryClient();
   const tripId = activeTrip?.id || "";
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -36,7 +34,7 @@ export default function TripKnaakie() {
   });
   const expenses = useMemo(() => expensesQuery.data || [], [expensesQuery.data]);
   const groups = useMemo(() => settlementByCurrency(expenses), [expenses]);
-  const members = membersQuery.data || [];
+  const members = useMemo(() => membersQuery.data || [], [membersQuery.data]);
   const names = new Map(members.map((member) => [member.userId, member.displayName]));
   if (!activeTrip || !user) return null;
   const readOnly = activeTrip.status === "archived";
@@ -60,12 +58,11 @@ export default function TripKnaakie() {
   const personal = groups.flatMap((group) => group.transfers.filter((transfer) => transfer.fromUserId === user.id || transfer.toUserId === user.id).map((transfer) => ({ ...transfer, currency: group.currency })));
   const transfers = groups.flatMap((group) => group.transfers.map((transfer) => ({ ...transfer, currency: group.currency })));
 
-  return <AppLayout>
-    <div className="mx-auto max-w-3xl px-5 pb-10 pt-5 sm:px-8">
-      <TripPageHeader startDate={activeTrip.start_date} endDate={activeTrip.end_date} destination={activeTrip.destination_name} />
+  return <>
+    <div>
       <header className="mt-6 flex items-center gap-3 border-b border-dashed border-border pb-5">
         <Receipt className="h-9 w-9 shrink-0 text-foreground" strokeWidth={1.5} aria-hidden />
-        <h1 className="font-display text-3xl font-bold">Knaakie</h1>
+        <h2 className="font-display text-2xl font-bold">Knaakie</h2>
         <span className="ml-auto text-sm text-muted-foreground num">{expenses.length} {expenses.length === 1 ? "bonnetje" : "bonnetjes"}</span>
       </header>
       {readOnly && <p className="mt-4 flex items-start gap-2 text-sm text-muted-foreground"><Archive className="h-4 w-4 shrink-0" />Deze reis is gearchiveerd. Je kunt de kosten nog bekijken.</p>}
@@ -91,7 +88,7 @@ export default function TripKnaakie() {
         <SectionLabel>Bonnetjes</SectionLabel>
         {!expensesQuery.isPending && !expensesQuery.isError && !expenses.length && <p className="py-3 text-sm text-muted-foreground">Niemand heeft nog kosten toegevoegd.</p>}
         <RowList>{expenses.map((expense) => {
-          const manager = isOrganizer || isAdmin || expense.created_by === user.id;
+          const manager = isOrganizer || expense.created_by === user.id;
           const isExpanded = expanded === expense.id;
           return <div key={expense.id} className="py-3">
             <Button variant="ghost" onClick={() => setExpanded(isExpanded ? null : expense.id)} aria-expanded={isExpanded} className="h-auto w-full justify-start gap-3 whitespace-normal px-0 py-1 text-left hover:bg-transparent">
@@ -116,5 +113,5 @@ export default function TripKnaakie() {
     </div>
     <ExpenseSheet open={sheetOpen} onOpenChange={setSheetOpen} tripId={tripId} tripCurrency={activeTrip.currency} currentUserId={user.id} members={members} expense={editing} onSaved={refresh} />
     <PaymentRequestSheet open={Boolean(payment)} onOpenChange={(open) => { if (!open) setPayment(null); }} recipientName={payment?.recipientName || ""} amount={payment?.amount || 0} currency={payment?.currency || activeTrip.currency} tripName={activeTrip.name} iban={detailsQuery.data?.iban} accountName={detailsQuery.data?.account_name} />
-  </AppLayout>;
+  </>;
 }

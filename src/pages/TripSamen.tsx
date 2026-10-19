@@ -1,7 +1,7 @@
 import { ACCOMMODATION_DECISION_TITLE, decisionWinner, promoteDecisionWinner } from "@/features/travel/accommodation";
 import { toast } from "sonner";
 import { useMemo, useState } from "react";
-import { Navigate, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Archive,
@@ -33,6 +33,7 @@ import {
   setDecisionVote,
   updateTask,
 } from "@/features/together/data";
+import { KostenSection } from "@/features/together/KostenSection";
 import { TaskSheet } from "@/features/together/TaskSheet";
 import { DecisionSheet } from "@/features/together/DecisionSheet";
 import { TripInvitesCard } from "@/features/invites/TripInvitesCard";
@@ -42,12 +43,13 @@ import { RecentActivity } from "@/features/notifications/RecentActivity";
 import { CountBar, EmptyLine, RowItem, RowList, SectionLabel, Segmented, StatusWord, StickyBar } from "@/components/primitives";
 import { TripPageHeader } from "@/components/TripPageHeader";
 
-/** Costs live on Knaakie; Samen holds tasks, choices and travelers. */
-type Section = "tasks" | "decisions";
+/** Shared work stays within Samen, including Kosten. */
+type Section = "tasks" | "decisions" | "expenses";
 
 const sectionOptions: Array<{ id: Section; label: string }> = [
   { id: "tasks", label: "Taken" },
   { id: "decisions", label: "Keuzes" },
+  { id: "expenses", label: "Kosten" },
 ];
 
 export default function TripSamen() {
@@ -57,7 +59,7 @@ export default function TripSamen() {
   const [searchParams] = useSearchParams();
   const [section, setSection] = useState<Section>(() => {
     const requested = searchParams.get("section");
-    return requested === "decisions" ? requested : "tasks";
+    return requested === "expenses" || requested === "decisions" ? requested : "tasks";
   });
   const [taskSheetOpen, setTaskSheetOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<TaskRow | null>(null);
@@ -103,7 +105,6 @@ export default function TripSamen() {
   const tasks = tasksQuery.data || [];
   const decisions = decisionsQuery.data || [];
   if (!activeTrip || !user) return null;
-  if (searchParams.get("section") === "expenses") return <Navigate to={`/trip/${activeTrip.id}/knaakie`} replace />;
 
   const refreshTasks = () => queryClient.invalidateQueries({ queryKey: ["together-tasks", activeTrip.id] });
   const refreshDecisions = () => queryClient.invalidateQueries({ queryKey: ["together-decisions", activeTrip.id] });
@@ -201,7 +202,7 @@ export default function TripSamen() {
   const addAction = !readOnly
     ? section === "tasks"
       ? { label: "Nieuwe taak", run: openNewTask }
-      : { label: "Nieuwe keuze", run: () => setDecisionSheetOpen(true) }
+      : section === "decisions" ? { label: "Nieuwe keuze", run: () => setDecisionSheetOpen(true) } : null
     : null;
 
   return (
@@ -340,7 +341,7 @@ export default function TripSamen() {
             options={sectionOptions.map((option) => ({
               ...option,
               label: `${option.label} ${
-                option.id === "tasks" ? openTasks.length : openDecisions.length
+                option.id === "tasks" ? openTasks.length : option.id === "decisions" ? openDecisions.length : ""
               }`,
             }))}
           />
@@ -350,7 +351,7 @@ export default function TripSamen() {
 
         <section className="mt-5">
           <SectionLabel>
-            {section === "tasks" ? "Taken" : "Keuzes"}
+            {section === "tasks" ? "Taken" : section === "decisions" ? "Keuzes" : "Kosten"}
           </SectionLabel>
 
           {section === "tasks" && (
@@ -486,6 +487,7 @@ export default function TripSamen() {
             )
           )}
 
+          {section === "expenses" && <KostenSection key={tripId} />}
         </section>
 
         <div className="px-5 pb-6 sm:px-8"><RecentActivity tripId={activeTrip.id} /></div>

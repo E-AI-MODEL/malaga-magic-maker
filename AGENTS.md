@@ -44,6 +44,7 @@ Bounded builds; no unrelated redesigns, extra features, duplicated concepts or b
 Run build, lint, typecheck and tests; browser-test relevant flows. Report changed files, migrations, tests, failures and risks. Never report done while acceptance criteria fail.
 
 ## Koppelingen
+- Receipt recognition stays inside Samen → Kosten and returns an ephemeral proposal through the server-only Gateway SDK; only the existing expense RPC saves reviewed fields. Why: avoid extra navigation, duplicate costs and persistent receipt/identity data.
 - `trip-calendar`: secret link per user; store only the token hash. Why: bearer secret.
 - `trip-weather`: MET Norway, Nominatim with Photon fallback; credit sources in UI. Why: licence terms.
 - `send-reminders`: pg_cron + `x-cron-secret`, URL/secret in `server_job_secrets`, VAPID keys in `push_server_keys`, e-mail via Lovable Emails. Why: secrets stay server-side.

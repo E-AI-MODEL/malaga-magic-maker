@@ -4,6 +4,8 @@ import { Input } from "@/components/ui/input";
 import { FormError, FormField, FormSelect, FormSheet, FormSubmit } from "@/components/FormSheet";
 import { createExpenseWithSplits, ExpenseBundle, TripMemberView, updateExpenseWithSplits } from "./data";
 import { splitEvenly, splitTotal } from "./money";
+import { ReceiptInput } from "./ReceiptInput";
+import { matchReceiptPayer, type ReceiptSuggestion } from "./receipt";
 
 type Props = {
   open: boolean;
@@ -28,6 +30,9 @@ export function ExpenseSheet({ open, onOpenChange, tripId, tripCurrency, current
   const [customAmounts, setCustomAmounts] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [proposalReceived, setProposalReceived] = useState(false);
+  const [reviewed, setReviewed] = useState(false);
+  const [receiptNote, setReceiptNote] = useState("");
 
   useEffect(() => {
     if (!open) return;
@@ -47,7 +52,18 @@ export function ExpenseSheet({ open, onOpenChange, tripId, tripCurrency, current
       setCustomAmounts({});
     }
     setError("");
+    setProposalReceived(false); setReviewed(false); setReceiptNote("");
   }, [open, expense, tripCurrency, currentUserId, members]);
+
+  const applyProposal = (proposal: ReceiptSuggestion) => {
+    setDescription(proposal.description || "");
+    setAmount(proposal.amount === null ? "" : String(proposal.amount));
+    setCurrency(proposal.currency || "");
+    setPaidByUserId(matchReceiptPayer(proposal.payerName, members) || "");
+    setProposalReceived(true); setReviewed(false);
+    setReceiptNote(proposal.date ? `Datum op de bon: ${proposal.date}. Controleer hieronder bedrag, valuta, betaler en verdeling.` : "Controleer hieronder bedrag, valuta, betaler en verdeling. Ontbrekende gegevens vul je zelf in.");
+    setError("");
+  };
 
   const numericAmount = Number(amount || 0);
   const splits = useMemo(() => {
@@ -65,6 +81,9 @@ export function ExpenseSheet({ open, onOpenChange, tripId, tripCurrency, current
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
     setError("");
+    if (saving) return;
+    if (proposalReceived && !reviewed) { setError("Controleer het voorstel en bevestig de gegevens voordat je opslaat."); return; }
+    if (!currency || !/^[A-Z]{3}$/.test(currency)) { setError("Kies de valuta van de bon."); return; }
 
     if (!description.trim()) {
       setError("Waar waren deze kosten voor?");
@@ -74,7 +93,7 @@ export function ExpenseSheet({ open, onOpenChange, tripId, tripCurrency, current
       setError("Vul een bedrag groter dan nul in.");
       return;
     }
-    if (!paidByUserId || selectedUserIds.length === 0) {
+    if (!members.some((member) => member.userId === paidByUserId) || selectedUserIds.length === 0 || selectedUserIds.some((id) => !members.some((member) => member.userId === id))) {
       setError("Kies wie betaalde en over wie de kosten worden verdeeld.");
       return;
     }
@@ -96,8 +115,7 @@ export function ExpenseSheet({ open, onOpenChange, tripId, tripCurrency, current
       else await createExpenseWithSplits(tripId, input);
       await onSaved();
       onOpenChange(false);
-    } catch (caught) {
-      console.error("expense save failed", caught);
+    } catch {
       setError("De kosten konden niet worden opgeslagen.");
     } finally {
       setSaving(false);
@@ -108,10 +126,12 @@ export function ExpenseSheet({ open, onOpenChange, tripId, tripCurrency, current
     <FormSheet
       open={open}
       onOpenChange={onOpenChange}
-      title={expense ? "Kosten wijzigen" : "Kosten toevoegen"}
+      title={expense ? "Kosten wijzigen" : "Bonnetje toevoegen"}
       description="Wie betaalde, en hoe verdelen jullie het bedrag?"
     >
       <form onSubmit={handleSubmit} className="mt-6 space-y-5">
+        {open && !expense && <ReceiptInput tripId={tripId} onProposal={applyProposal} />}
+        {proposalReceived && <p role="status" className="text-sm text-muted-foreground">Voorstel uit je bonnetje. {receiptNote}</p>}
         <FormField label="Waarvoor?" htmlFor="expense-description" required>
           <Input id="expense-description" value={description} onChange={(event) => setDescription(event.target.value)} placeholder="Bijv. Treinkaartjes" className="h-11" autoFocus />
         </FormField>
@@ -125,7 +145,7 @@ export function ExpenseSheet({ open, onOpenChange, tripId, tripCurrency, current
               id="expense-currency"
               value={currency}
               onChange={setCurrency}
-              options={currencies.map((item) => ({ value: item, label: item }))}
+              options={[{ value: "", label: "Kies valuta" }, ...[...new Set([...currencies, tripCurrency, currency].filter(Boolean))].map((item) => ({ value: item, label: item }))]}
             />
           </FormField>
         </div>
@@ -135,7 +155,7 @@ export function ExpenseSheet({ open, onOpenChange, tripId, tripCurrency, current
             id="expense-payer"
             value={paidByUserId}
             onChange={setPaidByUserId}
-            options={members.map((member) => ({ value: member.userId, label: member.displayName }))}
+            options={[{ value: "", label: "Kies een reiziger" }, ...members.map((member) => ({ value: member.userId, label: member.displayName }))]}
           />
         </FormField>
 
@@ -183,7 +203,8 @@ export function ExpenseSheet({ open, onOpenChange, tripId, tripCurrency, current
         )}
 
         <FormError message={error} />
-        <FormSubmit saving={saving}>{expense ? "Wijzigingen opslaan" : "Kosten toevoegen"}</FormSubmit>
+        {proposalReceived && <label className="flex items-start gap-3 text-sm"><input type="checkbox" checked={reviewed} onChange={(event) => setReviewed(event.target.checked)} className="mt-1 h-4 w-4 shrink-0" /><span>Ik heb bedrag, valuta, betaler en verdeling gecontroleerd.</span></label>}
+        <FormSubmit saving={saving}>{expense ? "Wijzigingen opslaan" : "Opslaan"}</FormSubmit>
       </form>
     </FormSheet>
   );

@@ -1,5 +1,11 @@
 # Roadmap
 
+## Bonherkenning binnen Samen → Kosten
+- [x] Drie hoofdknoppen behouden; Knaakie als kostensectie, geen extra route of migratie
+- [x] Gateway-SDK geïmporteerd, workspacecatalogus inbegrepen; beeldinvoer en zero-retention op Responses bevestigd
+- [x] Tijdelijke bonfoto, expliciete verwerkingstoestemming, betaler lokaal koppelen en gecontroleerd opslaan via bestaande kostenfunctie
+- [ ] Tests, lint, automatische checks en ingelogde controle afronden
+
 ## Home-ronde
 - [x] Vaste landing /trips met voorrang voor uitnodiging en expliciete next
 - [x] Home-labels, begroeting, eerstvolgende reis, Aan de slag en accountregel

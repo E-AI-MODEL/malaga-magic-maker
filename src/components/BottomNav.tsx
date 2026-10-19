@@ -1,4 +1,4 @@
-import { LayoutDashboard, Receipt, Route, Users } from "lucide-react";
+import { LayoutDashboard, Route, Users } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { useTrip } from "@/contexts/TripContext";
 
@@ -15,7 +15,6 @@ export function BottomNav() {
     { to: `/trip/${activeTrip.id}`, icon: LayoutDashboard, label: "Overzicht", end: true },
     { to: `/trip/${activeTrip.id}/reis`, icon: Route, label: "Reis", end: false },
     { to: `/trip/${activeTrip.id}/samen`, icon: Users, label: "Samen", end: false },
-    { to: `/trip/${activeTrip.id}/knaakie`, icon: Receipt, label: "Knaakie", end: false },
   ];
 
   return (

@@ -1,5 +1,15 @@
 # Roadmap
 
+## Bonherkenning binnen Samen → Kosten
+- [x] Drie hoofdknoppen behouden; Knaakie als kostensectie, geen extra route of migratie
+- [x] Gateway-SDK geïmporteerd, workspacecatalogus inbegrepen; beeldinvoer en zero-retention op Responses bevestigd
+- [x] Tijdelijke bonfoto, expliciete verwerkingstoestemming, betaler lokaal koppelen en gecontroleerd opslaan via bestaande kostenfunctie
+- [x] 265 tests en 3 functietests geslaagd; functie-typecheck en automatische productiebuild/typecheck OK; lint 0 fouten, 24 bestaande waarschuwingen
+- [x] Fictieve bon via echte Gateway: EUR 43,50 en datum correct; getypte schuine naam niet als handschrift beschouwd (null). Geen representatieve handschriftmeting
+- [x] receipt-extract gedeployed; openbaar mobiel scherm zonder overflow of runtimefouten
+- [ ] Ingelogde controle Samen → Kosten op 390px/desktop, echte bon → correctie → opslaan → teruglezen — geblokkeerd: geen sessie voor verzoeker; zelfstandig aanmelden leverde geen overeenkomend account
+- [ ] VoiceOver, echte telefooncamera en representatieve handschriftbonnen — vereisen apparaat en voorbeeldbonnen van gebruiker
+
 ## Home-ronde
 - [x] Vaste landing /trips met voorrang voor uitnodiging en expliciete next
 - [x] Home-labels, begroeting, eerstvolgende reis, Aan de slag en accountregel

@@ -68,7 +68,7 @@ export function personalFollowUps(trips: Pick<Trip, "id" | "name" | "status" | "
       const balances = computeBalances(facts.expenses.filter((expense) => expense.trip_id === trip.id && expense.currency === currency).map((expense) => ({ paidByUserId: expense.paid_by_user_id, amount: Number(expense.amount), splits: expense.splits.map((split) => ({ user_id: split.user_id, amount: Number(split.amount) })) })));
       for (const transfer of settleBalances(balances).filter((transfer) => transfer.fromUserId === userId)) {
         const money = new Intl.NumberFormat("nl-NL", { style: "currency", currency }).format(transfer.cents / 100);
-        payments.push({ key: `payment-${trip.id}-${currency}-${transfer.toUserId}`, kind: "payment", title: `Je betaalt ${facts.names[transfer.toUserId] || "een reisgenoot"} ${money}`, tripName: trip.name, href: `/trip/${trip.id}/knaakie` });
+        payments.push({ key: `payment-${trip.id}-${currency}-${transfer.toUserId}`, kind: "payment", title: `Je betaalt ${facts.names[transfer.toUserId] || "een reisgenoot"} ${money}`, tripName: trip.name, href: `/trip/${trip.id}/samen?section=expenses` });
       }
     }
   }

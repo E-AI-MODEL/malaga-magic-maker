@@ -54,6 +54,7 @@ jobs:
           deno check supabase/functions/payments-account/index.ts
           deno check supabase/functions/payments-webhook/index.ts
           (cd supabase/functions/reminder-test && deno check --node-modules-dir=auto index.ts)
+          deno check --config supabase/functions/receipt-extract/deno.json supabase/functions/receipt-extract/index.ts
           deno check supabase/functions/reminders-unsubscribe/index.ts
           (cd supabase/functions/send-reminders && deno check --node-modules-dir=auto index.ts)
           deno check supabase/functions/trip-ai-chat/index.ts
@@ -64,7 +65,9 @@ jobs:
         run: npm run lint
 
       - name: Test
-        run: npm test
+        run: |
+          npm test
+          deno test --config supabase/functions/receipt-extract/deno.json supabase/functions/receipt-extract/validation.test.ts
 
       - name: Build
         run: npm run build

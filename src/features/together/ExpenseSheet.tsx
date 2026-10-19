@@ -35,7 +35,11 @@ export function ExpenseSheet({ open, onOpenChange, tripId, tripCurrency, current
   const [receiptNote, setReceiptNote] = useState("");
 
   useEffect(() => {
-    if (!open) return;
+    if (!open) {
+      setDescription(""); setAmount(""); setPaidByUserId(""); setCurrency("");
+      setCustomAmounts({}); setSelectedUserIds([]); setReceiptNote(""); setProposalReceived(false); setReviewed(false);
+      return;
+    }
     setDescription(expense?.description || "");
     setAmount(expense ? String(expense.amount) : "");
     setCurrency(expense?.currency || tripCurrency || "EUR");

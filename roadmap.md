@@ -1,5 +1,8 @@
 # Roadmap
 
+## Mobiele Knaakie-footer
+- [ ] Vaste knop naar Samen → Kosten, ook vanuit Samen; tests en ingelogde mobiele controle
+
 ## Bonherkenning binnen Samen → Kosten
 - [x] Drie hoofdknoppen behouden; Knaakie als kostensectie, geen extra route of migratie
 - [x] Gateway-SDK geïmporteerd, workspacecatalogus inbegrepen; beeldinvoer en zero-retention op Responses bevestigd

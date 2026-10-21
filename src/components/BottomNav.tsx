@@ -1,10 +1,13 @@
-import { LayoutDashboard, Route, Users } from "lucide-react";
-import { NavLink } from "react-router-dom";
+import { LayoutDashboard, Route, Users, Wallet } from "lucide-react";
+import { Link, NavLink, useLocation } from "react-router-dom";
 import { useTrip } from "@/contexts/TripContext";
+import { Button } from "@/components/ui/button";
 
 export function BottomNav() {
   const { activeTrip } = useTrip();
+  const { pathname, search } = useLocation();
   if (!activeTrip) return null;
+  const expensesActive = pathname === `/trip/${activeTrip.id}/samen` && new URLSearchParams(search).get("section") === "expenses";
 
   const base =
     "relative flex h-[58px] flex-1 flex-col items-center justify-center gap-1 text-[11px] font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring";
@@ -25,17 +28,25 @@ export function BottomNav() {
             key={link.to}
             to={link.to}
             end={link.end}
-            className={({ isActive }) => `${base} ${isActive ? active : inactive}`}
+             aria-current={link.label === "Samen" && expensesActive ? false : undefined}
+             className={({ isActive }) => `${base} ${isActive && !expensesActive ? active : inactive}`}
           >
             {({ isActive }) => (
               <>
-                {isActive && <span aria-hidden className="absolute inset-x-7 top-0 h-[3px] bg-primary" />}
-                <link.icon className="h-5 w-5" strokeWidth={isActive ? 2 : 1.75} aria-hidden />
+                {isActive && !expensesActive && <span aria-hidden className="absolute inset-x-7 top-0 h-[3px] bg-primary" />}
+                <link.icon className="h-5 w-5" strokeWidth={isActive && !expensesActive ? 2 : 1.75} aria-hidden />
                 <span>{link.label}</span>
               </>
             )}
           </NavLink>
         ))}
+         <Button asChild variant="ghost" className={`${base} h-[58px] rounded-none px-0 py-0 text-[11px] ${expensesActive ? active : inactive}`}>
+           <Link to={`/trip/${activeTrip.id}/samen?section=expenses`} aria-current={expensesActive ? "page" : undefined}>
+             {expensesActive && <span aria-hidden className="absolute inset-x-7 top-0 h-[3px] bg-primary" />}
+             <Wallet className="!h-5 !w-5" strokeWidth={expensesActive ? 2 : 1.75} aria-hidden />
+             <span>Knaakie</span>
+           </Link>
+         </Button>
       </div>
     </nav>
   );

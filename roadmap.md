@@ -1,5 +1,10 @@
 # Roadmap
 
+## Mobiele Knaakie-footer
+- [x] Vaste Knaakie-knop naar bestaande Samen → Kosten; URL-gestuurde sectie werkt ook vanuit Samen, geen nieuwe route/migratie
+- [x] 268 tests geslaagd; lint 0 fouten/24 bestaande waarschuwingen; automatische build OK
+- [ ] Ingelogde mobiele controle — previewsessie opent login; vernieuwen voor verzoeker mislukt omdat geen overeenkomend account gevonden is. Gebruiker moet in de preview inloggen
+
 ## Bonherkenning binnen Samen → Kosten
 - [x] Drie hoofdknoppen behouden; Knaakie als kostensectie, geen extra route of migratie
 - [x] Gateway-SDK geïmporteerd, workspacecatalogus inbegrepen; beeldinvoer en zero-retention op Responses bevestigd

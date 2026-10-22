@@ -14,6 +14,7 @@ import {
 
 /** Lucide-only product iconography for trip item types. No emoji anywhere in product UI. */
 const map: Record<string, LucideIcon> = {
+  own_vehicle: Car,
   flight: Plane,
   train: Train,
   ferry: Ship,

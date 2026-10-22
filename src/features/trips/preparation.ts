@@ -49,14 +49,12 @@ export function tripPreparation({ activeTrip, items, tasks, decisions, readiness
           return { key: `check-${key}`, title: check.label, actionLabel: action.label, href: action.href };
         });
 
+    // Only gentle, data-driven suggestions: solo trips, own transport and trips
+    // without bookings are complete trips, not missing pieces.
     const suggestions: FirstThing[] = [];
     if (readiness && !ended) {
       if (readiness.facts.trip_item_count === 0)
-        suggestions.push({ key: "s-items", title: "Zet je heenreis en verblijf erin", actionLabel: "Naar Reis", href: `/trip/${activeTrip.id}/reis` });
-      if (readiness.facts.member_count <= 1)
-        suggestions.push({ key: "s-members", title: "Nodig je reisgenoten uit", actionLabel: "Uitnodigen", href: `/trip/${activeTrip.id}/settings` });
-      if (readiness.facts.document_count === 0 && readiness.facts.trip_item_count > 0)
-        suggestions.push({ key: "s-docs", title: "Bewaar je tickets en bevestigingen", actionLabel: "Naar Reis", href: `/trip/${activeTrip.id}/reis` });
+        suggestions.push({ key: "s-items", title: "Zet je eerste onderdeel in je planning", actionLabel: "Naar Reis", href: `/trip/${activeTrip.id}/reis` });
     }
 
     const things = firstThings({
@@ -78,11 +76,5 @@ export function tripPreparation({ activeTrip, items, tasks, decisions, readiness
       suggestions,
     });
 
-    const score = preparationScore({
-      checks: readiness?.checks || [],
-      itemCount: items.filter((item) => item.status !== "idea" && item.status !== "cancelled").length,
-      missingStay: timelineWarnings(items, activeTrip.start_date ?? null, activeTrip.end_date ?? null).some((w) => w.kind === "missing_stay"),
-    });
-
-    return { things, ...score };
+    return { things };
 }

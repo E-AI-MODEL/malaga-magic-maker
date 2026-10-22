@@ -61,7 +61,8 @@ function NextTrip({ trip, facts, userId }: { trip: Trip; facts: HomeFacts; userI
   const first = preparation.things[0];
 
   return (
-    <section className="mt-5 border-y border-border bg-card px-4 py-4">
+    <section className="-mt-14 rounded-[20px] border border-border bg-card p-4 shadow-soft">
+      <p className="font-ui text-[12px] font-semibold text-muted-foreground">Eerstvolgende reis</p>
       <Link to={`/trip/${trip.id}`} className="flex items-center gap-3.5 py-1">
         <TripVisual
           name={trip.name}
@@ -133,41 +134,43 @@ export default function Trips() {
 
   return (
     <AppLayout>
-      <div className="mx-auto max-w-3xl px-5 pb-16 pt-5">
-        <div className="flex items-center justify-between gap-3">
-          <h1 className="min-w-0 break-words font-display text-[30px] font-bold leading-tight">{firstName ? `Hoi ${firstName}` : "Hoi"}</h1>
-          <Button asChild variant="outline" size="sm" className="shrink-0 rounded-md bg-card">
-            <Link to="/new-trip"><Plus className="mr-1.5 h-3.5 w-3.5" />Nieuwe reis</Link>
-          </Button>
+      <section className="relative">
+        <div className="relative h-[210px] w-full overflow-hidden bg-secondary sm:h-[240px]">
+          <img src={heroHome} alt="" aria-hidden width={1280} height={720} loading="eager" className="h-full w-full object-cover" />
+          <div aria-hidden className="absolute inset-0 bg-foreground/60" />
+          <div className="absolute inset-x-0 top-0 mx-auto max-w-3xl px-5 pt-7">
+            <p className="flex items-center gap-2.5 font-ui text-[13px] font-medium text-white/80">
+              <span aria-hidden className="h-px w-7 bg-white/40" />
+              Je hele vakantie in je broekzak
+            </p>
+            <div className="mt-3 flex items-center justify-between gap-3">
+              <h1 className="min-w-0 break-words font-display text-[34px] font-bold leading-tight text-white">{firstName ? `Hoi ${firstName}` : "Hoi"}</h1>
+              <Button asChild variant="outline" size="sm" className="shrink-0 rounded-md bg-card">
+                <Link to="/new-trip"><Plus className="mr-1.5 h-3.5 w-3.5" />Nieuwe reis</Link>
+              </Button>
+            </div>
+          </div>
         </div>
-
+      </section>
+      <div className="relative z-10 mx-auto max-w-3xl px-5 pb-16">
         {loading ? (
-          <div className="mt-5 h-20 animate-pulse rounded-[14px] bg-secondary" />
+          <div className="-mt-14 h-28 animate-pulse rounded-[20px] border border-border bg-card shadow-soft" />
         ) : heroTrip ? (
           <>
-            <div className="mt-6"><SectionLabel>Eerstvolgende reis</SectionLabel></div>
             <NextTrip trip={heroTrip} facts={facts} userId={user?.id} />
             <GettingStarted trip={heroTrip} hasAnyTrip={userTrips.length > 0} />
           </>
-        ) : activeTrips.length ? <GettingStarted trip={activeTrips[0]} hasAnyTrip={userTrips.length > 0} /> : (
-          <div className="mt-6">
-            <div className="relative h-[340px] w-full overflow-hidden rounded-[20px]">
-              <img src={heroHome} alt="Terras met uitzicht op zee en een opengeslagen reisnotitieboek" width={1280} height={720} loading="eager" className="h-full w-full object-cover" />
-              <div aria-hidden className="absolute inset-0 bg-foreground/60" />
-              <div className="absolute inset-x-0 bottom-0 p-5">
-                <h2 className="font-display text-[30px] font-bold uppercase leading-[1.08] tracking-wide text-white">
-                  Je hele vakantie
-                  <br />
-                  in je broekzak
-                </h2>
-                <p className="mt-3 max-w-sm text-[15px] leading-relaxed text-white/90">
-                  Begin met een naam. Data, mensen en plannen voeg je toe wanneer je wilt.
-                </p>
-              </div>
+        ) : activeTrips.length ? <div className="pt-4"><GettingStarted trip={activeTrips[0]} hasAnyTrip={userTrips.length > 0} /></div> : (
+          <div>
+            <div className="-mt-14 rounded-[20px] border border-border bg-card p-5 shadow-soft">
+              <h2 className="font-display text-[22px] font-bold leading-tight">Start je eerste reis</h2>
+              <p className="mt-2 text-[15px] leading-relaxed text-muted-foreground">
+                Begin met een naam. Data, mensen en plannen voeg je toe wanneer je wilt.
+              </p>
+              <Button asChild size="lg" className="mt-4 w-full rounded-md sm:w-auto">
+                <Link to="/new-trip"><Plus className="mr-1.5 h-4 w-4" />Je eerste reis starten</Link>
+              </Button>
             </div>
-            <Button asChild size="lg" className="mt-4 w-full rounded-md sm:w-auto">
-              <Link to="/new-trip"><Plus className="mr-1.5 h-4 w-4" />Je eerste reis starten</Link>
-            </Button>
             <GettingStarted trip={null} hasAnyTrip={userTrips.length > 0} />
           </div>
         )}

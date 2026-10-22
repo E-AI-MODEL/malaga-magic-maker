@@ -1,4 +1,5 @@
 export const travelTypes = [
+  { value: "own_vehicle", label: "Eigen vervoer" },
   { value: "flight", label: "Vliegtuig" },
   { value: "train", label: "Trein" },
   { value: "ferry", label: "Boot" },
@@ -117,6 +118,11 @@ export function formatTripDay(key: string, timezone: string) {
 export type DetailField = { key: string; label: string; placeholder?: string };
 
 export const typeDetailFields: Record<string, DetailField[]> = {
+  own_vehicle: [
+    { key: "departure_place", label: "Vertrek vanaf", placeholder: "Bijv. thuis" },
+    { key: "arrival_place", label: "Naar" },
+    { key: "vehicle", label: "Vervoer", placeholder: "Bijv. eigen auto, camper, fiets" },
+  ],
   flight: [
     { key: "flight_number", label: "Vluchtnummer", placeholder: "Bijv. KL1234" },
     { key: "departure_airport", label: "Van (luchthaven)", placeholder: "Bijv. AMS" },
@@ -206,8 +212,10 @@ export function timelineWarnings(items: WarnItem[], tripStart: string | null, tr
     }
   }
 
-  if (tripStart && tripEnd && tripEnd > tripStart) {
-    const stays = active.filter((i) => i.type === "stay" && i.start_at && i.end_at);
+  // Gaps are only worth mentioning when the traveller keeps stays in the app at all:
+  // camping, family or a roadtrip without bookings is a normal trip, not a missing one.
+  const stays = active.filter((i) => i.type === "stay" && i.start_at && i.end_at);
+  if (tripStart && tripEnd && tripEnd > tripStart && stays.length > 0) {
     const missing: string[] = [];
     for (let t = dayStart(tripStart); t < dayStart(tripEnd); t += DAY) {
       const covered = stays.some((s) => dayStart(s.start_at!) <= t && dayStart(s.end_at!) > t);

@@ -44,11 +44,11 @@ import {
   tripDayKey,
 } from "@/features/travel/presentation";
 
-const quickAddTypes = ["flight", "train", "stay", "activity", "custom"] as const;
+const quickAddTypes = ["own_vehicle", "flight", "train", "stay", "activity", "custom"] as const;
 
 const filters: ReadonlyArray<{ id: "all" | "transport" | "stay" | "doing"; label: string; types: readonly string[] }> = [
   { id: "all", label: "Alles", types: [] },
-  { id: "transport", label: "Vervoer", types: ["flight", "train", "ferry", "rental_car", "transfer"] },
+  { id: "transport", label: "Vervoer", types: ["own_vehicle", "flight", "train", "ferry", "rental_car", "transfer"] },
   { id: "stay", label: "Verblijf", types: ["stay"] },
   { id: "doing", label: "Doen", types: ["activity", "restaurant", "event", "ticket"] },
 ];

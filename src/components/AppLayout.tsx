@@ -19,6 +19,31 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import logo from "@/assets/vakansie_primary_complete.png.asset.json";
+
+function AccountMenu({ navigate }: { navigate: (path: string) => void }) {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="icon" className="h-9 w-9 text-muted-foreground" aria-label="Meer opties">
+          <MoreHorizontal className="h-5 w-5" strokeWidth={1.75} />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-60">
+        <DropdownMenuItem onClick={() => navigate("/trips")}>
+          <Home className="mr-2 h-4 w-4" />Home
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => navigate("/profiel")}>
+          <User className="mr-2 h-4 w-4" />Profiel
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => navigate("/new-trip")}>
+          <Plus className="mr-2 h-4 w-4" />Nieuwe reis
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
 
 export function AppLayout({ children }: { children: ReactNode }) {
   const { profile } = useAuth();
@@ -31,16 +56,37 @@ export function AppLayout({ children }: { children: ReactNode }) {
   const showHansie = isTripScreen && activeTrip?.status !== "archived";
   const title = pathname === "/trips" ? "Home" : pathname === "/profiel" ? "Profiel" : activeTrip?.name;
 
+  const goHome = () => {
+    if (pathname === "/trips") window.scrollTo({ top: 0 });
+    else navigate("/trips");
+  };
+
   if (isMobile) {
+    if (!isTripScreen) {
+      return (
+        <div className="min-h-screen overflow-x-hidden bg-background pb-[env(safe-area-inset-bottom)]">
+          <header className="sticky top-0 z-40 border-b border-border/70 bg-background">
+            <AdminBar />
+            <div className="mx-auto flex h-14 max-w-3xl items-center justify-between px-5">
+              <button type="button" onClick={goHome} aria-label="Naar Home" className="flex items-center">
+                <img src={logo.url} alt="Vakansie" width={169} height={43} className="h-8 w-auto object-contain" />
+              </button>
+              <AccountMenu navigate={navigate} />
+            </div>
+          </header>
+          <main className="mx-auto max-w-2xl">{children}</main>
+        </div>
+      );
+    }
     return (
-      <div className={`min-h-screen overflow-x-hidden bg-background ${isTripScreen ? (showHansie ? "pb-[calc(8rem+env(safe-area-inset-bottom))]" : "pb-[calc(4rem+env(safe-area-inset-bottom))]") : "pb-[env(safe-area-inset-bottom)]"}`}>
+      <div className={`min-h-screen overflow-x-hidden bg-background ${showHansie ? "pb-[calc(8rem+env(safe-area-inset-bottom))]" : "pb-[calc(4rem+env(safe-area-inset-bottom))]"}`}>
         <header className="sticky top-0 z-40 border-b border-border bg-background">
           <AdminBar />
           <div className="mx-auto grid h-12 max-w-2xl grid-cols-[40px_minmax(0,1fr)_40px] items-center px-2">
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => navigate("/trips")}
+              onClick={goHome}
               className="h-9 w-9 text-muted-foreground"
               aria-label="Naar Home"
             >
@@ -121,10 +167,11 @@ export function AppLayout({ children }: { children: ReactNode }) {
             <div className="flex min-w-0 items-center gap-2">
               <SidebarTrigger className="text-muted-foreground" />
               <Button variant="ghost"
-                onClick={() => navigate("/trips")}
+                onClick={goHome}
+                aria-label="Naar Home"
                 className="truncate font-ui text-sm font-semibold text-muted-foreground transition-colors hover:text-foreground"
               >
-                {isTripScreen ? "Home" : title || <span className="font-brand text-base">Vakansie</span>}
+                {isTripScreen ? "Home" : <img src={logo.url} alt="Vakansie" width={169} height={43} className="h-7 w-auto object-contain" />}
               </Button>
             </div>
             <div className="flex items-center gap-2">

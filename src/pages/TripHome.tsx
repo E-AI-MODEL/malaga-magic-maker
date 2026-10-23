@@ -13,7 +13,7 @@ import { travelTypeIcon } from "@/features/travel/icons";
 import { countdownLabel, excludeFirstThings, tripHasEnded, upcomingTripItems } from "@/features/trips/overview";
 import { tripPreparation } from "@/features/trips/preparation";
 import { Button } from "@/components/ui/button";
-import { ReadinessBar, RowItem, RowList, SectionLabel } from "@/components/primitives";
+import { RowItem, RowList, SectionLabel } from "@/components/primitives";
 import { TripVisual } from "@/components/TripVisual";
 import { WeatherStrip } from "@/features/trips/WeatherStrip";
 import { showWeatherStrip } from "@/features/trips/weather";
@@ -81,7 +81,7 @@ export default function TripHome() {
     const items = itemsQuery.data || [];
     const tasks = tasksQuery.data || [];
     const decisions = decisionsQuery.data || [];
-    const { things, done, total } = tripPreparation({ activeTrip, items, tasks, decisions, readiness, userId: user?.id, ended });
+    const { things } = tripPreparation({ activeTrip, items, tasks, decisions, readiness, userId: user?.id, ended });
     const myTasks = user ? tasks.filter((task) => task.status !== "done" && task.assigned_user_id === user.id) : [];
     const myVotes = decisions.filter((decision) => decision.status === "open" && !decision.options.some((option) => option.votes.some((vote) => vote.user_id === user?.id)));
 
@@ -92,7 +92,7 @@ export default function TripHome() {
       ...myVotes.map((decision) => ({ key: `decision-${decision.id}`, icon: Scale, title: decision.title, meta: "Nog niet gestemd" })),
     ], things).slice(0, 3);
 
-    return { things, upcoming, personal, done, total };
+    return { things, upcoming, personal };
   }, [activeTrip, ended, itemsQuery.data, tasksQuery.data, decisionsQuery.data, readiness, user]);
 
   if (!activeTrip || !view) return null;
@@ -125,11 +125,6 @@ export default function TripHome() {
 
         {!ended && showWeatherStrip(activeTrip, timezone) && <WeatherStrip tripId={activeTrip.id} timeZone={timezone} />}
 
-        {!ended && !readinessQuery.isLoading && !itemsQuery.isLoading && (
-          <div className="px-5 pt-3 sm:px-8">
-            <ReadinessBar done={view.done} total={view.total} sentence={`${view.done} van ${view.total} geregeld`} />
-          </div>
-        )}
 
         <div className="space-y-6 px-5 pt-4 sm:px-8">
           {ended ? (
@@ -171,7 +166,7 @@ export default function TripHome() {
                 )}
               </>
             ) : (
-              <p className="mt-1.5 font-display uppercase tracking-tight text-[19px] font-extrabold">Alles geregeld. Goede reis.</p>
+              <p className="mt-1.5 font-display uppercase tracking-tight text-[19px] font-extrabold">Niets dat nu op je wacht.</p>
             )}
           </section>
 
@@ -185,7 +180,7 @@ export default function TripHome() {
                 onClick={() => navigate(`/trip/${activeTrip.id}/reis`)}
                 className="py-3 text-left text-[14px] text-muted-foreground hover:text-foreground"
               >
-                Nog niets ingepland. Voeg vervoer, verblijf of een activiteit toe via Reis.
+                Nog niets ingepland. Voeg toe wat je weet, bijvoorbeeld je vertrek of een uitje.
               </button>
             ) : (
               <ol className="relative mt-1">

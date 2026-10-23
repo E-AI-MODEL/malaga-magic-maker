@@ -13,7 +13,7 @@ import { useAuth } from "@/lib/auth";
 import { usePlanStatus } from "@/features/pro/limits";
 import { AppLayout } from "@/components/AppLayout";
 import { Button } from "@/components/ui/button";
-import { ReadinessBar, RowItem, RowList, SectionLabel } from "@/components/primitives";
+import { RowItem, RowList, SectionLabel } from "@/components/primitives";
 import { TripThumb, TripVisual } from "@/components/TripVisual";
 import { GettingStarted } from "@/features/onboarding/GettingStarted";
 import heroHome from "@/assets/hero-home.jpg";
@@ -87,10 +87,9 @@ function NextTrip({ trip, facts, userId }: { trip: Trip; facts: HomeFacts; userI
 
       {ended ? <p className="mt-3 text-xs text-muted-foreground">Deze reis is afgelopen.</p> : readinessQuery.data && itemsQuery.data ? (
         <div className="mt-3 space-y-3">
-          <ReadinessBar done={preparation.done} total={preparation.total} sentence={`${preparation.done} van ${preparation.total} geregeld`} />
           {first && <Link to={first.href} className="block text-sm text-muted-foreground hover:text-foreground">{first.title}</Link>}
         </div>
-      ) : <p className="mt-3 text-xs text-muted-foreground">Voorbereiding laden…</p>}
+      ) : <p className="mt-3 text-xs text-muted-foreground">Laden…</p>}
       <Button asChild variant="outline" size="sm" className="mt-4"><Link to={`/trip/${trip.id}`}>Naar reis<ArrowRight className="ml-2 h-4 w-4" /></Link></Button>
     </section>
   );

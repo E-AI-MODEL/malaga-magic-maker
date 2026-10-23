@@ -3,10 +3,9 @@ import type { TaskRow, TripItemRow } from "@/integrations/supabase/database";
 import type { DecisionBundle } from "@/features/together/data";
 import { activeReadinessChecks, readinessAction, type TripReadiness } from "@/features/readiness/data";
 import { computeReminders } from "@/features/reminders/data";
-import { timelineWarnings } from "@/features/travel/presentation";
-import { firstThings, preparationScore, type FirstThing } from "./overview";
+import { firstThings, type FirstThing } from "./overview";
 
-/** Shared first action and preparation score for Home and the trip overview. */
+/** Shared first action for Home and the trip overview. */
 export function tripPreparation({ activeTrip, items, tasks, decisions, readiness, userId, ended }: {
   activeTrip: Trip;
   items: TripItemRow[];

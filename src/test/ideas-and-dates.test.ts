@@ -4,6 +4,7 @@ import { candidateStayStatus, chosenIdeaUpdate, decisionWinner } from "@/feature
 import { dateShiftAnchor, itemsOutsideTrip, shiftItemDates, timelineWarnings } from "@/features/travel/presentation";
 import { upcomingTripItems } from "@/features/trips/overview";
 import { tripPreparation } from "@/features/trips/preparation";
+import type { TripReadiness } from "@/features/readiness/data";
 import type { Trip } from "@/contexts/TripContext";
 import type { TripItemRow } from "@/integrations/supabase/database";
 
@@ -47,7 +48,7 @@ describe("ideas never count as bookings", () => {
   });
   it("an empty plan suggests a first item, never travel companions", () => {
     const activeTrip = { id: "trip", start_date: null, end_date: null } as Trip;
-    const readiness = { status: "attention", attention_count: 0, checks: [], facts: { trip_item_count: 0, document_count: 0, member_count: 1 } } as const;
+    const readiness = { status: "attention", attention_count: 0, checks: [], facts: { trip_item_count: 0, document_count: 0, member_count: 1 } } satisfies TripReadiness;
     const keys = tripPreparation({ activeTrip, items: [], tasks: [], decisions: [], readiness, ended: false }).things.map((t) => t.key);
     expect(keys).toEqual(["s-items"]);
   });

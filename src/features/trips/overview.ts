@@ -78,13 +78,3 @@ export function excludeFirstThings<T extends { key: string }>(personal: T[], thi
   const firstThingKeys = new Set(things.map((thing) => thing.key));
   return personal.filter((item) => !firstThingKeys.has(item.key));
 }
-
-/** Preparation score: each check counts once; an empty plan or nights without a stay are never "geregeld". */
-export function preparationScore(input: { checks: { attention_count: number }[]; itemCount: number; missingStay: boolean }) {
-  const results = [
-    ...input.checks.map((c) => c.attention_count === 0),
-    input.itemCount > 0,
-    !input.missingStay,
-  ];
-  return { done: results.filter(Boolean).length, total: results.length };
-}

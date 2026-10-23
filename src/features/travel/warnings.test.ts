@@ -19,6 +19,13 @@ describe("timelineWarnings", () => {
     expect(w.find((x) => x.kind === "missing_stay")?.message).toBe("2 nachten nog zonder overnachting.");
   });
 
+  it("never asks for a stay when the trip keeps no stays (camping, family, roadtrip)", () => {
+    const w = timelineWarnings([
+      { ...base, id: "c", type: "own_vehicle", title: "Met de auto", start_at: "2026-05-01T08:00:00Z", end_at: null },
+    ], "2026-05-01", "2026-05-05");
+    expect(w.some((x) => x.kind === "missing_stay")).toBe(false);
+  });
+
   it("flags booked transport without a reference but ignores cancelled and ideas", () => {
     const w = timelineWarnings([
       { id: "f", type: "flight", title: "Vlucht", status: "paid", booking_reference: null, start_at: null, end_at: null },

@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { candidateStayStatus, chosenIdeaUpdate, decisionWinner } from "@/features/travel/accommodation";
 import { dateShiftAnchor, itemsOutsideTrip, shiftItemDates, timelineWarnings } from "@/features/travel/presentation";
-import { preparationScore, upcomingTripItems } from "@/features/trips/overview";
+import { upcomingTripItems } from "@/features/trips/overview";
 import { tripPreparation } from "@/features/trips/preparation";
 import type { Trip } from "@/contexts/TripContext";
 import type { TripItemRow } from "@/integrations/supabase/database";
@@ -38,20 +38,18 @@ describe("ideas never count as bookings", () => {
     ], "2026-10-15", "2026-10-17");
     expect(w.some((x) => x.kind === "overlap")).toBe(false);
     expect(w.some((x) => x.kind === "outside_trip")).toBe(false);
-    expect(w.find((x) => x.kind === "missing_stay")?.message).toBe("2 nachten nog zonder overnachting.");
+    expect(w.some((x) => x.kind === "missing_stay")).toBe(false);
   });
   it("readiness counts only planned bookings and non-idea items", () => {
     const sql = readFileSync("drizzle/migrations/0008_readiness_ignores_ideas.sql", "utf8");
     expect(sql).toContain("i.status = 'planned'");
     expect(sql).toContain("i.status NOT IN ('idea','cancelled')");
   });
-  it("preparation score item count excludes ideas", () => {
+  it("an empty plan suggests a first item, never travel companions", () => {
     const activeTrip = { id: "trip", start_date: null, end_date: null } as Trip;
-    const result = tripPreparation({ activeTrip, items: [item("idea", "idea", "2026-10-15"), item("cancelled", "cancelled", "2026-10-15")] as TripItemRow[], tasks: [], decisions: [], ended: false });
-    expect(result.done).toBe(1);
-    const planned = tripPreparation({ activeTrip, items: [item("planned", "planned", "2026-10-15")] as TripItemRow[], tasks: [], decisions: [], ended: false });
-    expect(planned.done).toBe(2);
-    expect(preparationScore({ checks: [], itemCount: 0, missingStay: false }).done).toBe(1);
+    const readiness = { status: "attention", attention_count: 0, checks: [], facts: { trip_item_count: 0, document_count: 0, member_count: 1 } } as const;
+    const keys = tripPreparation({ activeTrip, items: [], tasks: [], decisions: [], readiness, ended: false }).things.map((t) => t.key);
+    expect(keys).toEqual(["s-items"]);
   });
 });
 

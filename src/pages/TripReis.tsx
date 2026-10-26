@@ -315,7 +315,7 @@ export default function TripReis() {
             <EmptyLine
               text={
                 items.length === 0
-                  ? "Nog niets ingepland. Begin met vervoer of verblijf; wat nog niet vaststaat mag op Nog regelen."
+                  ? "Nog niets ingepland."
                   : items.length === ideas.length
                     ? "Nog niets vastgelegd. Kies hieronder een idee of voeg zelf iets toe."
                     : "Niets in deze filter."

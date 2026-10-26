@@ -339,7 +339,7 @@ export default function NewTrip() {
                   id="description"
                   value={description}
                   onChange={(event) => setDescription(event.target.value)}
-                  placeholder="Bijv. rustig tempo, familiebezoek of nog te beslissen"
+                  placeholder="Bijv. familiebezoek, stedentrip of nog te beslissen"
                   className="mt-2"
                   rows={3}
                 />

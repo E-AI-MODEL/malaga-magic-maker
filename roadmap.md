@@ -1,5 +1,13 @@
 # Roadmap
 
+## Integrale vernieuwing (goedgekeurd plan)
+- [x] Fase B deel 1: afgewezen woorden verwijderd + automatische woordencontrole
+- [ ] Fase A: gedeelde stijl (kop, tijdlijnrij, lege toestand, sheets, knoppen)
+- [ ] Fase B deel 2: volledige taalronde alle schermen
+- [ ] Fase C: Home, Nieuwe reis, Overzicht, Reis, Samen, Profiel/Instellingen, Inloggen
+- [ ] Fase D: onderbalk, Hansie, Knaakie, desktop
+- [ ] Fase E: ingelogde controle 390px/desktop (solo, groep, afgelopen)
+
 ## Mobiele Knaakie-footer
 - [x] Vaste Knaakie-knop naar bestaande Samen → Kosten; URL-gestuurde sectie werkt ook vanuit Samen, geen nieuwe route/migratie
 - [x] 268 tests geslaagd; lint 0 fouten/24 bestaande waarschuwingen; automatische build OK

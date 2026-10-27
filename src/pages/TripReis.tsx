@@ -33,6 +33,7 @@ import {
   StatusWord,
   StickyBar,
   SwipeRow,
+  TimelineRow,
 } from "@/components/primitives";
 import { travelTypeIcon } from "@/features/travel/icons";
 import {
@@ -217,6 +218,7 @@ export default function TripReis() {
     <AppLayout>
       <div className="px-5 pb-12 pt-4 sm:px-8">
         <TripPageHeader
+          title="Reis"
           startDate={activeTrip.start_date}
           endDate={activeTrip.end_date}
           destination={activeTrip.destination_name}
@@ -337,26 +339,15 @@ export default function TripReis() {
                       const canEdit = !readOnly && (isOrganizer || item.created_by === user?.id);
                       const displayTimezone = item.timezone || timezone;
                       const TypeIcon = travelTypeIcon(item.type);
-                      const row = (
-                        <div className="flex min-h-[56px] items-center gap-3 border-b border-rule py-2.5">
-                          {/* Time gutter keeps every row aligned on one vertical rhythm. */}
-                          <span className="relative flex w-11 shrink-0 flex-col items-start self-stretch">
-                            <span className="num font-ui text-[12px] font-semibold leading-5 text-foreground">
-                              {timeAnchor(item, displayTimezone)}
-                            </span>
-                            {index < dayItems.length - 1 && <span aria-hidden className="mt-1 w-px flex-1 bg-rail" />}
-                          </span>
-                          <IconBubble icon={TypeIcon} tone="muted" />
-                          <span className="min-w-0 flex-1">
-                            <span className="line-clamp-2 break-words text-[15px] font-medium leading-tight">{item.title}</span>
-                            <span className="mt-0.5 block truncate text-xs text-muted-foreground">
-                              {[type.label, providerLabel(item.provider)].filter(Boolean).join(" · ")} ·{" "}
-                              <StatusWord tone={statusTone(item.status)}>{getTravelStatus(item.status)}</StatusWord>
-                            </span>
-                          </span>
-                          <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground/60" strokeWidth={1.75} aria-hidden />
-                        </div>
-                      );
+                      const row = <TimelineRow
+                        time={timeAnchor(item, displayTimezone)}
+                        icon={TypeIcon}
+                        title={item.title}
+                        category={filters[1].types.includes(item.type) ? "transport" : item.type === "stay" ? "stay" : item.type === "restaurant" ? "food" : filters[3].types.includes(item.type) ? "activity" : "other"}
+                        connected={index < dayItems.length - 1}
+                        onClick={canEdit ? () => openEdit(item) : undefined}
+                        meta={<>{[type.label, providerLabel(item.provider)].filter(Boolean).join(" · ")} · <StatusWord tone={statusTone(item.status)}>{getTravelStatus(item.status)}</StatusWord></>}
+                      />;
 
                       if (!canEdit) return <div key={item.id}>{row}</div>;
 
@@ -368,11 +359,7 @@ export default function TripReis() {
                             { label: "Wissen", icon: Trash2, tone: "danger", onClick: () => void handleDelete(item) },
                           ]}
                         >
-                          <div className="flex items-center border-b border-rule">
-                            <button type="button" onClick={() => openEdit(item)} className="min-w-0 flex-1 text-left [&>div]:border-b-0">
-                              {row}
-                            </button>
-                          </div>
+                          {row}
                         </SwipeRow>
                       );
                     })}

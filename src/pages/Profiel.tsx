@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { FormError } from "@/components/FormSheet";
 import { formatIban, normalizeIban, paymentDetailsError } from "@/features/together/iban";
-import { SectionLabel } from "@/components/primitives";
+import { PageHeader, SectionLabel } from "@/components/primitives";
 import { NotificationPreferences } from "@/features/notifications/NotificationPreferences";
 import { ReminderPreferences } from "@/features/notifications/ReminderPreferences";
 import { toast } from "sonner";
@@ -115,7 +115,7 @@ export default function Profiel() {
             {(profile?.display_name || user?.email || "?").slice(0, 1).toUpperCase()}
           </span>
           <div className="min-w-0">
-            <h1 className="break-words font-display uppercase text-[28px] font-bold leading-tight">{profile?.display_name || "Reiziger"}</h1>
+            <PageHeader title={profile?.display_name || "Reiziger"} />
             <p className="truncate text-xs text-muted-foreground">
               {profile?.username ? `@${profile.username}` : ""}
               {profile?.username && user?.email ? " · " : ""}

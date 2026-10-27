@@ -214,6 +214,7 @@ export default function TripSamen() {
     <AppLayout>
       <div className="px-5 pb-12 pt-5 sm:px-8">
         <TripPageHeader
+          title="Samen"
           startDate={activeTrip.start_date}
           endDate={activeTrip.end_date}
           destination={activeTrip.destination_name}

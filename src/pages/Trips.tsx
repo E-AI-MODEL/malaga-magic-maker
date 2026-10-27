@@ -13,7 +13,7 @@ import { useAuth } from "@/lib/auth";
 import { usePlanStatus } from "@/features/pro/limits";
 import { AppLayout } from "@/components/AppLayout";
 import { Button } from "@/components/ui/button";
-import { RowItem, RowList, SectionLabel } from "@/components/primitives";
+import { PageHeader, RowItem, RowList, SectionLabel } from "@/components/primitives";
 import { TripThumb, TripVisual } from "@/components/TripVisual";
 import { GettingStarted } from "@/features/onboarding/GettingStarted";
 import heroHome from "@/assets/hero-home.jpg";
@@ -61,7 +61,7 @@ function NextTrip({ trip, facts, userId }: { trip: Trip; facts: HomeFacts; userI
   const first = preparation.things[0];
 
   return (
-    <section className="-mt-14 rounded-[20px] border border-border bg-card p-4 shadow-soft">
+    <section className="-mt-14 rounded-lg border border-border bg-card p-5 shadow-soft">
       <p className="font-ui text-[12px] font-semibold text-muted-foreground">Eerstvolgende reis</p>
       <Link to={`/trip/${trip.id}`} className="flex items-center gap-3.5 py-1">
         <TripVisual
@@ -138,22 +138,21 @@ export default function Trips() {
           <img src={heroHome} alt="" aria-hidden width={1280} height={720} loading="eager" className="h-full w-full object-cover" />
           <div aria-hidden className="absolute inset-0 bg-foreground/60" />
           <div className="absolute inset-x-0 top-0 mx-auto max-w-3xl px-5 pt-7">
-            <p className="flex items-center gap-2.5 font-ui text-[13px] font-medium text-white/80">
-              <span aria-hidden className="h-px w-7 bg-white/40" />
+            <p className="flex items-center gap-2.5 font-ui text-[13px] font-medium text-on-image/80">
+              <span aria-hidden className="h-px w-7 bg-on-image/40" />
               Je hele vakantie in je broekzak
             </p>
-            <div className="mt-3 flex items-center justify-between gap-3">
-              <h1 className="min-w-0 break-words font-display text-[34px] font-bold leading-tight text-white">{firstName ? `Hoi ${firstName}` : "Hoi"}</h1>
+            <PageHeader className="mt-3 text-on-image" title={firstName ? `Hoi ${firstName}` : "Hoi"} action={
               <Button asChild variant="outline" size="sm" className="shrink-0 rounded-md bg-card">
                 <Link to="/new-trip"><Plus className="mr-1.5 h-3.5 w-3.5" />Nieuwe reis</Link>
               </Button>
-            </div>
+            } />
           </div>
         </div>
       </section>
       <div className="relative z-10 mx-auto max-w-3xl px-5 pb-16">
         {loading ? (
-          <div className="-mt-14 h-28 animate-pulse rounded-[20px] border border-border bg-card shadow-soft" />
+          <div className="-mt-14 h-28 animate-pulse rounded-lg border border-border bg-card shadow-soft" />
         ) : heroTrip ? (
           <>
             <NextTrip trip={heroTrip} facts={facts} userId={user?.id} />
@@ -161,7 +160,7 @@ export default function Trips() {
           </>
         ) : activeTrips.length ? <div className="pt-4"><GettingStarted trip={activeTrips[0]} hasAnyTrip={userTrips.length > 0} /></div> : (
           <div>
-            <div className="-mt-14 rounded-[20px] border border-border bg-card p-5 shadow-soft">
+            <div className="-mt-14 rounded-lg border border-border bg-card p-5 shadow-soft">
               <h2 className="font-display text-[22px] font-bold leading-tight">Start je eerste reis</h2>
               <p className="mt-2 text-[15px] leading-relaxed text-muted-foreground">
                 Begin met een naam. Data, mensen en plannen voeg je toe wanneer je wilt.

@@ -18,7 +18,7 @@ import { TripItemSheet } from "@/features/travel/TripItemSheet";
 import { BookingPasteSheet } from "@/features/travel/BookingPasteSheet";
 import { AccommodationSearchSheet } from "@/features/travel/AccommodationSearchSheet";
 import { CalendarFeedSheet } from "@/features/travel/CalendarFeedSheet";
-import { CalendarPlus, ChevronRight } from "lucide-react";
+import { CalendarPlus } from "lucide-react";
 import { ACCOMMODATION_DECISION_TITLE, chooseTripIdea, ideaActionMessage, undoTripIdeaChoice } from "@/features/travel/accommodation";
 import { providerLabel } from "@/features/travel/providers";
 import { TripPageHeader } from "@/components/TripPageHeader";
@@ -29,7 +29,6 @@ import {
   DayHeader,
   EmptyLine,
   FilterChips,
-  IconBubble,
   StatusWord,
   StickyBar,
   SwipeRow,

@@ -3,6 +3,7 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PageHeader } from "@/components/primitives";
 import { useAuth } from "@/lib/auth";
 import { GoogleAuthButton } from "@/components/GoogleAuthButton";
 import { PUBLIC_SIGNUP_ENABLED } from "@/config/access";
@@ -78,7 +79,7 @@ export default function Signup() {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background px-5">
         <div className="w-full max-w-md rounded-lg border border-border bg-card p-7 text-center shadow-soft">
-          <h1 className="font-display uppercase text-2xl font-semibold">Vakansie is nog privé</h1>
+          <PageHeader title="Vakansie is nog privé" />
           <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
             Nieuwe accounts worden pas geopend wanneer de publieke versie klaar is.
           </p>
@@ -98,8 +99,8 @@ export default function Signup() {
         </div>
 
         <div className="rounded-lg border border-border bg-card p-7 shadow-soft">
-          <p className="font-ui text-[11px] font-semibold uppercase tracking-[0.16em] text-primary">Account</p>
-          <h1 className="mt-2 font-display uppercase text-[28px] font-semibold leading-tight">Maak je account</h1>
+          <p className="font-ui text-[13px] font-medium text-muted-foreground">Account</p>
+          <PageHeader title="Maak je account" />
           <p className="mt-2 text-sm text-muted-foreground">
             Daarmee kun je je eigen reizen beheren en uitnodigingen accepteren.
           </p>

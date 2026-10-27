@@ -3,6 +3,7 @@ import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { formatTripDateRange } from "@/features/trips/presentation";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { PageHeader } from "@/components/primitives";
 
 /** Shared top line for trip work screens: dates and destination, with one outline add action. */
 export function TripPageHeader({
@@ -11,24 +12,24 @@ export function TripPageHeader({
   destination,
   addActions,
   addMenu,
+  title,
 }: {
   startDate: string | null;
   endDate: string | null;
   destination?: string | null;
   addActions?: Array<{ label: string; onClick: () => void }>;
   addMenu?: ReactNode;
+  title: string;
 }) {
   const hasMenu = Boolean(addMenu) || Boolean(addActions?.length);
   return (
-    <div className="flex min-h-9 items-center justify-between gap-3">
-      <p className="min-w-0 text-sm leading-snug text-muted-foreground">
+    <PageHeader title={title} meta={<>
         {formatTripDateRange(startDate, endDate)}
         {destination ? ` · ${destination}` : ""}
-      </p>
-      {hasMenu && (
+      </>} action={hasMenu ? (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button size="sm" variant="outline" className="shrink-0 rounded-md">
+            <Button size="sm" className="shrink-0 rounded-md">
               <Plus className="mr-1.5 h-3.5 w-3.5" />Toevoegen
             </Button>
           </DropdownMenuTrigger>
@@ -38,7 +39,6 @@ export function TripPageHeader({
             ))}
           </DropdownMenuContent>
         </DropdownMenu>
-      )}
-    </div>
+      ) : undefined} />
   );
 }

@@ -18,10 +18,10 @@ export function FormSheet({ open, onOpenChange, title, description, children }: 
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
         side="bottom"
-        className="max-h-[92vh] overflow-y-auto rounded-t-3xl border-t border-rule bg-card px-5 pb-8 sm:left-1/2 sm:max-w-xl sm:-translate-x-1/2"
+        className="form-sheet max-h-[92dvh] overflow-y-auto overscroll-contain rounded-t-lg border-t border-border bg-card px-5 pb-0 pt-6 sm:left-1/2 sm:max-w-xl sm:-translate-x-1/2"
       >
-        <SheetHeader className="text-left">
-          <SheetTitle className="font-display text-xl font-extrabold uppercase tracking-tight">{title}</SheetTitle>
+        <SheetHeader className="pr-11 text-left">
+          <SheetTitle className="font-display text-[28px] font-bold leading-tight">{title}</SheetTitle>
           {description ? <SheetDescription>{description}</SheetDescription> : null}
         </SheetHeader>
         {children}
@@ -74,7 +74,7 @@ export function FormSelect({ id, value, onChange, options, className, "aria-labe
         aria-label={ariaLabel}
         value={value}
         onChange={(event) => onChange(event.target.value)}
-        className="h-11 w-full appearance-none rounded-xl border border-input bg-background px-3 pr-9 text-base text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-1 md:text-sm"
+        className="h-12 min-w-0 w-full appearance-none rounded-md border border-input bg-background px-3 pr-9 text-base text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-1"
       >
         {options.map((option) => (
           <option key={option.value} value={option.value}>
@@ -89,7 +89,7 @@ export function FormSelect({ id, value, onChange, options, className, "aria-labe
 
 export function FormError({ message }: { message: string }) {
   if (!message) return null;
-  return <p className="rounded-xl bg-destructive/10 px-4 py-3 text-sm font-medium text-destructive">{message}</p>;
+  return <p role="alert" className="rounded-md bg-destructive/10 px-4 py-3 text-sm font-medium text-destructive">{message}</p>;
 }
 
 type FormSubmitProps = {
@@ -101,9 +101,11 @@ type FormSubmitProps = {
 /** Full-width primary submit button shared by all form sheets. */
 export function FormSubmit({ saving, children }: FormSubmitProps) {
   return (
-    <Button type="submit" className="h-12 w-full rounded-xl font-display text-base font-extrabold uppercase tracking-wide" disabled={saving}>
+    <div className="form-submit-bar">
+    <Button type="submit" className="min-h-12 w-full text-base font-semibold" disabled={saving}>
       {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
       {children}
     </Button>
+    </div>
   );
 }

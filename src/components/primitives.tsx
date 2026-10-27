@@ -1,6 +1,19 @@
 import { useRef, useState, type ComponentType, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { ChevronRight, Sparkles, X, type LucideIcon } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+
+/** Shared sentence-case heading; page data and actions stay with the caller. */
+export function PageHeader({ title, meta, action, className }: { title: ReactNode; meta?: ReactNode; action?: ReactNode; className?: string }) {
+  return <header className={cn("flex flex-wrap items-start justify-between gap-4", className)}>
+    <div className="min-w-0 flex-1">
+      <h1 className="page-title">{title}</h1>
+      {meta && <div className="mt-2 text-[15px] leading-relaxed text-muted-foreground">{meta}</div>}
+    </div>
+    {action && <div className="shrink-0">{action}</div>}
+  </header>;
+}
 
 /** Warm white object surface on the off-white canvas. Depth without SaaS cards. */
 export function Surface({
@@ -58,8 +71,8 @@ export function StatusChip({ children, tone = "neutral" }: { children: ReactNode
 /** Signal section break, shared by all working screens. */
 export function SectionLabel({ children, action }: { children: ReactNode; action?: ReactNode }) {
   return (
-    <div className="flex items-baseline justify-between gap-3 border-t border-border pt-3">
-      <h2 className="min-w-0 font-display text-[18px] font-bold leading-tight text-foreground">{children}</h2>
+    <div className="flex flex-wrap items-center justify-between gap-3 pb-2 pt-2">
+      <h2 className="min-w-0 font-ui text-[17px] font-semibold leading-tight text-foreground">{children}</h2>
       {action}
     </div>
   );
@@ -105,20 +118,20 @@ export function RowItem({ icon: Icon, title, meta, trailing, to, onClick, tone =
         <Icon className={`h-[18px] w-[18px] shrink-0 ${tone === "attention" ? "text-warning" : "text-muted-foreground"}`} />
       )}
       <span className="min-w-0 flex-1">
-        <span className="block truncate text-[15px] font-medium leading-tight">{title}</span>
-        {meta && <span className="mt-0.5 block truncate text-xs text-muted-foreground">{meta}</span>}
+        <span className="block break-words text-[16px] font-medium leading-snug">{title}</span>
+        {meta && <span className="mt-1 block break-words text-[13px] font-normal leading-snug text-muted-foreground">{meta}</span>}
       </span>
       {trailing && <span className="shrink-0 text-xs text-muted-foreground tabular">{trailing}</span>}
       {interactive && <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground/60" />}
     </>
   );
 
-  const className = `flex min-h-[48px] w-full items-center gap-3 py-3 text-left rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
-    interactive ? "transition-opacity hover:opacity-70" : ""
+  const className = `flex min-h-[64px] w-full items-center gap-3 rounded-md px-0 py-4 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
+    interactive ? "hover:bg-accent hover:text-accent-foreground" : ""
   }`;
 
   if (to) return <Link to={to} className={className}>{body}</Link>;
-  if (onClick) return <button type="button" onClick={onClick} className={className}>{body}</button>;
+  if (onClick) return <Button variant="row" type="button" onClick={onClick} className={className}>{body}</Button>;
   return <div className={className}>{body}</div>;
 }
 
@@ -182,13 +195,13 @@ export function StatStrip({
 /** One sentence plus one text action. Never an oversized illustrated card. */
 export function EmptyLine({ text, actionLabel, to, onClick }: { text: string; actionLabel?: string; to?: string; onClick?: () => void }) {
   return (
-    <p className="py-4 text-sm leading-relaxed text-muted-foreground">
-      {text}{" "}
-      {actionLabel && to && <Link to={to} className="font-semibold text-primary underline-offset-4 hover:underline">{actionLabel}</Link>}
+    <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 py-5">
+      <p className="min-w-0 text-[15px] leading-relaxed text-muted-foreground">{text}</p>
+      {actionLabel && to && <Button asChild variant="outline"><Link to={to}>{actionLabel}</Link></Button>}
       {actionLabel && !to && onClick && (
-        <button type="button" onClick={onClick} className="font-semibold text-primary underline-offset-4 hover:underline">{actionLabel}</button>
+        <Button variant="outline" type="button" onClick={onClick}>{actionLabel}</Button>
       )}
-    </p>
+    </div>
   );
 }
 
@@ -207,18 +220,19 @@ export function Segmented<T extends string>({
   return (
     <div role="tablist" className={`flex w-full rounded-lg border border-border bg-secondary p-1 ${className}`}>
       {options.map((option) => (
-        <button
+        <Button
           key={option.id}
           role="tab"
           type="button"
           aria-selected={value === option.id}
+          variant="ghost"
           onClick={() => onChange(option.id)}
-          className={`min-h-[40px] flex-1 rounded-md px-2 text-[13px] font-semibold transition-colors ${
-            value === option.id ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+          className={`min-h-11 min-w-0 flex-1 rounded-md px-2 text-[14px] font-semibold transition-colors ${
+            value === option.id ? "bg-card text-foreground shadow-soft" : "text-muted-foreground hover:text-foreground"
           }`}
         >
           {option.label}
-        </button>
+        </Button>
       ))}
     </div>
   );
@@ -251,20 +265,21 @@ export function FilterChips<T extends string>({
       {options.map((option) => {
         const selected = value === option.id;
         return (
-          <button
+          <Button
             key={option.id}
             type="button"
             aria-pressed={selected}
+            variant="outline"
             onClick={() => onChange(option.id)}
-            className={`inline-flex h-9 shrink-0 items-center gap-1.5 rounded-md border px-3 font-ui text-[13px] font-medium transition-colors ${
-              selected ? "border-primary bg-primary text-primary-foreground" : "border-border text-muted-foreground hover:text-foreground"
+            className={`inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-md border px-3 font-ui text-[14px] font-medium transition-colors ${
+              selected ? "border-foreground bg-secondary text-foreground" : "border-border text-muted-foreground hover:text-foreground"
             }`}
           >
             {option.label}
             {typeof option.count === "number" && (
-              <span className={`num text-[11px] ${selected ? "text-primary-foreground/70" : "text-muted-foreground/70"}`}>{option.count}</span>
+              <span className="num text-[12px] text-muted-foreground">{option.count}</span>
             )}
-          </button>
+          </Button>
         );
       })}
     </div>
@@ -313,10 +328,43 @@ export function CountBar({
 export function DayHeader({ label, meta }: { label: string; meta?: string }) {
   return (
     <div className="sticky top-[5.5rem] z-20 -mx-5 flex items-baseline gap-2 bg-background/95 px-5 py-1.5 sm:-mx-8 sm:px-8">
-      <span className="font-ui text-[12px] font-semibold uppercase tracking-[0.1em] text-foreground">{label}</span>
+      <span className="font-ui text-[16px] font-semibold text-foreground">{label}</span>
       {meta && <span className="num truncate text-[11px] text-muted-foreground">{meta}</span>}
     </div>
   );
+}
+
+/** Stable time gutter and type accent, with a connector only to a following item. */
+export function TimelineRow({ time, icon: Icon, title, meta, category = "other", connected = false, onClick, to }: {
+  time: ReactNode; icon: ComponentType<{ className?: string; strokeWidth?: number | string }>;
+  title: ReactNode; meta?: ReactNode; category?: "transport" | "stay" | "activity" | "food" | "other";
+  connected?: boolean; onClick?: () => void; to?: string;
+}) {
+  const tints = {
+    transport: "bg-tint-transport/10 text-tint-transport",
+    stay: "bg-tint-stay/10 text-tint-stay",
+    activity: "bg-tint-activity/10 text-tint-activity",
+    food: "bg-tint-food/10 text-tint-food",
+    other: "bg-tint-other/10 text-tint-other",
+  };
+  const body = <>
+    <span className="num w-16 shrink-0 self-start pt-3 text-[15px] font-semibold leading-tight">{time}</span>
+    <span className="relative flex w-10 shrink-0 self-stretch justify-center">
+      {connected && <span aria-hidden className="absolute bottom-[-1rem] top-10 w-px bg-rail" />}
+      <span aria-hidden className={cn("relative z-10 mt-1 flex h-10 w-10 items-center justify-center rounded-lg", tints[category])}>
+        <Icon className="h-5 w-5" strokeWidth={1.75} />
+      </span>
+    </span>
+    <span className="min-w-0 flex-1 py-2">
+      <span className="block break-words text-[16px] font-medium leading-snug">{title}</span>
+      {meta && <span className="mt-1 block break-words text-[13px] font-normal leading-snug text-muted-foreground">{meta}</span>}
+    </span>
+    {(onClick || to) && <ChevronRight aria-hidden className="h-4 w-4 shrink-0 text-muted-foreground" />}
+  </>;
+  const className = "flex min-h-[76px] w-full items-center gap-3 rounded-md px-0 py-3 text-left";
+  if (to) return <Button asChild variant="row" className={className}><Link to={to}>{body}</Link></Button>;
+  if (onClick) return <Button variant="row" onClick={onClick} className={className}>{body}</Button>;
+  return <div className={className}>{body}</div>;
 }
 
 /** Hansie proposes something inside the list itself. Never a chat bubble. */

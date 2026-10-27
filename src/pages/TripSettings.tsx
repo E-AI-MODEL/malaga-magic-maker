@@ -5,6 +5,7 @@ import { useTrip } from "@/contexts/TripContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { PageHeader } from "@/components/primitives";
 import { AppLayout } from "@/components/AppLayout";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -50,7 +51,7 @@ export default function TripSettings() {
         <Button asChild variant="ghost" className="-ml-3 mb-6">
           <Link to={`/trip/${activeTrip.id}`}><ArrowLeft className="mr-2 h-4 w-4" />Terug</Link>
         </Button>
-        <h1 className="font-display text-2xl font-extrabold">Reisinstellingen</h1>
+        <PageHeader title="Reisinstellingen" />
         <p className="mt-3 text-sm text-muted-foreground">Alleen de organisator van deze reis kan deze gegevens wijzigen.</p>
       </div></AppLayout>
     );
@@ -125,9 +126,7 @@ export default function TripSettings() {
 
   return (
     <AppLayout><div className="mx-auto max-w-xl px-5 py-8 sm:py-12">
-      <p className="text-xs font-semibold text-primary">Deze reis</p>
-      <h1 className="mt-2 font-display text-3xl font-extrabold tracking-normal">Reisinstellingen</h1>
-      <p className="mt-2 text-sm text-muted-foreground">Wijzig de naam, bestemming en data van je reis.</p>
+      <PageHeader title="Reisinstellingen" meta="Wijzig de naam, bestemming en data van je reis." />
 
       <form onSubmit={handleSubmit} className="mt-8 space-y-5">
         <div>

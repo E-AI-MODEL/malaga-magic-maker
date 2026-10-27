@@ -13,23 +13,10 @@ import { travelTypeIcon } from "@/features/travel/icons";
 import { countdownLabel, excludeFirstThings, tripHasEnded, upcomingTripItems } from "@/features/trips/overview";
 import { tripPreparation } from "@/features/trips/preparation";
 import { Button } from "@/components/ui/button";
-import { RowItem, RowList, SectionLabel } from "@/components/primitives";
+import { EmptyLine, RowItem, RowList, SectionLabel, TimelineRow } from "@/components/primitives";
 import { TripVisual } from "@/components/TripVisual";
 import { WeatherStrip } from "@/features/trips/WeatherStrip";
 import { showWeatherStrip } from "@/features/trips/weather";
-
-const TYPE_TINT: Record<string, string> = {
-  flight: "bg-tint-transport/10 text-tint-transport",
-  train: "bg-tint-transport/10 text-tint-transport",
-  ferry: "bg-tint-transport/10 text-tint-transport",
-  transfer: "bg-tint-transport/10 text-tint-transport",
-  rental_car: "bg-tint-transport/10 text-tint-transport",
-  stay: "bg-tint-stay/10 text-tint-stay",
-  activity: "bg-tint-activity/10 text-tint-activity",
-  event: "bg-tint-activity/10 text-tint-activity",
-  ticket: "bg-tint-activity/10 text-tint-activity",
-  restaurant: "bg-tint-food/10 text-tint-food",
-};
 
 function shortDate(value: string, timeZone: string) {
   return new Date(value)
@@ -133,13 +120,13 @@ export default function TripHome() {
               {hasOpenAmounts && <Button variant="outline" className="mt-3" onClick={() => navigate(`/trip/${activeTrip.id}/samen?section=expenses`)}>Naar Knaakie</Button>}
             </section>
           ) : <>
-          <section className="border-l-4 border-primary bg-band p-4">
-            <p className="font-ui text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Eerst dit</p>
+          <section className="py-2">
+            <SectionLabel>Eerst dit</SectionLabel>
             {readinessQuery.isLoading ? (
               <p className="mt-2 text-[15px] text-muted-foreground">Laden…</p>
             ) : first ? (
               <>
-                <p className="mt-1.5 font-display uppercase tracking-tight text-[19px] font-extrabold leading-snug">{first.title}</p>
+                <p className="mt-1.5 text-[19px] font-semibold leading-snug">{first.title}</p>
                 {first.meta && <p className="mt-0.5 text-[13px] text-muted-foreground">{first.meta}</p>}
                 <Button className="mt-3 h-11 w-full" onClick={() => navigate(first.href)}>
                   {first.actionLabel}
@@ -166,7 +153,7 @@ export default function TripHome() {
                 )}
               </>
             ) : (
-              <p className="mt-1.5 font-display uppercase tracking-tight text-[19px] font-extrabold">Niets dat nu op je wacht.</p>
+              <p className="mt-1.5 text-[15px] text-muted-foreground">Niets dat nu op je wacht.</p>
             )}
           </section>
 
@@ -175,36 +162,16 @@ export default function TripHome() {
             {itemsQuery.isLoading ? (
               <p className="py-3 text-[14px] text-muted-foreground">Laden…</p>
             ) : view.upcoming.length === 0 ? (
-              <button
-                type="button"
-                onClick={() => navigate(`/trip/${activeTrip.id}/reis`)}
-                className="py-3 text-left text-[14px] text-muted-foreground hover:text-foreground"
-              >
-                Nog niets ingepland. Voeg toe wat je weet, bijvoorbeeld je vertrek of een uitje.
-              </button>
+              <EmptyLine text="Nog niets ingepland." actionLabel="Naar Reis" to={`/trip/${activeTrip.id}/reis`} />
             ) : (
               <ol className="relative mt-1">
-                <span aria-hidden className="absolute bottom-5 left-[82px] top-5 w-px bg-border" />
-                {view.upcoming.map((item) => {
+                {view.upcoming.map((item, index) => {
                   const Icon = travelTypeIcon(item.type);
                   return (
                     <li key={item.id}>
-                      <button
-                        type="button"
-                        onClick={() => navigate(`/trip/${activeTrip.id}/reis`)}
-                        className="grid w-full grid-cols-[64px_36px_minmax(0,1fr)] items-center gap-2 py-2.5 text-left"
-                      >
-                        <span className="num whitespace-nowrap font-ui text-[13px] font-semibold leading-tight">
-                          {shortDate(item.start_at as string, item.timezone || timezone)}
-                        </span>
-                        <span
-                          aria-hidden
-                          className={`relative z-10 flex h-9 w-9 items-center justify-center rounded-full ${TYPE_TINT[item.type] || "bg-tint-other/10 text-tint-other"}`}
-                        >
-                          <Icon className="h-[17px] w-[17px]" strokeWidth={1.75} />
-                        </span>
-                        <span className="truncate text-[15px] font-medium">{item.title}</span>
-                      </button>
+                      <TimelineRow time={shortDate(item.start_at as string, item.timezone || timezone)} icon={Icon} title={item.title}
+                        category={["own_vehicle", "flight", "train", "ferry", "transfer", "rental_car"].includes(item.type) ? "transport" : item.type === "stay" ? "stay" : item.type === "restaurant" ? "food" : ["activity", "event", "ticket"].includes(item.type) ? "activity" : "other"}
+                        connected={index < view.upcoming.length - 1} to={`/trip/${activeTrip.id}/reis`} />
                     </li>
                   );
                 })}

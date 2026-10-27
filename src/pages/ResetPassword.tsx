@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PageHeader } from "@/components/primitives";
 import { useAuth } from "@/lib/auth";
 
 export default function ResetPassword() {
@@ -39,8 +40,8 @@ export default function ResetPassword() {
   if (!user) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background px-5">
-        <div className="w-full max-w-md rounded-lg border border-border bg-card p-7 text-center shadow-sm">
-          <h1 className="font-display text-2xl font-extrabold">Herstellink nodig</h1>
+        <div className="w-full max-w-md rounded-lg border border-border bg-card p-7 text-center shadow-soft">
+          <PageHeader title="Herstellink nodig" />
           <p className="mt-3 text-sm text-muted-foreground">Open de link uit je herstelmail. Is die verlopen, vraag dan een nieuwe aan.</p>
           <Button asChild className="mt-6"><Link to="/forgot-password">Nieuwe link aanvragen</Link></Button>
         </div>
@@ -50,8 +51,8 @@ export default function ResetPassword() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-5">
-      <div className="w-full max-w-md rounded-lg border border-border bg-card p-7 shadow-sm">
-        <h1 className="font-display text-2xl font-extrabold">Nieuw wachtwoord</h1>
+      <div className="w-full max-w-md rounded-lg border border-border bg-card p-7 shadow-soft">
+        <PageHeader title="Nieuw wachtwoord" />
         <p className="mt-2 text-sm text-muted-foreground">Kies een nieuw wachtwoord voor je account.</p>
         <form onSubmit={handleSubmit} className="mt-6 space-y-4">
           <div>

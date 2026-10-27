@@ -3,6 +3,7 @@ import { Link, Navigate, useSearchParams } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PageHeader } from "@/components/primitives";
 import { useAuth } from "@/lib/auth";
 import { GoogleAuthButton } from "@/components/GoogleAuthButton";
 import logo from "@/assets/vakansie_primary_complete.png.asset.json";
@@ -46,8 +47,8 @@ export default function Login() {
         </div>
 
         <div className="rounded-lg border border-border bg-card p-7 shadow-soft">
-          <p className="font-ui text-[11px] font-semibold uppercase tracking-[0.16em] text-primary">Inloggen</p>
-          <h1 className="mt-2 font-display uppercase text-[28px] font-semibold leading-tight">Welkom terug</h1>
+          <p className="font-ui text-[13px] font-medium text-muted-foreground">Inloggen</p>
+          <PageHeader title="Welkom terug" />
           <p className="mt-2 text-sm text-muted-foreground">Log in om je reizen te bekijken en verder te werken.</p>
 
           <div className="mt-6">

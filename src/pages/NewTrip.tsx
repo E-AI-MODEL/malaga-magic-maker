@@ -10,6 +10,7 @@ import { emptyTravelerDraft, TravelerProfileForm, type TravelerProfileDraft } fr
 import { describePlanLimit } from "@/features/pro/limits";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PageHeader } from "@/components/primitives";
 import { Textarea } from "@/components/ui/textarea";
 
 const currencies = ["EUR", "USD", "GBP", "CHF"];
@@ -168,7 +169,7 @@ export default function NewTrip() {
         <div className="flex items-center justify-between gap-4">
           <Button asChild variant="ghost" className="-ml-3">
             <Link to="/trips">
-              <ArrowLeft className="mr-2 h-4 w-4" />Mijn reizen
+              <ArrowLeft className="mr-2 h-4 w-4" />Home
             </Link>
           </Button>
           <span className="text-xs font-semibold text-muted-foreground">Stap {step} van 3</span>
@@ -183,8 +184,8 @@ export default function NewTrip() {
         {inviteLinks.length > 0 ? (
           <>
             <div className="mt-9">
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">{name.trim()}</p>
-              <h1 className="mt-2 font-display text-3xl font-extrabold tracking-normal sm:text-4xl">Je reis staat klaar.</h1>
+              <p className="text-xs font-medium text-muted-foreground">{name.trim()}</p>
+              <PageHeader className="mt-2" title="Je reis staat klaar." />
               <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
                 Stuur deze persoonlijke links door. Ze zijn zeven dagen geldig en werken één keer. Later opnieuw ophalen kan niet.
               </p>
@@ -219,8 +220,8 @@ export default function NewTrip() {
         ) : step === 1 ? (
           <>
             <div className="mt-9">
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">Nieuwe reis</p>
-              <h1 className="mt-2 font-display text-3xl font-extrabold tracking-normal sm:text-4xl">Hoe heet je reis?</h1>
+              <p className="text-xs font-medium text-muted-foreground">Nieuwe reis</p>
+              <PageHeader className="mt-2" title="Hoe heet je reis?" />
               <p className="mt-3 max-w-lg text-sm leading-relaxed text-muted-foreground">
                 Een naam is genoeg. Bestemming en data kun je later aanvullen.
               </p>
@@ -284,8 +285,8 @@ export default function NewTrip() {
         ) : step === 2 ? (
           <>
             <div className="mt-9">
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">{name.trim()}</p>
-              <h1 className="mt-2 font-display text-3xl font-extrabold tracking-normal sm:text-4xl">Wat weet je al?</h1>
+              <p className="text-xs font-medium text-muted-foreground">{name.trim()}</p>
+              <PageHeader className="mt-2" title="Wat weet je al?" />
               <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
                 Alles hieronder is optioneel. Sla over wat nog niet vaststaat en vul het later aan vanuit je reis.
               </p>
@@ -361,8 +362,8 @@ export default function NewTrip() {
         ) : (
           <>
             <div className="mt-9">
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">{name.trim()}</p>
-              <h1 className="mt-2 font-display text-3xl font-extrabold tracking-normal sm:text-4xl">Met wie en hoe?</h1>
+              <p className="text-xs font-medium text-muted-foreground">{name.trim()}</p>
+              <PageHeader className="mt-2" title="Met wie en hoe?" />
               <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
                 Nodig meteen mensen uit en vertel wat jij belangrijk vindt. Hansie houdt hier rekening mee bij suggesties.
               </p>

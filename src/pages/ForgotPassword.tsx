@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PageHeader } from "@/components/primitives";
 import { useAuth } from "@/lib/auth";
 
 export default function ForgotPassword() {
@@ -24,8 +25,8 @@ export default function ForgotPassword() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-5">
-      <div className="w-full max-w-md rounded-lg border border-border bg-card p-7 shadow-sm">
-        <h1 className="font-display text-2xl font-extrabold">Wachtwoord herstellen</h1>
+      <div className="w-full max-w-md rounded-lg border border-border bg-card p-7 shadow-soft">
+        <PageHeader title="Wachtwoord herstellen" />
         <p className="mt-2 text-sm leading-relaxed text-muted-foreground">Vul je e-mailadres in. Als daar een account bij hoort, ontvang je een herstellink.</p>
 
         {sent ? (

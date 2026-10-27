@@ -35,7 +35,9 @@
     --rule: 160 5% 12%;
     --on-image: 0 0% 100%;
 
-    --radius: 0.25rem;
+    --radius: 0.5rem;
+    --scrim: 160 5% 8%;
+    --shadow-sheet: 0 -8px 40px hsl(var(--scrim) / 0.12);
 
     --rail: 45 10% 76%;
     --band: 46 26% 91%;
@@ -125,7 +127,7 @@
     @apply bg-background text-foreground antialiased;
     font-family: 'Barlow', system-ui, sans-serif;
     -webkit-overflow-scrolling: touch;
-    scroll-behavior: smooth;
+    scroll-behavior: auto;
   }
 }
 
@@ -142,6 +144,29 @@
   }
   .row-tap {
     min-height: 56px;
+  }
+  .page-title {
+    font-family: 'Barlow Condensed', 'Barlow', sans-serif;
+    font-size: 32px;
+    font-weight: 700;
+    line-height: 1.1;
+    overflow-wrap: anywhere;
+  }
+  .form-sheet > form {
+    padding-bottom: 0;
+  }
+  .form-sheet .form-submit-bar {
+    position: sticky;
+    bottom: 0;
+    margin-top: 24px;
+    padding: 16px 0 max(16px, env(safe-area-inset-bottom));
+    background: hsl(var(--card));
+    border-top: 1px solid hsl(var(--border));
+    z-index: 2;
+  }
+  .form-sheet {
+    box-shadow: var(--shadow-sheet);
+    scroll-padding-block: 80px;
   }
 }
 

@@ -66,7 +66,7 @@ export function KostenSection() {
           <h2 className="font-display text-2xl font-bold">Knaakie</h2>
           <span className="ml-auto text-sm text-muted-foreground num">{expenses.length} {expenses.length === 1 ? "bonnetje" : "bonnetjes"}</span>
         </div>
-        <p className="mt-2 text-[15px] leading-relaxed text-muted-foreground">Houd bij wie wat betaalde. Aan het einde rekent Knaakie uit wie wie terugbetaalt.</p>
+        <p className="mt-2 text-[15px] leading-relaxed text-muted-foreground">Wie heeft wat betaald? Knaakie rekent aan het einde uit wie wie terugbetaalt.</p>
       </header>
       {readOnly && <p className="mt-4 flex items-start gap-2 text-sm text-muted-foreground"><Archive className="h-4 w-4 shrink-0" />Deze reis is gearchiveerd. Je kunt de kosten nog bekijken.</p>}
 
@@ -74,7 +74,7 @@ export function KostenSection() {
 
       <section className="py-5">
         <SectionLabel>Voor jou</SectionLabel>
-        {expensesQuery.isPending ? <p className="py-3 text-sm text-muted-foreground">Kosten laden…</p> : expensesQuery.isError ? <p className="py-3 text-sm text-muted-foreground">De kosten zijn nu niet beschikbaar. <Button variant="link" onClick={() => void expensesQuery.refetch()}>Opnieuw proberen</Button></p> : personal.length ? <RowList>
+        {expensesQuery.isPending ? <p className="py-3 text-sm text-muted-foreground">Laden…</p> : expensesQuery.isError ? <p className="py-3 text-sm text-muted-foreground">Laden lukt nu niet. <Button variant="link" onClick={() => void expensesQuery.refetch()}>Opnieuw proberen</Button></p> : personal.length ? <RowList>
           {personal.map((transfer) => {
             const pay = transfer.fromUserId === user.id;
             const name = names.get(pay ? transfer.toUserId : transfer.fromUserId) || "Medereiziger";
@@ -84,18 +84,18 @@ export function KostenSection() {
               {!pay && !readOnly && <Button className="mt-3 h-12 w-full sm:w-auto" onClick={() => setPayment({ recipientName: name, amount: transfer.cents / 100, currency: transfer.currency })}><HandCoins className="mr-2 h-5 w-5" />Vraag {name} om betaling</Button>}
             </div>;
           })}
-        </RowList> : <p className="py-3 text-sm text-muted-foreground">{expenses.length ? "Je hoeft niets te verrekenen." : "Nog geen gedeelde kosten."}</p>}
+        </RowList> : <p className="py-3 text-sm text-muted-foreground">{expenses.length ? "Je hoeft niets terug te betalen." : "Nog geen kosten."}</p>}
       </section>
 
       <section className="border-t border-border py-5">
         <SectionLabel>Bonnetjes</SectionLabel>
-        {!expensesQuery.isPending && !expensesQuery.isError && !expenses.length && <p className="py-3 text-sm text-muted-foreground">Niemand heeft nog kosten toegevoegd.</p>}
+        {!expensesQuery.isPending && !expensesQuery.isError && !expenses.length && <p className="py-3 text-sm text-muted-foreground">Nog niets toegevoegd.</p>}
         <RowList>{expenses.map((expense) => {
           const manager = isOrganizer || expense.created_by === user.id;
           const isExpanded = expanded === expense.id;
           return <div key={expense.id} className="py-3">
             <Button variant="ghost" onClick={() => setExpanded(isExpanded ? null : expense.id)} aria-expanded={isExpanded} className="h-auto w-full justify-start gap-3 whitespace-normal px-0 py-1 text-left hover:bg-transparent">
-              <div className="min-w-0 flex-1"><span className="block break-words text-[15px] font-medium">{expense.description}</span><span className="mt-1 block text-xs font-normal text-muted-foreground">Betaald door {names.get(expense.paid_by_user_id || "") || "nog te koppelen"}</span></div>
+              <div className="min-w-0 flex-1"><span className="block break-words text-[15px] font-medium">{expense.description}</span><span className="mt-1 block text-xs font-normal text-muted-foreground">Betaald door {names.get(expense.paid_by_user_id || "") || "nog niet ingevuld"}</span></div>
               <span className="num shrink-0 text-sm font-semibold">{money(expense.amount, expense.currency)}</span><ChevronDown className={`h-4 w-4 shrink-0 text-muted-foreground ${isExpanded ? "rotate-180" : ""}`} />
             </Button>
             {isExpanded && <div className="mt-3 border-l border-border pl-3">
@@ -108,7 +108,7 @@ export function KostenSection() {
 
       {expenses.length > 0 && <section className="border-t border-dashed border-border py-5">
         <SectionLabel>Wie betaalt wie</SectionLabel>
-        {transfers.length === 0 ? <p className="flex items-center gap-2 py-3 text-sm text-muted-foreground"><Check className="h-4 w-4" />Niemand hoeft iets te verrekenen.</p> : <>
+        {transfers.length === 0 ? <p className="flex items-center gap-2 py-3 text-sm text-muted-foreground"><Check className="h-4 w-4" />Iedereen is quitte.</p> : <>
           <RowList>{transfers.map((transfer) => <div key={`${transfer.currency}-${transfer.fromUserId}-${transfer.toUserId}`} className="flex flex-wrap items-start justify-between gap-x-3 gap-y-1 py-3 text-sm"><span className="min-w-0 flex-1 break-words">{transfer.fromUserId === user.id ? "Jij" : names.get(transfer.fromUserId) || "Medereiziger"} betaalt {transfer.toUserId === user.id ? "jou" : names.get(transfer.toUserId) || "Medereiziger"}</span><span className="num shrink-0 font-semibold">{money(transfer.cents / 100, transfer.currency)}</span></div>)}</RowList>
           <Button variant="outline" className="mt-3 h-11" onClick={() => void copy()}><Copy className="mr-2 h-4 w-4" />Overzicht kopiëren</Button>
         </>}

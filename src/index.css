@@ -4,10 +4,10 @@
 
 @layer base {
   :root {
-    --background: 48 32% 95%;
+    --background: 40 30% 96%;
     --foreground: 160 5% 12%;
 
-    --card: 48 40% 98%;
+    --card: 0 0% 100%;
     --card-foreground: 160 5% 12%;
 
     --popover: 48 40% 98%;
@@ -35,7 +35,7 @@
     --rule: 160 5% 12%;
     --on-image: 0 0% 100%;
 
-    --radius: 0.5rem;
+    --radius: 0.875rem;
     --scrim: 160 5% 8%;
     --shadow-sheet: 0 -8px 40px hsl(var(--scrim) / 0.12);
 
@@ -133,7 +133,7 @@
 
 @layer components {
   .rule-divide > * + * {
-    border-top: 1px solid hsl(var(--rule) / 0.08);
+    border-top: 1px solid hsl(var(--rule) / 0.06);
   }
   .tabular {
     font-variant-numeric: tabular-nums;

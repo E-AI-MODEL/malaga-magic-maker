@@ -202,7 +202,7 @@ export default function Trips() {
               <ChevronDown className={`ml-auto h-4 w-4 transition-transform ${archiveOpen ? "rotate-180" : ""}`} />
             </Button>
             {archiveOpen && (
-              <RowList className="border-t border-rule">
+              <RowList>
                 {archivedTrips.map((trip) => <TripRow key={trip.id} trip={trip} />)}
               </RowList>
             )}

@@ -65,7 +65,7 @@ export function ExpenseSheet({ open, onOpenChange, tripId, tripCurrency, current
     setCurrency(proposal.currency || "");
     setPaidByUserId(matchReceiptPayer(proposal.payerName, members) || "");
     setProposalReceived(true); setReviewed(false);
-    setReceiptNote(proposal.date ? `Datum op de bon: ${proposal.date}. Controleer hieronder bedrag, valuta, betaler en verdeling.` : "Controleer hieronder bedrag, valuta, betaler en verdeling. Ontbrekende gegevens vul je zelf in.");
+    setReceiptNote(proposal.date ? `Datum op de bon: ${proposal.date}. Controleer de gegevens hieronder.` : "Controleer de gegevens hieronder en vul aan wat ontbreekt.");
     setError("");
   };
 
@@ -131,7 +131,7 @@ export function ExpenseSheet({ open, onOpenChange, tripId, tripCurrency, current
       open={open}
       onOpenChange={onOpenChange}
       title={expense ? "Kosten wijzigen" : "Bonnetje toevoegen"}
-      description="Wie betaalde, en hoe verdelen jullie het bedrag?"
+      description="Wie heeft betaald en voor wie is het?"
     >
       <form onSubmit={handleSubmit} className="mt-6 space-y-5">
         {open && !expense && <ReceiptInput tripId={tripId} onProposal={applyProposal} />}
@@ -164,7 +164,7 @@ export function ExpenseSheet({ open, onOpenChange, tripId, tripCurrency, current
         </FormField>
 
         <div>
-          <p className="text-sm font-semibold">Verdelen over</p>
+          <p className="text-sm font-semibold">Voor wie?</p>
           <div className="mt-2 grid gap-2 sm:grid-cols-2">
             {members.map((member) => (
               <label key={member.userId} className="flex min-h-12 cursor-pointer items-center gap-3 rounded-xl border border-border px-3 py-2.5 text-sm">
@@ -176,10 +176,10 @@ export function ExpenseSheet({ open, onOpenChange, tripId, tripCurrency, current
         </div>
 
         <div>
-          <p className="text-sm font-semibold">Hoe verdelen?</p>
+          <p className="text-sm font-semibold">Verdelen</p>
           <div className="mt-2 grid grid-cols-2 gap-2">
             <button type="button" onClick={() => setMode("equal")} className={`min-h-12 rounded-xl border px-3 py-3 text-[15px] font-semibold ${mode === "equal" ? "border-primary bg-primary/10 text-primary" : "border-border"}`}>Gelijk verdelen</button>
-            <button type="button" onClick={() => setMode("custom")} className={`min-h-12 rounded-xl border px-3 py-3 text-[15px] font-semibold ${mode === "custom" ? "border-primary bg-primary/10 text-primary" : "border-border"}`}>Zelf bedragen</button>
+            <button type="button" onClick={() => setMode("custom")} className={`min-h-12 rounded-xl border px-3 py-3 text-[15px] font-semibold ${mode === "custom" ? "border-primary bg-primary/10 text-primary" : "border-border"}`}>Zelf verdelen</button>
           </div>
         </div>
 
@@ -207,7 +207,7 @@ export function ExpenseSheet({ open, onOpenChange, tripId, tripCurrency, current
         )}
 
         <FormError message={error} />
-        {proposalReceived && <label className="flex min-h-12 cursor-pointer items-start gap-3 rounded-xl border border-border px-3 py-3 text-sm"><input type="checkbox" checked={reviewed} onChange={(event) => setReviewed(event.target.checked)} className="mt-0.5 h-5 w-5 shrink-0" /><span>Ik heb bedrag, valuta, betaler en verdeling gecontroleerd.</span></label>}
+        {proposalReceived && <label className="flex min-h-12 cursor-pointer items-start gap-3 rounded-xl border border-border px-3 py-3 text-sm"><input type="checkbox" checked={reviewed} onChange={(event) => setReviewed(event.target.checked)} className="mt-0.5 h-5 w-5 shrink-0" /><span>Ik heb alles gecontroleerd.</span></label>}
         <FormSubmit saving={saving}>{expense ? "Wijzigingen opslaan" : "Opslaan"}</FormSubmit>
       </form>
     </FormSheet>

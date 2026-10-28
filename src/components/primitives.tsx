@@ -47,7 +47,7 @@ export function IconBubble({
         ? "bg-secondary text-muted-foreground"
         : "bg-primary/10 text-primary";
   return (
-    <span aria-hidden className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-md ${toneClass} ${className}`}>
+    <span aria-hidden className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${toneClass} ${className}`}>
       <Icon className="h-[18px] w-[18px]" strokeWidth={1.75} />
     </span>
   );
@@ -71,8 +71,8 @@ export function StatusChip({ children, tone = "neutral" }: { children: ReactNode
 /** Signal section break, shared by all working screens. */
 export function SectionLabel({ children, action }: { children: ReactNode; action?: ReactNode }) {
   return (
-    <div className="flex flex-wrap items-center justify-between gap-3 pb-2 pt-2">
-      <h2 className="min-w-0 font-ui text-[17px] font-semibold leading-tight text-foreground">{children}</h2>
+    <div className="flex flex-wrap items-center justify-between gap-3 pb-3 pt-4">
+      <h2 className="min-w-0 font-ui text-[19px] font-semibold leading-tight text-foreground">{children}</h2>
       {action}
     </div>
   );
@@ -93,7 +93,7 @@ export function StatusWord({ children, tone = "neutral" }: { children: ReactNode
 
 /** Hairline-separated list container. Rows live directly inside it. */
 export function RowList({ children, className = "" }: { children: ReactNode; className?: string }) {
-  return <div className={`rule-divide ${className}`}>{children}</div>;
+  return <div className={`rule-divide overflow-hidden rounded-2xl bg-card px-4 shadow-soft ${className}`}>{children}</div>;
 }
 
 type RowItemProps = {
@@ -113,8 +113,8 @@ export function RowItem({ icon: Icon, title, meta, trailing, to, onClick, tone =
   const interactive = Boolean(to || onClick);
   const body = (
     <>
-      {Icon && emphasis && <IconBubble icon={Icon} tone={tone === "attention" ? "attention" : "default"} />}
-      {Icon && !emphasis && (
+      {Icon && (emphasis || interactive) && <IconBubble icon={Icon} tone={tone === "attention" ? "attention" : "default"} />}
+      {Icon && !emphasis && !interactive && (
         <Icon className={`h-[18px] w-[18px] shrink-0 ${tone === "attention" ? "text-warning" : "text-muted-foreground"}`} />
       )}
       <span className="min-w-0 flex-1">
@@ -195,7 +195,7 @@ export function StatStrip({
 /** One sentence plus one text action. Never an oversized illustrated card. */
 export function EmptyLine({ text, actionLabel, to, onClick }: { text: string; actionLabel?: string; to?: string; onClick?: () => void }) {
   return (
-    <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 py-5">
+    <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3 rounded-2xl bg-card px-4 py-5 shadow-soft">
       <p className="min-w-0 text-[15px] leading-relaxed text-muted-foreground">{text}</p>
       {actionLabel && to && <Button asChild variant="outline"><Link to={to}>{actionLabel}</Link></Button>}
       {actionLabel && !to && onClick && (
@@ -471,7 +471,7 @@ export function SwipeRow({ children, actions }: { children: ReactNode; actions: 
         onPointerUp={onPointerUp}
         onPointerCancel={onPointerUp}
         style={{ transform: `translateX(${offset}px)` }}
-        className="relative bg-background transition-transform duration-150 group-hover:pr-16"
+        className="relative bg-card transition-transform duration-150 group-hover:pr-16"
       >
         {children}
       </div>

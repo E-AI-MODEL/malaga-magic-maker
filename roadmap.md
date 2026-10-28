@@ -102,3 +102,10 @@ Home-ronde: gewijzigd `src/App.tsx`, `src/features/trips/start.ts` en tests, `sr
 - [x] Reisgenoten zien "De organisator kiest; stem mee via Samen" bij een open keuze
 - [x] Overzicht-icoon LayoutDashboard; korte datumregel; desktop geen dubbele reisnaam; tijdlijnlijn alleen tussen onderdelen
 - [ ] Echte rechten-test in de database (organisator / reisgenoot / maker terug) — testomgeving staat alleen lezen toe
+
+## Duidelijkere UI door alle lagen
+- [x] Stap 1: lijsten als lichte kaarten, witte vlakken, grotere afronding en pictogrammen op alle klikbare rijen
+- [x] Stap 3 (deels): Reis heeft directe toevoegknoppen per type
+- [ ] Stap 2: Overzicht als vakantiedashboard
+- [ ] Stap 4: Samen en Knaakie stroomlijnen
+- [ ] Stap 5: ingelogd mobiel/desktop nalopen

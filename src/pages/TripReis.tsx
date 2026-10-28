@@ -257,6 +257,19 @@ export default function TripReis() {
 
         {actionError && <p className="mt-4 text-sm font-medium text-destructive">{actionError}</p>}
 
+        {!readOnly && (
+          <div className="-mx-5 mt-4 flex gap-2 overflow-x-auto px-5 pb-1 sm:mx-0 sm:flex-wrap sm:px-0" aria-label="Direct toevoegen">
+            {quickAddTypes.map((value) => {
+              const TypeIcon = travelTypeIcon(value);
+              return (
+                <Button key={value} type="button" variant="outline" onClick={() => openCreate(value)} className="h-11 shrink-0 gap-2 rounded-full bg-card px-4 text-[14px] font-medium">
+                  <TypeIcon className="h-4 w-4" strokeWidth={1.75} />{getTravelType(value).label}
+                </Button>
+              );
+            })}
+          </div>
+        )}
+
         {showFilters && (
           <StickyBar className="mt-4">
             <div className="flex items-center gap-2 overflow-x-auto">
@@ -321,8 +334,6 @@ export default function TripReis() {
                     ? "Nog niets vastgelegd. Kies hieronder een idee of voeg zelf iets toe."
                     : "Niets in deze filter."
               }
-              actionLabel={readOnly || items.length > 0 ? undefined : "Eerste onderdeel toevoegen"}
-              onClick={readOnly || items.length > 0 ? undefined : () => openCreate()}
             />
           ) : (
             <div>

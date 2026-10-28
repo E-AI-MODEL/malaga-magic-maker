@@ -64,15 +64,15 @@ export function ReceiptInput({ tripId, onProposal }: Props) {
 
   return <section className="space-y-3 border-b border-border pb-5" aria-label="Bonfoto">
     <div className="flex flex-wrap gap-2">
-      <Button type="button" variant="outline" className="h-11" onClick={() => fileRef.current?.click()} disabled={busy}><ImagePlus className="mr-2 h-4 w-4" />Foto kiezen</Button>
-      <Button type="button" variant="outline" className="h-11" onClick={() => cameraRef.current?.click()} disabled={busy}><Camera className="mr-2 h-4 w-4" />Foto maken</Button>
+      <Button type="button" variant="outline" className="h-12 flex-1" onClick={() => fileRef.current?.click()} disabled={busy}><ImagePlus className="mr-2 h-5 w-5" />Foto kiezen</Button>
+      <Button type="button" variant="outline" className="h-12 flex-1" onClick={() => cameraRef.current?.click()} disabled={busy}><Camera className="mr-2 h-5 w-5" />Foto maken</Button>
     </div>
     <input ref={fileRef} aria-label="Kies bonfoto" type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={(event) => { void choose(event.target.files?.[0]); event.target.value = ""; }} />
     <input ref={cameraRef} aria-label="Maak bonfoto" type="file" accept="image/jpeg,image/png,image/webp" capture="environment" className="hidden" onChange={(event) => { void choose(event.target.files?.[0]); event.target.value = ""; }} />
     {image && <>
       <img src={image} alt="Gekozen bonnetje ter controle" className="max-h-64 w-full object-contain" />
       <label className="flex items-start gap-3 text-sm leading-relaxed"><input type="checkbox" checked={consent} onChange={(event) => setConsent(event.target.checked)} className="mt-1 h-4 w-4 shrink-0" disabled={busy} /><span>Deze foto mag naar de AI-dienst om uit te lezen. Controleer persoonlijke gegevens op de foto. De foto wordt niet als bijlage bewaard.</span></label>
-      <div className="flex flex-wrap gap-2"><Button type="button" variant="outline" disabled={!consent || busy} onClick={() => void recognize()}>{busy && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Bonnetje uitlezen</Button><Button type="button" variant="ghost" onClick={clear}><X className="mr-2 h-4 w-4" />{busy ? "Stoppen" : "Foto verwijderen"}</Button></div>
+      <div className="flex flex-wrap gap-2"><Button type="button" className="h-12 flex-1" disabled={!consent || busy} onClick={() => void recognize()}>{busy && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}Bonnetje uitlezen</Button><Button type="button" variant="ghost" className="h-12" onClick={clear}><X className="mr-2 h-4 w-4" />{busy ? "Stoppen" : "Foto verwijderen"}</Button></div>
     </>}
     <p role="status" aria-live="polite" className="text-sm text-muted-foreground">{busy ? "Foto verwerken…" : error || "Je kunt de kosten ook handmatig invullen."}</p>
   </section>;

@@ -19,7 +19,8 @@ describe("explicit receipt saving", () => {
     fireEvent.change(screen.getByLabelText("Bedrag *"), { target: { value: "50" } });
     fireEvent.click(screen.getByLabelText("Ik heb bedrag, valuta, betaler en verdeling gecontroleerd."));
     fireEvent.click(screen.getByRole("button", { name: "Opslaan" }));
-    await waitFor(() => expect(createExpenseWithSplits).toHaveBeenCalledWith("trip-a", { description: "Restaurant", amount: 50, currency: "USD", paidByUserId: "piet", splits: [{ user_id: "me", amount: 50 }] }));
+    // Standaard wordt een nieuw bonnetje gelijk verdeeld over alle reizigers.
+    await waitFor(() => expect(createExpenseWithSplits).toHaveBeenCalledWith("trip-a", { description: "Restaurant", amount: 50, currency: "USD", paidByUserId: "piet", splits: [{ user_id: "me", amount: 25 }, { user_id: "piet", amount: 25 }] }));
     expect(props.onSaved).toHaveBeenCalled();
   });
   it("discards proposed fields when closed without saving", () => {

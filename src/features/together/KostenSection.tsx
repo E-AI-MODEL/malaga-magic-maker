@@ -95,7 +95,7 @@ export function KostenSection() {
           const isExpanded = expanded === expense.id;
           return <div key={expense.id} className="py-3">
             <Button variant="ghost" onClick={() => setExpanded(isExpanded ? null : expense.id)} aria-expanded={isExpanded} className="h-auto w-full justify-start gap-3 whitespace-normal px-0 py-1 text-left hover:bg-transparent">
-              <div className="min-w-0 flex-1"><span className="block break-words text-[15px] font-medium">{expense.description}</span><span className="mt-1 block text-xs font-normal text-muted-foreground">Betaald door {names.get(expense.paid_by_user_id || "") || "nog niet ingevuld"}</span></div>
+              <div className="min-w-0 flex-1"><span className="block break-words text-[15px] font-medium">{expense.description}</span><span className="mt-1 block text-xs font-normal text-muted-foreground">Betaald door {names.get(expense.paid_by_user_id || "") || "onbekend"}</span></div>
               <span className="num shrink-0 text-sm font-semibold">{money(expense.amount, expense.currency)}</span><ChevronDown className={`h-4 w-4 shrink-0 text-muted-foreground ${isExpanded ? "rotate-180" : ""}`} />
             </Button>
             {isExpanded && <div className="mt-3 border-l border-border pl-3">

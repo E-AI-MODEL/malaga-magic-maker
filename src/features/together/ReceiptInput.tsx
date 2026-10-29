@@ -71,7 +71,7 @@ export function ReceiptInput({ tripId, onProposal }: Props) {
     <input ref={cameraRef} aria-label="Maak bonfoto" type="file" accept="image/jpeg,image/png,image/webp" capture="environment" className="hidden" onChange={(event) => { void choose(event.target.files?.[0]); event.target.value = ""; }} />
     {image && <>
       <img src={image} alt="Gekozen bonnetje ter controle" className="max-h-64 w-full object-contain" />
-      <label className="flex items-start gap-3 text-sm leading-relaxed"><input type="checkbox" checked={consent} onChange={(event) => setConsent(event.target.checked)} className="mt-1 h-4 w-4 shrink-0" disabled={busy} /><span>De foto gaat naar de AI-dienst om te lezen. Hij wordt nergens bewaard.</span></label>
+      <label className="flex items-start gap-3 text-sm leading-relaxed"><input type="checkbox" checked={consent} onChange={(event) => setConsent(event.target.checked)} className="mt-1 h-4 w-4 shrink-0" disabled={busy} /><span>AI oncijfert je bonnetje. De foto wordt nergens bewaard.</span></label>
       <div className="flex flex-wrap gap-2"><Button type="button" className="h-12 flex-1" disabled={!consent || busy} onClick={() => void recognize()}>{busy && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}Bonnetje uitlezen</Button><Button type="button" variant="ghost" className="h-12" onClick={clear}><X className="mr-2 h-4 w-4" />{busy ? "Stoppen" : "Foto verwijderen"}</Button></div>
     </>}
     <p role="status" aria-live="polite" className="text-sm text-muted-foreground">{busy ? "Foto verwerken…" : error || "Of vul het zelf in."}</p>

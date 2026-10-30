@@ -1,5 +1,11 @@
 # Roadmap
 
+## Simpeler, zoals Tikkie
+- [x] Knaakie: één groot saldo + één knop, per persoon 'Vraag terug', bedrag eerst in formulier, betaler/verdeling achter één regel 'Aanpassen'
+- [ ] Samen: cijferstrook weg, solo zonder Reizigers/Uitnodigen
+- [ ] Reis: één toevoegpad (snelknoppen), korte lege toestanden
+- [ ] Overzicht: één oranje actie, kortere zinnen
+
 ## Integrale vernieuwing (goedgekeurd plan)
 - [x] Fase B deel 1: afgewezen woorden verwijderd + automatische woordencontrole
 - [x] Fase A: gedeelde stijl doorgevoerd — PageHeader op Home, Nieuwe reis, Reis/Samen, Profiel/Instellingen en auth; TimelineRow op Overzicht/Reis; gedeelde lege toestand, neutrale sectiekeuze, grotere knoppen/invoer en vaste formulier-opslagstrook

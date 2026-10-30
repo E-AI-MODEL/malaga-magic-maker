@@ -33,11 +33,12 @@ export function ExpenseSheet({ open, onOpenChange, tripId, tripCurrency, current
   const [proposalReceived, setProposalReceived] = useState(false);
   const [reviewed, setReviewed] = useState(false);
   const [receiptNote, setReceiptNote] = useState("");
+  const [showDetails, setShowDetails] = useState(false);
 
   useEffect(() => {
     if (!open) {
       setDescription(""); setAmount(""); setPaidByUserId(""); setCurrency("");
-      setCustomAmounts({}); setSelectedUserIds([]); setReceiptNote(""); setProposalReceived(false); setReviewed(false);
+      setCustomAmounts({}); setSelectedUserIds([]); setReceiptNote(""); setProposalReceived(false); setReviewed(false); setShowDetails(false);
       return;
     }
     setDescription(expense?.description || "");
@@ -98,10 +99,12 @@ export function ExpenseSheet({ open, onOpenChange, tripId, tripCurrency, current
       return;
     }
     if (!members.some((member) => member.userId === paidByUserId) || selectedUserIds.length === 0 || selectedUserIds.some((id) => !members.some((member) => member.userId === id))) {
+      setShowDetails(true);
       setError("Kies wie betaalde en over wie de kosten worden verdeeld.");
       return;
     }
     if (splits.some((split) => !Number.isFinite(split.amount) || split.amount < 0) || !splitMatches) {
+      setShowDetails(true);
       setError("De verdeling moet precies gelijk zijn aan het totaalbedrag.");
       return;
     }
@@ -126,34 +129,47 @@ export function ExpenseSheet({ open, onOpenChange, tripId, tripCurrency, current
     }
   };
 
+  const payerName = members.find((member) => member.userId === paidByUserId)?.displayName;
+  const everyone = selectedUserIds.length === members.length;
+  const summary = `${paidByUserId === currentUserId ? "Jij betaalde" : `${payerName || "Onbekend"} betaalde`} · ${everyone ? (members.length === 1 ? "alleen voor jou" : `gelijk over iedereen (${members.length})`) : `over ${selectedUserIds.length} ${selectedUserIds.length === 1 ? "persoon" : "personen"}`}`;
+  const detailsVisible = showDetails || Boolean(expense) || proposalReceived;
+
   return (
     <FormSheet
       open={open}
       onOpenChange={onOpenChange}
       title={expense ? "Kosten wijzigen" : "Bonnetje toevoegen"}
-      description="Wie heeft betaald en voor wie is het?"
     >
-      <form onSubmit={handleSubmit} className="mt-6 space-y-5">
+      <form onSubmit={handleSubmit} className="mt-4 space-y-5">
         {open && !expense && <ReceiptInput tripId={tripId} onProposal={applyProposal} />}
         {proposalReceived && <p role="status" className="text-sm text-muted-foreground">Voorstel uit je bonnetje. {receiptNote}</p>}
-        <FormField label="Waarvoor?" htmlFor="expense-description" required>
-          <Input id="expense-description" value={description} onChange={(event) => setDescription(event.target.value)} placeholder="Bijv. Treinkaartjes" className="h-12" />
-        </FormField>
 
-        <div className="grid grid-cols-[1fr_110px] gap-3">
+        <div className="grid grid-cols-[1fr_96px] items-end gap-3">
           <FormField label="Bedrag" htmlFor="expense-amount" required>
-            <Input id="expense-amount" type="number" inputMode="decimal" min="0.01" step="0.01" value={amount} onChange={(event) => setAmount(event.target.value)} className="h-12" />
+            <Input id="expense-amount" type="number" inputMode="decimal" min="0.01" step="0.01" value={amount} onChange={(event) => setAmount(event.target.value)} placeholder="0,00" className="num h-16 font-display !text-4xl font-semibold [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" autoFocus={!expense} />
           </FormField>
           <FormField label="Valuta" htmlFor="expense-currency">
             <FormSelect
               id="expense-currency"
               value={currency}
               onChange={setCurrency}
-              options={[{ value: "", label: "Kies valuta" }, ...[...new Set([...currencies, tripCurrency, currency].filter(Boolean))].map((item) => ({ value: item, label: item }))]}
+              options={[{ value: "", label: "Kies" }, ...[...new Set([...currencies, tripCurrency, currency].filter(Boolean))].map((item) => ({ value: item, label: item }))]}
             />
           </FormField>
         </div>
 
+        <FormField label="Waarvoor?" htmlFor="expense-description" required>
+          <Input id="expense-description" value={description} onChange={(event) => setDescription(event.target.value)} placeholder="Bijv. boodschappen" className="h-12" />
+        </FormField>
+
+        {!detailsVisible && (
+          <button type="button" onClick={() => setShowDetails(true)} className="flex min-h-12 w-full items-center justify-between gap-3 rounded-xl border border-border px-4 py-3 text-left text-[15px]">
+            <span className="min-w-0">{summary}</span>
+            <span className="shrink-0 text-sm font-semibold underline underline-offset-4">Aanpassen</span>
+          </button>
+        )}
+
+        {detailsVisible && <>
         <FormField label="Wie betaalde?" htmlFor="expense-payer">
           <FormSelect
             id="expense-payer"
@@ -205,6 +221,7 @@ export function ExpenseSheet({ open, onOpenChange, tripId, tripCurrency, current
             </div>
           </div>
         )}
+        </>}
 
         <FormError message={error} />
         {proposalReceived && <label className="flex min-h-12 cursor-pointer items-start gap-3 rounded-xl border border-border px-3 py-3 text-sm"><input type="checkbox" checked={reviewed} onChange={(event) => setReviewed(event.target.checked)} className="mt-0.5 h-5 w-5 shrink-0" /><span>Ik heb alles gecontroleerd.</span></label>}

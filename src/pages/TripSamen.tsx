@@ -362,7 +362,7 @@ export default function TripSamen() {
 
         {actionError && <p className="mt-4 text-sm font-medium text-destructive">{actionError}</p>}
 
-        <section className="mt-5">
+        <section ref={sectionRef} className="mt-5 scroll-mt-28">
           <SectionLabel>
             {section === "tasks" ? "Taken" : section === "decisions" ? "Keuzes" : "Kosten"}
           </SectionLabel>

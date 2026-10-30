@@ -146,7 +146,7 @@ export function ExpenseSheet({ open, onOpenChange, tripId, tripCurrency, current
 
         <div className="grid grid-cols-[1fr_96px] items-end gap-3">
           <FormField label="Bedrag" htmlFor="expense-amount" required>
-            <Input id="expense-amount" type="number" inputMode="decimal" min="0.01" step="0.01" value={amount} onChange={(event) => setAmount(event.target.value)} placeholder="0,00" className="num h-16 font-display text-4xl font-semibold" autoFocus={!expense} />
+            <Input id="expense-amount" type="number" inputMode="decimal" min="0.01" step="0.01" value={amount} onChange={(event) => setAmount(event.target.value)} placeholder="0,00" className="num h-16 font-display !text-4xl font-semibold [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" autoFocus={!expense} />
           </FormField>
           <FormField label="Valuta" htmlFor="expense-currency">
             <FormSelect

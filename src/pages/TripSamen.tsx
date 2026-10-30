@@ -364,7 +364,7 @@ export default function TripSamen() {
 
         <section ref={sectionRef} className="mt-5 scroll-mt-28">
           <SectionLabel>
-            {section === "tasks" ? "Taken" : section === "decisions" ? "Keuzes" : "Kosten"}
+            {section === "tasks" ? "Taken" : section === "decisions" ? "Keuzes" : "Knaakie"}
           </SectionLabel>
 
           {section === "tasks" && (

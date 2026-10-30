@@ -67,11 +67,7 @@ export function KostenSection() {
 
   return <>
     <div>
-      <header className="mt-4 flex items-center gap-2">
-        <Receipt className="h-5 w-5 shrink-0" strokeWidth={1.75} aria-hidden />
-        <h2 className="text-lg font-semibold">Knaakie</h2>
-        {expenses.length > 0 && <span className="ml-auto text-sm text-muted-foreground num">{expenses.length} {expenses.length === 1 ? "bonnetje" : "bonnetjes"}</span>}
-      </header>
+      {expenses.length > 0 && <p className="mt-1 text-sm text-muted-foreground num">{expenses.length} {expenses.length === 1 ? "bonnetje" : "bonnetjes"}</p>}
       {readOnly && <p className="mt-4 flex items-start gap-2 text-sm text-muted-foreground"><Archive className="h-4 w-4 shrink-0" />Deze reis is gearchiveerd. Je kunt de kosten nog bekijken.</p>}
 
       <section className="mt-5 rounded-2xl border border-border bg-card px-5 py-6 text-center" aria-live="polite">

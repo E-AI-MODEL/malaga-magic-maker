@@ -102,9 +102,8 @@ export function KostenSection() {
         </RowList>
       </section>}
 
-      <section className="border-t border-border py-5">
+      {expenses.length > 0 && <section className="border-t border-border py-5">
         <SectionLabel>Bonnetjes</SectionLabel>
-        {!expensesQuery.isPending && !expensesQuery.isError && !expenses.length && <p className="py-3 text-sm text-muted-foreground">Nog niets toegevoegd.</p>}
         <RowList>{expenses.map((expense) => {
           const manager = isOrganizer || expense.created_by === user.id;
           const isExpanded = expanded === expense.id;

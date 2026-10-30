@@ -57,35 +57,50 @@ export function KostenSection() {
   };
   const personal = groups.flatMap((group) => group.transfers.filter((transfer) => transfer.fromUserId === user.id || transfer.toUserId === user.id).map((transfer) => ({ ...transfer, currency: group.currency })));
   const transfers = groups.flatMap((group) => group.transfers.map((transfer) => ({ ...transfer, currency: group.currency })));
+  const others = transfers.filter((transfer) => transfer.fromUserId !== user.id && transfer.toUserId !== user.id);
+  // Netto saldo per valuta: wat je terugkrijgt minus wat je moet betalen.
+  const balances = groups.map((group) => ({
+    currency: group.currency,
+    cents: group.transfers.reduce((sum, t) => sum + (t.toUserId === user.id ? t.cents : t.fromUserId === user.id ? -t.cents : 0), 0),
+  })).filter((balance) => balance.cents !== 0);
+  const loading = expensesQuery.isPending;
 
   return <>
     <div>
-      <header className="mt-6 border-b border-dashed border-border pb-5">
-        <div className="flex items-center gap-3">
-          <Receipt className="h-9 w-9 shrink-0 text-foreground" strokeWidth={1.5} aria-hidden />
-          <h2 className="font-display text-2xl font-bold">Knaakie</h2>
-          <span className="ml-auto text-sm text-muted-foreground num">{expenses.length} {expenses.length === 1 ? "bonnetje" : "bonnetjes"}</span>
-        </div>
-        <p className="mt-2 text-[15px] leading-relaxed text-muted-foreground">Wie heeft wat betaald? Knaakie rekent aan het einde uit wie wie terugbetaalt.</p>
+      <header className="mt-4 flex items-center gap-2">
+        <Receipt className="h-5 w-5 shrink-0" strokeWidth={1.75} aria-hidden />
+        <h2 className="text-lg font-semibold">Knaakie</h2>
+        {expenses.length > 0 && <span className="ml-auto text-sm text-muted-foreground num">{expenses.length} {expenses.length === 1 ? "bonnetje" : "bonnetjes"}</span>}
       </header>
       {readOnly && <p className="mt-4 flex items-start gap-2 text-sm text-muted-foreground"><Archive className="h-4 w-4 shrink-0" />Deze reis is gearchiveerd. Je kunt de kosten nog bekijken.</p>}
 
-      {!readOnly && <Button className="mt-5 h-14 w-full text-base" onClick={openNew}><Plus className="mr-2 h-5 w-5" />Bonnetje toevoegen</Button>}
+      <section className="mt-5 rounded-2xl border border-border bg-card px-5 py-6 text-center" aria-live="polite">
+        {loading ? <p className="text-sm text-muted-foreground">Laden…</p>
+          : expensesQuery.isError ? <p className="text-sm text-muted-foreground">Laden lukt nu niet. <Button variant="link" onClick={() => void expensesQuery.refetch()}>Opnieuw proberen</Button></p>
+          : !expenses.length ? <><p className="font-display text-3xl font-semibold">Nog geen kosten</p><p className="mt-1 text-[15px] text-muted-foreground">Betaal je iets voor de groep? Zet het hier.</p></>
+          : !balances.length ? <p className="flex items-center justify-center gap-2 font-display text-3xl font-semibold"><Check className="h-7 w-7" />Je staat quitte</p>
+          : balances.map((balance) => <div key={balance.currency} className="py-1">
+            <p className="text-[15px] text-muted-foreground">{balance.cents > 0 ? "Je krijgt terug" : "Je moet nog betalen"}</p>
+            <p className="num font-display text-5xl font-semibold leading-tight">{money(Math.abs(balance.cents) / 100, balance.currency)}</p>
+          </div>)}
+        {!readOnly && <Button className="mt-5 h-14 w-full text-base" onClick={openNew}><Plus className="mr-2 h-5 w-5" />Bonnetje toevoegen</Button>}
+      </section>
 
-      <section className="py-5">
-        <SectionLabel>Voor jou</SectionLabel>
-        {expensesQuery.isPending ? <p className="py-3 text-sm text-muted-foreground">Laden…</p> : expensesQuery.isError ? <p className="py-3 text-sm text-muted-foreground">Laden lukt nu niet. <Button variant="link" onClick={() => void expensesQuery.refetch()}>Opnieuw proberen</Button></p> : personal.length ? <RowList>
+      {personal.length > 0 && <section className="py-5">
+        <RowList>
           {personal.map((transfer) => {
             const pay = transfer.fromUserId === user.id;
             const name = names.get(pay ? transfer.toUserId : transfer.fromUserId) || "Medereiziger";
-            return <div key={`${transfer.currency}-${transfer.fromUserId}-${transfer.toUserId}`} className="py-4">
-              <p className="break-words text-[15px] text-muted-foreground">{pay ? `Jij betaalt ${name}` : `Je krijgt terug van ${name}`}</p>
-              <p className="num mt-1 font-display text-3xl font-semibold">{money(transfer.cents / 100, transfer.currency)}</p>
-              {!pay && !readOnly && <Button className="mt-3 h-12 w-full sm:w-auto" onClick={() => setPayment({ recipientName: name, amount: transfer.cents / 100, currency: transfer.currency })}><HandCoins className="mr-2 h-5 w-5" />Vraag {name} om betaling</Button>}
+            return <div key={`${transfer.currency}-${transfer.fromUserId}-${transfer.toUserId}`} className="flex items-center gap-3 py-3">
+              <div className="min-w-0 flex-1">
+                <p className="break-words text-[15px]">{pay ? `Jij betaalt ${name}` : `${name} betaalt jou`}</p>
+                <p className="num text-lg font-semibold">{money(transfer.cents / 100, transfer.currency)}</p>
+              </div>
+              {!pay && !readOnly && <Button variant="outline" className="h-11 shrink-0" onClick={() => setPayment({ recipientName: name, amount: transfer.cents / 100, currency: transfer.currency })}><HandCoins className="mr-2 h-4 w-4" />Vraag terug</Button>}
             </div>;
           })}
-        </RowList> : <p className="py-3 text-sm text-muted-foreground">{expenses.length ? "Je hoeft niets terug te betalen." : "Nog geen kosten."}</p>}
-      </section>
+        </RowList>
+      </section>}
 
       <section className="border-t border-border py-5">
         <SectionLabel>Bonnetjes</SectionLabel>

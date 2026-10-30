@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Archive, Check, ChevronDown, Copy, HandCoins, Pencil, Plus, Receipt, Trash2 } from "lucide-react";
+import { Archive, Check, ChevronDown, Copy, HandCoins, Pencil, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { RowList, SectionLabel } from "@/components/primitives";

@@ -99,10 +99,12 @@ export function ExpenseSheet({ open, onOpenChange, tripId, tripCurrency, current
       return;
     }
     if (!members.some((member) => member.userId === paidByUserId) || selectedUserIds.length === 0 || selectedUserIds.some((id) => !members.some((member) => member.userId === id))) {
+      setShowDetails(true);
       setError("Kies wie betaalde en over wie de kosten worden verdeeld.");
       return;
     }
     if (splits.some((split) => !Number.isFinite(split.amount) || split.amount < 0) || !splitMatches) {
+      setShowDetails(true);
       setError("De verdeling moet precies gelijk zijn aan het totaalbedrag.");
       return;
     }

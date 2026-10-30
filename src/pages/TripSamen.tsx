@@ -1,6 +1,6 @@
 import { ACCOMMODATION_DECISION_TITLE, decisionWinner, promoteDecisionWinner } from "@/features/travel/accommodation";
 import { toast } from "sonner";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -59,6 +59,13 @@ export default function TripSamen() {
   const [searchParams, setSearchParams] = useSearchParams();
   const requested = searchParams.get("section");
   const section: Section = requested === "expenses" || requested === "decisions" ? requested : "tasks";
+  const sectionRef = useRef<HTMLElement>(null);
+  // Knaakie and Home links deep-link to a section: bring it into view instead of leaving it below the fold.
+  useEffect(() => {
+    if (!requested) return;
+    const timer = window.setTimeout(() => sectionRef.current?.scrollIntoView({ block: "start" }), 50);
+    return () => window.clearTimeout(timer);
+  }, [requested]);
   const setSection = (next: Section) => {
     setSearchParams((current) => {
       const params = new URLSearchParams(current);
@@ -355,7 +362,7 @@ export default function TripSamen() {
 
         {actionError && <p className="mt-4 text-sm font-medium text-destructive">{actionError}</p>}
 
-        <section className="mt-5">
+        <section ref={sectionRef} className="mt-5 scroll-mt-28">
           <SectionLabel>
             {section === "tasks" ? "Taken" : section === "decisions" ? "Keuzes" : "Kosten"}
           </SectionLabel>

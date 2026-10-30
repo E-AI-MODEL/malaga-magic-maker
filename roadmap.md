@@ -16,6 +16,9 @@
 - [ ] Ingelogde mobiele controle — previewsessie opent login; vernieuwen voor verzoeker mislukt omdat geen overeenkomend account gevonden is. Gebruiker moet in de preview inloggen
 
 ## Bonherkenning binnen Samen → Kosten
+- [x] Live test 30 okt: testbon via ingelogd account → omschrijving, EUR 31,50 en datum correct herkend (gedrukte naam bewust genegeerd)
+- [x] Knaakie-knop scrolt direct naar Kosten; lege Documenten-tekst ingekort, dubbele knop weg
+- [x] Ingelogde controle 390px/desktop: Home, Overzicht, Reis, Samen, Kosten, Profiel, Nieuwe reis zonder overflow of fouten
 - [x] Drie hoofdknoppen behouden; Knaakie als kostensectie, geen extra route of migratie
 - [x] Gateway-SDK geïmporteerd, workspacecatalogus inbegrepen; beeldinvoer en zero-retention op Responses bevestigd
 - [x] Tijdelijke bonfoto, expliciete verwerkingstoestemming, betaler lokaal koppelen en gecontroleerd opslaan via bestaande kostenfunctie

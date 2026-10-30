@@ -33,11 +33,12 @@ export function ExpenseSheet({ open, onOpenChange, tripId, tripCurrency, current
   const [proposalReceived, setProposalReceived] = useState(false);
   const [reviewed, setReviewed] = useState(false);
   const [receiptNote, setReceiptNote] = useState("");
+  const [showDetails, setShowDetails] = useState(false);
 
   useEffect(() => {
     if (!open) {
       setDescription(""); setAmount(""); setPaidByUserId(""); setCurrency("");
-      setCustomAmounts({}); setSelectedUserIds([]); setReceiptNote(""); setProposalReceived(false); setReviewed(false);
+      setCustomAmounts({}); setSelectedUserIds([]); setReceiptNote(""); setProposalReceived(false); setReviewed(false); setShowDetails(false);
       return;
     }
     setDescription(expense?.description || "");
@@ -218,6 +219,7 @@ export function ExpenseSheet({ open, onOpenChange, tripId, tripCurrency, current
             </div>
           </div>
         )}
+        </>}
 
         <FormError message={error} />
         {proposalReceived && <label className="flex min-h-12 cursor-pointer items-start gap-3 rounded-xl border border-border px-3 py-3 text-sm"><input type="checkbox" checked={reviewed} onChange={(event) => setReviewed(event.target.checked)} className="mt-0.5 h-5 w-5 shrink-0" /><span>Ik heb alles gecontroleerd.</span></label>}

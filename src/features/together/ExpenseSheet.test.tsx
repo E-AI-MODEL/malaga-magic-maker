@@ -32,4 +32,11 @@ describe("explicit receipt saving", () => {
     expect(screen.getByLabelText("Waarvoor? *")).toHaveValue("");
     expect(createExpenseWithSplits).not.toHaveBeenCalled();
   });
+  it("hides payer and split behind one summary line until Aanpassen", () => {
+    render(<ExpenseSheet {...props} />);
+    expect(screen.queryByLabelText("Wie betaalde?")).toBeNull();
+    expect(screen.getByText("Jij betaalde · gelijk over iedereen (2)")).toBeTruthy();
+    fireEvent.click(screen.getByText("Aanpassen"));
+    expect(screen.getByLabelText("Wie betaalde?")).toHaveValue("me");
+  });
 });

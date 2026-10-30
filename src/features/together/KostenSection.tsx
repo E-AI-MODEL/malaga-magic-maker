@@ -118,14 +118,14 @@ export function KostenSection() {
             </div>}
           </div>;
         })}</RowList>
-      </section>
+      </section>}
 
-      {expenses.length > 0 && <section className="border-t border-dashed border-border py-5">
-        <SectionLabel>Wie betaalt wie</SectionLabel>
-        {transfers.length === 0 ? <p className="flex items-center gap-2 py-3 text-sm text-muted-foreground"><Check className="h-4 w-4" />Iedereen is quitte.</p> : <>
-          <RowList>{transfers.map((transfer) => <div key={`${transfer.currency}-${transfer.fromUserId}-${transfer.toUserId}`} className="flex flex-wrap items-start justify-between gap-x-3 gap-y-1 py-3 text-sm"><span className="min-w-0 flex-1 break-words">{transfer.fromUserId === user.id ? "Jij" : names.get(transfer.fromUserId) || "Medereiziger"} betaalt {transfer.toUserId === user.id ? "jou" : names.get(transfer.toUserId) || "Medereiziger"}</span><span className="num shrink-0 font-semibold">{money(transfer.cents / 100, transfer.currency)}</span></div>)}</RowList>
-          <Button variant="outline" className="mt-3 h-11" onClick={() => void copy()}><Copy className="mr-2 h-4 w-4" />Overzicht kopiëren</Button>
+      {transfers.length > 0 && <section className="border-t border-border py-5">
+        {others.length > 0 && <>
+          <SectionLabel>Tussen de anderen</SectionLabel>
+          <RowList>{others.map((transfer) => <div key={`${transfer.currency}-${transfer.fromUserId}-${transfer.toUserId}`} className="flex flex-wrap items-start justify-between gap-x-3 gap-y-1 py-3 text-sm"><span className="min-w-0 flex-1 break-words">{names.get(transfer.fromUserId) || "Medereiziger"} betaalt {names.get(transfer.toUserId) || "Medereiziger"}</span><span className="num shrink-0 font-semibold">{money(transfer.cents / 100, transfer.currency)}</span></div>)}</RowList>
         </>}
+        <Button variant="ghost" className="mt-2 h-11 px-0" onClick={() => void copy()}><Copy className="mr-2 h-4 w-4" />Wie betaalt wie kopiëren</Button>
       </section>}
     </div>
     <ExpenseSheet open={sheetOpen} onOpenChange={setSheetOpen} tripId={tripId} tripCurrency={activeTrip.currency} currentUserId={user.id} members={members} expense={editing} onSaved={refresh} />

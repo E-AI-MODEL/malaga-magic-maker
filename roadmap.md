@@ -17,6 +17,7 @@
 
 ## Bonherkenning binnen Samen → Kosten
 - [x] Live test 30 okt: testbon via ingelogd account → omschrijving, EUR 31,50 en datum correct herkend (gedrukte naam bewust genegeerd)
+- [x] Handgeschreven briefje van gebruiker ("10 bier €15,-") eerst niet herkend; instructie verruimd → "10 bier", EUR 15,00. Gedrukte bon blijft correct
 - [x] Knaakie-knop scrolt direct naar Kosten; lege Documenten-tekst ingekort, dubbele knop weg
 - [x] Ingelogde controle 390px/desktop: Home, Overzicht, Reis, Samen, Kosten, Profiel, Nieuwe reis zonder overflow of fouten
 - [x] Drie hoofdknoppen behouden; Knaakie als kostensectie, geen extra route of migratie

@@ -248,7 +248,7 @@ export default function Landing() {
                   <span className="text-[15px]">10 bier</span>
                   <span className="tabular font-display text-[30px] font-bold leading-none">€ 15,00</span>
                 </div>
-                <p className="mt-2 text-[12px] opacity-70">Betaald door jij · gedeeld door 6</p>
+                <p className="mt-2 text-[12px] opacity-70">Betaald door jou · gedeeld door 6</p>
               </div>
               <div className="mt-4 flex h-14 w-full items-center justify-center gap-2 rounded-xl bg-primary font-display text-lg font-semibold text-primary-foreground">
                 <Check className="h-5 w-5" strokeWidth={2.25} />

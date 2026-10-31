@@ -61,19 +61,19 @@ export function PaymentRequestSheet({
       <p className="mt-1 whitespace-pre-wrap rounded-xl bg-secondary px-4 py-3 text-[15px] leading-relaxed">{text}</p>
       <div className="mt-5 space-y-2.5">
         {canShare && (
-          <Button type="button" onClick={() => void handleShare()} className="h-12 w-full rounded-xl font-display text-base font-extrabold uppercase tracking-wide">
-            <Share2 className="mr-2 h-4 w-4" strokeWidth={1.75} />
+          <Button type="button" onClick={() => void handleShare()} className="h-14 w-full rounded-xl text-base font-semibold">
+            <Share2 className="mr-2 h-5 w-5" strokeWidth={1.75} />
             Delen
           </Button>
         )}
-        <Button asChild variant="outline" className="h-12 w-full rounded-xl">
+        <Button asChild variant="outline" className="h-14 w-full rounded-xl text-base">
           <a href={whatsappHref} target="_blank" rel="noopener noreferrer">
-            <MessageCircle className="mr-2 h-4 w-4" strokeWidth={1.75} />
+            <MessageCircle className="mr-2 h-5 w-5" strokeWidth={1.75} />
             WhatsApp
           </a>
         </Button>
-        <Button type="button" variant="outline" onClick={() => void handleCopy()} className="h-12 w-full rounded-xl">
-          <Copy className="mr-2 h-4 w-4" strokeWidth={1.75} />
+        <Button type="button" variant="outline" onClick={() => void handleCopy()} className="h-14 w-full rounded-xl text-base">
+          <Copy className="mr-2 h-5 w-5" strokeWidth={1.75} />
           Kopiëren
         </Button>
       </div>

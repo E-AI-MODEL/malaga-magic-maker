@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Archive, Check, ChevronDown, Copy, HandCoins, Pencil, Plus, Trash2 } from "lucide-react";
+import { Archive, Camera, Check, ChevronDown, Copy, Pencil, Send, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { RowList, SectionLabel } from "@/components/primitives";
@@ -67,35 +67,39 @@ export function KostenSection() {
 
   return <>
     <div>
-      {expenses.length > 0 && <p className="mt-1 text-sm text-muted-foreground num">{expenses.length} {expenses.length === 1 ? "bonnetje" : "bonnetjes"}</p>}
       {readOnly && <p className="mt-4 flex items-start gap-2 text-sm text-muted-foreground"><Archive className="h-4 w-4 shrink-0" />Deze reis is gearchiveerd. Je kunt de kosten nog bekijken.</p>}
 
-      <section className="mt-5 rounded-2xl border border-border bg-card px-5 py-6 text-center" aria-live="polite">
-        {loading ? <p className="text-sm text-muted-foreground">Laden…</p>
-          : expensesQuery.isError ? <p className="text-sm text-muted-foreground">Laden lukt nu niet. <Button variant="link" onClick={() => void expensesQuery.refetch()}>Opnieuw proberen</Button></p>
-          : !expenses.length ? <><p className="font-display text-3xl font-semibold">Nog geen kosten</p><p className="mt-1 text-[15px] text-muted-foreground">Betaal je iets voor de groep? Zet het hier.</p></>
-          : !balances.length ? <p className="flex items-center justify-center gap-2 font-display text-3xl font-semibold"><Check className="h-7 w-7" />Je staat quitte</p>
+      <section className="mt-5 overflow-hidden rounded-3xl bg-foreground px-5 pb-5 pt-6 text-background" aria-live="polite">
+        {loading ? <p className="text-sm opacity-70">Laden…</p>
+          : expensesQuery.isError ? <p className="text-sm opacity-80">Laden lukt nu niet. <Button variant="link" className="text-background underline" onClick={() => void expensesQuery.refetch()}>Opnieuw proberen</Button></p>
+          : !expenses.length ? <><p className="font-display text-4xl font-semibold leading-none">Nog geen kosten</p><p className="mt-2 text-[15px] opacity-75">Iets betaald voor de groep? Maak een foto van je bonnetje.</p></>
+          : !balances.length ? <><p className="text-[15px] opacity-75">Iedereen is rond</p><p className="mt-1 flex items-center gap-2 font-display text-5xl font-semibold leading-none"><Check className="h-9 w-9 text-primary" strokeWidth={2.5} />Quitte</p></>
           : balances.map((balance) => <div key={balance.currency} className="py-1">
-            <p className="text-[15px] text-muted-foreground">{balance.cents > 0 ? "Je krijgt terug" : "Je moet nog betalen"}</p>
-            <p className="num font-display text-5xl font-semibold leading-tight">{money(Math.abs(balance.cents) / 100, balance.currency)}</p>
+            <p className="text-[15px] opacity-75">{balance.cents > 0 ? "Je krijgt nog" : "Je moet nog betalen"}</p>
+            <p className={`num font-display text-6xl font-semibold leading-none tracking-tight ${balance.cents > 0 ? "text-primary" : ""}`}>{money(Math.abs(balance.cents) / 100, balance.currency)}</p>
           </div>)}
-        {!readOnly && <Button className="mt-5 h-14 w-full text-base" onClick={openNew}><Plus className="mr-2 h-5 w-5" />Bonnetje toevoegen</Button>}
+        {expenses.length > 0 && <p className="num mt-3 text-sm opacity-60">{expenses.length} {expenses.length === 1 ? "bonnetje" : "bonnetjes"} in deze reis</p>}
+        {!readOnly && <Button className="mt-6 h-16 w-full rounded-2xl font-display text-lg font-semibold" onClick={openNew}><Camera className="mr-2.5 h-6 w-6" strokeWidth={2} />Bonnetje toevoegen</Button>}
       </section>
 
       {personal.length > 0 && <section className="py-5">
-        <RowList>
+        <SectionLabel>Jouw bedragen</SectionLabel>
+        <div className="space-y-2.5">
           {personal.map((transfer) => {
             const pay = transfer.fromUserId === user.id;
             const name = names.get(pay ? transfer.toUserId : transfer.fromUserId) || "Medereiziger";
-            return <div key={`${transfer.currency}-${transfer.fromUserId}-${transfer.toUserId}`} className="flex items-center gap-3 py-3">
-              <div className="min-w-0 flex-1">
-                <p className="break-words text-[15px]">{pay ? `Jij betaalt ${name}` : `${name} betaalt jou`}</p>
-                <p className="num text-lg font-semibold">{money(transfer.cents / 100, transfer.currency)}</p>
+            return <div key={`${transfer.currency}-${transfer.fromUserId}-${transfer.toUserId}`} className="rounded-2xl border border-border bg-card p-4">
+              <div className="flex items-center gap-3">
+                <span aria-hidden className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-secondary font-display text-xl font-semibold">{name.trim().charAt(0).toUpperCase() || "?"}</span>
+                <div className="min-w-0 flex-1">
+                  <p className="break-words text-[15px] text-muted-foreground">{pay ? `Jij betaalt ${name}` : `${name} betaalt jou`}</p>
+                  <p className="num font-display text-3xl font-semibold leading-tight">{money(transfer.cents / 100, transfer.currency)}</p>
+                </div>
               </div>
-              {!pay && !readOnly && <Button variant="outline" className="h-11 shrink-0" onClick={() => setPayment({ recipientName: name, amount: transfer.cents / 100, currency: transfer.currency })}><HandCoins className="mr-2 h-4 w-4" />Vraag terug</Button>}
+              {!pay && !readOnly && <Button variant="secondary" className="mt-3 h-14 w-full rounded-xl text-base font-semibold" onClick={() => setPayment({ recipientName: name, amount: transfer.cents / 100, currency: transfer.currency })}><Send className="mr-2 h-5 w-5" />Betaalverzoek sturen</Button>}
             </div>;
           })}
-        </RowList>
+        </div>
       </section>}
 
       {expenses.length > 0 && <section className="border-t border-border py-5">

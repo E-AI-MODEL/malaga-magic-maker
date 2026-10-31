@@ -3,7 +3,7 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
 const roots = ["src/pages", "src/features", "src/components"];
-const banned = [/draaiboek/i, /nog regelen/i, /wat telt nu/i, /afvalrace/i, /van \$\{[^}]+\} geregeld/];
+const banned = [/draaiboek/i, /nog regelen/i, /wat telt nu/i, /afvalrace/i, /vraag terug/i, /van \$\{[^}]+\} geregeld/];
 
 function files(dir: string): string[] {
   return readdirSync(dir).flatMap((name) => {

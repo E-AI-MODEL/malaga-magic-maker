@@ -672,6 +672,24 @@ export type Database = {
           },
         ]
       }
+      guest_receipt_events: {
+        Row: {
+          created_at: string
+          id: string
+          ip_hash: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          ip_hash: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          ip_hash?: string
+        }
+        Relationships: []
+      }
       notification_preferences: {
         Row: {
           decisions: boolean
@@ -1796,6 +1814,10 @@ export type Database = {
     Functions: {
       accept_trip_invite: { Args: { p_token: string }; Returns: string }
       choose_trip_idea: { Args: { p_item_id: string }; Returns: Json }
+      consume_guest_receipt_quota: {
+        Args: { p_ip_hash: string }
+        Returns: boolean
+      }
       consume_hansie_quota: { Args: { p_trip_id: string }; Returns: Json }
       create_calendar_feed: { Args: { p_trip_id: string }; Returns: string }
       create_decision_with_options: {

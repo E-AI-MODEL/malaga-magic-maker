@@ -76,31 +76,31 @@ export function TaskWizard({ open, onOpenChange, tripId, timezone, startDate, cu
   return (
     <StepSheet open={open} onOpenChange={onOpenChange} title="Nieuwe taak" total={steps.length} index={flow.index} onBack={flow.back} onSwipeNext={flow.step !== "summary" ? flow.next : undefined}>
       {flow.step === "what" && <form onSubmit={(e: FormEvent) => { e.preventDefault(); flow.next(); }}>
-        <StepQuestion>Wat moet er gebeuren?</StepQuestion>
+        <StepQuestion>Beschrijf de taak</StepQuestion>
         <Input aria-label="Taak" autoFocus value={title} maxLength={140} onChange={(e) => setTitle(e.target.value)} placeholder="Bijvoorbeeld huurauto reserveren" className="h-16 rounded-2xl text-xl" />
         <div className="mt-4 flex flex-wrap gap-2">{SUGGESTIONS.map((s) => <StepChip key={s} selected={title === s} onClick={() => { setTitle(s); flow.go(flow.backToSummary ? "summary" : steps[1]); }}>{s}</StepChip>)}</div>
         <StepNext disabled={!title.trim()}>{flow.backToSummary ? "Klaar" : "Volgende"}</StepNext>
       </form>}
 
       {flow.step === "who" && <div className="space-y-3">
-        <StepQuestion sub={!isOrganizer ? "Je kunt een nieuwe taak aan jezelf geven of open laten." : undefined}>Wie pakt het op?</StepQuestion>
+        <StepQuestion sub={!isOrganizer ? "Geef de taak aan jezelf of laat hem open." : undefined}>Kies wie het oppakt</StepQuestion>
         {people.map((m) => <StepTile key={m.userId} selected={assignee === m.userId} icon={<UserRound />} onClick={() => { setAssignee(m.userId); flow.go(flow.backToSummary ? "summary" : "when"); }}>{m.userId === currentUserId ? "Ik doe het" : m.displayName}</StepTile>)}
-        <StepTile selected={assignee === ""} icon={<Users />} onClick={() => { setAssignee(""); flow.go(flow.backToSummary ? "summary" : "when"); }}>Nog niemand</StepTile>
+        <StepTile selected={assignee === ""} icon={<Users />} onClick={() => { setAssignee(""); flow.go(flow.backToSummary ? "summary" : "when"); }}>Laat open</StepTile>
       </div>}
 
       {flow.step === "when" && <div className="space-y-3">
-        <StepQuestion>Wanneer moet het klaar zijn?</StepQuestion>
+        <StepQuestion>Kies een deadline</StepQuestion>
         {choices.map((c) => <StepTile key={c.key} selected={due === c.day} icon={c.key === "today" ? <Sun /> : c.key === "departure" ? <Plane /> : c.key === "none" ? <CalendarOff /> : <CalendarDays />} onClick={() => { setDue(c.day); flow.go("summary"); }}>{c.label}</StepTile>)}
-        <label className="block pt-2"><span className="text-sm font-semibold text-muted-foreground">Of kies een datum</span>
+        <label className="block pt-2"><span className="text-sm font-semibold text-muted-foreground">Of kies een eigen datum</span>
           <Input type="date" value={due || ""} onChange={(e) => setDue(e.target.value || null)} className="mt-2 h-14 rounded-2xl text-lg" /></label>
         {due && !choices.some((c) => c.day === due) && <StepNext onClick={() => flow.go("summary")}>Volgende</StepNext>}
       </div>}
 
       {flow.step === "summary" && <div className="space-y-5">
-        <StepQuestion>Klopt dit?</StepQuestion>
+        <StepQuestion>Check en sla op</StepQuestion>
         <StepSummary rows={[
           { label: "Taak", value: title, onEdit: () => flow.edit("what") },
-          ...(solo ? [] : [{ label: "Wie", value: assignee ? (assignee === currentUserId ? "Ik" : name(assignee)) : "Nog niemand", onEdit: () => flow.edit("who") }]),
+          ...(solo ? [] : [{ label: "Wie", value: assignee ? (assignee === currentUserId ? "Ik" : name(assignee)) : "Open", onEdit: () => flow.edit("who") }]),
           { label: "Klaar op", value: dueLabel, onEdit: () => flow.edit("when") },
         ]} />
         <StepNext onClick={() => void save()} busy={saving} disabled={!flow.complete} done>Taak toevoegen</StepNext>

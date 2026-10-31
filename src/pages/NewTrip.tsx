@@ -203,35 +203,35 @@ export default function NewTrip() {
       <div className="mx-auto flex min-h-0 w-full max-w-xl flex-1 flex-col">
         <StepFrame total={steps.length} index={flow.index} onBack={flow.back} onClose={() => navigate("/trips")} closeLabel="Terug naar Home" onSwipeNext={flow.step !== "summary" ? flow.next : undefined}>
           {flow.step === "name" && <form onSubmit={(e: FormEvent) => { e.preventDefault(); flow.next(); }}>
-            <StepQuestion sub="Een naam is genoeg. De rest mag je overslaan.">Hoe heet je reis?</StepQuestion>
+            <StepQuestion sub="Meer is niet nodig. De rest vul je later aan.">Geef je reis een naam</StepQuestion>
             <Input aria-label="Naam van de reis" autoFocus autoComplete="off" value={name} maxLength={80} onChange={(e) => setName(e.target.value)} placeholder="Bijvoorbeeld zomer in Italië" className="h-16 rounded-2xl text-xl" />
             <StepNext disabled={!name.trim()}>{flow.backToSummary ? "Klaar" : "Volgende"}</StepNext>
           </form>}
 
           {flow.step === "where" && <form onSubmit={(e: FormEvent) => { e.preventDefault(); after(nextOf("where")); }}>
-            <StepQuestion>Waar ga je heen?</StepQuestion>
+            <StepQuestion>Vul je bestemming in</StepQuestion>
             <Input aria-label="Bestemming" autoFocus value={destination} onChange={(e) => setDestination(e.target.value)} placeholder="Plaats of regio" className="h-16 rounded-2xl text-xl" />
             <Input aria-label="Land" value={country} onChange={(e) => setCountry(e.target.value)} placeholder="Land" className="mt-3 h-14 rounded-2xl text-lg" />
-            <StepNext>{destination.trim() || country.trim() ? (flow.backToSummary ? "Klaar" : "Volgende") : "Weet ik nog niet"}</StepNext>
+            <StepNext>{destination.trim() || country.trim() ? (flow.backToSummary ? "Klaar" : "Volgende") : "Sla over"}</StepNext>
           </form>}
 
           {flow.step === "when" && <form onSubmit={(e: FormEvent) => { e.preventDefault(); if (datesValid) after(nextOf("when")); }}>
-            <StepQuestion>Wanneer ga je?</StepQuestion>
+            <StepQuestion>Kies je data</StepQuestion>
             <div className="grid grid-cols-2 gap-3">
               <label><span className="text-sm font-semibold text-muted-foreground">Van</span><Input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} className="mt-2 h-14 rounded-2xl text-lg" /></label>
               <label><span className="text-sm font-semibold text-muted-foreground">Tot</span><Input type="date" value={endDate} min={startDate || undefined} onChange={(e) => setEndDate(e.target.value)} className="mt-2 h-14 rounded-2xl text-lg" /></label>
             </div>
             {!datesValid && <StepError message="De einddatum kan niet vóór de startdatum liggen." />}
-            <StepNext disabled={!datesValid}>{startDate || endDate ? (flow.backToSummary ? "Klaar" : "Volgende") : "Nog niet bekend"}</StepNext>
+            <StepNext disabled={!datesValid}>{startDate || endDate ? (flow.backToSummary ? "Klaar" : "Volgende") : "Sla over"}</StepNext>
           </form>}
 
           {flow.step === "who" && <div className="space-y-3">
-            <StepQuestion>Met wie ga je?</StepQuestion>
+            <StepQuestion>Kies je gezelschap</StepQuestion>
             {partyTypeOptions.map((o) => <StepTile key={o.value} selected={partyType === o.value} icon={o.value === "solo" ? <UserRound /> : <Users />} onClick={() => choosePeople(o.value)}>{o.label}</StepTile>)}
           </div>}
 
           {flow.step === "size" && <div>
-            <StepQuestion>Met hoeveel personen?</StepQuestion>
+            <StepQuestion>Stel het aantal personen in</StepQuestion>
             <div className="flex items-center justify-center gap-6 py-4">
               <Button type="button" variant="outline" className="h-16 w-16 rounded-full text-3xl" aria-label="Minder" onClick={() => setGroupSize(String(Math.max(2, (Number.parseInt(groupSize, 10) || 2) - 1)))}><Minus className="h-7 w-7" /></Button>
               <span className="num w-24 text-center font-display text-7xl font-semibold" aria-live="polite">{groupSize}</span>
@@ -241,20 +241,20 @@ export default function NewTrip() {
           </div>}
 
           {flow.step === "invite" && <form onSubmit={(e: FormEvent) => { e.preventDefault(); flow.next(); }}>
-            <StepQuestion sub="Zet de e-mailadressen onder elkaar. Je krijgt per persoon een link om te delen.">Wie nodig je uit?</StepQuestion>
+            <StepQuestion sub="Eén e-mailadres per regel. Je krijgt per persoon een link om te delen.">Nodig je reisgenoten uit</StepQuestion>
             <Textarea aria-label="E-mailadressen" value={inviteEmails} onChange={(e) => setInviteEmails(e.target.value)} placeholder={"naam@voorbeeld.nl\nander@voorbeeld.nl"} rows={4} className="rounded-2xl text-lg" />
-            {!flow.complete && parsedEmails.length > 0 && <StepError message="Eén van de adressen klopt niet. Controleer de spelling." />}
-            <StepNext>{parsedEmails.length ? (flow.backToSummary ? "Klaar" : "Volgende") : "Later uitnodigen"}</StepNext>
+            {!flow.complete && parsedEmails.length > 0 && <StepError message="Een adres klopt niet. Check de spelling." />}
+            <StepNext>{parsedEmails.length ? (flow.backToSummary ? "Klaar" : "Volgende") : "Nodig later uit"}</StepNext>
           </form>}
 
           {flow.step === "wishes" && <div>
-            <StepQuestion sub="Hansie houdt hier rekening mee. Mag je overslaan.">Wat vind jij belangrijk?</StepQuestion>
+            <StepQuestion sub="Hansie gebruikt ze voor tips. Overslaan mag.">Geef je wensen op</StepQuestion>
             <TravelerProfileForm value={profile} onChange={setProfile} idPrefix="new-trip" />
             <StepNext onClick={() => after("summary")}>{flow.backToSummary ? "Klaar" : "Volgende"}</StepNext>
           </div>}
 
           {flow.step === "summary" && <div className="space-y-5">
-            <StepQuestion sub="Alles kun je later nog aanpassen.">Klopt dit?</StepQuestion>
+            <StepQuestion sub="Alles is later aan te passen.">Check je reis</StepQuestion>
             <StepSummary rows={[
               { label: "Reis", value: name.trim(), onEdit: () => flow.edit("name") },
               { label: "Waarheen", value: whereLabel, onEdit: () => flow.edit("where") },

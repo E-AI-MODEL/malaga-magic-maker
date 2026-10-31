@@ -120,7 +120,7 @@ export function ExpenseWizard({ open, onOpenChange, tripId, people, selfId, defa
       if (proposal.currency) setCurrency(proposal.currency);
       const payer = proposal.payerName && people.find((p) => p.name.toLocaleLowerCase("nl-NL") === proposal.payerName!.trim().toLocaleLowerCase("nl-NL"));
       if (payer) setPaidBy(payer.id);
-      setNote(proposal.date ? `Gelezen van je bonnetje, datum ${new Date(`${proposal.date}T12:00:00`).toLocaleDateString("nl-NL", { day: "numeric", month: "long", year: "numeric" })}. Klopt het?` : "Gelezen van je bonnetje. Klopt het?");
+      setNote(proposal.date ? `Uit je bonnetje gehaald, datum ${new Date(`${proposal.date}T12:00:00`).toLocaleDateString("nl-NL", { day: "numeric", month: "long", year: "numeric" })}. Check de gegevens.` : "Uit je bonnetje gehaald. Check de gegevens.");
       setImage("");
       const target = stepAfterProposal(proposal.amount, proposal.description);
       if (target === "summary") go("summary"); else { setBackToSummary(false); go(target); }
@@ -149,19 +149,19 @@ export function ExpenseWizard({ open, onOpenChange, tripId, people, selfId, defa
     <StepSheet open={open} onOpenChange={onOpenChange} title="Bonnetje toevoegen" total={steps.length} index={index} onBack={back} onSwipeNext={step !== "start" && step !== "summary" && !busy ? next : undefined}>
 
           {step === "start" && <div className="space-y-3">
-            {question("Hoe wil je het toevoegen?")}
+            {question("Voeg je bonnetje toe")}
             {!image ? <>
-              <button type="button" className={`${tile} mt-3 h-24 border-foreground bg-foreground text-background hover:bg-foreground/90 active:bg-foreground/90`} disabled={busy} onClick={() => cameraRef.current?.click()}><Camera className="h-8 w-8 shrink-0" />Foto van bonnetje maken</button>
-              <button type="button" className={`${tile} h-20`} disabled={busy} onClick={() => fileRef.current?.click()}><ImagePlus className="h-7 w-7 shrink-0" />Foto kiezen</button>
-              <button type="button" className={`${tile} h-20`} disabled={busy} onClick={() => go("amount")}><PenLine className="h-7 w-7 shrink-0" />Zelf invullen</button>
+              <button type="button" className={`${tile} mt-3 h-24 border-foreground bg-foreground text-background hover:bg-foreground/90 active:bg-foreground/90`} disabled={busy} onClick={() => cameraRef.current?.click()}><Camera className="h-8 w-8 shrink-0" />Maak een foto</button>
+              <button type="button" className={`${tile} h-20`} disabled={busy} onClick={() => fileRef.current?.click()}><ImagePlus className="h-7 w-7 shrink-0" />Kies een foto</button>
+              <button type="button" className={`${tile} h-20`} disabled={busy} onClick={() => go("amount")}><PenLine className="h-7 w-7 shrink-0" />Vul zelf in</button>
               {busy && <p className="flex items-center gap-2 text-[15px] text-muted-foreground"><Loader2 className="h-5 w-5 animate-spin" />Foto klaarzetten…</p>}
             </> : <>
               <img src={image} alt="Je bonnetje" className="mt-3 max-h-[38dvh] w-full rounded-2xl bg-secondary object-contain" />
               <Button type="button" className="h-16 w-full rounded-2xl font-display text-xl font-semibold [&_svg]:size-6" disabled={busy} onClick={() => void read()}>{busy ? <Loader2 className="mr-2 animate-spin" /> : <Sparkles className="mr-2" />}{busy ? "AI leest je bonnetje…" : "Laat AI het uitlezen"}</Button>
               <p className="text-center text-sm text-muted-foreground">De foto wordt nergens bewaard.</p>
               <div className="grid grid-cols-2 gap-2">
-                <Button type="button" variant="outline" className="h-12 rounded-xl" onClick={() => { pending.current?.abort(); setBusy(false); setImage(""); }}>Andere foto</Button>
-                <Button type="button" variant="outline" className="h-12 rounded-xl" onClick={() => { pending.current?.abort(); setBusy(false); setImage(""); go("amount"); }}>Zelf invullen</Button>
+                <Button type="button" variant="outline" className="h-12 rounded-xl" onClick={() => { pending.current?.abort(); setBusy(false); setImage(""); }}>Kies andere foto</Button>
+                <Button type="button" variant="outline" className="h-12 rounded-xl" onClick={() => { pending.current?.abort(); setBusy(false); setImage(""); go("amount"); }}>Vul zelf in</Button>
               </div>
             </>}
             <input ref={fileRef} aria-label="Kies bonfoto" type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={(e) => { void choose(e.target.files?.[0]); e.target.value = ""; }} />
@@ -169,7 +169,7 @@ export function ExpenseWizard({ open, onOpenChange, tripId, people, selfId, defa
           </div>}
 
           {step === "amount" && <form className="space-y-6" onSubmit={(e) => { e.preventDefault(); next(); }}>
-            {question("Hoeveel was het?")}
+            {question("Vul het bedrag in")}
             <Input aria-label="Bedrag" inputMode="decimal" autoFocus value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="0,00" className="num h-24 rounded-2xl border-2 text-center font-display !text-6xl font-semibold" />
             <div className="flex flex-wrap justify-center gap-2" role="group" aria-label="Valuta">
               {[...new Set([...CURRENCIES, defaultCurrency, currency].filter(Boolean))].map((c) => <button key={c} type="button" aria-pressed={c === currency} onClick={() => setCurrency(c)} className={`h-11 min-w-16 rounded-full border px-4 text-[15px] font-semibold ${c === currency ? "border-foreground bg-foreground text-background" : "border-border bg-card"}`}>{c}</button>)}
@@ -178,26 +178,26 @@ export function ExpenseWizard({ open, onOpenChange, tripId, people, selfId, defa
           </form>}
 
           {step === "what" && <form className="space-y-5" onSubmit={(e) => { e.preventDefault(); next(); }}>
-            {question("Waarvoor was het?")}
+            {question("Kies waarvoor")}
             <div className="grid grid-cols-2 gap-2.5">
               {QUICK_WHAT.map((w) => <button key={w} type="button" onClick={() => { setDescription(w); if (backToSummary) { setBackToSummary(false); go("summary"); } else go(steps[index + 1]); }} className={`h-16 rounded-2xl border text-lg font-semibold ${description === w ? "border-foreground bg-foreground text-background" : "border-border bg-card"}`}>{w}</button>)}
             </div>
-            <Input aria-label="Waarvoor" value={description} maxLength={160} onChange={(e) => setDescription(e.target.value)} placeholder="Of typ het zelf" className="h-14 rounded-2xl text-lg" />
+            <Input aria-label="Waarvoor" value={description} maxLength={160} onChange={(e) => setDescription(e.target.value)} placeholder="Of typ het in" className="h-14 rounded-2xl text-lg" />
             {bigNext()}
           </form>}
 
           {step === "payer" && <div className="space-y-3">
-            {question("Wie heeft betaald?")}
+            {question("Kies wie betaalde")}
             {people.map((p) => <button key={p.id} type="button" onClick={() => { setPaidBy(p.id); if (backToSummary) { setBackToSummary(false); go("summary"); } else go(steps[index + 1]); }} className={`${tile} h-20 ${paidBy === p.id ? "border-foreground" : ""}`}>
               <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-secondary font-display text-xl">{name(p.id).charAt(0).toUpperCase()}</span>{name(p.id)}{paidBy === p.id && <Check className="ml-auto h-6 w-6" />}
             </button>)}
           </div>}
 
           {step === "split" && <div className="space-y-3">
-            {question(people.length > 1 ? "Met wie deel je het?" : "Deel je het met iemand?")}
-            {people.length > 1 && <button type="button" onClick={() => { setSplit(people.map((p) => p.id)); if (backToSummary) { setBackToSummary(false); go("summary"); } else go(steps[index + 1]); }} className={`${tile} h-20 border-foreground bg-foreground text-background hover:bg-foreground/90 active:bg-foreground/90`}><Check className="h-7 w-7 shrink-0" />Iedereen gelijk ({people.length})</button>}
-            {people.length === 1 && <button type="button" onClick={() => { setSplit([selfId]); next(); }} className={`${tile} h-20`}><Check className="h-7 w-7 shrink-0" />Nee, alleen voor mij</button>}
-            {people.length > 1 && <p className="pt-2 text-sm font-semibold text-muted-foreground">Of kies wie meedoen</p>}
+            {question(people.length > 1 ? "Kies met wie je deelt" : "Deel het met anderen")}
+            {people.length > 1 && <button type="button" onClick={() => { setSplit(people.map((p) => p.id)); if (backToSummary) { setBackToSummary(false); go("summary"); } else go(steps[index + 1]); }} className={`${tile} h-20 border-foreground bg-foreground text-background hover:bg-foreground/90 active:bg-foreground/90`}><Check className="h-7 w-7 shrink-0" />Deel gelijk met iedereen ({people.length})</button>}
+            {people.length === 1 && <button type="button" onClick={() => { setSplit([selfId]); next(); }} className={`${tile} h-20`}><Check className="h-7 w-7 shrink-0" />Alleen voor mij</button>}
+            {people.length > 1 && <p className="pt-2 text-sm font-semibold text-muted-foreground">Of kies zelf wie meedoet</p>}
             {people.length > 1 && <div className="flex flex-wrap gap-2">
               {people.map((p) => { const on = split.includes(p.id); return <button key={p.id} type="button" aria-pressed={on} onClick={() => setSplit((s) => (on ? s.filter((id) => id !== p.id) : [...s, p.id]))} className={`flex h-12 items-center gap-1.5 rounded-full border px-4 text-[15px] font-semibold ${on ? "border-foreground bg-foreground text-background" : "border-border bg-card"}`}>{on ? <Check className="h-4 w-4" /> : <Plus className="h-4 w-4" />}{name(p.id)}</button>; })}
             </div>}
@@ -209,11 +209,11 @@ export function ExpenseWizard({ open, onOpenChange, tripId, people, selfId, defa
           </div>}
 
           {step === "summary" && <div className="space-y-5">
-            {question("Klopt dit?")}
+            {question("Check en sla op")}
             {note && <p className="flex items-start gap-2 text-[15px] text-muted-foreground"><Sparkles className="mt-0.5 h-4 w-4 shrink-0" />{note}</p>}
             <div className="overflow-hidden rounded-3xl bg-foreground text-background">
               <button type="button" onClick={() => edit("amount")} className="block w-full px-5 pb-4 pt-5 text-left">
-                <span className="block text-sm opacity-70">Bedrag · tik om te wijzigen</span>
+                <span className="block text-sm opacity-70">Bedrag · tik om aan te passen</span>
                 <span className="num block font-display text-6xl font-semibold leading-none">{amountValid ? money(value, currency) : "—"}</span>
               </button>
             </div>

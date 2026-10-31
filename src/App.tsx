@@ -118,6 +118,8 @@ function AppRoutes() {
         <Route path="/privacy" element={<PrivacyPage />} />
         <Route path="/afmelden" element={<Afmelden />} />
         <Route path="/" element={user ? <SignedInStart /> : <Landing />} />
+        <Route path="/index" element={<Navigate to="/" replace />} />
+        <Route path="/index.html" element={<Navigate to="/" replace />} />
         <Route path="/boot" element={<Navigate to={user ? "/trips" : "/login"} replace />} />
 
         <Route path="/trips" element={<ProtectedRoute><Trips /></ProtectedRoute>} />

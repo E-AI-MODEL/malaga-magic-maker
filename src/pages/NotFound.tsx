@@ -20,20 +20,20 @@ const NotFound = () => {
           Pagina niet gevonden
         </span>
         <h1 className="mt-3 font-serif text-3xl leading-tight text-foreground">
-          Deze pagina staat niet in het dossier
+          Deze pagina bestaat niet
         </h1>
         <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-          De link klopt niet meer of de reis is verwijderd. Ga terug naar je reizen om verder te werken.
+          De link klopt niet meer of de reis is verwijderd.
         </p>
 
         <div className="mt-8 border-t border-border/70">
           <Link
-            to="/trips"
+            to="/"
             className="flex items-center justify-between border-b border-border/70 py-4 text-sm text-foreground"
           >
             <span className="flex items-center gap-3">
               <Compass className="h-4 w-4 text-muted-foreground" />
-              Naar Mijn reizen
+              Naar Home
             </span>
             <ArrowLeft className="h-4 w-4 rotate-180 text-muted-foreground" />
           </Link>

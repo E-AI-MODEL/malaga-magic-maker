@@ -224,7 +224,7 @@ export default function TripReis() {
           addMenu={readOnly ? undefined : (
             <>
               <DropdownMenuItem onClick={() => setBookingSheetOpen(true)}>
-                <Mail className="mr-2 h-4 w-4" strokeWidth={1.75} />Boeking plakken
+                <Mail className="mr-2 h-4 w-4" strokeWidth={1.75} />Boeking scannen
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => setStaySearchOpen(true)}>
                 <Search className="mr-2 h-4 w-4" strokeWidth={1.75} />Verblijf zoeken

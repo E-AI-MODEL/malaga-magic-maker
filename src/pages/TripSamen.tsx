@@ -35,7 +35,8 @@ import {
 } from "@/features/together/data";
 import { KostenSection } from "@/features/together/KostenSection";
 import { TaskSheet } from "@/features/together/TaskSheet";
-import { DecisionSheet } from "@/features/together/DecisionSheet";
+import { DecisionWizard } from "@/features/together/DecisionWizard";
+import { TaskWizard } from "@/features/together/TaskWizard";
 import { TripInvitesCard } from "@/features/invites/TripInvitesCard";
 import { listTravelerProfiles, summariseProfile } from "@/features/travelers/data";
 import { TravelerProfileSheet } from "@/features/travelers/TravelerProfileSheet";
@@ -74,6 +75,7 @@ export default function TripSamen() {
     }, { replace: true });
   };
   const [taskSheetOpen, setTaskSheetOpen] = useState(false);
+  const [taskWizardOpen, setTaskWizardOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<TaskRow | null>(null);
   const [decisionSheetOpen, setDecisionSheetOpen] = useState(false);
   const [expandedDecision, setExpandedDecision] = useState<string | null>(null);
@@ -123,7 +125,7 @@ export default function TripSamen() {
 
   const openNewTask = () => {
     setEditingTask(null);
-    setTaskSheetOpen(true);
+    setTaskWizardOpen(true);
   };
   const openTaskEdit = (task: TaskRow) => {
     setEditingTask(task);
@@ -525,7 +527,18 @@ export default function TripSamen() {
         task={editingTask}
         onSaved={refreshTasks}
       />
-      <DecisionSheet
+      <TaskWizard
+        open={taskWizardOpen}
+        onOpenChange={setTaskWizardOpen}
+        tripId={activeTrip.id}
+        timezone={timezone}
+        startDate={activeTrip.start_date}
+        currentUserId={user.id}
+        isOrganizer={isOrganizer}
+        members={members}
+        onSaved={refreshTasks}
+      />
+      <DecisionWizard
         open={decisionSheetOpen}
         onOpenChange={setDecisionSheetOpen}
         tripId={activeTrip.id}

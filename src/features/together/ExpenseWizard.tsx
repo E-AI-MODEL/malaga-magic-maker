@@ -1,6 +1,6 @@
-import { FormEvent, TouchEvent, useEffect, useRef, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import { ArrowLeft, ArrowRight, Camera, Check, ImagePlus, Loader2, PenLine, Plus, Sparkles, UserPlus, X } from "lucide-react";
-import { Sheet, SheetContent, SheetDescription, SheetTitle } from "@/components/ui/sheet";
+import { StepSheet } from "@/components/steps";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { formatExpenseMoney as money } from "./settlement";
@@ -63,7 +63,6 @@ export function ExpenseWizard({ open, onOpenChange, tripId, people, selfId, defa
   const fileRef = useRef<HTMLInputElement>(null);
   const cameraRef = useRef<HTMLInputElement>(null);
   const pending = useRef<AbortController | null>(null);
-  const touchX = useRef<number | null>(null);
 
   useEffect(() => {
     pending.current?.abort();
@@ -141,33 +140,14 @@ export function ExpenseWizard({ open, onOpenChange, tripId, people, selfId, defa
   };
   const addPerson = (event: FormEvent) => { event.preventDefault(); if (newName.trim() && onAddPerson) { onAddPerson(newName); setNewName(""); } };
 
-  const onTouchStart = (event: TouchEvent) => { touchX.current = event.touches[0]?.clientX ?? null; };
-  const onTouchEnd = (event: TouchEvent) => {
-    const start = touchX.current; touchX.current = null;
-    const end = event.changedTouches[0]?.clientX;
-    if (start === null || end === undefined || busy) return;
-    if (end - start < -70 && step !== "start" && step !== "summary") next();
-    if (end - start > 70) back();
-  };
 
   const tile = "flex w-full items-center gap-4 rounded-2xl border border-border bg-card px-5 text-left text-lg font-semibold transition-colors hover:bg-secondary active:bg-secondary";
   const bigNext = (label = "Volgende") => <Button type="button" className="h-16 w-full rounded-2xl font-display text-xl font-semibold [&_svg]:size-6" disabled={!valid[step]} onClick={next}>{backToSummary ? "Klaar" : label}<ArrowRight className="ml-2" /></Button>;
   const question = (text: string) => <h3 className="font-display text-[32px] font-bold leading-tight">{text}</h3>;
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="bottom" className="flex h-[92dvh] flex-col rounded-t-3xl border-t border-border bg-background px-0 pb-0 pt-0 sm:left-1/2 sm:max-w-xl sm:-translate-x-1/2 [&>button:last-child]:hidden">
-        <SheetTitle className="sr-only">Bonnetje toevoegen</SheetTitle>
-        <SheetDescription className="sr-only">Stap {index + 1} van {steps.length}</SheetDescription>
-        <div className="flex items-center gap-3 px-4 pt-4">
-          <Button type="button" variant="ghost" size="icon" className="h-12 w-12 rounded-full" onClick={back} disabled={index === 0} aria-label="Vorige stap"><ArrowLeft className="h-6 w-6" /></Button>
-          <div className="flex flex-1 justify-center gap-1.5" aria-hidden>
-            {steps.map((s, i) => <span key={s} className={`h-1.5 rounded-full ${i === index ? "w-8 bg-foreground" : i < index ? "w-4 bg-foreground/50" : "w-4 bg-border"}`} />)}
-          </div>
-          <Button type="button" variant="ghost" size="icon" className="h-12 w-12 rounded-full" onClick={() => onOpenChange(false)} aria-label="Sluiten"><X className="h-6 w-6" /></Button>
-        </div>
+    <StepSheet open={open} onOpenChange={onOpenChange} title="Bonnetje toevoegen" total={steps.length} index={index} onBack={back} onSwipeNext={step !== "start" && step !== "summary" && !busy ? next : undefined}>
 
-        <div className="flex-1 overflow-y-auto overscroll-contain px-5 pb-[max(env(safe-area-inset-bottom),1.25rem)] pt-6" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd} aria-live="polite">
           {step === "start" && <div className="space-y-3">
             {question("Hoe wil je het toevoegen?")}
             {!image ? <>
@@ -249,9 +229,6 @@ export function ExpenseWizard({ open, onOpenChange, tripId, people, selfId, defa
           </div>}
 
           {error && <p role="alert" className="mt-4 rounded-xl bg-destructive/10 px-4 py-3 text-sm font-medium text-destructive">{error}</p>}
-          {step !== "start" && step !== "summary" && <p className="mt-6 text-center text-xs text-muted-foreground">Veeg naar links of rechts om te bladeren</p>}
-        </div>
-      </SheetContent>
-    </Sheet>
+    </StepSheet>
   );
 }

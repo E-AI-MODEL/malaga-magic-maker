@@ -1,5 +1,5 @@
 import { FormEvent, useEffect, useRef, useState } from "react";
-import { ArrowLeft, ArrowRight, Camera, Check, ImagePlus, Loader2, PenLine, Plus, Sparkles, UserPlus, X } from "lucide-react";
+import { ArrowRight, Camera, Check, ImagePlus, Loader2, PenLine, Plus, Sparkles, UserPlus } from "lucide-react";
 import { StepSheet } from "@/components/steps";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

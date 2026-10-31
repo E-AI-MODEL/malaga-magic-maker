@@ -100,7 +100,7 @@ export function TaskWizard({ open, onOpenChange, tripId, timezone, startDate, cu
         <StepQuestion>Check en sla op</StepQuestion>
         <StepSummary rows={[
           { label: "Taak", value: title, onEdit: () => flow.edit("what") },
-          ...(solo ? [] : [{ label: "Wie", value: assignee ? (assignee === currentUserId ? "Ik" : name(assignee)) : "Nog niemand", onEdit: () => flow.edit("who") }]),
+          ...(solo ? [] : [{ label: "Wie", value: assignee ? (assignee === currentUserId ? "Ik" : name(assignee)) : "Open", onEdit: () => flow.edit("who") }]),
           { label: "Klaar op", value: dueLabel, onEdit: () => flow.edit("when") },
         ]} />
         <StepNext onClick={() => void save()} busy={saving} disabled={!flow.complete} done>Taak toevoegen</StepNext>

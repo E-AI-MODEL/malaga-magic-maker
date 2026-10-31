@@ -120,3 +120,9 @@ Home-ronde: gewijzigd `src/App.tsx`, `src/features/trips/start.ts` en tests, `sr
 - [ ] Stap 2: Overzicht als vakantiedashboard
 - [ ] Stap 4: Samen en Knaakie stroomlijnen
 - [ ] Stap 5: ingelogd mobiel/desktop nalopen
+
+## Knaakie zonder account
+- [ ] Knaakie-pagina zonder account: 10 uitgaven gratis, reisgenoten (namen) toevoegen, betaalverzoek delen, bonnetje scannen
+- [ ] Na 10 uitgaven: account maken om door te gaan; bestaande uitgaven blijven zichtbaar
+- [ ] Na aanmelden: uitgaven verhuizen naar een nieuwe reis
+- [ ] Heel Knaakie-blok op de homepage is één knop naar Knaakie

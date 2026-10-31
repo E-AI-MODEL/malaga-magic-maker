@@ -130,4 +130,6 @@ Home-ronde: gewijzigd `src/App.tsx`, `src/features/trips/start.ts` en tests, `sr
 
 ## Stap voor stap toevoegen
 - [x] Knaakie: bonnetje toevoegen als stappen (foto of zelf invullen, één vraag per scherm, vegen, samenvatting)
-- [ ] Zelfde aanpak voor andere toevoegschermen (reis maken, Reis-onderdeel, taak, keuze): wacht op keuze product owner
+- [x] Nieuwe reis, nieuwe taak en nieuwe keuze als stappen
+- [ ] Reis: onderdeel toevoegen (vlucht, verblijf, vervoer, activiteit) als stappen
+- [ ] Stappen ingelogd nalopen op telefoon (reis, taak, keuze, Knaakie in een reis)

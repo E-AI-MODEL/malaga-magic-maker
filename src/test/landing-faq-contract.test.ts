@@ -17,12 +17,12 @@ describe("Landing FAQ contract", () => {
     expect(landing).not.toContain("Zijn mijn documenten veilig?");
   });
 
-  it("renders the FAQ as a collapsible accordion with nine richer answers", () => {
+  it("renders the FAQ as a collapsible accordion with ten richer answers", () => {
     expect(landing).toContain('from "@/components/ui/accordion"');
     expect(landing).toContain("<AccordionTrigger");
     expect(landing).toContain("<AccordionContent");
     expect(landing).toContain("collapsible");
     const questions = landing.match(/^\s{4}q: "/gm) || [];
-    expect(questions).toHaveLength(9);
+    expect(questions).toHaveLength(10);
   });
 });

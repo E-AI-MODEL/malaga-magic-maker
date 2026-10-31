@@ -3,12 +3,14 @@ import { Link } from "react-router-dom";
 import {
   ArrowRight,
   Bell,
+  Camera,
   Check,
   CheckCircle2,
   FileText,
   Heart,
   Plane,
   Route,
+  Send,
   Sparkles,
   UserRound,
   Users,
@@ -241,7 +243,7 @@ export default function Landing() {
                 Bonnetje ontcijferd
               </div>
               <div className="mt-4 rounded-2xl bg-background/10 p-4">
-                <p className="font-hand text-[15px] opacity-80">Strandtent De Zon</p>
+                <p className="text-[13px] opacity-70">Strandtent De Zon</p>
                 <div className="mt-2 flex items-baseline justify-between gap-3">
                   <span className="text-[15px]">10 bier</span>
                   <span className="tabular font-display text-[30px] font-bold leading-none">€ 15,00</span>

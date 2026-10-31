@@ -90,7 +90,7 @@ function NextTrip({ trip, facts, userId }: { trip: Trip; facts: HomeFacts; userI
           {first && <Link to={first.href} className="block text-sm text-muted-foreground hover:text-foreground">{first.title}</Link>}
         </div>
       ) : <p className="mt-3 text-xs text-muted-foreground">Laden…</p>}
-      <Button asChild size="lg" className="mt-4 h-14 w-full rounded-xl font-display text-lg font-semibold [&_svg]:size-5"><Link to={`/trip/${trip.id}`}>Naar {trip.name}<ArrowRight className="ml-2" /></Link></Button>
+      <Button asChild size="lg" className="mt-4 h-14 w-full rounded-xl font-display text-lg font-semibold [&_svg]:size-5"><Link to={`/trip/${trip.id}`}><span className="min-w-0 truncate">Naar {trip.name}</span><ArrowRight className="ml-2 shrink-0" /></Link></Button>
     </section>
   );
 }

@@ -60,11 +60,11 @@ export default function KnaakieGuest() {
 
       <main className="mx-auto max-w-xl px-5 pb-16 pt-6">
         <h1 className="font-display text-[40px] font-bold uppercase leading-none tracking-wide">Knaakie</h1>
-        <p className="mt-2 text-[15px] leading-relaxed text-muted-foreground">Houd bij wie wat betaalt. Zonder account, op dit apparaat.</p>
+        <p className="mt-2 text-[15px] leading-relaxed text-muted-foreground">Houd bij wie wat betaalt: met vrienden, huisgenoten of op reis. Zonder account, op dit apparaat.</p>
 
         <label className="mt-5 block">
           <span className="text-sm font-semibold">Waarvoor is deze pot?</span>
-          <Input value={state.name} maxLength={80} placeholder="Bijvoorbeeld Weekend Texel" onChange={(e) => setState((c) => ({ ...c, name: e.target.value }))} className="mt-2 h-12 text-base" />
+          <Input value={state.name} maxLength={80} placeholder="Bijvoorbeeld etentje, huisfeest of weekend weg" onChange={(e) => setState((c) => ({ ...c, name: e.target.value }))} className="mt-2 h-12 text-base" />
         </label>
 
         <section className="mt-5 overflow-hidden rounded-3xl bg-foreground px-5 pb-5 pt-6 text-background" aria-live="polite">
@@ -94,7 +94,7 @@ export default function KnaakieGuest() {
             })}
           </ul>
           <form onSubmit={addPerson} className="mt-3 flex gap-2">
-            <Input aria-label="Naam reisgenoot" value={newName} maxLength={40} placeholder="Naam van een reisgenoot" onChange={(e) => setNewName(e.target.value)} className="h-12 flex-1 text-base" />
+            <Input aria-label="Naam" value={newName} maxLength={40} placeholder="Naam van iemand die meedoet" onChange={(e) => setNewName(e.target.value)} className="h-12 flex-1 text-base" />
             <Button type="submit" variant="secondary" className="h-12 rounded-xl px-4" disabled={!newName.trim()}><UserPlus className="mr-1.5 h-5 w-5" />Toevoegen</Button>
           </form>
         </section>
@@ -104,7 +104,7 @@ export default function KnaakieGuest() {
           <div className="space-y-2.5">
             {mine.map((t) => {
               const pay = t.fromUserId === GUEST_SELF_ID;
-              const name = names.get(pay ? t.toUserId : t.fromUserId) || "Reisgenoot";
+              const name = names.get(pay ? t.toUserId : t.fromUserId) || "Iemand";
               return <div key={`${t.currency}-${t.fromUserId}-${t.toUserId}`} className="rounded-2xl border border-border bg-card p-4">
                 <div className="flex items-center gap-3">
                   <span aria-hidden className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-secondary font-display text-xl font-semibold">{name.charAt(0).toUpperCase()}</span>
@@ -137,8 +137,8 @@ export default function KnaakieGuest() {
         </section>}
 
         <section className="mt-4 rounded-3xl border border-border bg-card p-5">
-          <p className="font-display text-[22px] font-bold leading-tight">Bewaren en delen met je reisgenoten?</p>
-          <p className="mt-2 text-sm leading-relaxed text-muted-foreground">Met een gratis account komen je kosten in een reis. Daar nodig je reisgenoten uit, zodat iedereen hetzelfde ziet.</p>
+          <p className="font-display text-[22px] font-bold leading-tight">Bewaren en samen bijhouden?</p>
+          <p className="mt-2 text-sm leading-relaxed text-muted-foreground">Met een gratis account worden je kosten bewaard. Je nodigt de anderen uit, zodat iedereen hetzelfde ziet.</p>
           <Button asChild size="lg" className="mt-4 h-14 w-full rounded-xl font-display text-lg font-semibold"><Link to="/signup">Gratis account maken</Link></Button>
           <Link to="/login" className="mt-3 block text-center text-sm font-medium text-muted-foreground underline-offset-4 hover:underline">Ik heb al een account</Link>
         </section>
@@ -209,7 +209,7 @@ function GuestExpenseSheet({ open, onOpenChange, state, onSave }: SheetProps) {
               </button>;
             })}
           </div>
-          {state.people.length === 1 && <p className="mt-2 text-xs text-muted-foreground">Voeg reisgenoten toe onder "Wie doen er mee?" om kosten te delen.</p>}
+          {state.people.length === 1 && <p className="mt-2 text-xs text-muted-foreground">Voeg mensen toe onder "Wie doen er mee?" om kosten te delen.</p>}
         </fieldset>
         {error && <FormError message={error} />}
         <FormSubmit saving={false}>Opslaan</FormSubmit>

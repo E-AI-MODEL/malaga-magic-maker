@@ -37,7 +37,7 @@ export function GuestKnaakieImport() {
           saveGuestKnaakie(remaining);
         }
         localStorage.removeItem(GUEST_KNAAKIE_KEY);
-        toast.success("Je Knaakie-kosten staan nu in je reis. Nodig je reisgenoten uit en pas de verdeling aan.", { duration: 10000 });
+        toast.success("Je Knaakie-kosten staan nu in je account. Nodig de anderen uit en pas de verdeling aan.", { duration: 10000 });
         navigate(`/trip/${tripId}/samen?section=expenses`, { replace: true });
       } catch {
         // No automatic retry this session; the next sign-in tries again with what is left.

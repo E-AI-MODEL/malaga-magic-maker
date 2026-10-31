@@ -1,11 +1,15 @@
-import { useEffect, useState } from "react";
-import { Check, Loader2 } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Camera, Check, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { FormSheet } from "@/components/FormSheet";
 import {
   createItemFromSuggestion,
+  dismissDocumentSuggestion,
+  extractTripDocument,
   parseBookingText,
+  uploadTripDocument,
+  validateDocumentFile,
   parseDocumentSuggestion,
   type DocumentSuggestion,
 } from "@/features/documents/data";
@@ -26,6 +30,9 @@ export function BookingPasteSheet({ open, onOpenChange, tripId, onSaved }: Props
   const [suggestions, setSuggestions] = useState<DocumentSuggestion[]>([]);
   const [addedKeys, setAddedKeys] = useState<number[]>([]);
   const [savingKey, setSavingKey] = useState<number | null>(null);
+  const [documentId, setDocumentId] = useState<string | null>(null);
+  const [showPaste, setShowPaste] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (open) return;
@@ -35,7 +42,41 @@ export function BookingPasteSheet({ open, onOpenChange, tripId, onSaved }: Props
     setSuggestions([]);
     setAddedKeys([]);
     setSavingKey(null);
+    setDocumentId(null);
+    setShowPaste(false);
   }, [open]);
+
+  const scan = async (file: File | undefined) => {
+    if (!file) return;
+    setError("");
+    setSummary(null);
+    setSuggestions([]);
+    setAddedKeys([]);
+    try {
+      validateDocumentFile(file);
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Dit bestand werkt niet.");
+      return;
+    }
+    setReading(true);
+    try {
+      const type = file.type === "application/pdf" ? "booking_confirmation" : "ticket";
+      const id = await uploadTripDocument({ tripId, documentType: type, file });
+      setDocumentId(id);
+      const result = (await extractTripDocument(tripId, id)) as { summary?: string | null; suggestion?: unknown } | null;
+      const parsed = parseDocumentSuggestion(result?.suggestion);
+      setSummary(result?.summary || null);
+      setSuggestions(parsed ? [parsed] : []);
+      if (!parsed) setError("Geen boeking gevonden. Het bestand staat wel bij Documenten.");
+      await onSaved();
+    } catch (cause) {
+      console.error("booking scan failed", cause);
+      setError("Uitlezen lukte niet. Probeer het opnieuw of plak de tekst.");
+    } finally {
+      setReading(false);
+      if (fileRef.current) fileRef.current.value = "";
+    }
+  };
 
   const read = async () => {
     setReading(true);
@@ -63,7 +104,12 @@ export function BookingPasteSheet({ open, onOpenChange, tripId, onSaved }: Props
     setSavingKey(index);
     setError("");
     try {
-      await createItemFromSuggestion(tripId, suggestion, "Overgenomen uit een doorgestuurde boeking");
+      await createItemFromSuggestion(
+        tripId,
+        suggestion,
+        documentId ? "Overgenomen uit een gescande boeking" : "Overgenomen uit een doorgestuurde boeking",
+      );
+      if (documentId) await dismissDocumentSuggestion(tripId, documentId).catch(() => undefined);
       setAddedKeys((current) => [...current, index]);
       await onSaved();
     } catch (cause) {
@@ -78,10 +124,36 @@ export function BookingPasteSheet({ open, onOpenChange, tripId, onSaved }: Props
     <FormSheet
       open={open}
       onOpenChange={onOpenChange}
-      title="Boeking doorsturen"
-      description="Plak de tekst van je boekingsmail. Hansie leest vluchten, verblijf en huurauto's eruit en zet ze op de tijdlijn."
+      title="Boeking scannen"
+      description="Foto, screenshot of PDF van je ticket of boeking. AI leest het uit, jij checkt het."
     >
       <div className="mt-4 space-y-4">
+          <input
+            ref={fileRef}
+            type="file"
+            accept="image/jpeg,image/png,image/webp,application/pdf"
+            className="sr-only"
+            aria-label="Kies foto of PDF"
+            onChange={(event) => void scan(event.target.files?.[0])}
+          />
+          <Button
+            type="button"
+            size="lg"
+            className="h-14 w-full text-base"
+            disabled={reading}
+            onClick={() => fileRef.current?.click()}
+          >
+            {reading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <Camera className="mr-2 h-5 w-5" strokeWidth={1.75} />}
+            {reading ? "AI leest je boeking…" : "Foto, screenshot of PDF"}
+          </Button>
+          <p className="text-xs text-muted-foreground">Het bestand komt ook bij Documenten van deze reis, alleen zichtbaar voor reisgenoten.</p>
+
+          {!showPaste ? (
+            <button type="button" className="text-sm font-medium underline underline-offset-4" onClick={() => setShowPaste(true)}>
+              Of plak de tekst uit je mail
+            </button>
+          ) : (
+          <>
           <Textarea
             value={text}
             onChange={(event) => setText(event.target.value)}
@@ -90,10 +162,12 @@ export function BookingPasteSheet({ open, onOpenChange, tripId, onSaved }: Props
             className="text-base"
           />
 
-          <Button type="button" onClick={() => void read()} disabled={reading || text.trim().length < 20} className="w-full">
+          <Button type="button" variant="outline" onClick={() => void read()} disabled={reading || text.trim().length < 20} className="w-full">
             {reading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-            {reading ? "Hansie leest mee…" : "Uitlezen"}
+            {reading ? "AI leest mee…" : "Tekst uitlezen"}
           </Button>
+          </>
+          )}
 
           {error && <p className="text-sm font-medium text-destructive">{error}</p>}
           {summary && <p className="text-sm text-muted-foreground">{summary}</p>}
@@ -125,7 +199,7 @@ export function BookingPasteSheet({ open, onOpenChange, tripId, onSaved }: Props
                         disabled={savingKey === index}
                         onClick={() => void add(suggestion, index)}
                       >
-                        {savingKey === index ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Toevoegen"}
+                        {savingKey === index ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Zet op Reis"}
                       </Button>
                     )}
                   </div>

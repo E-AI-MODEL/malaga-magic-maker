@@ -143,7 +143,7 @@ export default function Trips() {
               Je hele vakantie in je broekzak
             </p>
             <PageHeader className="mt-3 text-on-image" title={firstName ? `Hoi ${firstName}` : "Hoi"} action={
-              <Button asChild variant="outline" size="sm" className="shrink-0 rounded-md bg-card">
+              <Button asChild variant="outline" size="sm" className="h-11 shrink-0 rounded-xl bg-card px-4 text-[15px] text-foreground hover:text-foreground">
                 <Link to="/new-trip"><Plus className="mr-1.5 h-3.5 w-3.5" />Nieuwe reis</Link>
               </Button>
             } />

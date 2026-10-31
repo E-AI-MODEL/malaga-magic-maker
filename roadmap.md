@@ -122,8 +122,8 @@ Home-ronde: gewijzigd `src/App.tsx`, `src/features/trips/start.ts` en tests, `sr
 - [ ] Stap 5: ingelogd mobiel/desktop nalopen
 
 ## Knaakie zonder account
-- [ ] Knaakie-pagina zonder account: 10 uitgaven gratis, reisgenoten (namen) toevoegen, betaalverzoek delen, bonnetje scannen
-- [ ] Na 10 uitgaven: account maken om door te gaan; bestaande uitgaven blijven zichtbaar
-- [ ] Na aanmelden: uitgaven verhuizen naar een nieuwe reis
-- [ ] Heel Knaakie-blok op de homepage is één knop naar Knaakie
-- [ ] Knaakie zonder account: geen "reisgenoten", want het is niet altijd een reis
+- [x] Knaakie-pagina zonder account: 10 uitgaven gratis, reisgenoten (namen) toevoegen, betaalverzoek delen, bonnetje scannen
+- [x] Na 10 uitgaven: account maken om door te gaan; bestaande uitgaven blijven zichtbaar
+- [x] Na aanmelden: uitgaven verhuizen naar een nieuwe reis
+- [x] Heel Knaakie-blok op de homepage is één knop naar Knaakie
+- [x] Knaakie zonder account: geen "reisgenoten", want het is niet altijd een reis

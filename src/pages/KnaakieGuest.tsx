@@ -94,7 +94,7 @@ export default function KnaakieGuest() {
             })}
           </ul>
           <form onSubmit={addPerson} className="mt-3 flex gap-2">
-            <Input aria-label="Naam" value={newName} maxLength={40} placeholder="Naam van iemand die meedoet" onChange={(e) => setNewName(e.target.value)} className="h-12 flex-1 text-base" />
+            <Input aria-label="Naam" value={newName} maxLength={40} placeholder="Naam" onChange={(e) => setNewName(e.target.value)} className="h-12 flex-1 text-base" />
             <Button type="submit" variant="secondary" className="h-12 rounded-xl px-4" disabled={!newName.trim()}><UserPlus className="mr-1.5 h-5 w-5" />Toevoegen</Button>
           </form>
         </section>

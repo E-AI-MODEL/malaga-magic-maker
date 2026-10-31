@@ -48,4 +48,5 @@ Run build, lint, typecheck and tests; browser-test relevant flows. Report change
 - `trip-calendar`: secret link per user; store only the token hash. Why: bearer secret.
 - `trip-weather`: MET Norway, Nominatim with Photon fallback; credit sources in UI. Why: licence terms.
 - `send-reminders`: pg_cron + `x-cron-secret`, URL/secret in `server_job_secrets`, VAPID keys in `push_server_keys`, e-mail via Lovable Emails. Why: secrets stay server-side.
+- Public `/knaakie` lets visitors without an account keep up to 10 expenses on their device; guest bonnetje scans hit `receipt-extract` in guest mode, whose service-role use is limited to the hashed-address quota RPC; after sign-in the costs move once into a trip. Why: try the main feature without an account, without storing visitor data or opening trip data.
 - Ideas never count as bookings; IBANs and mail text never go to Hansie or external services. Why: plans and privacy.

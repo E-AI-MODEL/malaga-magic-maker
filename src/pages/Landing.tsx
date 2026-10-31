@@ -3,12 +3,14 @@ import { Link } from "react-router-dom";
 import {
   ArrowRight,
   Bell,
+  Camera,
   Check,
   CheckCircle2,
   FileText,
   Heart,
   Plane,
   Route,
+  Send,
   Sparkles,
   UserRound,
   Users,
@@ -91,6 +93,10 @@ const FAQ = [
   {
     q: "Hoeveel reisgenoten kunnen er mee?",
     a: "Onbeperkt, ook zonder Pro. Iedereen ziet dezelfde stand van zaken en kan zelf instellen welke meldingen hij of zij wil krijgen.",
+  },
+  {
+    q: "Hoe werkt Knaakie met bonnetjes?",
+    a: "Maak in Samen bij Kosten een foto van een kassabon of een handgeschreven briefje. AI ontcijfert het bedrag en, als die erop staat, de datum. Jij controleert het voorstel, kiest wie betaalde en slaat het op. De foto wordt nergens bewaard. Daarna zie je per persoon wie wie moet betalen en stuur je een betaalverzoek met je eigen rekeningnummer.",
   },
   {
     q: "Wat kan Hansie?",
@@ -216,6 +222,79 @@ export default function Landing() {
               ))}
             </p>
           </div>
+        </section>
+
+        <section aria-labelledby="knaakie-title" className="mx-auto mt-14 max-w-3xl px-5">
+          <p className="font-ui text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+            Knaakie · kosten delen
+          </p>
+          <h2 id="knaakie-title" className="mt-2 font-display text-[26px] font-bold uppercase tracking-wide leading-tight">
+            Foto van je bonnetje. Klaar.
+          </h2>
+          <p className="mt-2 max-w-md text-[15px] leading-relaxed text-muted-foreground">
+            Geen bonnetjes bewaren of bedragen overtikken. Maak een foto van een kassabon of een
+            handgeschreven briefje: AI ontcijfert het bedrag en de datum. Jij kijkt het na en slaat op.
+          </p>
+
+          <div className="mt-6 grid gap-4 sm:grid-cols-2">
+            <div className="rounded-3xl bg-foreground px-5 pb-5 pt-6 text-background">
+              <div className="flex items-center gap-2 font-ui text-[11px] font-semibold uppercase tracking-[0.14em] opacity-70">
+                <Camera className="h-4 w-4" strokeWidth={1.75} />
+                Bonnetje ontcijferd
+              </div>
+              <div className="mt-4 rounded-2xl bg-background/10 p-4">
+                <p className="text-[13px] opacity-70">Strandtent De Zon</p>
+                <div className="mt-2 flex items-baseline justify-between gap-3">
+                  <span className="text-[15px]">10 bier</span>
+                  <span className="tabular font-display text-[30px] font-bold leading-none">€ 15,00</span>
+                </div>
+                <p className="mt-2 text-[12px] opacity-70">Betaald door jou · gedeeld door 6</p>
+              </div>
+              <div className="mt-4 flex h-14 w-full items-center justify-center gap-2 rounded-xl bg-primary font-display text-lg font-semibold text-primary-foreground">
+                <Check className="h-5 w-5" strokeWidth={2.25} />
+                Opslaan
+              </div>
+            </div>
+
+            <div className="rounded-3xl border border-border bg-card p-5 shadow-soft">
+              <p className="font-ui text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                Jij krijgt terug
+              </p>
+              <p className="tabular mt-2 font-display text-[40px] font-bold leading-none text-primary">€ 43,50</p>
+              <ul className="mt-4 rule-divide">
+                {[
+                  { name: "Sanne", amount: "€ 21,75" },
+                  { name: "Joris", amount: "€ 21,75" },
+                ].map((row) => (
+                  <li key={row.name} className="flex items-center gap-3 py-2.5">
+                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-secondary font-display text-[15px] font-bold">
+                      {row.name[0]}
+                    </span>
+                    <span className="min-w-0 flex-1 text-[15px] font-medium">{row.name} betaalt jou</span>
+                    <span className="tabular font-display text-[19px] font-bold">{row.amount}</span>
+                  </li>
+                ))}
+              </ul>
+              <div className="mt-3 flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-secondary text-[15px] font-semibold">
+                <Send className="h-4 w-4" strokeWidth={1.75} />
+                Betaalverzoek sturen
+              </div>
+            </div>
+          </div>
+
+          <ul className="mt-5 space-y-2.5 text-sm text-muted-foreground">
+            {[
+              "Werkt met kassabonnen én handgeschreven briefjes",
+              "Per persoon zie je meteen wie wie moet betalen",
+              "Betaalverzoek met je eigen rekeningnummer, geld loopt niet via ons",
+              "De foto wordt nergens bewaard",
+            ].map((item) => (
+              <li key={item} className="flex gap-2">
+                <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" strokeWidth={1.75} />
+                <span>{item}</span>
+              </li>
+            ))}
+          </ul>
         </section>
 
         <section className="mx-auto mt-14 max-w-3xl px-5">

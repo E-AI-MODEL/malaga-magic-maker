@@ -6,6 +6,19 @@ export const requestSchema = z.object({
   consent: z.literal(true),
 }).strict();
 
+/** Visitors without an account: no trip, no identity; quota is enforced per hashed network address. */
+export const guestRequestSchema = z.object({
+  guest: z.literal(true),
+  image: z.string().max(7 * 1024 * 1024),
+  consent: z.literal(true),
+}).strict();
+
+/** First address in x-forwarded-for, else a fixed bucket so missing headers share one quota. */
+export function clientAddress(forwarded: string | null): string {
+  const first = forwarded?.split(",")[0]?.trim();
+  return first && first.length <= 64 ? first : "unknown";
+}
+
 export const suggestionSchema = z.object({
   description: z.string().max(160).nullable(),
   amount: z.number().finite().positive().max(1000000).nullable(),

@@ -16,7 +16,7 @@ import {
   Users,
   Wallet,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Accordion,
   AccordionContent,
@@ -96,7 +96,7 @@ const FAQ = [
   },
   {
     q: "Hoe werkt Knaakie met bonnetjes?",
-    a: "Maak in Samen bij Kosten een foto van een kassabon of een handgeschreven briefje. AI ontcijfert het bedrag en, als die erop staat, de datum. Jij controleert het voorstel, kiest wie betaalde en slaat het op. De foto wordt nergens bewaard. Daarna zie je per persoon wie wie moet betalen en stuur je een betaalverzoek met je eigen rekeningnummer.",
+    a: "Open Knaakie en maak een foto van een kassabon of een handgeschreven briefje. Zonder account kun je 10 uitgaven gratis toevoegen; maak je daarna een account, dan gaan je kosten mee. AI ontcijfert het bedrag en, als die erop staat, de datum. Jij controleert het voorstel, kiest wie betaalde en slaat het op. De foto wordt nergens bewaard. Daarna zie je per persoon wie wie moet betalen en stuur je een betaalverzoek met je eigen rekeningnummer.",
   },
   {
     q: "Wat kan Hansie?",
@@ -225,6 +225,7 @@ export default function Landing() {
         </section>
 
         <section aria-labelledby="knaakie-title" className="mx-auto mt-14 max-w-3xl px-5">
+          <Link to="/knaakie" aria-label="Knaakie openen: foto van je bonnetje, kosten delen" className="block rounded-3xl transition-opacity hover:opacity-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4">
           <p className="font-ui text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
             Kosten delen
           </p>
@@ -235,9 +236,9 @@ export default function Landing() {
             Foto van je bonnetje. Klaar.
           </p>
           <p className="mt-2 max-w-md text-[15px] leading-relaxed text-muted-foreground">
-            Knaakie houdt bij wie wat betaalt. Maak een foto van een kassabon of een handgeschreven
-            briefje: AI ontcijfert het bedrag en de datum. Jij kijkt het na en slaat op. Knaakie zit in
-            elke reis, met een vaste knop onderin je scherm.
+            Knaakie houdt bij wie wat betaalt: met vrienden, huisgenoten of op reis. Maak een foto van een kassabon of een handgeschreven
+            briefje: AI ontcijfert het bedrag en de datum. Jij kijkt het na en slaat op. Probeer het
+            meteen, zonder account.
           </p>
 
           <div className="mt-6 grid gap-4 sm:grid-cols-2">
@@ -300,15 +301,15 @@ export default function Landing() {
             ))}
           </ul>
 
-          <Button asChild size="lg" className="mt-6 h-14 w-full rounded-xl px-8 font-display text-lg font-semibold sm:w-auto [&_svg]:size-5">
-            <Link to="/signup">
-              <Camera className="mr-2" />
-              Knaakie gratis proberen
-            </Link>
-          </Button>
-          <p className="mt-2 text-xs text-muted-foreground">
-            Maak een account en een reis aan. Daarna tik je onderin op Knaakie.
-          </p>
+          <span className={`${buttonVariants({ size: "lg" })} mt-6 h-14 w-full rounded-xl px-8 font-display text-lg font-semibold sm:w-auto [&_svg]:size-5`}>
+            <Camera className="mr-2" />
+            Probeer Knaakie gratis
+            <ArrowRight className="ml-2" />
+          </span>
+          <span className="mt-2 block text-xs text-muted-foreground">
+            10 uitgaven gratis, zonder account. Maak je later een account, dan gaan je kosten mee.
+          </span>
+          </Link>
         </section>
 
         <section className="mx-auto mt-14 max-w-3xl px-5">

@@ -1,4 +1,4 @@
-import { receiptAccessAllowed, requestSchema, validReceiptImage } from "./validation.ts";
+import { clientAddress, guestRequestSchema, receiptAccessAllowed, requestSchema, validReceiptImage } from "./validation.ts";
 
 function assert(condition: boolean) { if (!condition) throw new Error("receipt validation failed"); }
 Deno.test("receipt membership is required and archived trips are denied", () => {
@@ -17,4 +17,11 @@ Deno.test("receipt consent is explicit and identities cannot be sent to AI", () 
   assert(requestSchema.safeParse(body).success);
   assert(!requestSchema.safeParse({ ...body, consent: false }).success);
   assert(!requestSchema.safeParse({ ...body, members: ["private"] }).success);
+});
+Deno.test("guest requests carry no trip or identity and need consent", () => {
+  assert(guestRequestSchema.safeParse({ guest: true, image: "photo", consent: true }).success);
+  assert(!guestRequestSchema.safeParse({ guest: true, image: "photo", consent: false }).success);
+  assert(!guestRequestSchema.safeParse({ guest: true, image: "photo", consent: true, tripId: "11111111-1111-4111-8111-111111111111" }).success);
+  assert(clientAddress("1.2.3.4, 5.6.7.8") === "1.2.3.4");
+  assert(clientAddress(null) === "unknown");
 });

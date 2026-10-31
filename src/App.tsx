@@ -12,6 +12,7 @@ import { ClientErrorReporter } from "@/features/observability/ClientErrorReporte
 import { AppErrorBoundary } from "@/features/observability/AppErrorBoundary";
 import Login from "./pages/Login";
 import { pendingInvitePath, signedInEntryPath } from "@/features/trips/start";
+import { GuestKnaakieImport } from "@/features/knaakie-guest/GuestKnaakieImport";
 
 const Trips = lazy(() => import("./pages/Trips"));
 const Landing = lazy(() => import("./pages/Landing"));
@@ -32,6 +33,7 @@ const Ops = lazy(() => import("./pages/Ops"));
 const OpsErrors = lazy(() => import("./pages/OpsErrors"));
 const Afmelden = lazy(() => import("./pages/Afmelden"));
 const NotFound = lazy(() => import("./pages/NotFound"));
+const KnaakieGuest = lazy(() => import("./pages/KnaakieGuest"));
 
 const queryClient = new QueryClient();
 
@@ -108,12 +110,14 @@ function AppRoutes() {
 
   return (
     <Suspense fallback={<PageLoader />}>
+      {user && <GuestKnaakieImport />}
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={user ? <Navigate to="/trips" replace /> : <Signup />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/steun" element={<Steun />} />
+        <Route path="/knaakie" element={user ? <Navigate to="/trips" replace /> : <KnaakieGuest />} />
         <Route path="/terms" element={<TermsPage />} />
         <Route path="/privacy" element={<PrivacyPage />} />
         <Route path="/afmelden" element={<Afmelden />} />

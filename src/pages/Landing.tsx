@@ -139,7 +139,7 @@ export default function Landing() {
 
       <main className="pb-16">
         <section className="relative">
-          <div className="relative h-[420px] w-full overflow-hidden sm:h-[500px]">
+          <div className="relative h-[520px] w-full overflow-hidden sm:h-[540px]">
             <div
               aria-hidden
               className={`absolute inset-0 bg-secondary transition-opacity duration-700 ${heroLoaded ? "opacity-0" : "opacity-100"}`}
@@ -168,6 +168,17 @@ export default function Landing() {
                 Geen losse appjes, mails en screenshots meer. Reisplan, taken, kosten en documenten bij
                 elkaar, voor jezelf of voor de hele groep.
               </p>
+              <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">
+                <Button asChild size="lg" className="h-14 w-full rounded-xl px-8 font-display text-lg font-semibold sm:w-auto [&_svg]:size-5">
+                  <Link to="/signup">
+                    Gratis beginnen
+                    <ArrowRight className="ml-2" />
+                  </Link>
+                </Button>
+                <Link to="/login" className="text-center text-[15px] font-medium text-on-image underline-offset-4 hover:underline sm:px-4">
+                  Ik heb al een account
+                </Link>
+              </div>
             </div>
           </div>
 
@@ -196,18 +207,7 @@ export default function Landing() {
               </ul>
             </div>
 
-            <div className="mt-4 flex flex-col gap-2 sm:flex-row">
-              <Button asChild size="lg" className="w-full rounded-md sm:w-auto">
-                <Link to="/signup">
-                  Gratis beginnen
-                  <ArrowRight className="ml-1.5 h-4 w-4" />
-                </Link>
-              </Button>
-              <Button asChild size="lg" variant="outline" className="w-full rounded-md bg-card sm:w-auto">
-                <Link to="/login">Ik heb al een account</Link>
-              </Button>
-            </div>
-            <p className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
+            <p className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
               {["Gratis te gebruiken", "Elke bestemming", "Privé per reis"].map((item) => (
                 <span key={item} className="flex items-center gap-1.5">
                   <Check className="h-3.5 w-3.5 text-primary" strokeWidth={2.25} />

@@ -90,7 +90,7 @@ function NextTrip({ trip, facts, userId }: { trip: Trip; facts: HomeFacts; userI
           {first && <Link to={first.href} className="block text-sm text-muted-foreground hover:text-foreground">{first.title}</Link>}
         </div>
       ) : <p className="mt-3 text-xs text-muted-foreground">Laden…</p>}
-      <Button asChild variant="outline" size="sm" className="mt-4"><Link to={`/trip/${trip.id}`}>Naar reis<ArrowRight className="ml-2 h-4 w-4" /></Link></Button>
+      <Button asChild size="lg" className="mt-4 h-14 w-full rounded-xl font-display text-lg font-semibold [&_svg]:size-5"><Link to={`/trip/${trip.id}`}><span className="min-w-0 truncate">Naar {trip.name}</span><ArrowRight className="ml-2 shrink-0" /></Link></Button>
     </section>
   );
 }
@@ -143,7 +143,7 @@ export default function Trips() {
               Je hele vakantie in je broekzak
             </p>
             <PageHeader className="mt-3 text-on-image" title={firstName ? `Hoi ${firstName}` : "Hoi"} action={
-              <Button asChild variant="outline" size="sm" className="shrink-0 rounded-md bg-card">
+              <Button asChild variant="outline" size="sm" className="h-11 shrink-0 rounded-xl bg-card px-4 text-[15px] text-foreground hover:text-foreground">
                 <Link to="/new-trip"><Plus className="mr-1.5 h-3.5 w-3.5" />Nieuwe reis</Link>
               </Button>
             } />
@@ -165,8 +165,8 @@ export default function Trips() {
               <p className="mt-2 text-[15px] leading-relaxed text-muted-foreground">
                 Begin met een naam. Data, mensen en plannen voeg je toe wanneer je wilt.
               </p>
-              <Button asChild size="lg" className="mt-4 w-full rounded-md sm:w-auto">
-                <Link to="/new-trip"><Plus className="mr-1.5 h-4 w-4" />Je eerste reis starten</Link>
+              <Button asChild size="lg" className="mt-4 h-14 w-full rounded-xl font-display text-lg font-semibold [&_svg]:size-5">
+                <Link to="/new-trip"><Plus className="mr-2" />Je eerste reis starten</Link>
               </Button>
             </div>
             <GettingStarted trip={null} hasAnyTrip={userTrips.length > 0} />

@@ -79,7 +79,7 @@ export function KostenSection() {
             <p className={`num font-display text-6xl font-semibold leading-none tracking-tight ${balance.cents > 0 ? "text-primary" : ""}`}>{money(Math.abs(balance.cents) / 100, balance.currency)}</p>
           </div>)}
         {expenses.length > 0 && <p className="num mt-3 text-sm opacity-60">{expenses.length} {expenses.length === 1 ? "bonnetje" : "bonnetjes"} in deze reis</p>}
-        {!readOnly && <Button className="mt-6 h-16 w-full rounded-2xl font-display text-lg font-semibold" onClick={openNew}><Camera className="mr-2.5 h-6 w-6" strokeWidth={2} />Bonnetje toevoegen</Button>}
+        {!readOnly && <Button className="mt-6 h-16 w-full rounded-2xl font-display text-lg font-semibold [&_svg]:size-6" onClick={openNew}><Camera className="mr-2.5 h-6 w-6" strokeWidth={2} />Bonnetje toevoegen</Button>}
       </section>
 
       {personal.length > 0 && <section className="py-5">
@@ -96,7 +96,7 @@ export function KostenSection() {
                   <p className="num font-display text-3xl font-semibold leading-tight">{money(transfer.cents / 100, transfer.currency)}</p>
                 </div>
               </div>
-              {!pay && !readOnly && <Button variant="secondary" className="mt-3 h-14 w-full rounded-xl text-base font-semibold" onClick={() => setPayment({ recipientName: name, amount: transfer.cents / 100, currency: transfer.currency })}><Send className="mr-2 h-5 w-5" />Betaalverzoek sturen</Button>}
+              {!pay && !readOnly && <Button variant="secondary" className="mt-3 h-14 w-full rounded-xl text-base font-semibold [&_svg]:size-5" onClick={() => setPayment({ recipientName: name, amount: transfer.cents / 100, currency: transfer.currency })}><Send className="mr-2 h-5 w-5" />Betaalverzoek sturen</Button>}
             </div>;
           })}
         </div>

@@ -64,8 +64,8 @@ export function ReceiptInput({ tripId, onProposal }: Props) {
 
   return <section className="space-y-3 border-b border-border pb-5" aria-label="Bonfoto">
     <div className="grid grid-cols-2 gap-2.5">
-      <Button type="button" variant="secondary" className="h-24 flex-col gap-2 rounded-2xl text-base font-semibold" onClick={() => cameraRef.current?.click()} disabled={busy}><Camera className="h-7 w-7" strokeWidth={1.75} />Foto maken</Button>
-      <Button type="button" variant="secondary" className="h-24 flex-col gap-2 rounded-2xl text-base font-semibold" onClick={() => fileRef.current?.click()} disabled={busy}><ImagePlus className="h-7 w-7" strokeWidth={1.75} />Foto kiezen</Button>
+      <Button type="button" variant="secondary" className="h-24 flex-col gap-2 rounded-2xl text-base font-semibold [&_svg]:size-7" onClick={() => cameraRef.current?.click()} disabled={busy}><Camera className="h-7 w-7" strokeWidth={1.75} />Foto maken</Button>
+      <Button type="button" variant="secondary" className="h-24 flex-col gap-2 rounded-2xl text-base font-semibold [&_svg]:size-7" onClick={() => fileRef.current?.click()} disabled={busy}><ImagePlus className="h-7 w-7" strokeWidth={1.75} />Foto kiezen</Button>
     </div>
     <input ref={fileRef} aria-label="Kies bonfoto" type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={(event) => { void choose(event.target.files?.[0]); event.target.value = ""; }} />
     <input ref={cameraRef} aria-label="Maak bonfoto" type="file" accept="image/jpeg,image/png,image/webp" capture="environment" className="hidden" onChange={(event) => { void choose(event.target.files?.[0]); event.target.value = ""; }} />

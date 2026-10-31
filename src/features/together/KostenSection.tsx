@@ -20,6 +20,7 @@ export function KostenSection() {
   const queryClient = useQueryClient();
   const tripId = activeTrip?.id || "";
   const [sheetOpen, setSheetOpen] = useState(false);
+  const [wizardOpen, setWizardOpen] = useState(false);
   const [editing, setEditing] = useState<ExpenseBundle | null>(null);
   const [expanded, setExpanded] = useState<string | null>(null);
   const [payment, setPayment] = useState<{ recipientName: string; amount: number; currency: string } | null>(null);
@@ -40,7 +41,6 @@ export function KostenSection() {
   const names = new Map(members.map((member) => [member.userId, member.displayName]));
   if (!activeTrip || !user) return null;
   const readOnly = activeTrip.status === "archived";
-  const [wizardOpen, setWizardOpen] = useState(false);
   const openNew = () => { setEditing(null); setWizardOpen(true); };
   const refresh = async () => {
     await Promise.all([

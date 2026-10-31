@@ -1,7 +1,7 @@
 {
   "name": "Vakansie",
   "short_name": "Vakansie",
-  "description": "Je hele vakantie geregeld op een plek.",
+  "description": "Jouw hele vakantie in je broekzak.",
   "start_url": "/trips",
   "scope": "/",
   "display": "standalone",

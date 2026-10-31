@@ -35,7 +35,7 @@ const FEATURES = [
   {
     icon: Users,
     title: "Samen regelen",
-    body: "Verdeel taken, stem over keuzes en houd bij wie wat betaalt.",
+    body: "Verdeel taken en stem over keuzes. Knaakie houdt bij wie wat betaalt, ook via een foto van je bonnetje.",
   },
   {
     icon: UserRound,
@@ -65,7 +65,7 @@ const STEPS = [
   { title: "Werk toe naar vertrek", body: "Voeg je boekingen toe en vink af wat geregeld is. Zo zie je wat nog aandacht vraagt." },
   {
     title: "Neem je reis mee",
-    body: "Op locatie vraag je Hansie wat er vandaag op de planning staat of welk uitje bij jullie past. Je tickets zijn bij de hand. Na afloop zie je wie nog wat moet betalen.",
+    body: "Op locatie vraag je Hansie wat er vandaag op de planning staat of welk uitje bij jullie past. Je tickets zijn bij de hand. Bonnetjes fotografeer je met Knaakie, en na afloop zie je wie nog wat moet betalen.",
   },
 ];
 
@@ -115,7 +115,7 @@ const FAQ = [
 const DOSSIER_ROWS = [
   { icon: Plane, title: "Heenvlucht", meta: "vr 12 jun · 07:15", state: "Geboekt" },
   { icon: Route, title: "Huis met zeezicht", meta: "12 – 19 jun · 6 personen", state: "Geboekt" },
-  { icon: Wallet, title: "Kosten splitsen", meta: "€ 1.240 · 6 reizigers", state: "Loopt" },
+  { icon: Wallet, title: "Knaakie", meta: "€ 1.240 · 6 reizigers", state: "Loopt" },
   { icon: FileText, title: "Tickets en vouchers", meta: "4 documenten", state: "Klaar" },
 ];
 
@@ -299,6 +299,16 @@ export default function Landing() {
               </li>
             ))}
           </ul>
+
+          <Button asChild size="lg" className="mt-6 h-14 w-full rounded-xl px-8 font-display text-lg font-semibold sm:w-auto [&_svg]:size-5">
+            <Link to="/signup">
+              <Camera className="mr-2" />
+              Knaakie gratis proberen
+            </Link>
+          </Button>
+          <p className="mt-2 text-xs text-muted-foreground">
+            Maak een account en een reis aan. Daarna tik je onderin op Knaakie.
+          </p>
         </section>
 
         <section className="mx-auto mt-14 max-w-3xl px-5">

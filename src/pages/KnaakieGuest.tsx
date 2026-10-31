@@ -61,7 +61,7 @@ export default function KnaakieGuest() {
         <p className="mt-2 text-[15px] leading-relaxed text-muted-foreground">Houd bij wie wat betaalt: met vrienden, huisgenoten of op reis. Zonder account, op dit apparaat.</p>
 
         <label className="mt-5 block">
-          <span className="text-sm font-semibold">Geef je pot een naam</span>
+          <span className="text-sm font-semibold">Geef deze kosten een naam</span>
           <Input value={state.name} maxLength={80} placeholder="Bijvoorbeeld etentje, huisfeest of weekend weg" onChange={(e) => setState((c) => ({ ...c, name: e.target.value }))} className="mt-2 h-12 text-base" />
         </label>
 
@@ -81,7 +81,7 @@ export default function KnaakieGuest() {
         </section>
 
         <section className="py-5">
-          <SectionLabel>Voeg mensen toe</SectionLabel>
+          <SectionLabel>Voeg toe wie meedoet</SectionLabel>
           <ul className="flex flex-wrap gap-2">
             {state.people.map((p) => {
               const locked = p.id === GUEST_SELF_ID || state.expenses.some((e) => e.paidBy === p.id || e.splitAmong.includes(p.id));

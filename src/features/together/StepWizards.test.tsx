@@ -38,7 +38,7 @@ describe("choice steps", () => {
     expect(screen.getByRole("button", { name: /Volgende/ })).toBeDisabled();
     fireEvent.change(screen.getByLabelText("Optie 2"), { target: { value: "Sushi" } });
     fireEvent.click(screen.getByRole("button", { name: /Volgende/ }));
-    fireEvent.click(screen.getByRole("button", { name: /Keuze starten/ }));
+    fireEvent.click(screen.getByRole("button", { name: /Stemming starten/ }));
     await waitFor(() => expect(createDecisionWithOptions).toHaveBeenCalledWith({ tripId: "t", title: "Kies het restaurant", description: null, options: [{ label: "Pizza" }, { label: "Sushi" }] }));
   });
 });

@@ -40,14 +40,14 @@ export function DecisionWizard({ open, onOpenChange, tripId, onSaved }: Props) {
   return (
     <StepSheet open={open} onOpenChange={onOpenChange} title="Nieuwe keuze" total={steps.length} index={flow.index} onBack={flow.back} onSwipeNext={flow.step !== "summary" ? flow.next : undefined}>
       {flow.step === "question" && <form onSubmit={(e: FormEvent) => { e.preventDefault(); flow.next(); }}>
-        <StepQuestion sub="Daarna stemt iedereen.">Zet de keuze klaar</StepQuestion>
-        <Input aria-label="Vraag" autoFocus value={title} maxLength={140} onChange={(e) => setTitle(e.target.value)} placeholder="Bijvoorbeeld kies het restaurant" className="h-16 rounded-2xl text-xl" />
+        <StepQuestion sub="Daarna stemt iedereen mee.">Typ waarover jullie stemmen</StepQuestion>
+        <Input aria-label="Vraag" autoFocus value={title} maxLength={140} onChange={(e) => setTitle(e.target.value)} placeholder="Bijvoorbeeld welk restaurant" className="h-16 rounded-2xl text-xl" />
         <div className="mt-4 flex flex-wrap gap-2">{SUGGESTIONS.map((s) => <StepChip key={s} selected={title === s} onClick={() => { setTitle(s); flow.go(flow.backToSummary ? "summary" : "options"); }}>{s}</StepChip>)}</div>
         <StepNext disabled={!title.trim()}>{flow.backToSummary ? "Klaar" : "Volgende"}</StepNext>
       </form>}
 
       {flow.step === "options" && <form onSubmit={(e: FormEvent) => { e.preventDefault(); flow.next(); }}>
-        <StepQuestion sub="Minimaal twee.">Zet de opties neer</StepQuestion>
+        <StepQuestion sub="Minimaal twee, bijvoorbeeld Pizza en Sushi.">Vul de opties in</StepQuestion>
         <div className="space-y-2.5">
           {options.map((option, index) => <div key={index} className="flex gap-2">
             <Input aria-label={`Optie ${index + 1}`} autoFocus={index === 0} value={option} maxLength={120} onChange={(e) => setOptions((c) => c.map((v, i) => (i === index ? e.target.value : v)))} placeholder={`Optie ${index + 1}`} className="h-14 flex-1 rounded-2xl text-lg" />
@@ -59,12 +59,12 @@ export function DecisionWizard({ open, onOpenChange, tripId, onSaved }: Props) {
       </form>}
 
       {flow.step === "summary" && <div className="space-y-5">
-        <StepQuestion>Check en start</StepQuestion>
+        <StepQuestion>Check en start de stemming</StepQuestion>
         <StepSummary rows={[
-          { label: "Keuze", value: title, onEdit: () => flow.edit("question") },
+          { label: "Stemming", value: title, onEdit: () => flow.edit("question") },
           { label: "Opties", value: clean.join(" · "), onEdit: () => flow.edit("options") },
         ]} />
-        <StepNext onClick={() => void save()} busy={saving} disabled={!flow.complete} done>Keuze starten</StepNext>
+        <StepNext onClick={() => void save()} busy={saving} disabled={!flow.complete} done>Stemming starten</StepNext>
       </div>}
       <StepError message={error} />
     </StepSheet>

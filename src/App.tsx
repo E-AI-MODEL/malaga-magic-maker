@@ -110,6 +110,7 @@ function AppRoutes() {
 
   return (
     <Suspense fallback={<PageLoader />}>
+      {user && <GuestKnaakieImport />}
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={user ? <Navigate to="/trips" replace /> : <Signup />} />

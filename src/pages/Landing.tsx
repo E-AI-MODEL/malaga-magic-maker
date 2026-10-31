@@ -96,7 +96,7 @@ const FAQ = [
   },
   {
     q: "Hoe werkt Knaakie met bonnetjes?",
-    a: "Maak in Samen bij Kosten een foto van een kassabon of een handgeschreven briefje. AI ontcijfert het bedrag en, als die erop staat, de datum. Jij controleert het voorstel, kiest wie betaalde en slaat het op. De foto wordt nergens bewaard. Daarna zie je per persoon wie wie moet betalen en stuur je een betaalverzoek met je eigen rekeningnummer.",
+    a: "Open Knaakie en maak een foto van een kassabon of een handgeschreven briefje. Zonder account kun je 10 uitgaven gratis toevoegen; maak je daarna een account, dan gaan je kosten mee. AI ontcijfert het bedrag en, als die erop staat, de datum. Jij controleert het voorstel, kiest wie betaalde en slaat het op. De foto wordt nergens bewaard. Daarna zie je per persoon wie wie moet betalen en stuur je een betaalverzoek met je eigen rekeningnummer.",
   },
   {
     q: "Wat kan Hansie?",
@@ -236,7 +236,7 @@ export default function Landing() {
             Foto van je bonnetje. Klaar.
           </p>
           <p className="mt-2 max-w-md text-[15px] leading-relaxed text-muted-foreground">
-            Knaakie houdt bij wie wat betaalt. Maak een foto van een kassabon of een handgeschreven
+            Knaakie houdt bij wie wat betaalt: met vrienden, huisgenoten of op reis. Maak een foto van een kassabon of een handgeschreven
             briefje: AI ontcijfert het bedrag en de datum. Jij kijkt het na en slaat op. Probeer het
             meteen, zonder account.
           </p>

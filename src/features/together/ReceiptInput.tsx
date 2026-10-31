@@ -63,9 +63,9 @@ export function ReceiptInput({ tripId, onProposal }: Props) {
   };
 
   return <section className="space-y-3 border-b border-border pb-5" aria-label="Bonfoto">
-    <div className="flex flex-wrap gap-2">
-      <Button type="button" variant="outline" className="h-12 flex-1" onClick={() => fileRef.current?.click()} disabled={busy}><ImagePlus className="mr-2 h-5 w-5" />Foto kiezen</Button>
-      <Button type="button" variant="outline" className="h-12 flex-1" onClick={() => cameraRef.current?.click()} disabled={busy}><Camera className="mr-2 h-5 w-5" />Foto maken</Button>
+    <div className="grid grid-cols-2 gap-2.5">
+      <Button type="button" variant="secondary" className="h-24 flex-col gap-2 rounded-2xl text-base font-semibold" onClick={() => cameraRef.current?.click()} disabled={busy}><Camera className="h-7 w-7" strokeWidth={1.75} />Foto maken</Button>
+      <Button type="button" variant="secondary" className="h-24 flex-col gap-2 rounded-2xl text-base font-semibold" onClick={() => fileRef.current?.click()} disabled={busy}><ImagePlus className="h-7 w-7" strokeWidth={1.75} />Foto kiezen</Button>
     </div>
     <input ref={fileRef} aria-label="Kies bonfoto" type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={(event) => { void choose(event.target.files?.[0]); event.target.value = ""; }} />
     <input ref={cameraRef} aria-label="Maak bonfoto" type="file" accept="image/jpeg,image/png,image/webp" capture="environment" className="hidden" onChange={(event) => { void choose(event.target.files?.[0]); event.target.value = ""; }} />

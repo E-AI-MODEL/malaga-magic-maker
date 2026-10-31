@@ -91,6 +91,7 @@ function NextTrip({ trip, facts, userId }: { trip: Trip; facts: HomeFacts; userI
         </div>
       ) : <p className="mt-3 text-xs text-muted-foreground">Laden…</p>}
       <Button asChild size="lg" className="mt-4 h-14 w-full rounded-xl font-display text-lg font-semibold [&_svg]:size-5"><Link to={`/trip/${trip.id}`}><span className="min-w-0 truncate">Naar {trip.name}</span><ArrowRight className="ml-2 shrink-0" /></Link></Button>
+      <Button asChild variant="outline" size="lg" className="mt-2 h-14 w-full rounded-xl bg-card font-display text-lg font-semibold text-foreground hover:text-foreground [&_svg]:size-5"><Link to={`/trip/${trip.id}/samen?section=expenses`}><Receipt className="mr-2 shrink-0" />Naar Knaakie</Link></Button>
     </section>
   );
 }

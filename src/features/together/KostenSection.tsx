@@ -7,8 +7,10 @@ import { RowList, SectionLabel } from "@/components/primitives";
 import { useTrip } from "@/contexts/TripContext";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
-import { deleteExpense, listExpenses, listTripMembers, type ExpenseBundle } from "@/features/together/data";
+import { createExpenseWithSplits, deleteExpense, listExpenses, listTripMembers, type ExpenseBundle } from "@/features/together/data";
 import { ExpenseSheet } from "@/features/together/ExpenseSheet";
+import { ExpenseWizard } from "@/features/together/ExpenseWizard";
+import { splitEvenly } from "@/features/together/money";
 import { PaymentRequestSheet } from "@/features/together/PaymentRequestSheet";
 import { formatExpenseMoney as money, settlementByCurrency } from "@/features/together/settlement";
 
@@ -18,6 +20,7 @@ export function KostenSection() {
   const queryClient = useQueryClient();
   const tripId = activeTrip?.id || "";
   const [sheetOpen, setSheetOpen] = useState(false);
+  const [wizardOpen, setWizardOpen] = useState(false);
   const [editing, setEditing] = useState<ExpenseBundle | null>(null);
   const [expanded, setExpanded] = useState<string | null>(null);
   const [payment, setPayment] = useState<{ recipientName: string; amount: number; currency: string } | null>(null);
@@ -38,7 +41,7 @@ export function KostenSection() {
   const names = new Map(members.map((member) => [member.userId, member.displayName]));
   if (!activeTrip || !user) return null;
   const readOnly = activeTrip.status === "archived";
-  const openNew = () => { setEditing(null); setSheetOpen(true); };
+  const openNew = () => { setEditing(null); setWizardOpen(true); };
   const refresh = async () => {
     await Promise.all([
       queryClient.invalidateQueries({ queryKey: ["together-expenses", tripId] }),
@@ -128,6 +131,12 @@ export function KostenSection() {
         <Button variant="ghost" className="mt-2 h-11 px-0" onClick={() => void copy()}><Copy className="mr-2 h-4 w-4" />Wie betaalt wie kopiëren</Button>
       </section>}
     </div>
+    <ExpenseWizard open={wizardOpen} onOpenChange={setWizardOpen} tripId={tripId} selfId={user.id} defaultCurrency={activeTrip.currency || "EUR"}
+      people={members.map((member) => ({ id: member.userId, name: member.displayName }))}
+      onSave={async (result) => {
+        await createExpenseWithSplits(tripId, { description: result.description, amount: result.amount, currency: result.currency, paidByUserId: result.paidBy, splits: splitEvenly(result.amount, result.splitAmong) });
+        await refresh();
+      }} />
     <ExpenseSheet open={sheetOpen} onOpenChange={setSheetOpen} tripId={tripId} tripCurrency={activeTrip.currency} currentUserId={user.id} members={members} expense={editing} onSaved={refresh} />
     <PaymentRequestSheet open={Boolean(payment)} onOpenChange={(open) => { if (!open) setPayment(null); }} recipientName={payment?.recipientName || ""} amount={payment?.amount || 0} currency={payment?.currency || activeTrip.currency} tripName={activeTrip.name} iban={detailsQuery.data?.iban} accountName={detailsQuery.data?.account_name} />
   </>;

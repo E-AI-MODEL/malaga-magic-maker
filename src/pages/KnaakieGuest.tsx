@@ -1,11 +1,10 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, Camera, Check, Plus, Send, Trash2, UserPlus, X } from "lucide-react";
+import { ArrowRight, Camera, Check, Send, Trash2, UserPlus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { FormError, FormField, FormSelect, FormSheet, FormSubmit } from "@/components/FormSheet";
 import { SectionLabel } from "@/components/primitives";
-import { ReceiptInput } from "@/features/together/ReceiptInput";
+import { ExpenseWizard } from "@/features/together/ExpenseWizard";
 import { PaymentRequestSheet } from "@/features/together/PaymentRequestSheet";
 import { formatExpenseMoney as money } from "@/features/together/settlement";
 import {
@@ -23,7 +22,6 @@ import {
 } from "@/features/knaakie-guest/store";
 import logo from "@/assets/vakansie_primary_complete.png.asset.json";
 
-const CURRENCIES = ["EUR", "GBP", "USD", "CHF", "SEK", "NOK", "DKK", "PLN", "CZK", "HUF", "TRY"];
 
 export default function KnaakieGuest() {
   const [state, setState] = useState<GuestKnaakie>(() => loadGuestKnaakie());
@@ -144,76 +142,10 @@ export default function KnaakieGuest() {
         </section>
       </main>
 
-      <GuestExpenseSheet open={sheetOpen} onOpenChange={setSheetOpen} state={state} onSave={(input) => { setState((c) => addGuestExpense(c, input)); setSheetOpen(false); }} />
+      <ExpenseWizard open={sheetOpen} onOpenChange={setSheetOpen} tripId={null} selfId={GUEST_SELF_ID} defaultCurrency={state.expenses[0]?.currency || "EUR"}
+        people={state.people} onAddPerson={(name) => setState((c) => addGuestPerson(c, name))}
+        onSave={(input) => setState((c) => addGuestExpense(c, input))} />
       {payment && <PaymentRequestSheet open onOpenChange={(open) => !open && setPayment(null)} recipientName={payment.recipientName} tripName={state.name.trim() || "ons uitje"} amount={payment.amount} currency={payment.currency} />}
     </div>
-  );
-}
-
-type SheetProps = {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  state: GuestKnaakie;
-  onSave: (input: { description: string; amount: number; currency: string; paidBy: string; splitAmong: string[] }) => void;
-};
-
-function GuestExpenseSheet({ open, onOpenChange, state, onSave }: SheetProps) {
-  const [amount, setAmount] = useState("");
-  const [description, setDescription] = useState("");
-  const [currency, setCurrency] = useState("EUR");
-  const [paidBy, setPaidBy] = useState(GUEST_SELF_ID);
-  const [split, setSplit] = useState<string[]>([]);
-  const [error, setError] = useState("");
-
-  useEffect(() => {
-    if (!open) return;
-    setAmount(""); setDescription(""); setPaidBy(GUEST_SELF_ID); setError("");
-    setCurrency(state.expenses[0]?.currency || "EUR");
-    setSplit(state.people.map((p) => p.id));
-    // Reset only when the sheet opens.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open]);
-
-  const submit = (event: FormEvent) => {
-    event.preventDefault();
-    const value = Number(amount.replace(",", "."));
-    if (!(value > 0) || value > 1000000) return setError("Vul een bedrag in.");
-    if (!description.trim()) return setError("Vul in waarvoor het was.");
-    if (!split.length) return setError("Kies wie meedoen.");
-    onSave({ description, amount: Math.round(value * 100) / 100, currency, paidBy, splitAmong: split });
-  };
-
-  return (
-    <FormSheet open={open} onOpenChange={onOpenChange} title="Bonnetje toevoegen">
-      <form onSubmit={submit} className="mt-5 space-y-5">
-        {open && <ReceiptInput tripId={null} onProposal={(p) => {
-          if (p.amount) setAmount(String(p.amount).replace(".", ","));
-          if (p.description) setDescription(p.description);
-          if (p.currency && CURRENCIES.includes(p.currency)) setCurrency(p.currency);
-          const match = p.payerName && state.people.find((person) => person.name.toLocaleLowerCase("nl-NL") === p.payerName!.trim().toLocaleLowerCase("nl-NL"));
-          if (match) setPaidBy(match.id);
-        }} />}
-        <div className="grid grid-cols-[1fr_auto] gap-2">
-          <FormField label="Bedrag" htmlFor="guest-amount"><Input id="guest-amount" inputMode="decimal" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="0,00" className="num h-14 font-display text-3xl font-semibold" /></FormField>
-          <FormField label="Valuta" htmlFor="guest-currency"><FormSelect id="guest-currency" value={currency} onChange={setCurrency} options={CURRENCIES.map((c) => ({ value: c, label: c }))} /></FormField>
-        </div>
-        <FormField label="Waarvoor?" htmlFor="guest-description"><Input id="guest-description" value={description} maxLength={160} onChange={(e) => setDescription(e.target.value)} placeholder="Bijvoorbeeld boodschappen" className="h-12 text-base" /></FormField>
-        <FormField label="Betaald door" htmlFor="guest-payer"><FormSelect id="guest-payer" value={paidBy} onChange={setPaidBy} options={state.people.map((p) => ({ value: p.id, label: p.id === GUEST_SELF_ID ? "Jij" : p.name }))} /></FormField>
-        <fieldset>
-          <legend className="text-sm font-semibold">Gedeeld door</legend>
-          <div className="mt-2 flex flex-wrap gap-2">
-            {state.people.map((p) => {
-              const on = split.includes(p.id);
-              return <button key={p.id} type="button" aria-pressed={on} onClick={() => setSplit((s) => (on ? s.filter((id) => id !== p.id) : [...s, p.id]))} className={`flex h-11 items-center gap-1.5 rounded-full border px-4 text-[15px] ${on ? "border-foreground bg-foreground text-background" : "border-border bg-card"}`}>
-                {on ? <Check className="h-4 w-4" /> : <Plus className="h-4 w-4" />}{p.id === GUEST_SELF_ID ? "Jij" : p.name}
-              </button>;
-            })}
-          </div>
-          {state.people.length === 1 && <p className="mt-2 text-xs text-muted-foreground">Voeg mensen toe onder "Wie doen er mee?" om kosten te delen.</p>}
-        </fieldset>
-        {error && <FormError message={error} />}
-        <FormSubmit saving={false}>Opslaan</FormSubmit>
-      </form>
-    </FormSheet>
   );
 }

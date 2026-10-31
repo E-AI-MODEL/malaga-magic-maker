@@ -127,3 +127,7 @@ Home-ronde: gewijzigd `src/App.tsx`, `src/features/trips/start.ts` en tests, `sr
 - [x] Na aanmelden: uitgaven verhuizen naar een nieuwe reis
 - [x] Heel Knaakie-blok op de homepage is één knop naar Knaakie
 - [x] Knaakie zonder account: geen "reisgenoten", want het is niet altijd een reis
+
+## Stap voor stap toevoegen
+- [x] Knaakie: bonnetje toevoegen als stappen (foto of zelf invullen, één vraag per scherm, vegen, samenvatting)
+- [ ] Zelfde aanpak voor andere toevoegschermen (reis maken, Reis-onderdeel, taak, keuze): wacht op keuze product owner

@@ -166,7 +166,7 @@ export default function Landing() {
                 Voorbereiden zonder gedoe
               </p>
               <h1 className="mt-4 font-display text-[34px] font-bold uppercase tracking-wide leading-[1.08] text-white sm:text-[46px]">
-                Je hele vakantie
+                Jouw hele vakantie
                 <br />
                 in je broekzak
               </h1>

@@ -141,7 +141,7 @@ export default function Trips() {
           <div className="absolute inset-x-0 top-0 mx-auto max-w-3xl px-5 pt-7">
             <p className="flex items-center gap-2.5 font-ui text-[13px] font-medium text-on-image/80">
               <span aria-hidden className="h-px w-7 bg-on-image/40" />
-              Je hele vakantie in je broekzak
+              Jouw hele vakantie in je broekzak
             </p>
             <PageHeader className="mt-3 text-on-image" title={firstName ? `Hoi ${firstName}` : "Hoi"} action={
               <Button asChild variant="outline" size="sm" className="h-11 shrink-0 rounded-xl bg-card px-4 text-[15px] text-foreground hover:text-foreground">

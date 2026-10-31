@@ -226,14 +226,18 @@ export default function Landing() {
 
         <section aria-labelledby="knaakie-title" className="mx-auto mt-14 max-w-3xl px-5">
           <p className="font-ui text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-            Knaakie · kosten delen
+            Kosten delen
           </p>
-          <h2 id="knaakie-title" className="mt-2 font-display text-[26px] font-bold uppercase tracking-wide leading-tight">
-            Foto van je bonnetje. Klaar.
+          <h2 id="knaakie-title" className="mt-2 font-display text-[40px] font-bold uppercase tracking-wide leading-none">
+            Knaakie
           </h2>
+          <p className="mt-2 font-display text-[22px] font-bold leading-tight">
+            Foto van je bonnetje. Klaar.
+          </p>
           <p className="mt-2 max-w-md text-[15px] leading-relaxed text-muted-foreground">
-            Geen bonnetjes bewaren of bedragen overtikken. Maak een foto van een kassabon of een
-            handgeschreven briefje: AI ontcijfert het bedrag en de datum. Jij kijkt het na en slaat op.
+            Knaakie houdt bij wie wat betaalt. Maak een foto van een kassabon of een handgeschreven
+            briefje: AI ontcijfert het bedrag en de datum. Jij kijkt het na en slaat op. Knaakie zit in
+            elke reis, met een vaste knop onderin je scherm.
           </p>
 
           <div className="mt-6 grid gap-4 sm:grid-cols-2">

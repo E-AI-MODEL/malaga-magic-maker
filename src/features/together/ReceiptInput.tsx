@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { receiptFileError, type ReceiptSuggestion } from "./receipt";
 import { recognizeReceipt } from "./receipt-client";
 
-type Props = { tripId: string; onProposal: (proposal: ReceiptSuggestion) => void };
+type Props = { tripId: string | null; onProposal: (proposal: ReceiptSuggestion) => void };
 
 /** Mounted only while adding an expense. No storage, object URLs or raw OCR state. */
 export function ReceiptInput({ tripId, onProposal }: Props) {

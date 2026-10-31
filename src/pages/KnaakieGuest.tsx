@@ -61,7 +61,7 @@ export default function KnaakieGuest() {
         <p className="mt-2 text-[15px] leading-relaxed text-muted-foreground">Houd bij wie wat betaalt: met vrienden, huisgenoten of op reis. Zonder account, op dit apparaat.</p>
 
         <label className="mt-5 block">
-          <span className="text-sm font-semibold">Waarvoor is deze pot?</span>
+          <span className="text-sm font-semibold">Geef je pot een naam</span>
           <Input value={state.name} maxLength={80} placeholder="Bijvoorbeeld etentje, huisfeest of weekend weg" onChange={(e) => setState((c) => ({ ...c, name: e.target.value }))} className="mt-2 h-12 text-base" />
         </label>
 
@@ -81,7 +81,7 @@ export default function KnaakieGuest() {
         </section>
 
         <section className="py-5">
-          <SectionLabel>Wie doen er mee?</SectionLabel>
+          <SectionLabel>Voeg mensen toe</SectionLabel>
           <ul className="flex flex-wrap gap-2">
             {state.people.map((p) => {
               const locked = p.id === GUEST_SELF_ID || state.expenses.some((e) => e.paidBy === p.id || e.splitAmong.includes(p.id));
@@ -135,7 +135,7 @@ export default function KnaakieGuest() {
         </section>}
 
         <section className="mt-4 rounded-3xl border border-border bg-card p-5">
-          <p className="font-display text-[22px] font-bold leading-tight">Bewaren en samen bijhouden?</p>
+          <p className="font-display text-[22px] font-bold leading-tight">Bewaar je kosten en deel ze</p>
           <p className="mt-2 text-sm leading-relaxed text-muted-foreground">Met een gratis account worden je kosten bewaard. Je nodigt de anderen uit, zodat iedereen hetzelfde ziet.</p>
           <Button asChild size="lg" className="mt-4 h-14 w-full rounded-xl font-display text-lg font-semibold"><Link to="/signup">Gratis account maken</Link></Button>
           <Link to="/login" className="mt-3 block text-center text-sm font-medium text-muted-foreground underline-offset-4 hover:underline">Ik heb al een account</Link>

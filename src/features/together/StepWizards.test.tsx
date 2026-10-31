@@ -15,7 +15,7 @@ describe("task steps", () => {
     fireEvent.click(screen.getByRole("button", { name: "Vervoer regelen" }));
     fireEvent.click(screen.getByRole("button", { name: /Piet/ }));
     fireEvent.click(screen.getByRole("button", { name: /Geen datum/ }));
-    expect(screen.getByText("Klopt dit?")).toBeTruthy();
+    expect(screen.getByText("Check en sla op")).toBeTruthy();
     expect(createTask).not.toHaveBeenCalled();
     fireEvent.click(screen.getByRole("button", { name: /Taak toevoegen/ }));
     await waitFor(() => expect(createTask).toHaveBeenCalledWith(expect.objectContaining({ trip_id: "t", title: "Vervoer regelen", assigned_user_id: "piet", due_at: null })));
@@ -33,12 +33,12 @@ describe("task steps", () => {
 describe("choice steps", () => {
   it("needs two options before it can start", async () => {
     render(<DecisionWizard open onOpenChange={vi.fn()} tripId="t" onSaved={vi.fn()} />);
-    fireEvent.click(screen.getByRole("button", { name: "Waar gaan we eten?" }));
+    fireEvent.click(screen.getByRole("button", { name: "Kies het restaurant" }));
     fireEvent.change(screen.getByLabelText("Optie 1"), { target: { value: "Pizza" } });
     expect(screen.getByRole("button", { name: /Volgende/ })).toBeDisabled();
     fireEvent.change(screen.getByLabelText("Optie 2"), { target: { value: "Sushi" } });
     fireEvent.click(screen.getByRole("button", { name: /Volgende/ }));
     fireEvent.click(screen.getByRole("button", { name: /Keuze starten/ }));
-    await waitFor(() => expect(createDecisionWithOptions).toHaveBeenCalledWith({ tripId: "t", title: "Waar gaan we eten?", description: null, options: [{ label: "Pizza" }, { label: "Sushi" }] }));
+    await waitFor(() => expect(createDecisionWithOptions).toHaveBeenCalledWith({ tripId: "t", title: "Kies het restaurant", description: null, options: [{ label: "Pizza" }, { label: "Sushi" }] }));
   });
 });

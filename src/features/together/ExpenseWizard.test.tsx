@@ -24,13 +24,13 @@ describe("bonnetje steps", () => {
   it("walks through by hand, auto-advancing after each choice, and saves an equal split", async () => {
     const onSave = vi.fn();
     render(<ExpenseWizard {...base} people={people} onSave={onSave} />);
-    fireEvent.click(screen.getByText("Zelf invullen"));
+    fireEvent.click(screen.getByText("Vul zelf in"));
     fireEvent.change(screen.getByLabelText("Bedrag"), { target: { value: "30,50" } });
     fireEvent.click(screen.getByRole("button", { name: /Volgende/ }));
     fireEvent.click(screen.getByRole("button", { name: "Eten" }));
     fireEvent.click(screen.getByRole("button", { name: /Piet/ }));
-    fireEvent.click(screen.getByRole("button", { name: /Iedereen gelijk/ }));
-    expect(screen.getByText("Klopt dit?")).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: /Deel gelijk met iedereen/ }));
+    expect(screen.getByText("Check en sla op")).toBeTruthy();
     expect(onSave).not.toHaveBeenCalled();
     fireEvent.click(screen.getByRole("button", { name: "Opslaan" }));
     await waitFor(() => expect(onSave).toHaveBeenCalledWith({ description: "Eten", amount: 30.5, currency: "EUR", paidBy: "piet", splitAmong: ["me", "piet"] }));
@@ -42,7 +42,7 @@ describe("bonnetje steps", () => {
     const input = container.ownerDocument.querySelector('input[aria-label="Kies bonfoto"]') as HTMLInputElement;
     fireEvent.change(input, { target: { files: [new File(["x"], "bon.jpg", { type: "image/jpeg" })] } });
     fireEvent.click(await screen.findByRole("button", { name: /Laat AI het uitlezen/ }));
-    expect(await screen.findByText("Klopt dit?")).toBeTruthy();
+    expect(await screen.findByText("Check en sla op")).toBeTruthy();
     expect(screen.getByText("Pizzeria Roma")).toBeTruthy();
     expect(onSave).not.toHaveBeenCalled();
   });

@@ -216,7 +216,7 @@ export default function NewTrip() {
           </form>}
 
           {flow.step === "when" && <form onSubmit={(e: FormEvent) => { e.preventDefault(); if (datesValid) after(nextOf("when")); }}>
-            <StepQuestion>Kies je data</StepQuestion>
+            <StepQuestion>Kies wanneer je gaat</StepQuestion>
             <div className="grid grid-cols-2 gap-3">
               <label><span className="text-sm font-semibold text-muted-foreground">Van</span><Input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} className="mt-2 h-14 rounded-2xl text-lg" /></label>
               <label><span className="text-sm font-semibold text-muted-foreground">Tot</span><Input type="date" value={endDate} min={startDate || undefined} onChange={(e) => setEndDate(e.target.value)} className="mt-2 h-14 rounded-2xl text-lg" /></label>
@@ -226,12 +226,12 @@ export default function NewTrip() {
           </form>}
 
           {flow.step === "who" && <div className="space-y-3">
-            <StepQuestion>Kies je gezelschap</StepQuestion>
+            <StepQuestion>Kies met wie je gaat</StepQuestion>
             {partyTypeOptions.map((o) => <StepTile key={o.value} selected={partyType === o.value} icon={o.value === "solo" ? <UserRound /> : <Users />} onClick={() => choosePeople(o.value)}>{o.label}</StepTile>)}
           </div>}
 
           {flow.step === "size" && <div>
-            <StepQuestion>Stel het aantal personen in</StepQuestion>
+            <StepQuestion>Kies met hoeveel personen je gaat</StepQuestion>
             <div className="flex items-center justify-center gap-6 py-4">
               <Button type="button" variant="outline" className="h-16 w-16 rounded-full text-3xl" aria-label="Minder" onClick={() => setGroupSize(String(Math.max(2, (Number.parseInt(groupSize, 10) || 2) - 1)))}><Minus className="h-7 w-7" /></Button>
               <span className="num w-24 text-center font-display text-7xl font-semibold" aria-live="polite">{groupSize}</span>
@@ -248,7 +248,7 @@ export default function NewTrip() {
           </form>}
 
           {flow.step === "wishes" && <div>
-            <StepQuestion sub="Hansie gebruikt ze voor tips. Overslaan mag.">Geef je wensen op</StepQuestion>
+            <StepQuestion sub="Hansie gebruikt dit voor tips. Overslaan mag.">Vertel wat je belangrijk vindt</StepQuestion>
             <TravelerProfileForm value={profile} onChange={setProfile} idPrefix="new-trip" />
             <StepNext onClick={() => after("summary")}>{flow.backToSummary ? "Klaar" : "Volgende"}</StepNext>
           </div>}

@@ -469,7 +469,7 @@ export default function Landing() {
           <div className="rounded-[20px] border border-border bg-card px-5 py-9 text-center shadow-soft">
             <h2 className="font-display text-[28px] font-bold uppercase tracking-wide leading-tight">Klaar om te beginnen?</h2>
             <p className="mx-auto mt-2 max-w-sm text-sm leading-relaxed text-muted-foreground">
-              Zet je volgende reis neer en bouw hem stap voor stap op. Een naam is genoeg.
+              Begin met een naam. De rest vul je stap voor stap aan.
             </p>
             <Button asChild size="lg" className="mt-5 w-full rounded-md sm:w-auto sm:px-10">
               <Link to="/signup">

@@ -154,7 +154,7 @@ export function ExpenseWizard({ open, onOpenChange, tripId, people, selfId, defa
               <button type="button" className={`${tile} mt-3 h-24 border-foreground bg-foreground text-background hover:bg-foreground/90 active:bg-foreground/90`} disabled={busy} onClick={() => cameraRef.current?.click()}><Camera className="h-8 w-8 shrink-0" />Maak een foto</button>
               <button type="button" className={`${tile} h-20`} disabled={busy} onClick={() => fileRef.current?.click()}><ImagePlus className="h-7 w-7 shrink-0" />Kies een foto</button>
               <button type="button" className={`${tile} h-20`} disabled={busy} onClick={() => go("amount")}><PenLine className="h-7 w-7 shrink-0" />Vul zelf in</button>
-              {busy && <p className="flex items-center gap-2 text-[15px] text-muted-foreground"><Loader2 className="h-5 w-5 animate-spin" />Foto klaarzetten…</p>}
+              {busy && <p className="flex items-center gap-2 text-[15px] text-muted-foreground"><Loader2 className="h-5 w-5 animate-spin" />Foto laden…</p>}
             </> : <>
               <img src={image} alt="Je bonnetje" className="mt-3 max-h-[38dvh] w-full rounded-2xl bg-secondary object-contain" />
               <Button type="button" className="h-16 w-full rounded-2xl font-display text-xl font-semibold [&_svg]:size-6" disabled={busy} onClick={() => void read()}>{busy ? <Loader2 className="mr-2 animate-spin" /> : <Sparkles className="mr-2" />}{busy ? "AI leest je bonnetje…" : "Laat AI het uitlezen"}</Button>
@@ -178,11 +178,11 @@ export function ExpenseWizard({ open, onOpenChange, tripId, people, selfId, defa
           </form>}
 
           {step === "what" && <form className="space-y-5" onSubmit={(e) => { e.preventDefault(); next(); }}>
-            {question("Kies waarvoor")}
+            {question("Kies waar het voor was")}
             <div className="grid grid-cols-2 gap-2.5">
               {QUICK_WHAT.map((w) => <button key={w} type="button" onClick={() => { setDescription(w); if (backToSummary) { setBackToSummary(false); go("summary"); } else go(steps[index + 1]); }} className={`h-16 rounded-2xl border text-lg font-semibold ${description === w ? "border-foreground bg-foreground text-background" : "border-border bg-card"}`}>{w}</button>)}
             </div>
-            <Input aria-label="Waarvoor" value={description} maxLength={160} onChange={(e) => setDescription(e.target.value)} placeholder="Of typ het in" className="h-14 rounded-2xl text-lg" />
+            <Input aria-label="Waarvoor" value={description} maxLength={160} onChange={(e) => setDescription(e.target.value)} placeholder="Of typ het zelf" className="h-14 rounded-2xl text-lg" />
             {bigNext()}
           </form>}
 
@@ -194,7 +194,7 @@ export function ExpenseWizard({ open, onOpenChange, tripId, people, selfId, defa
           </div>}
 
           {step === "split" && <div className="space-y-3">
-            {question(people.length > 1 ? "Kies met wie je deelt" : "Deel het met anderen")}
+            {question(people.length > 1 ? "Kies met wie je de kosten deelt" : "Deel de kosten met anderen")}
             {people.length > 1 && <button type="button" onClick={() => { setSplit(people.map((p) => p.id)); if (backToSummary) { setBackToSummary(false); go("summary"); } else go(steps[index + 1]); }} className={`${tile} h-20 border-foreground bg-foreground text-background hover:bg-foreground/90 active:bg-foreground/90`}><Check className="h-7 w-7 shrink-0" />Deel gelijk met iedereen ({people.length})</button>}
             {people.length === 1 && <button type="button" onClick={() => { setSplit([selfId]); next(); }} className={`${tile} h-20`}><Check className="h-7 w-7 shrink-0" />Alleen voor mij</button>}
             {people.length > 1 && <p className="pt-2 text-sm font-semibold text-muted-foreground">Of kies zelf wie meedoet</p>}

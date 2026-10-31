@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { useAuth } from "@/lib/auth";
 import { useTrip } from "@/contexts/TripContext";
 import { createExpenseWithSplits } from "@/features/together/data";
-import { GUEST_KNAAKIE_KEY, guestImportRows, loadGuestKnaakie } from "./store";
+import { GUEST_KNAAKIE_KEY, guestImportRows, loadGuestKnaakie, removeGuestExpense, saveGuestKnaakie } from "./store";
 
 /** Moves Knaakie costs made without an account into a trip once, right after sign-in. */
 export function GuestKnaakieImport() {
@@ -29,14 +29,18 @@ export function GuestKnaakieImport() {
           tripId = userTrips.find((trip) => trip.status !== "archived")?.id || null;
         }
         if (!tripId) throw new Error("no_trip");
-        for (const row of guestImportRows(state)) {
+        let remaining = state;
+        for (const { id, ...row } of guestImportRows(state)) {
           await createExpenseWithSplits(tripId, { ...row, paidByUserId: user.id, splits: [{ user_id: user.id, amount: row.amount }] });
+          // Drop each saved cost right away so a retry never creates duplicates.
+          remaining = removeGuestExpense(remaining, id);
+          saveGuestKnaakie(remaining);
         }
         localStorage.removeItem(GUEST_KNAAKIE_KEY);
         toast.success("Je Knaakie-kosten staan nu in je reis. Nodig je reisgenoten uit en pas de verdeling aan.", { duration: 10000 });
         navigate(`/trip/${tripId}/samen?section=expenses`, { replace: true });
       } catch {
-        running.current = false;
+        // No automatic retry this session; the next sign-in tries again with what is left.
         toast.error("Je Knaakie-kosten konden niet worden overgezet. Ze staan nog op dit apparaat.");
       }
     })();

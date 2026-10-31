@@ -96,6 +96,6 @@ export function guestImportRows(state: GuestKnaakie) {
     const others = e.splitAmong.filter((id) => id !== GUEST_SELF_ID).map((id) => names.get(id)).filter(Boolean);
     const shared = others.length ? `gedeeld met ${others.join(", ")}` : "";
     const note = [payer, shared].filter(Boolean).join(", ");
-    return { description: (note ? `${e.description} (${note})` : e.description).slice(0, 200), amount: e.amount, currency: e.currency };
+    return { id: e.id, description: (note ? `${e.description} (${note})` : e.description).slice(0, 200), amount: e.amount, currency: e.currency };
   });
 }

@@ -44,7 +44,7 @@ Bounded builds; no unrelated redesigns, extra features, duplicated concepts or b
 Run build, lint, typecheck and tests; browser-test relevant flows. Report changed files, migrations, tests, failures and risks. Never report done while acceptance criteria fail.
 
 ## Koppelingen
-- Costs use Samen's URL section, including the fixed mobile shortcut. Receipts return ephemeral Gateway proposals saved only via the expense RPC. Why: no duplicate routes/state or retained receipt data.
+- Samen without a URL section opens the shared tile overview; its expenses section displays Knaakie without shared-work controls, including from the mobile shortcut. Receipts return ephemeral Gateway proposals saved only via the expense RPC. Why: distinct destinations without duplicate routes, cost logic or retained receipt data.
 - `trip-calendar`: secret link per user; store only the token hash. Why: bearer secret.
 - `trip-weather`: MET Norway, Nominatim with Photon fallback; credit sources in UI. Why: licence terms.
 - `send-reminders`: pg_cron + `x-cron-secret`, URL/secret in `server_job_secrets`, VAPID keys in `push_server_keys`, e-mail via Lovable Emails. Why: secrets stay server-side.

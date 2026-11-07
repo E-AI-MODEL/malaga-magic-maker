@@ -72,21 +72,21 @@ export function KostenSection() {
     <div>
       {readOnly && <p className="mt-4 flex items-start gap-2 text-sm text-muted-foreground"><Archive className="h-4 w-4 shrink-0" />Deze reis is gearchiveerd. Je kunt de kosten nog bekijken.</p>}
 
-      <section className="tile-knaakie mt-5 overflow-hidden rounded-3xl px-5 pb-5 pt-6 text-on-image" aria-live="polite">
+      <section className="tile-knaakie overflow-hidden rounded-2xl px-4 py-4 text-on-image" aria-live="polite">
         {loading ? <p className="text-sm opacity-70">Laden…</p>
           : expensesQuery.isError ? <p className="text-sm opacity-80">Laden lukt nu niet. <Button variant="link" className="text-background underline" onClick={() => void expensesQuery.refetch()}>Opnieuw proberen</Button></p>
-          : !expenses.length ? <><p className="font-display text-4xl font-semibold leading-none">Nog geen kosten</p></>
+          : !expenses.length ? <><p className="font-display text-2xl font-semibold leading-none">Nog geen kosten</p></>
           : !balances.length ? <><p className="text-[15px] opacity-75">Iedereen is rond</p><p className="mt-1 flex items-center gap-2 font-display text-5xl font-semibold leading-none"><Check className="h-9 w-9 " strokeWidth={2.5} />Quitte</p></>
           : balances.map((balance) => <div key={balance.currency} className="py-1">
             <p className="text-[15px] opacity-75">{balance.cents > 0 ? "Je krijgt nog" : "Je moet nog betalen"}</p>
-            <p className={`num font-display text-6xl font-semibold leading-none tracking-tight `}>{money(Math.abs(balance.cents) / 100, balance.currency)}</p>
+            <p className={`num font-display text-4xl font-semibold leading-none tracking-tight `}>{money(Math.abs(balance.cents) / 100, balance.currency)}</p>
           </div>)}
         {expenses.length > 0 && <p className="num mt-3 text-sm opacity-60">{expenses.length} {expenses.length === 1 ? "bonnetje" : "bonnetjes"} in deze reis</p>}
-        {!readOnly && <div className="mt-5 grid grid-cols-2 gap-2">
-          <button type="button" onClick={openNew} className="tile-plain flex h-14 items-center justify-center gap-2 rounded-2xl font-brand text-[17px] font-semibold text-foreground"><Camera className="h-5 w-5" strokeWidth={2} />Scan bon</button>
-          <button type="button" onClick={openNew} className="tile-plain flex h-14 items-center justify-center gap-2 rounded-2xl font-brand text-[17px] font-semibold text-foreground"><PenLine className="h-5 w-5" strokeWidth={2} />Vul in</button>
-        </div>}
       </section>
+      {!readOnly && <div className="mt-4 grid grid-cols-2 gap-3">
+        <Button variant="secondary" onClick={openNew} className="tile-plain h-16 rounded-2xl text-base"><Camera />Scan bon</Button>
+        <Button variant="secondary" onClick={openNew} className="tile-plain h-16 rounded-2xl text-base"><PenLine />Vul in</Button>
+      </div>}
 
       {personal.length > 0 && <section className="py-5">
         <SectionLabel>Jouw bedragen</SectionLabel>
@@ -94,7 +94,7 @@ export function KostenSection() {
           {personal.map((transfer) => {
             const pay = transfer.fromUserId === user.id;
             const name = names.get(pay ? transfer.toUserId : transfer.fromUserId) || "Medereiziger";
-            return <div key={`${transfer.currency}-${transfer.fromUserId}-${transfer.toUserId}`} className="rounded-2xl border border-border bg-card p-4">
+            return <div key={`${transfer.currency}-${transfer.fromUserId}-${transfer.toUserId}`} className="tile-plain rounded-2xl bg-card p-4">
               <div className="flex items-center gap-3">
                 <span aria-hidden className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-secondary font-display text-xl font-semibold">{name.trim().charAt(0).toUpperCase() || "?"}</span>
                 <div className="min-w-0 flex-1">
@@ -110,10 +110,10 @@ export function KostenSection() {
 
       {expenses.length > 0 && <section className="border-t border-border py-5">
         <SectionLabel>Bonnetjes</SectionLabel>
-        <RowList>{expenses.map((expense) => {
+        <div className="space-y-3">{expenses.map((expense) => {
           const manager = isOrganizer || expense.created_by === user.id;
           const isExpanded = expanded === expense.id;
-          return <div key={expense.id} className="py-3">
+          return <div key={expense.id} className="tile-plain rounded-2xl bg-card px-4 py-3">
             <Button variant="ghost" onClick={() => setExpanded(isExpanded ? null : expense.id)} aria-expanded={isExpanded} className="h-auto w-full justify-start gap-3 whitespace-normal px-0 py-1 text-left hover:bg-transparent">
               <div className="min-w-0 flex-1"><span className="block break-words text-[15px] font-medium">{expense.description}</span><span className="mt-1 block text-xs font-normal text-muted-foreground">Betaald door {names.get(expense.paid_by_user_id || "") || "onbekend"}</span></div>
               <span className="num shrink-0 text-sm font-semibold">{money(expense.amount, expense.currency)}</span><ChevronDown className={`h-4 w-4 shrink-0 text-muted-foreground ${isExpanded ? "rotate-180" : ""}`} />
@@ -123,7 +123,7 @@ export function KostenSection() {
               {!readOnly && manager && <div className="mt-3 grid grid-cols-2 gap-2"><Button variant="outline" className="h-11" onClick={() => { setEditing(expense); setSheetOpen(true); }}><Pencil className="mr-1.5 h-4 w-4" />Wijzigen</Button><Button variant="outline" className="h-11 text-destructive" onClick={() => void remove(expense)}><Trash2 className="mr-1.5 h-4 w-4" />Verwijderen</Button></div>}
             </div>}
           </div>;
-        })}</RowList>
+        })}</div>
       </section>}
 
       {transfers.length > 0 && <section className="border-t border-border py-5">

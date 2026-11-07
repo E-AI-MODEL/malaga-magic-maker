@@ -1,5 +1,11 @@
 # Roadmap
 
+## Samen, Knaakie en Hansie onderscheiden
+- [x] Samen opent een gezamenlijk tegeloverzicht; Knaakie opent alleen kosten met eigen titel en compacte kostentegels
+- [x] Hansie: kleinere onderwerptegels, geen dubbele uitleg of voorbereidingsvragen eronder
+- [x] Ingelogd op 393×706: Samen → Knaakie → Samen → Hansie gecontroleerd; geen paginascroll, overlap of runtimefouten; 298 tests groen, lint 0 fouten/30 bestaande waarschuwingen, automatische build OK
+- [ ] Gevulde kostentegels visueel controleren — beschikbare reis heeft geen kosten; geen nieuwe testkosten aangemaakt
+
 ## Directe mobiele start
 - [x] Goed om te weten: hele vragenlijst standaard ingeklapt, afzonderlijke antwoorden blijven uitklapbaar
 - [x] Inloggen en Account maken: gedeelde fotobalk, tastbare Home-tegel, grote invoer en accountknoppen; bestaande toegang en next behouden

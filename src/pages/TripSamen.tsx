@@ -1,11 +1,15 @@
 import { decisionStatusLine, decisionsTileLine, displayDecisionTitle, tasksTileLine } from "@/features/together/labels";
 import { ACCOMMODATION_DECISION_TITLE, decisionWinner, promoteDecisionWinner } from "@/features/travel/accommodation";
 import { toast } from "sonner";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Archive,
+  ArrowLeft,
+  ListTodo,
+  Vote,
+  Wallet,
   CalendarClock,
   Check,
   CheckCircle2,
@@ -58,14 +62,7 @@ export default function TripSamen() {
   const queryClient = useQueryClient();
   const [searchParams, setSearchParams] = useSearchParams();
   const requested = searchParams.get("section");
-  const section: Section = requested === "expenses" || requested === "decisions" ? requested : "tasks";
-  const sectionRef = useRef<HTMLElement>(null);
-  // Knaakie and Home links deep-link to a section: bring it into view instead of leaving it below the fold.
-  useEffect(() => {
-    if (!requested) return;
-    const timer = window.setTimeout(() => sectionRef.current?.scrollIntoView({ block: "start" }), 50);
-    return () => window.clearTimeout(timer);
-  }, [requested]);
+  const section: Section | null = requested === "expenses" || requested === "decisions" || requested === "tasks" ? requested : null;
   const setSection = (next: Section) => {
     setSearchParams((current) => {
       const params = new URLSearchParams(current);
@@ -217,7 +214,7 @@ export default function TripSamen() {
     <AppLayout>
       <div className="px-5 pb-12 pt-5 sm:px-8">
         <TripPageHeader
-          title="Samen"
+          title={section === "expenses" ? "Knaakie" : section === "tasks" ? "Taken" : section === "decisions" ? "Keuzes" : "Samen"}
           startDate={activeTrip.start_date}
           endDate={activeTrip.end_date}
           destination={activeTrip.destination_name}
@@ -233,7 +230,7 @@ export default function TripSamen() {
           </div>
         )}
 
-        <section className="mt-5">
+        {!section && <section className="mt-5">
           <div className="-mx-5 flex gap-2 overflow-x-auto px-5 pb-1 sm:mx-0 sm:px-0" aria-label="Reizigers">
             {membersQuery.isLoading ? <LoadingRows /> : members.map((member) => {
               const isMe = member.userId === user.id;
@@ -277,30 +274,32 @@ export default function TripSamen() {
               )}
             </div>
           )}
-        </section>
+        </section>}
 
-        <div className="mt-5 grid grid-cols-3 gap-2" role="tablist" aria-label="Onderdelen">
+        {!section && <div className="mt-5 grid grid-cols-2 gap-3" aria-label="Samen">
           {sectionOptions.map((option) => {
-            const selected = section === option.id;
+            const Icon = option.id === "tasks" ? ListTodo : option.id === "decisions" ? Vote : Wallet;
             const line = option.id === "tasks"
               ? tasksTileLine(openTasks.filter((task) => task.assigned_user_id === user.id || task.backup_user_id === user.id || !task.assigned_user_id).length)
               : option.id === "decisions"
                 ? decisionsTileLine(openDecisions.filter((decision) => !decision.options.some((o) => o.votes.some((vote) => vote.user_id === user.id))).length)
-                : "Scan bon";
+                : "Kosten";
             return (
-              <button key={option.id} type="button" role="tab" aria-selected={selected}
+              <Button key={option.id} type="button" variant="secondary"
                 onClick={() => { setSection(option.id); setActionError(""); }}
-                className={`${option.id === "expenses" ? "tile-knaakie text-on-image" : "tile-plain text-foreground"} rounded-2xl px-3 py-3 text-left ${selected ? "ring-2 ring-foreground" : ""}`}>
-                <span className="block font-brand text-[17px] font-semibold leading-tight">{option.label}</span>
-                <span className={`mt-0.5 block truncate text-[12px] ${option.id === "expenses" ? "opacity-90" : "text-muted-foreground"}`}>{line}</span>
-              </button>
+                className={`${option.id === "expenses" ? "tile-knaakie text-on-image col-span-2" : "tile-plain text-foreground"} h-24 flex-col items-start justify-center rounded-2xl px-4 text-left`}>
+                <span className="flex items-center gap-2"><Icon className="h-5 w-5" /><span className="font-brand text-xl font-semibold">{option.id === "expenses" ? "Knaakie" : option.label}</span></span>
+                <span className={`block text-sm font-normal ${option.id === "expenses" ? "opacity-90" : "text-muted-foreground"}`}>{line}</span>
+              </Button>
             );
           })}
-        </div>
+        </div>}
+
+        {section && section !== "expenses" && <Button variant="ghost" className="mt-3 px-0" onClick={() => setSearchParams({}, { replace: true })}><ArrowLeft />Samen</Button>}
 
         {actionError && <p className="mt-4 text-sm font-medium text-destructive">{actionError}</p>}
 
-        <section ref={sectionRef} className="mt-5 scroll-mt-28">
+        <section className="mt-4">
 
           {section === "tasks" && (
             tasksQuery.isLoading ? (

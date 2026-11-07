@@ -9,10 +9,11 @@ import { GoogleAuthButton } from "@/components/GoogleAuthButton";
 import { PUBLIC_SIGNUP_ENABLED } from "@/config/access";
 import { usePlatformSwitches } from "@/features/ops/settings";
 import { AuthPage } from "@/components/AuthPage";
+import { oauthReturnPath } from "@/lib/oauth-return-path";
 
 function safeNext(value: string | null) {
-  if (!value || !value.startsWith("/") || value.startsWith("//")) return "/trips";
-  return value;
+  const path = oauthReturnPath(value);
+  return path === "/" ? "/trips" : path;
 }
 
 export default function Signup() {
@@ -35,7 +36,7 @@ export default function Signup() {
   const handleGoogle = async () => {
     setError("");
     setLoading(true);
-    const result = await signInWithGoogle();
+    const result = await signInWithGoogle(next);
     setLoading(false);
     if (result.error) setError(result.error);
   };
@@ -62,7 +63,7 @@ export default function Signup() {
     }
 
     setLoading(true);
-    const result = await signUp(email, password, displayName);
+    const result = await signUp(email, password, displayName, next);
     setLoading(false);
     if (result.error) {
       setError(result.error);

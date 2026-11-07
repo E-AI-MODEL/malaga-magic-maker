@@ -22,11 +22,12 @@ interface AuthContextType {
   isAdmin: boolean;
   loading: boolean;
   signIn: (emailOrUsername: string, password: string) => Promise<{ error?: string }>;
-  signInWithGoogle: () => Promise<{ error?: string }>;
+  signInWithGoogle: (next?: string) => Promise<{ error?: string }>;
   signUp: (
     email: string,
     password: string,
     displayName: string,
+    next?: string,
   ) => Promise<{ error?: string; needsEmailConfirmation?: boolean }>;
   requestPasswordReset: (email: string) => Promise<{ error?: string }>;
   updatePassword: (password: string) => Promise<{ error?: string }>;

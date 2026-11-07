@@ -1,3 +1,5 @@
+import { oauthReturnPath } from "@/lib/oauth-return-path";
+
 /** Pending invite stored when a logged-out visitor opens /join/:code; consumed once at signed-in entry. */
 export function signedInEntryPath(invite: string | null): string {
   return invite || "/trips";

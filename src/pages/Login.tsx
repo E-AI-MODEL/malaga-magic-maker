@@ -22,7 +22,7 @@ export default function Login() {
   const handleGoogle = async () => {
     setError("");
     setLoading(true);
-    const result = await signInWithGoogle();
+    const result = await signInWithGoogle(next);
     setLoading(false);
     if (result.error) setError(result.error);
   };

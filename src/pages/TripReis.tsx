@@ -308,12 +308,12 @@ export default function TripReis() {
             <Mail className="mr-3 h-5 w-5" />Boeking scannen
           </Button>
           <div className="mt-3 grid grid-cols-3 gap-2">
-            {addTiles.map((tile) => {
-              const TileIcon = travelTypeIcon(tile.type);
+            {addTiles.map(({ type: value, label }) => {
+              const TypeIcon = travelTypeIcon(value);
               return (
-                <button key={tile.type} type="button" onClick={() => { setAddOpen(false); openCreate(tile.type); }}
+                <button key={value} type="button" onClick={() => { setAddOpen(false); openCreate(value); }}
                   className="flex h-24 flex-col items-center justify-center gap-2 rounded-xl border border-border text-[14px] font-semibold hover:bg-accent">
-                  <TileIcon className="h-6 w-6" strokeWidth={1.75} />{tile.label}
+                  <TypeIcon className="h-6 w-6" strokeWidth={1.75} />{label}
                 </button>
               );
             })}

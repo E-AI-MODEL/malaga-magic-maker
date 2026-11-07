@@ -11,7 +11,7 @@ import { ActivityLogProvider } from "@/contexts/ActivityLogContext";
 import { ClientErrorReporter } from "@/features/observability/ClientErrorReporter";
 import { AppErrorBoundary } from "@/features/observability/AppErrorBoundary";
 import Login from "./pages/Login";
-import { pendingInvitePath, signedInEntryPath } from "@/features/trips/start";
+import { knaakieDestination, pendingInvitePath, signedInEntryPath } from "@/features/trips/start";
 import { GuestKnaakieImport } from "@/features/knaakie-guest/GuestKnaakieImport";
 
 const Trips = lazy(() => import("./pages/Trips"));
@@ -117,7 +117,7 @@ function AppRoutes() {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/steun" element={<Steun />} />
-        <Route path="/knaakie" element={user ? <Navigate to="/trips" replace /> : <KnaakieGuest />} />
+        <Route path="/knaakie" element={user ? <SignedInKnaakie /> : <KnaakieGuest />} />
         <Route path="/terms" element={<TermsPage />} />
         <Route path="/privacy" element={<PrivacyPage />} />
         <Route path="/afmelden" element={<Afmelden />} />
@@ -158,6 +158,12 @@ function AppRoutes() {
       </Routes>
     </Suspense>
   );
+}
+
+function SignedInKnaakie() {
+  const { userTrips, loading } = useTrip();
+  if (loading) return <PageLoader />;
+  return <Navigate to={knaakieDestination(userTrips)} replace />;
 }
 
 const App = () => (

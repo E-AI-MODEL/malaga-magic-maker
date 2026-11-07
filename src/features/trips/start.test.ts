@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { loginDestination, pendingInvitePath, signedInEntryPath } from "./start";
+import { knaakieDestination, loginDestination, pendingInvitePath, signedInEntryPath } from "./start";
 
 describe("Home landing", () => {
   it("always opens Home at signed-in entry", () => {
@@ -8,6 +8,24 @@ describe("Home landing", () => {
   });
   it("gives an invitation priority over Home", () => {
     expect(signedInEntryPath(pendingInvitePath(() => "invitation"))).toBe("/join/invitation");
+  });
+});
+
+describe("signed-in Knaakie entry", () => {
+  it("opens the first dated active trip's existing costs", () => {
+    expect(knaakieDestination([
+      { id: "later", status: "planning", start_date: "2027-08-01" },
+      { id: "first", status: "planning", start_date: "2027-07-01" },
+    ])).toBe("/trip/first/samen?section=expenses");
+  });
+  it("never selects an archived trip", () => {
+    expect(knaakieDestination([
+      { id: "old", status: "archived", start_date: "2026-01-01" },
+      { id: "active", status: "planning", start_date: null },
+    ])).toBe("/trip/active/samen?section=expenses");
+  });
+  it("opens trip creation instead of bouncing back Home without a trip", () => {
+    expect(knaakieDestination([])).toBe("/new-trip");
   });
 });
 

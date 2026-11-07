@@ -1,5 +1,11 @@
 # Roadmap
 
+## Directe mobiele start
+- [x] Strategie: bonnetje eerst, account later; bestaande gastkostenlogica en scancontrole hergebruiken, geen nieuwe route of backend
+- [x] Homepage: directe foto-/handmatige invoer, korte reisingang; voorbeeldsaldo en lange functie-/stappenblokken weg
+- [ ] Tests en mobiele/desktopcontrole van foto → controle → opslaan → kosten teruglezen
+- [ ] Echte camera, VoiceOver en conversie-effect — vereisen apparaatcontrole en bezoekersmeting
+
 ## Simpeler, zoals Tikkie
 - [x] Knaakie: 'Vraag terug' → 'Betaalverzoek sturen' (woordencontrole), donkere saldokaart, grote knoppen voor bonnetje, foto en delen
 - [x] Knaakie: één groot saldo + één knop, per persoon 'Betaalverzoek sturen', bedrag eerst in formulier, betaler/verdeling achter één regel 'Aanpassen'

@@ -22,6 +22,9 @@ type Props = {
   onSave: (result: WizardResult) => Promise<void> | void;
   /** Only Knaakie without an account can add people from inside the steps. */
   onAddPerson?: (name: string) => void;
+  /** Home already offers the photo/manual choice; reuse the same review and save flow. */
+  initialFile?: File;
+  initialStep?: "start" | "amount";
 };
 
 const CURRENCIES = ["EUR", "USD", "GBP", "CHF"];
@@ -45,7 +48,7 @@ export function stepAfterProposal(amount: number | null, description: string | n
 
 const parseAmount = (value: string) => Number(value.replace(/\s/g, "").replace(",", "."));
 
-export function ExpenseWizard({ open, onOpenChange, tripId, people, selfId, defaultCurrency, onSave, onAddPerson }: Props) {
+export function ExpenseWizard({ open, onOpenChange, tripId, people, selfId, defaultCurrency, onSave, onAddPerson, initialFile, initialStep = "start" }: Props) {
   const steps = wizardSteps(people.length, Boolean(onAddPerson));
   const [step, setStep] = useState<WizardStep>("start");
   const [backToSummary, setBackToSummary] = useState(false);
@@ -67,11 +70,25 @@ export function ExpenseWizard({ open, onOpenChange, tripId, people, selfId, defa
   useEffect(() => {
     pending.current?.abort();
     if (!open) return;
-    setStep("start"); setBackToSummary(false); setAmount(""); setCurrency(defaultCurrency || "EUR"); setDescription("");
+    setStep(initialStep); setBackToSummary(false); setAmount(""); setCurrency(defaultCurrency || "EUR"); setDescription("");
     setPaidBy(selfId); setSplit(people.map((p) => p.id)); setImage(""); setBusy(false); setNote(""); setError(""); setNewName(""); setSaving(false);
     // Reset only when the sheet opens; the image is never kept after closing.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
+
+  useEffect(() => {
+    if (!open || !initialFile) return;
+    let cancelled = false;
+    setBusy(true);
+    prepareReceiptImage(initialFile).then((prepared) => {
+      if (!cancelled) setImage(prepared);
+    }).catch((caught) => {
+      if (!cancelled) setError(caught instanceof Error ? caught.message : "Deze foto werkt niet.");
+    }).finally(() => {
+      if (!cancelled) setBusy(false);
+    });
+    return () => { cancelled = true; };
+  }, [open, initialFile]);
 
   // Newly added people join the split automatically.
   const peopleKey = people.map((p) => p.id).join("|");
@@ -118,7 +135,8 @@ export function ExpenseWizard({ open, onOpenChange, tripId, people, selfId, defa
       if (proposal.amount) setAmount(String(proposal.amount).replace(".", ","));
       if (proposal.description) setDescription(proposal.description);
       if (proposal.currency) setCurrency(proposal.currency);
-      const payer = proposal.payerName && people.find((p) => p.name.toLocaleLowerCase("nl-NL") === proposal.payerName!.trim().toLocaleLowerCase("nl-NL"));
+      const payerName = proposal.payerName?.trim().toLocaleLowerCase("nl-NL");
+      const payer = payerName && people.find((p) => p.name.toLocaleLowerCase("nl-NL") === payerName);
       if (payer) setPaidBy(payer.id);
       setNote(proposal.date ? `Uit je bonnetje gehaald, datum ${new Date(`${proposal.date}T12:00:00`).toLocaleDateString("nl-NL", { day: "numeric", month: "long", year: "numeric" })}. Check de gegevens.` : "Uit je bonnetje gehaald. Check de gegevens.");
       setImage("");

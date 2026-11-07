@@ -240,7 +240,7 @@ export function HansieWidget({
       <div
         className={
           floating
-            ? "fixed bottom-[calc(58px+env(safe-area-inset-bottom))] inset-x-0 z-40 border-t border-border bg-card px-3 py-1.5"
+            ? "fixed bottom-[calc(62px+max(6px,env(safe-area-inset-bottom)))] inset-x-0 z-40 border-t border-border bg-card px-3 py-1.5"
             : "sticky bottom-0 left-0 right-0 z-40 border-t border-border bg-background px-3 pb-2 pt-1.5 safe-area-pb"
         }
       >

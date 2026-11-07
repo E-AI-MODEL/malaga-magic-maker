@@ -79,7 +79,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
       );
     }
     return (
-      <div className={`min-h-screen overflow-x-hidden bg-background ${showHansie ? "pb-[calc(8rem+env(safe-area-inset-bottom))]" : "pb-[calc(4rem+env(safe-area-inset-bottom))]"}`}>
+      <div className={`min-h-screen overflow-x-hidden bg-background ${showHansie ? "pb-[calc(8.5rem+env(safe-area-inset-bottom))]" : "pb-[calc(4.75rem+env(safe-area-inset-bottom))]"}`}>
         <header className="sticky top-0 z-40 border-b border-border bg-background">
           <AdminBar />
           <div className="mx-auto grid h-12 max-w-2xl grid-cols-[40px_minmax(0,1fr)_40px] items-center px-2">

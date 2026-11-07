@@ -182,7 +182,8 @@ export default function TripReis() {
 
   // Keep the page short: the first three rows here, the full list in a panel.
   const shownGroups: typeof groups = [];
-  let budget = 3;
+  // Short phones get two rows so Documenten still fits on the screen.
+  let budget = typeof window !== "undefined" && window.innerHeight < 760 ? 2 : 3;
   for (const [day, dayItems] of groups) {
     if (budget <= 0) break;
     shownGroups.push([day, dayItems.slice(0, budget)]);

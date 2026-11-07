@@ -15,7 +15,7 @@
 - [x] Knaakie: 'Vraag terug' → 'Betaalverzoek sturen' (woordencontrole), donkere saldokaart, grote knoppen voor bonnetje, foto en delen
 - [x] Knaakie: één groot saldo + één knop, per persoon 'Betaalverzoek sturen', bedrag eerst in formulier, betaler/verdeling achter één regel 'Aanpassen'
 - [ ] Samen: cijferstrook weg, solo zonder Reizigers/Uitnodigen
-- [ ] Reis: één toevoegpad (snelknoppen), korte lege toestanden
+- [x] Reis: één toevoegpad, max 3 rijen (2 op lage telefoons) + "Alle onderdelen"-paneel; getest als Lis op testreis
 - [ ] Overzicht: één oranje actie, kortere zinnen
 
 ## Integrale vernieuwing (goedgekeurd plan)

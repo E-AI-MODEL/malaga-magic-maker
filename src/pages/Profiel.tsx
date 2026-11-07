@@ -11,7 +11,7 @@ import { PageHeader } from "@/components/primitives";
 import { NotificationPreferences } from "@/features/notifications/NotificationPreferences";
 import { ReminderPreferences } from "@/features/notifications/ReminderPreferences";
 import { toast } from "sonner";
-import { Bell, ChevronRight, CreditCard, LogOut, Map as MapIcon, Settings, ShieldAlert, Sparkles, User } from "lucide-react";
+import { Bell, ChevronRight, CreditCard, LogOut, Map as MapIcon, Settings, ShieldAlert, Star, User } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
 import { usePro } from "@/features/pro/usePro";
 import { usePlanStatus } from "@/features/pro/limits";
@@ -114,7 +114,7 @@ export default function Profiel() {
 
   const tiles: { key: ProfileSheet; label: string; icon: typeof User; tone: string; show: boolean }[] = [
     { key: "account", label: "Account", icon: User, tone: "tile-vakansie text-primary-foreground", show: true },
-    { key: "pro", label: isPro ? "Pro actief" : "Pro", icon: Sparkles, tone: "tile-knaakie text-primary-foreground", show: true },
+    { key: "pro", label: isPro ? "Pro actief" : "Pro", icon: Star, tone: "tile-knaakie text-primary-foreground", show: true },
     { key: "betalen", label: "Betaalgegevens", icon: CreditCard, tone: "tile-plain text-foreground", show: !!user },
     { key: "meldingen", label: "Meldingen", icon: Bell, tone: "tile-plain text-foreground", show: !!user },
     { key: "reizen", label: "Reizen", icon: MapIcon, tone: "tile-plain text-foreground", show: true },

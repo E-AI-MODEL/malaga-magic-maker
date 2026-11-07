@@ -25,6 +25,7 @@ export function TripPageHeader({
 }) {
   const hasMenu = Boolean(addMenu) || Boolean(addActions?.length);
   return (
+    <div className="pt-12 md:pt-0">
     <PageHeader title={title} meta={<>
         {formatTripDateRange(startDate, endDate)}
         {destination ? ` · ${destination}` : ""}
@@ -46,5 +47,6 @@ export function TripPageHeader({
           </DropdownMenuContent>
         </DropdownMenu>
       ) : undefined} />
+    </div>
   );
 }

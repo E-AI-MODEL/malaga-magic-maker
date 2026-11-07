@@ -16,6 +16,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -80,73 +81,45 @@ export function AppLayout({ children }: { children: ReactNode }) {
     }
     return (
       <div className={`min-h-screen overflow-x-hidden bg-background ${showHansie ? "pb-[calc(8.5rem+env(safe-area-inset-bottom))]" : "pb-[calc(4.75rem+env(safe-area-inset-bottom))]"}`}>
-        <header className="sticky top-0 z-40 bg-background">
-          <AdminBar />
-          <div className="mx-auto grid h-12 max-w-2xl grid-cols-[40px_minmax(0,1fr)_40px] items-center px-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={goHome}
-              className="h-9 w-9 text-muted-foreground"
-              aria-label="Naar Home"
-            >
-              <Home className="h-5 w-5" strokeWidth={1.75} />
-            </Button>
-
-            {isTripScreen && activeTrip ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button type="button" className="mx-auto flex min-w-0 max-w-full items-center gap-1 px-2" aria-label="Wissel reis">
-                    <span className="truncate font-ui text-[15px] font-semibold leading-tight">{activeTrip.name}</span>
-                    <ChevronDown className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-                  </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="center" className="w-64">
-                  {userTrips.slice(0, 8).map((trip) => (
-                    <DropdownMenuItem key={trip.id} onClick={() => navigate(`/trip/${trip.id}`)}>
-                      <span className="truncate">{trip.name}</span>
-                      {trip.id === activeTrip.id && <Check className="ml-auto h-4 w-4 text-primary" aria-hidden />}
-                    </DropdownMenuItem>
-                  ))}
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => navigate("/trips")}>Alle reizen</DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            ) : (
-              <h1 className="min-w-0 truncate px-2 text-center font-ui text-[15px] font-semibold leading-tight">
-                {title || <span className="font-brand text-lg">Vakansie</span>}
-              </h1>
-            )}
-
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-9 w-9 text-muted-foreground" aria-label="Meer opties">
-                  <MoreHorizontal className="h-5 w-5" strokeWidth={1.75} />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-60">
-                {isTripScreen && activeTrip && isOrganizer && (
-                  <DropdownMenuItem onClick={() => navigate(`/trip/${activeTrip.id}/settings`)}>
-                    <Settings className="mr-2 h-4 w-4" />Reisinstellingen
-                  </DropdownMenuItem>
-                )}
-                {isTripScreen && activeTrip && activeTrip.status !== "archived" && (
-                  <DropdownMenuItem onClick={() => setCalendarOpen(true)}>
-                    <CalendarPlus className="mr-2 h-4 w-4" />Zet in je agenda
-                  </DropdownMenuItem>
-                )}
-                {!isTripScreen && (
-                  <DropdownMenuItem onClick={() => navigate("/profiel")}>
-                    <User className="mr-2 h-4 w-4" />Profiel
-                  </DropdownMenuItem>
-                )}
-                <DropdownMenuItem onClick={() => navigate("/new-trip")}>
-                  <Plus className="mr-2 h-4 w-4" />Nieuwe reis
+        <AdminBar />
+        {/* No header bar on trip screens: two floating buttons over the photo keep the screen full. */}
+        <div className="pointer-events-none fixed inset-x-0 top-0 z-40 mx-auto flex max-w-2xl items-center justify-between px-3 pt-[calc(env(safe-area-inset-top)+0.5rem)]">
+          <Button variant="outline" size="icon" onClick={goHome} className="pointer-events-auto h-10 w-10 rounded-full border-0 bg-card text-foreground shadow-soft" aria-label="Naar Home">
+            <Home className="h-5 w-5" strokeWidth={1.75} />
+          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="icon" className="pointer-events-auto h-10 w-10 rounded-full border-0 bg-card text-foreground shadow-soft" aria-label="Meer opties">
+                <MoreHorizontal className="h-5 w-5" strokeWidth={1.75} />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-64">
+              {activeTrip && userTrips.length > 1 && <DropdownMenuLabel className="text-xs text-muted-foreground">Wissel reis</DropdownMenuLabel>}
+              {activeTrip && userTrips.filter((trip) => trip.id !== activeTrip.id && trip.status !== "archived").slice(0, 5).map((trip) => (
+                <DropdownMenuItem key={trip.id} onClick={() => navigate(`/trip/${trip.id}`)}>
+                  <ChevronDown className="mr-2 h-4 w-4 -rotate-90" /><span className="truncate">{trip.name}</span>
                 </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        </header>
+              ))}
+              {activeTrip && userTrips.length > 1 && <DropdownMenuSeparator />}
+              {activeTrip && isOrganizer && (
+                <DropdownMenuItem onClick={() => navigate(`/trip/${activeTrip.id}/settings`)}>
+                  <Settings className="mr-2 h-4 w-4" />Reisinstellingen
+                </DropdownMenuItem>
+              )}
+              {activeTrip && activeTrip.status !== "archived" && (
+                <DropdownMenuItem onClick={() => setCalendarOpen(true)}>
+                  <CalendarPlus className="mr-2 h-4 w-4" />Zet in je agenda
+                </DropdownMenuItem>
+              )}
+              <DropdownMenuItem onClick={() => navigate("/profiel")}>
+                <User className="mr-2 h-4 w-4" />Profiel
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate("/new-trip")}>
+                <Plus className="mr-2 h-4 w-4" />Nieuwe reis
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
 
         <main className="mx-auto max-w-2xl">{children}</main>
         {isTripScreen && <BottomNav />}

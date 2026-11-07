@@ -19,12 +19,16 @@ import { PaymentHistory } from "@/features/pro/PaymentHistory";
 import { DeleteAccountSection } from "@/features/account/DeleteAccountSection";
 
 export default function Profiel() {
-  const { profile, isAdmin, user, signOut } = useAuth();
+  const { profile, refreshProfile, isAdmin, user, signOut } = useAuth();
   const { userTrips } = useTrip();
-  const { isPro, refresh: refreshPro } = usePro();
+  const { isPro: hasCheckoutEntitlement, refresh: refreshPro } = usePro();
   const { status: plan, refresh: refreshPlan } = usePlanStatus();
+  // Server plan status (is_pro_user) is authoritative, including Pro granted by Beheer.
+  const isPro = plan ? plan.plan !== "free" : hasCheckoutEntitlement;
   const navigate = useNavigate();
   const [displayName, setDisplayName] = useState(profile?.display_name || "");
+  const [username, setUsername] = useState(profile?.username || "");
+  useEffect(() => { setDisplayName(profile?.display_name || ""); setUsername(profile?.username || ""); }, [profile?.display_name, profile?.username]);
   const [saving, setSaving] = useState(false);
   const [iban, setIban] = useState("");
   const [accountName, setAccountName] = useState("");
@@ -33,17 +37,15 @@ export default function Profiel() {
   const activeTrips = userTrips.filter((trip) => trip.status !== "archived");
 
   const handleSave = async () => {
-    if (!profile || !displayName.trim()) return;
+    if (!profile) return;
+    const name = displayName.trim();
+    const handle = username.trim().toLowerCase().replace(/^@/, "");
+    if (!name) { toast.error("Vul je naam in"); return; }
+    if (!/^[a-z0-9_]{3,20}$/.test(handle)) { toast.error("Gebruikersnaam: 3 tot 20 tekens, alleen letters, cijfers en _"); return; }
     setSaving(true);
-    const { error } = await supabase
-      .from("profiles")
-      .update({ display_name: displayName.trim() })
-      .eq("id", profile.id);
-    if (error) {
-      toast.error("Kon naam niet opslaan");
-    } else {
-      toast.success("Naam bijgewerkt");
-    }
+    const { error } = await supabase.from("profiles").update({ display_name: name, username: handle }).eq("id", profile.id);
+    if (error) toast.error(error.code === "23505" ? "Deze gebruikersnaam is al bezet" : "Opslaan lukt nu niet");
+    else { toast.success("Opgeslagen"); await refreshProfile(); }
     setSaving(false);
   };
 
@@ -181,13 +183,13 @@ export default function Profiel() {
         <section className="mt-7">
           <SectionLabel>Account</SectionLabel>
           <div className="mt-3">
-            <label className="mb-1.5 block text-xs text-muted-foreground">Weergavenaam</label>
-            <div className="flex gap-2">
-              <Input value={displayName} onChange={(event) => setDisplayName(event.target.value)} className="h-10" />
-              <Button onClick={handleSave} disabled={saving || displayName === profile?.display_name} className="h-10">
-                {saving ? "..." : "Opslaan"}
-              </Button>
-            </div>
+            <label htmlFor="profile-name" className="mb-1.5 block text-sm font-semibold">Naam</label>
+            <Input id="profile-name" value={displayName} maxLength={60} onChange={(event) => setDisplayName(event.target.value)} />
+            <label htmlFor="profile-username" className="mb-1.5 mt-3 block text-sm font-semibold">Gebruikersnaam</label>
+            <Input id="profile-username" value={username} maxLength={21} autoCapitalize="none" autoCorrect="off" onChange={(event) => setUsername(event.target.value)} />
+            <Button onClick={handleSave} disabled={saving || (displayName === profile?.display_name && username === profile?.username)} className="mt-3 h-12 w-full">
+              {saving ? "Opslaan…" : "Opslaan"}
+            </Button>
           </div>
         </section>
 

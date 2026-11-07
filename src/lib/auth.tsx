@@ -18,6 +18,7 @@ interface Profile {
 interface AuthContextType {
   user: User | null;
   profile: Profile | null;
+  refreshProfile: () => Promise<void>;
   isAdmin: boolean;
   loading: boolean;
   signIn: (emailOrUsername: string, password: string) => Promise<{ error?: string }>;
@@ -198,7 +199,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, profile, isAdmin, loading, signIn, signInWithGoogle, signUp, requestPasswordReset, updatePassword, signOut }}
+      value={{ user, profile, refreshProfile: async () => { if (user) await fetchProfile(user.id); }, isAdmin, loading, signIn, signInWithGoogle, signUp, requestPasswordReset, updatePassword, signOut }}
     >
       {children}
     </AuthContext.Provider>

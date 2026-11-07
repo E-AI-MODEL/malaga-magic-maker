@@ -22,6 +22,7 @@
 - [x] Fase B deel 1: afgewezen woorden verwijderd + automatische woordencontrole
 - [x] Fase A: gedeelde stijl doorgevoerd — PageHeader op Home, Nieuwe reis, Reis/Samen, Profiel/Instellingen en auth; TimelineRow op Overzicht/Reis; gedeelde lege toestand, neutrale sectiekeuze, grotere knoppen/invoer en vaste formulier-opslagstrook
 - [x] Fase A controles: 268 tests geslaagd; lint 0 fouten/24 bestaande waarschuwingen; automatische typecheck/build OK; login, aanmelden en herstel op 390px/1280px zonder overflow/runtimefouten, invoer 16px
+- [x] Vaste schermhoogte op trip-schermen (alleen inhoud scrolt), datumkoppen in volledige lijst niet meer over rijen
 - [ ] Fase A ingelogde visuele controle en toetsenbord bij sheets — geblokkeerd: testsessie voor verzoeker kan niet worden aangemaakt; preview-login nodig. Bestaand logo laadt niet in lokale browser; live beeld niet bevestigd
 - [ ] Fase B deel 2: volledige taalronde alle schermen
 - [ ] Fase C: Home, Nieuwe reis, Overzicht, Reis, Samen, Profiel/Instellingen, Inloggen

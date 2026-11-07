@@ -325,9 +325,9 @@ export function CountBar({
 }
 
 /** Sticky day header for the itinerary. Small, quiet, always visible while scrolling. */
-export function DayHeader({ label, meta }: { label: string; meta?: string }) {
+export function DayHeader({ label, meta, sticky = true }: { label: string; meta?: string; sticky?: boolean }) {
   return (
-    <div className="sticky top-[5.5rem] z-20 -mx-5 flex items-baseline gap-2 bg-background/95 px-5 py-1.5 sm:-mx-8 sm:px-8">
+    <div className={`${sticky ? "sticky top-[5.5rem] z-20" : ""} -mx-5 flex items-baseline gap-2 bg-background/95 px-5 py-1.5 sm:-mx-8 sm:px-8`}>
       <span className="font-ui text-[16px] font-semibold text-foreground">{label}</span>
       {meta && <span className="num truncate text-[11px] text-muted-foreground">{meta}</span>}
     </div>

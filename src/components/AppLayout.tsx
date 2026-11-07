@@ -80,7 +80,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
       );
     }
     return (
-      <div className={`min-h-screen overflow-x-hidden bg-background ${"pb-[calc(4.75rem+env(safe-area-inset-bottom))]"}`}>
+      <div className="flex h-[100dvh] flex-col overflow-hidden bg-background">
         <AdminBar />
         {/* No header bar on trip screens: two floating buttons over the photo keep the screen full. */}
         <div className="pointer-events-none fixed inset-x-0 top-0 z-40 mx-auto flex max-w-2xl items-center justify-between px-3 pt-[calc(env(safe-area-inset-top)+0.5rem)]">
@@ -121,7 +121,8 @@ export function AppLayout({ children }: { children: ReactNode }) {
           </DropdownMenu>
         </div>
 
-        <main className="mx-auto max-w-2xl">{children}</main>
+        {/* Fixed frame: the page never scrolls; only this content box does, above the bottom nav. */}
+        <main className="mx-auto w-full max-w-2xl flex-1 overflow-y-auto overflow-x-hidden overscroll-contain pb-[calc(4.75rem+env(safe-area-inset-bottom))]">{children}</main>
         {isTripScreen && <BottomNav />}
         {showHansie && <HansieWidget trip={activeTrip} floating showBar={false} />}
         {activeTrip && <CalendarFeedSheet open={calendarOpen} onOpenChange={setCalendarOpen} tripId={activeTrip.id} />}

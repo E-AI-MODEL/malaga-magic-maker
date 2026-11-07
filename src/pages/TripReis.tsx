@@ -191,11 +191,12 @@ export default function TripReis() {
   }
   const hiddenCount = timelineItems.length - shownGroups.reduce((n, [, d]) => n + d.length, 0);
 
-  const renderGroups = (list: typeof groups) => (
+  const renderGroups = (list: typeof groups, sticky = true) => (
     <>
               {list.map(([day, dayItems]) => (
                 <div key={day} className="mb-2">
                   <DayHeader
+                    sticky={sticky}
                     label={day === "undated" ? "Nog niet ingepland" : formatTripDay(day, timezone)}
                   />
                   <div className="border-t border-rule">
@@ -327,7 +328,7 @@ export default function TripReis() {
       <Sheet open={allOpen} onOpenChange={setAllOpen}>
         <SheetContent side="bottom" className="max-h-[85dvh] overflow-y-auto rounded-t-2xl pb-[max(1.5rem,env(safe-area-inset-bottom))]">
           <SheetHeader><SheetTitle className="text-left">Alle onderdelen</SheetTitle></SheetHeader>
-          <div className="mt-3">{renderGroups(groups)}</div>
+          <div className="mt-3">{renderGroups(groups, false)}</div>
         </SheetContent>
       </Sheet>
       <Sheet open={addOpen} onOpenChange={setAddOpen}>

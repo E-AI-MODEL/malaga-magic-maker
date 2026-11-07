@@ -1,5 +1,9 @@
 # Roadmap
 
+## Bovenste reisnavigatie
+- [ ] Home, paginatitel en menu in één gereserveerde rij; geen zwevende overlap met titel of Toevoegen
+- [ ] Mobiel Overzicht, Reis, Samen en Knaakie controleren
+
 ## Samen, Knaakie en Hansie onderscheiden
 - [x] Samen opent een gezamenlijk tegeloverzicht; Knaakie opent alleen kosten met eigen titel en compacte kostentegels
 - [x] Hansie: kleinere onderwerptegels, geen dubbele uitleg of voorbereidingsvragen eronder

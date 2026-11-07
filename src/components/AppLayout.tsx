@@ -51,11 +51,15 @@ export function AppLayout({ children }: { children: ReactNode }) {
   const { activeTrip, userTrips, isOrganizer } = useTrip();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
-  const { pathname } = useLocation();
+  const { pathname, search } = useLocation();
   const [calendarOpen, setCalendarOpen] = useState(false);
   const isTripScreen = /^\/trip\/[^/]+(?:\/(?:reis|samen|settings))?\/?$/.test(pathname);
   const showHansie = isTripScreen && activeTrip?.status !== "archived";
   const title = pathname === "/trips" ? "Home" : pathname === "/profiel" ? "Profiel" : activeTrip?.name;
+  const section = new URLSearchParams(search).get("section");
+  const tripHeading = pathname.endsWith("/reis") ? "Reis"
+    : pathname.endsWith("/samen") ? section === "expenses" ? "Knaakie" : section === "tasks" ? "Taken" : section === "decisions" ? "Keuzes" : "Samen"
+    : null;
 
   const goHome = () => {
     if (pathname === "/trips") window.scrollTo({ top: 0 });
@@ -82,14 +86,15 @@ export function AppLayout({ children }: { children: ReactNode }) {
     return (
       <div className="flex h-[100dvh] flex-col overflow-hidden bg-background">
         <AdminBar />
-        {/* No header bar on trip screens: two floating buttons over the photo keep the screen full. */}
-        <div className="pointer-events-none fixed inset-x-0 top-0 z-40 mx-auto flex max-w-2xl items-center justify-between px-3 pt-[calc(env(safe-area-inset-top)+0.5rem)]">
-          <Button variant="outline" size="icon" onClick={goHome} className="pointer-events-auto h-10 w-10 rounded-full border-0 bg-card text-foreground shadow-soft" aria-label="Naar Home">
+        {/* Reserved row: navigation never overlays the page heading or its actions. */}
+        <div className="z-40 mx-auto flex w-full max-w-2xl shrink-0 items-center gap-3 px-5 pb-2 pt-[calc(env(safe-area-inset-top)+0.75rem)]">
+          <Button variant="secondary" size="icon" onClick={goHome} className="h-11 w-11 rounded-2xl" aria-label="Naar Home">
             <Home className="h-5 w-5" strokeWidth={1.75} />
           </Button>
+          <div className="min-w-0 flex-1">{tripHeading && <h1 className="truncate font-brand text-[28px] font-bold leading-tight">{tripHeading}</h1>}</div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="icon" className="pointer-events-auto h-10 w-10 rounded-full border-0 bg-card text-foreground shadow-soft" aria-label="Meer opties">
+              <Button variant="secondary" size="icon" className="h-11 w-11 rounded-2xl" aria-label="Meer opties">
                 <MoreHorizontal className="h-5 w-5" strokeWidth={1.75} />
               </Button>
             </DropdownMenuTrigger>

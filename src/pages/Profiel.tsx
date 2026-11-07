@@ -5,20 +5,23 @@ import { useTrip } from "@/contexts/TripContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { FormError } from "@/components/FormSheet";
+import { FormError, FormSheet } from "@/components/FormSheet";
 import { formatIban, normalizeIban, paymentDetailsError } from "@/features/together/iban";
-import { PageHeader, SectionLabel } from "@/components/primitives";
+import { PageHeader } from "@/components/primitives";
 import { NotificationPreferences } from "@/features/notifications/NotificationPreferences";
 import { ReminderPreferences } from "@/features/notifications/ReminderPreferences";
 import { toast } from "sonner";
-import { ChevronRight, LogOut, Sparkles } from "lucide-react";
+import { Bell, ChevronRight, CreditCard, LogOut, Map as MapIcon, Settings, ShieldAlert, Sparkles, User } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
 import { usePro } from "@/features/pro/usePro";
 import { usePlanStatus } from "@/features/pro/limits";
 import { PaymentHistory } from "@/features/pro/PaymentHistory";
 import { DeleteAccountSection } from "@/features/account/DeleteAccountSection";
 
+type ProfileSheet = "account" | "pro" | "betalen" | "meldingen" | "reizen" | "privacy";
+
 export default function Profiel() {
+  const [sheet, setSheet] = useState<ProfileSheet | null>(null);
   const { profile, refreshProfile, isAdmin, user, signOut } = useAuth();
   const { userTrips } = useTrip();
   const { isPro: hasCheckoutEntitlement, refresh: refreshPro } = usePro();
@@ -109,31 +112,70 @@ export default function Profiel() {
     setIbanSaving(false);
   };
 
+  const tiles: { key: ProfileSheet; label: string; icon: typeof User; tone: string; show: boolean }[] = [
+    { key: "account", label: "Account", icon: User, tone: "tile-vakansie text-primary-foreground", show: true },
+    { key: "pro", label: isPro ? "Pro actief" : "Pro", icon: Sparkles, tone: "tile-knaakie text-primary-foreground", show: true },
+    { key: "betalen", label: "Betaalgegevens", icon: CreditCard, tone: "tile-plain text-foreground", show: !!user },
+    { key: "meldingen", label: "Meldingen", icon: Bell, tone: "tile-plain text-foreground", show: !!user },
+    { key: "reizen", label: "Reizen", icon: MapIcon, tone: "tile-plain text-foreground", show: true },
+    { key: "privacy", label: "Account wissen", icon: ShieldAlert, tone: "tile-plain text-foreground", show: !!user?.email },
+  ];
+  const sheetTitle: Record<ProfileSheet, string> = { account: "Account", pro: "Vakansie Pro", betalen: "Betaalgegevens", meldingen: "Meldingen", reizen: "Actieve reizen", privacy: "Account verwijderen" };
+
   return (
     <AppLayout>
-      <div className="mx-auto max-w-2xl px-5 py-7">
-        <div className="flex items-center gap-3 border-b border-rule/10 pb-5">
+      <div className="mx-auto flex h-[calc(100dvh-11rem)] max-w-2xl flex-col overflow-hidden px-5 pt-5 md:h-[calc(100dvh-4rem)]">
+        <div className="flex items-center gap-3">
           <span className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 font-brand text-lg font-semibold text-primary">
             {(profile?.display_name || user?.email || "?").slice(0, 1).toUpperCase()}
           </span>
           <div className="min-w-0">
             <PageHeader title={profile?.display_name || "Reiziger"} />
-            <p className="truncate text-xs text-muted-foreground">
-              {profile?.username ? `@${profile.username}` : ""}
-              {profile?.username && user?.email ? " · " : ""}
-              {user?.email || ""}
-            </p>
-            {isPro && (
-              <span className="mt-1.5 inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-medium text-primary">
-                <Sparkles className="h-3 w-3" strokeWidth={1.75} />
-                Pro
-              </span>
-            )}
+            <p className="truncate text-xs text-muted-foreground">{profile?.username ? `@${profile.username}` : user?.email || ""}</p>
           </div>
         </div>
 
-        <section className="mt-7">
-          <SectionLabel>Vakansie Pro</SectionLabel>
+        <div className="mt-5 grid min-h-0 flex-1 auto-rows-fr grid-cols-2 gap-3 pb-3">
+          {tiles.filter((tile) => tile.show).map((tile) => (
+            <button key={tile.key} onClick={() => setSheet(tile.key)} className={`${tile.tone} flex flex-col justify-between rounded-2xl p-4 text-left`}>
+              <tile.icon className="h-6 w-6" strokeWidth={1.75} />
+              <span className="font-brand text-lg font-semibold leading-tight">{tile.label}</span>
+            </button>
+          ))}
+        </div>
+        <div className="grid grid-cols-2 gap-3 pb-4">
+          {isAdmin && (
+            <button onClick={() => navigate("/ops")} className="tile-plain flex h-14 items-center gap-2 rounded-2xl px-4 text-left text-foreground">
+              <Settings className="h-5 w-5" strokeWidth={1.75} />
+              <span className="font-brand text-base font-semibold">Beheer</span>
+            </button>
+          )}
+          <button onClick={() => void signOut()} className={`tile-plain flex h-14 items-center gap-2 rounded-2xl px-4 text-left text-destructive ${isAdmin ? "" : "col-span-2"}`}>
+            <LogOut className="h-5 w-5" />
+            <span className="font-brand text-base font-semibold">Uitloggen</span>
+          </button>
+        </div>
+      </div>
+
+      <FormSheet open={sheet !== null} onOpenChange={(open) => !open && setSheet(null)} title={sheet ? sheetTitle[sheet] : ""}>
+        {sheet === "account" && (<>
+        <section >
+          
+          <div className="mt-3">
+            <label htmlFor="profile-name" className="mb-1.5 block text-sm font-semibold">Naam</label>
+            <Input id="profile-name" value={displayName} maxLength={60} onChange={(event) => setDisplayName(event.target.value)} />
+            <label htmlFor="profile-username" className="mb-1.5 mt-3 block text-sm font-semibold">Gebruikersnaam</label>
+            <Input id="profile-username" value={username} maxLength={21} autoCapitalize="none" autoCorrect="off" onChange={(event) => setUsername(event.target.value)} />
+            <Button onClick={handleSave} disabled={saving || (displayName === profile?.display_name && username === profile?.username)} className="mt-3 h-12 w-full">
+              {saving ? "Opslaan…" : "Opslaan"}
+            </Button>
+          </div>
+        </section>
+
+        </>)}
+        {sheet === "pro" && (<>
+        <section >
+          
           <div className="mt-1 rule-divide">
             <button onClick={() => navigate("/steun")} className="flex w-full items-center gap-3 py-3 text-left">
               <span className="min-w-0 flex-1">
@@ -180,22 +222,11 @@ export default function Profiel() {
           }}
         />
 
-        <section className="mt-7">
-          <SectionLabel>Account</SectionLabel>
-          <div className="mt-3">
-            <label htmlFor="profile-name" className="mb-1.5 block text-sm font-semibold">Naam</label>
-            <Input id="profile-name" value={displayName} maxLength={60} onChange={(event) => setDisplayName(event.target.value)} />
-            <label htmlFor="profile-username" className="mb-1.5 mt-3 block text-sm font-semibold">Gebruikersnaam</label>
-            <Input id="profile-username" value={username} maxLength={21} autoCapitalize="none" autoCorrect="off" onChange={(event) => setUsername(event.target.value)} />
-            <Button onClick={handleSave} disabled={saving || (displayName === profile?.display_name && username === profile?.username)} className="mt-3 h-12 w-full">
-              {saving ? "Opslaan…" : "Opslaan"}
-            </Button>
-          </div>
-        </section>
-
+        </>)}
+        {sheet === "betalen" && (<>
         {user && (
-          <section className="mt-8">
-            <SectionLabel>Betaalgegevens</SectionLabel>
+          <section >
+            
             <p className="mt-2 text-xs text-muted-foreground">Alleen jij ziet dit. Het komt alleen in betaalverzoeken die jij zelf verstuurt.</p>
             <div className="mt-3 space-y-3">
               <div>
@@ -232,9 +263,11 @@ export default function Profiel() {
           </section>
         )}
 
+        </>)}
+        {sheet === "meldingen" && (<>
         {user && (
-          <section className="mt-8">
-            <SectionLabel>Meldingen</SectionLabel>
+          <section >
+            
             <div className="mt-2">
               <NotificationPreferences userId={user.id} />
               <ReminderPreferences userId={user.id} />
@@ -242,23 +275,10 @@ export default function Profiel() {
           </section>
         )}
 
-        {isAdmin && (
-          <section className="mt-8">
-            <SectionLabel>Toegang</SectionLabel>
-            <div className="mt-1 rule-divide">
-              <button onClick={() => navigate("/ops")} className="flex w-full items-center gap-3 py-3 text-left">
-                <span className="min-w-0 flex-1">
-                  <span className="block text-[15px] font-medium">Beheer</span>
-                  <span className="block text-xs text-muted-foreground">Interne omgeving voor gebruikers, reizen en systeemcontrole.</span>
-                </span>
-                <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground/60" />
-              </button>
-            </div>
-          </section>
-        )}
-
-        <section className="mt-8">
-          <SectionLabel>Actieve reizen</SectionLabel>
+        </>)}
+        {sheet === "reizen" && (<>
+        <section >
+          
           {activeTrips.length === 0 ? (
             <p className="py-3 text-sm text-muted-foreground">
               Je hebt op dit moment geen actieve reis. Gearchiveerde reizen vind je via Mijn reizen.
@@ -283,16 +303,8 @@ export default function Profiel() {
           )}
         </section>
 
-        <section className="mt-8">
-          <SectionLabel>Sessie</SectionLabel>
-          <div className="mt-1 rule-divide">
-            <button onClick={() => void signOut()} className="flex w-full items-center gap-3 py-3 text-left text-destructive">
-              <LogOut className="h-4 w-4 shrink-0" />
-              <span className="flex-1 text-[15px] font-medium">Uitloggen</span>
-            </button>
-          </div>
-        </section>
-
+        </>)}
+        {sheet === "privacy" && (<>
         {user?.email && (
           <DeleteAccountSection
             email={user.email}
@@ -304,7 +316,8 @@ export default function Profiel() {
             }}
           />
         )}
-      </div>
+        </>)}
+      </FormSheet>
     </AppLayout>
   );
 }

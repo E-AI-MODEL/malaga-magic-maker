@@ -64,7 +64,7 @@ export function StepFrame({ total, index, onBack, onClose, onSwipeNext, closeLab
       </div>
       <div className="flex-1 overflow-y-auto overscroll-contain px-5 pb-[max(env(safe-area-inset-bottom),1.25rem)] pt-6" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd} aria-live="polite">
         {children}
-        {hint && onSwipeNext && <p className="mt-6 text-center text-xs text-muted-foreground">Veeg naar links of rechts om te bladeren</p>}
+        {hint && onSwipeNext && <p className="mt-4 text-center text-xs text-muted-foreground">Veeg naar links of rechts om te bladeren</p>}
       </div>
     </div>
   );
@@ -75,7 +75,7 @@ type SheetProps = Omit<FrameProps, "onClose"> & { open: boolean; onOpenChange: (
 export function StepSheet({ open, onOpenChange, title, ...frame }: SheetProps) {
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="bottom" className="flex h-[92dvh] flex-col rounded-t-3xl border-t border-border bg-background px-0 pb-0 pt-0 sm:left-1/2 sm:max-w-xl sm:-translate-x-1/2 [&>button:last-child]:hidden">
+      <SheetContent side="bottom" className="flex h-[100dvh] flex-col rounded-none border-0 bg-background px-0 pb-0 pt-[env(safe-area-inset-top)] sm:h-[92dvh] sm:rounded-t-3xl sm:left-1/2 sm:max-w-xl sm:-translate-x-1/2 [&>button:last-child]:hidden">
         <SheetTitle className="sr-only">{title}</SheetTitle>
         <SheetDescription className="sr-only">Stap {frame.index + 1} van {frame.total}</SheetDescription>
         <StepFrame {...frame} onClose={() => onOpenChange(false)} />
@@ -85,7 +85,7 @@ export function StepSheet({ open, onOpenChange, title, ...frame }: SheetProps) {
 }
 
 export function StepQuestion({ children, sub }: { children: ReactNode; sub?: ReactNode }) {
-  return <div className="mb-5"><h3 className="font-display text-[32px] font-bold leading-tight">{children}</h3>{sub && <p className="mt-2 text-[15px] leading-relaxed text-muted-foreground">{sub}</p>}</div>;
+  return <div className="mb-5"><h3 className="font-display text-[28px] font-bold leading-tight">{children}</h3>{sub && <p className="mt-2 text-[15px] leading-relaxed text-muted-foreground">{sub}</p>}</div>;
 }
 
 type TileProps = { children: ReactNode; onClick: () => void; icon?: ReactNode; selected?: boolean; strong?: boolean; disabled?: boolean; size?: "lg" | "md" };

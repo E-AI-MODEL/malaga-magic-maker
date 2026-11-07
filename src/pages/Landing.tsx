@@ -55,6 +55,7 @@ export default function Landing() {
   const navigate = useNavigate();
   const [guest, setGuest] = useState(() => loadGuestKnaakie());
   const [open, setOpen] = useState(false);
+  const [logoFailed, setLogoFailed] = useState(false);
   const [file, setFile] = useState<File>();
   const [initialStep, setInitialStep] = useState<"start" | "amount">("start");
   const camera = useRef<HTMLInputElement>(null);
@@ -75,7 +76,7 @@ export default function Landing() {
   return (
     <div className="min-h-screen overflow-x-hidden bg-card text-foreground">
       <header className="mx-auto flex h-16 max-w-2xl items-center justify-between px-6">
-        <img src={logo.url} alt="Vakansie" width={169} height={43} className="h-8 w-auto object-contain" />
+        {logoFailed ? <span className="font-display text-3xl font-bold">Vakansie</span> : <img src={logo.url} alt="Vakansie" width={169} height={43} onError={() => setLogoFailed(true)} className="h-8 w-auto object-contain" />}
         <Button asChild variant="ghost"><Link to="/login">Inloggen<ArrowRight /></Link></Button>
       </header>
 

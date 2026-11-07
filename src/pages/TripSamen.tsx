@@ -10,7 +10,6 @@ import {
   CheckCircle2,
   ChevronDown,
   Circle,
-  ListChecks,
   Plus,
   Trash2,
   UserPlus,
@@ -41,7 +40,7 @@ import { TripInvitesCard } from "@/features/invites/TripInvitesCard";
 import { listTravelerProfiles, summariseProfile } from "@/features/travelers/data";
 import { TravelerProfileSheet } from "@/features/travelers/TravelerProfileSheet";
 import { RecentActivity } from "@/features/notifications/RecentActivity";
-import { CountBar, EmptyLine, RowItem, RowList, SectionLabel, Segmented, StatusWord, StickyBar } from "@/components/primitives";
+import { EmptyLine, RowList, Segmented, StatusWord, StickyBar } from "@/components/primitives";
 import { TripPageHeader } from "@/components/TripPageHeader";
 
 /** Shared work stays within Samen, including Kosten. */
@@ -207,11 +206,6 @@ export default function TripSamen() {
 
   const openTasks = tasks.filter((task) => task.status !== "done" && task.progress < 100);
   const openDecisions = decisions.filter((decision) => decision.status === "open");
-  const myTasks = openTasks.filter((task) => task.assigned_user_id === user.id || task.backup_user_id === user.id);
-  const myPendingDecisions = openDecisions.filter(
-    (decision) => !decision.options.some((option) => option.votes.some((vote) => vote.user_id === user.id)),
-  );
-  const personalAttentionCount = myTasks.length + myPendingDecisions.length;
 
   const addAction = !readOnly
     ? section === "tasks"
@@ -232,16 +226,6 @@ export default function TripSamen() {
             { label: "Nieuwe keuze", onClick: () => setDecisionSheetOpen(true) },
           ] : undefined}
         />
-        <div className="mt-3 border-y border-rule py-3">
-          <CountBar
-            items={[
-              { label: "Reizigers", value: members.length },
-              { label: "Open taken", value: openTasks.length, onClick: () => setSection("tasks") },
-              { label: "Open keuzes", value: openDecisions.length, onClick: () => setSection("decisions") },
-            ]}
-          />
-        </div>
-
         {readOnly && (
           <div className="mt-4 flex items-center gap-2 border-t border-rule/10 pt-3 text-sm text-muted-foreground">
             <Archive className="h-[18px] w-[18px] shrink-0" strokeWidth={1.75} />
@@ -249,60 +233,38 @@ export default function TripSamen() {
           </div>
         )}
 
-        <section className="mt-7">
-          <SectionLabel
-            action={
-              !readOnly ? (
+        <section className="mt-5">
+          <div className="-mx-5 flex gap-4 overflow-x-auto px-5 pb-1 sm:mx-0 sm:px-0" aria-label="Reizigers">
+            {membersQuery.isLoading ? <LoadingRows /> : members.map((member) => {
+              const isMe = member.userId === user.id;
+              const role = member.role === "organizer" ? "organisator" : "reiziger";
+              const summary = summariseProfile(profileMapByUser.get(member.userId));
+              return (
                 <button
+                  key={member.userId}
                   type="button"
-                  onClick={() => setInviteOpen((open) => !open)}
-                  className="inline-flex items-center gap-1 text-[13px] font-semibold text-primary underline-offset-4 hover:underline"
+                  disabled={!isMe || readOnly}
+                  onClick={() => setProfileSheetOpen(true)}
+                  title={summary || undefined}
+                  aria-label={`${member.displayName}${isMe ? " (jij)" : ""}, ${role}${isMe ? ". Wensen invullen" : ""}`}
+                  className="flex w-16 shrink-0 flex-col items-center gap-1.5 disabled:cursor-default"
                 >
-                  <UserPlus className="h-3.5 w-3.5" strokeWidth={2} />
-                  {inviteOpen ? "Sluiten" : "Uitnodigen"}
+                  <span className={`flex h-14 w-14 items-center justify-center rounded-full bg-secondary text-[18px] font-semibold ${isMe ? "ring-2 ring-primary ring-offset-2 ring-offset-background" : ""}`}>
+                    {member.displayName.slice(0, 1).toUpperCase()}
+                  </span>
+                  <span className="w-full truncate text-center text-[12px] font-medium">{isMe ? "Jij" : member.displayName}</span>
                 </button>
-              ) : null
-            }
-          >
-            Reizigers
-          </SectionLabel>
-
-          {membersQuery.isLoading ? (
-            <LoadingRows />
-          ) : (
-            <RowList className="mt-1">
-              {members.map((member) => {
-                const summary = summariseProfile(profileMapByUser.get(member.userId));
-                const isMe = member.userId === user.id;
-                return (
-                  <div key={member.userId} className="flex min-h-[48px] items-start gap-3 py-3">
-                    <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-secondary text-xs font-semibold">
-                      {member.displayName.slice(0, 1).toUpperCase()}
-                    </span>
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-[15px] font-medium">
-                        {member.displayName}{isMe ? ` (jij · ${member.role === "organizer" ? "organisator" : "reiziger"})` : ""}
-                      </p>
-                      <p className="mt-0.5 truncate text-[13px] text-muted-foreground">
-                        {summary || (isMe ? "Nog geen wensen ingevuld" : "Wensen nog niet ingevuld")}
-                      </p>
-                    </div>
-                    {isMe && !readOnly ? (
-                      <button
-                        type="button"
-                        onClick={() => setProfileSheetOpen(true)}
-                        className="shrink-0 text-[13px] font-semibold text-primary underline-offset-4 hover:underline"
-                      >
-                        {myProfile ? "Aanpassen" : "Invullen"}
-                      </button>
-                    ) : (
-                      <StatusWord tone="muted">{member.role === "organizer" ? "Organisator" : "Reiziger"}</StatusWord>
-                    )}
-                  </div>
-                );
-              })}
-            </RowList>
-          )}
+              );
+            })}
+            {!readOnly && (
+              <button type="button" onClick={() => setInviteOpen((open) => !open)} aria-expanded={inviteOpen} className="flex w-16 shrink-0 flex-col items-center gap-1.5">
+                <span className="flex h-14 w-14 items-center justify-center rounded-full border-2 border-dashed border-border text-muted-foreground">
+                  <UserPlus className="h-5 w-5" strokeWidth={1.75} />
+                </span>
+                <span className="text-[12px] font-medium text-muted-foreground">Uitnodigen</span>
+              </button>
+            )}
+          </div>
 
           {!readOnly && inviteOpen && (
             <div className="mt-4">
@@ -316,35 +278,6 @@ export default function TripSamen() {
             </div>
           )}
         </section>
-
-        {personalAttentionCount > 0 && (
-
-          <section className="mt-7">
-            <SectionLabel>Voor jou</SectionLabel>
-            <RowList className="mt-1">
-              {myTasks.slice(0, 3).map((task) => (
-                <RowItem
-                  key={`task-${task.id}`}
-                  icon={Circle}
-                  emphasis
-                  title={task.title}
-                  meta="Jouw taak"
-                  onClick={() => setSection("tasks")}
-                />
-              ))}
-              {myPendingDecisions.slice(0, Math.max(0, 3 - myTasks.length)).map((decision) => (
-                <RowItem
-                  key={`decision-${decision.id}`}
-                  icon={ListChecks}
-                  emphasis
-                  title={decision.title}
-                  meta="Jij hebt nog niet gestemd"
-                  onClick={() => setSection("decisions")}
-                />
-              ))}
-            </RowList>
-          </section>
-        )}
 
         <StickyBar className="mt-5">
           <Segmented
@@ -365,15 +298,12 @@ export default function TripSamen() {
         {actionError && <p className="mt-4 text-sm font-medium text-destructive">{actionError}</p>}
 
         <section ref={sectionRef} className="mt-5 scroll-mt-28">
-          <SectionLabel>
-            {section === "tasks" ? "Taken" : section === "decisions" ? "Keuzes" : "Knaakie"}
-          </SectionLabel>
 
           {section === "tasks" && (
             tasksQuery.isLoading ? (
               <LoadingRows />
             ) : tasks.length === 0 ? (
-              <EmptyLine text="Nog geen taken. Voeg alleen toe wat iemand echt moet regelen." actionLabel={readOnly ? undefined : "Nieuwe taak"} onClick={readOnly ? undefined : openNewTask} />
+              <EmptyLine text="Nog geen taken." actionLabel={readOnly ? undefined : "Nieuwe taak"} onClick={readOnly ? undefined : openNewTask} />
             ) : (
               <RowList className="mt-1">
                 {tasks.map((task) => {

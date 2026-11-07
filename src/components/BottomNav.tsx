@@ -10,8 +10,8 @@ export function BottomNav() {
   const expensesActive = pathname === `/trip/${activeTrip.id}/samen` && new URLSearchParams(search).get("section") === "expenses";
 
   const base =
-    "relative flex h-[58px] flex-1 flex-col items-center justify-center gap-1 text-[11px] font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring";
-  const active = "text-foreground";
+    "relative flex h-[56px] flex-1 flex-col items-center justify-center gap-0.5 rounded-2xl text-[11px] font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring";
+  const active = "bg-primary/10 text-primary";
   const inactive = "text-muted-foreground";
 
   const links = [
@@ -21,8 +21,8 @@ export function BottomNav() {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-border bg-card pb-[env(safe-area-inset-bottom)]">
-      <div className="mx-auto flex max-w-lg">
+    <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-border bg-card px-2 pt-1.5 pb-[max(6px,env(safe-area-inset-bottom))] shadow-soft">
+      <div className="mx-auto flex max-w-lg gap-1">
         {links.map((link) => (
           <NavLink
             key={link.to}
@@ -33,17 +33,15 @@ export function BottomNav() {
           >
             {({ isActive }) => (
               <>
-                {isActive && !expensesActive && <span aria-hidden className="absolute inset-x-7 top-0 h-[3px] bg-primary" />}
-                <link.icon className="h-5 w-5" strokeWidth={isActive && !expensesActive ? 2 : 1.75} aria-hidden />
+                                <link.icon className="h-5 w-5" strokeWidth={isActive && !expensesActive ? 2 : 1.75} aria-hidden />
                 <span>{link.label}</span>
               </>
             )}
           </NavLink>
         ))}
-         <Button asChild variant="ghost" className={`${base} h-[58px] rounded-none px-0 py-0 text-[11px] ${expensesActive ? active : inactive}`}>
+         <Button asChild variant="ghost" className={`${base} h-[56px] rounded-2xl px-0 py-0 text-[11px] ${expensesActive ? active : inactive}`}>
            <Link to={`/trip/${activeTrip.id}/samen?section=expenses`} aria-current={expensesActive ? "page" : undefined}>
-             {expensesActive && <span aria-hidden className="absolute inset-x-7 top-0 h-[3px] bg-primary" />}
-             <Wallet className="!h-5 !w-5" strokeWidth={expensesActive ? 2 : 1.75} aria-hidden />
+                          <Wallet className="!h-5 !w-5" strokeWidth={expensesActive ? 2 : 1.75} aria-hidden />
              <span>Knaakie</span>
            </Link>
          </Button>

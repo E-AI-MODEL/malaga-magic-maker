@@ -4,7 +4,7 @@
 
 @layer base {
   :root {
-    --background: 220 20% 97%;
+    --background: 205 60% 96%;
     --foreground: 222 47% 11%;
 
     --card: 0 0% 100%;
@@ -143,8 +143,8 @@
 
 @layer components {
   .button-physical {
-    border: 1px solid hsl(var(--foreground) / 0.15);
-    box-shadow: var(--shadow-button);
+    border: 0;
+    box-shadow: 0 4px 0 hsl(var(--foreground) / 0.16), 0 8px 16px hsl(var(--foreground) / 0.1);
     position: relative;
     top: 0;
   }
@@ -156,7 +156,7 @@
   .tile-knaakie:active, .tile-vakansie:active, .tile-hansie:active, .tile-plain:active { top: 4px; box-shadow: 0 2px 0 hsl(var(--foreground) / 0.2); }
   .button-physical:active:not(:disabled) {
     top: 3px;
-    box-shadow: var(--shadow-button-pressed);
+    box-shadow: 0 1px 0 hsl(var(--foreground) / 0.18);
   }
   .rule-divide > * + * {
     border-top: 1px solid hsl(var(--rule) / 0.06);

@@ -88,6 +88,6 @@ describe("Vakansie BUILD 17 visual depth contract", () => {
     expect(labels).toEqual(["Overzicht", "Reis", "Samen"]);
     expect(bottomNav).toContain('className="h-5 w-5"');
     expect(bottomNav).toContain("bg-card");
-    expect(bottomNav).toContain("bg-primary/10 text-primary");
+    expect(bottomNav).toContain("bg-vakansie/10 text-vakansie");
   });
 });

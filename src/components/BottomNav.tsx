@@ -11,7 +11,7 @@ export function BottomNav() {
 
   const base =
     "relative flex h-[56px] flex-1 flex-col items-center justify-center gap-0.5 rounded-2xl text-[11px] font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring";
-  const active = "bg-primary/10 text-primary";
+  const active = "bg-vakansie/10 text-vakansie";
   const inactive = "text-muted-foreground";
 
   const links = [
@@ -39,7 +39,7 @@ export function BottomNav() {
             )}
           </NavLink>
         ))}
-         <Button asChild variant="ghost" className={`${base} h-[56px] rounded-2xl px-0 py-0 text-[11px] ${expensesActive ? active : inactive}`}>
+         <Button asChild variant="ghost" className={`${base} tile-knaakie h-[56px] rounded-2xl px-0 py-0 text-[11px] text-on-image hover:text-on-image ${expensesActive ? "ring-2 ring-foreground/20" : ""}`}>
            <Link to={`/trip/${activeTrip.id}/samen?section=expenses`} aria-current={expensesActive ? "page" : undefined}>
                           <Wallet className="!h-5 !w-5" strokeWidth={expensesActive ? 2 : 1.75} aria-hidden />
              <span>Knaakie</span>

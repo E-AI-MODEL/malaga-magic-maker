@@ -57,7 +57,7 @@ export default function KnaakieGuest() {
       </header>
 
       <main className="mx-auto max-w-xl px-5 pb-16 pt-6">
-        <h1 className="font-display text-[40px] font-bold uppercase leading-none tracking-wide">Knaakie</h1>
+        <h1 className="font-display text-[40px] font-bold leading-none">Knaakie</h1>
         <p className="mt-2 text-[15px] leading-relaxed text-muted-foreground">Houd bij wie wat betaalt: met vrienden, huisgenoten of op reis. Zonder account, op dit apparaat.</p>
 
         <label className="mt-5 block">
@@ -65,16 +65,16 @@ export default function KnaakieGuest() {
           <Input value={state.name} maxLength={80} placeholder="Bijvoorbeeld etentje, huisfeest of weekend weg" onChange={(e) => setState((c) => ({ ...c, name: e.target.value }))} className="mt-2 h-12 text-base" />
         </label>
 
-        <section className="mt-5 overflow-hidden rounded-3xl bg-foreground px-5 pb-5 pt-6 text-background" aria-live="polite">
+        <section className="tile-knaakie mt-5 overflow-hidden rounded-[1.75rem] px-5 pb-5 pt-6 text-on-image" aria-live="polite">
           {!state.expenses.length ? <><p className="font-display text-4xl font-semibold leading-none">Nog geen kosten</p><p className="mt-2 text-[15px] opacity-75">Iets betaald voor de groep? Maak een foto van je bonnetje.</p></>
-            : !balances.length ? <><p className="text-[15px] opacity-75">Iedereen is rond</p><p className="mt-1 flex items-center gap-2 font-display text-5xl font-semibold leading-none"><Check className="h-9 w-9 text-primary" strokeWidth={2.5} />Quitte</p></>
+            : !balances.length ? <><p className="text-[15px] opacity-75">Iedereen is rond</p><p className="mt-1 flex items-center gap-2 font-display text-5xl font-semibold leading-none"><Check className="h-9 w-9" strokeWidth={2.5} />Quitte</p></>
             : balances.map((b) => <div key={b.currency} className="py-1">
               <p className="text-[15px] opacity-75">{b.cents > 0 ? "Je krijgt nog" : "Je moet nog betalen"}</p>
-              <p className={`num font-display text-6xl font-semibold leading-none tracking-tight ${b.cents > 0 ? "text-primary" : ""}`}>{money(Math.abs(b.cents) / 100, b.currency)}</p>
+              <p className={`num font-display text-6xl font-semibold leading-none tracking-tight `}>{money(Math.abs(b.cents) / 100, b.currency)}</p>
             </div>)}
           {left > 0
-            ? <Button className="mt-6 h-16 w-full rounded-2xl font-display text-lg font-semibold [&_svg]:size-6" onClick={() => setSheetOpen(true)}><Camera className="mr-2.5 h-6 w-6" strokeWidth={2} />Bonnetje toevoegen</Button>
-            : <Button asChild className="mt-6 h-16 w-full rounded-2xl font-display text-lg font-semibold [&_svg]:size-6"><Link to="/signup">Gratis account maken<ArrowRight className="ml-2.5 h-6 w-6" /></Link></Button>}
+            ? <Button variant="secondary" className="mt-6 h-16 w-full rounded-full font-display text-lg font-semibold [&_svg]:size-6" onClick={() => setSheetOpen(true)}><Camera className="mr-2.5 h-6 w-6" strokeWidth={2} />Bonnetje toevoegen</Button>
+            : <Button asChild variant="secondary" className="mt-6 h-16 w-full rounded-full font-display text-lg font-semibold [&_svg]:size-6"><Link to="/signup">Gratis account maken<ArrowRight className="ml-2.5 h-6 w-6" /></Link></Button>}
           <p className="mt-3 text-sm opacity-70">
             {left > 0 ? `Nog ${left} ${left === 1 ? "uitgave" : "uitgaven"} gratis zonder account.` : `Je hebt ${GUEST_FREE_EXPENSES} uitgaven toegevoegd. Maak een gratis account om verder te gaan; je kosten gaan mee.`}
           </p>
@@ -103,7 +103,7 @@ export default function KnaakieGuest() {
             {mine.map((t) => {
               const pay = t.fromUserId === GUEST_SELF_ID;
               const name = names.get(pay ? t.toUserId : t.fromUserId) || "Iemand";
-              return <div key={`${t.currency}-${t.fromUserId}-${t.toUserId}`} className="rounded-2xl border border-border bg-card p-4">
+              return <div key={`${t.currency}-${t.fromUserId}-${t.toUserId}`} className="tile-plain rounded-[1.5rem] bg-card p-4">
                 <div className="flex items-center gap-3">
                   <span aria-hidden className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-secondary font-display text-xl font-semibold">{name.charAt(0).toUpperCase()}</span>
                   <div className="min-w-0 flex-1">
@@ -134,7 +134,7 @@ export default function KnaakieGuest() {
           <p className="mt-2 text-xs text-muted-foreground">Verwijderen geeft geen gratis uitgave terug.</p>
         </section>}
 
-        <section className="mt-4 rounded-3xl border border-border bg-card p-5">
+        <section className="tile-plain mt-4 rounded-[1.75rem] bg-card p-5">
           <p className="font-display text-[22px] font-bold leading-tight">Bewaar je kosten en deel ze</p>
           <p className="mt-2 text-sm leading-relaxed text-muted-foreground">Met een gratis account worden je kosten bewaard. Je nodigt de anderen uit, zodat iedereen hetzelfde ziet.</p>
           <Button asChild size="lg" className="mt-4 h-14 w-full rounded-xl font-display text-lg font-semibold"><Link to="/signup">Gratis account maken</Link></Button>

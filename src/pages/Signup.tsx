@@ -8,7 +8,7 @@ import { useAuth } from "@/lib/auth";
 import { GoogleAuthButton } from "@/components/GoogleAuthButton";
 import { PUBLIC_SIGNUP_ENABLED } from "@/config/access";
 import { usePlatformSwitches } from "@/features/ops/settings";
-import logo from "@/assets/vakansie_primary_complete.png.asset.json";
+import { AuthPage } from "@/components/AuthPage";
 
 function safeNext(value: string | null) {
   if (!value || !value.startsWith("/") || value.startsWith("//")) return "/trips";
@@ -77,8 +77,8 @@ export default function Signup() {
 
   if (!enabled) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background px-5">
-        <div className="w-full max-w-md rounded-lg border border-border bg-card p-7 text-center shadow-soft">
+      <AuthPage>
+        <div>
           <PageHeader title="Vakansie is nog privé" />
           <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
             Nieuwe accounts worden pas geopend wanneer de publieke versie klaar is.
@@ -87,23 +87,14 @@ export default function Signup() {
             <Link to={`/login?next=${encodeURIComponent(next)}`}>Ik heb al toegang</Link>
           </Button>
         </div>
-      </div>
+      </AuthPage>
     );
   }
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-background px-5 py-10">
-      <div className="w-full max-w-md">
-        <div className="mb-6 flex items-center gap-2.5">
-          <img src={logo.url} alt="Vakansie" width={169} height={43} className="h-10 w-auto object-contain" />
-        </div>
-
-        <div className="rounded-lg border border-border bg-card p-7 shadow-soft">
-          <p className="font-ui text-[13px] font-medium text-muted-foreground">Account</p>
-          <PageHeader title="Maak je account" />
-          <p className="mt-2 text-sm text-muted-foreground">
-            Daarmee kun je je eigen reizen beheren en uitnodigingen accepteren.
-          </p>
+    <AuthPage>
+        <div>
+          <PageHeader title="Account maken" />
 
           <div className="mt-6">
             <GoogleAuthButton onClick={handleGoogle} loading={loading} label="Ga verder met Google" />
@@ -125,7 +116,7 @@ export default function Signup() {
                 value={displayName}
                 onChange={(event) => setDisplayName(event.target.value)}
                 autoComplete="name"
-                className="mt-2 h-11"
+                className="mt-2 h-14 rounded-lg bg-card text-base"
               />
             </div>
             <div>
@@ -138,7 +129,7 @@ export default function Signup() {
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
                 autoComplete="email"
-                className="mt-2 h-11"
+                className="mt-2 h-14 rounded-lg bg-card text-base"
               />
             </div>
             <div>
@@ -151,7 +142,7 @@ export default function Signup() {
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
                 autoComplete="new-password"
-                className="mt-2 h-11"
+                className="mt-2 h-14 rounded-lg bg-card text-base"
               />
               <p className="mt-1.5 text-xs text-muted-foreground">Minimaal 8 tekens.</p>
             </div>
@@ -165,7 +156,7 @@ export default function Signup() {
                 value={confirmPassword}
                 onChange={(event) => setConfirmPassword(event.target.value)}
                 autoComplete="new-password"
-                className="mt-2 h-11"
+                className="mt-2 h-14 rounded-lg bg-card text-base"
               />
             </div>
             {error && (
@@ -174,24 +165,18 @@ export default function Signup() {
             {message && (
               <p className="rounded-lg bg-primary/10 px-4 py-3 text-sm font-medium text-primary">{message}</p>
             )}
-            <Button type="submit" className="h-12 w-full rounded-md font-bold" disabled={loading}>
+            <Button type="submit" className="h-14 w-full rounded-lg text-lg font-bold" disabled={loading}>
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Account maken
             </Button>
           </form>
 
           <p className="mt-4 text-center text-xs leading-relaxed text-muted-foreground">
-            Door een account aan te maken ga je akkoord met onze gebruiksvoorwaarden en privacyverklaring.
+            Door een account te maken ga je akkoord met de <Link to="/terms" className="underline">voorwaarden</Link> en <Link to="/privacy" className="underline">privacyverklaring</Link>.
           </p>
         </div>
 
-        <p className="mt-6 text-center text-sm text-muted-foreground">
-          Al een account?{" "}
-          <Link to={`/login?next=${encodeURIComponent(next)}`} className="font-semibold text-primary hover:underline">
-            Log in
-          </Link>
-        </p>
-      </div>
-    </div>
+        <Button asChild variant="secondary" className="mt-6 h-14 w-full rounded-lg bg-card text-base"><Link to={`/login?next=${encodeURIComponent(next)}`}>Inloggen</Link></Button>
+    </AuthPage>
   );
 }

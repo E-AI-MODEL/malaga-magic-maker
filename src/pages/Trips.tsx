@@ -186,8 +186,6 @@ export default function Trips() {
           </>}
           <div className="h-6" />
         </FormSheet>
-          </section>
-        )}
       </div>
     </AppLayout>
   );

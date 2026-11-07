@@ -1,5 +1,24 @@
 const DAY = 24 * 60 * 60 * 1000;
 
+export type HansieTopic = "eten" | "doen" | "gewoonten" | "vervoer" | "vandaag";
+
+/** Local-guide tiles: the main things people ask Hansie at the destination. */
+export const HANSIE_TOPICS: { key: HansieTopic; label: string; question: string }[] = [
+  { key: "eten", label: "Eten en drinken", question: "Waar eten we vandaag lekker, passend bij onze groep?" },
+  { key: "doen", label: "Wat gaan we doen", question: "Wat kunnen we vandaag doen in de buurt, passend bij ons tempo?" },
+  { key: "gewoonten", label: "Lokale gewoonten", question: "Welke lokale gewoonten moeten we hier kennen?" },
+  { key: "vervoer", label: "Vervoer ter plekke", question: "Hoe komen we hier het makkelijkst van A naar B?" },
+  { key: "vandaag", label: "Vandaag en weer", question: "Wat staat er vandaag en wat doet het weer?" },
+];
+
+export const HANSIE_FOLLOW_UPS: Record<HansieTopic, string[]> = {
+  eten: ["Iets goedkopers", "Hoe komen we daar?"],
+  doen: ["Iets voor als het regent", "Hoe komen we daar?"],
+  gewoonten: ["Hoe zit het met fooi?", "Pinnen of contant?"],
+  vervoer: ["Wat kost een taxi ongeveer?", "Kunnen we lopen?"],
+  vandaag: ["Wat staat er morgen?", "Waar eten we vanavond?"],
+};
+
 export type HansieSuggestionInput = {
   now: Date;
   startDate: string | null;

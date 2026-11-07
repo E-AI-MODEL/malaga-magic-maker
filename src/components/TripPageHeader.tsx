@@ -29,13 +29,13 @@ export function TripPageHeader({
         {formatTripDateRange(startDate, endDate)}
         {destination ? ` · ${destination}` : ""}
       </>} action={onAdd ? (
-        <Button size="sm" className="shrink-0 rounded-md" onClick={onAdd}>
+        <Button size="sm" variant="secondary" className="shrink-0 rounded-full" onClick={onAdd}>
           <Plus className="mr-1.5 h-3.5 w-3.5" />Toevoegen
         </Button>
       ) : hasMenu ? (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button size="sm" className="shrink-0 rounded-md">
+            <Button size="sm" variant="secondary" className="shrink-0 rounded-full">
               <Plus className="mr-1.5 h-3.5 w-3.5" />Toevoegen
             </Button>
           </DropdownMenuTrigger>

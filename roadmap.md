@@ -1,5 +1,10 @@
 # Roadmap
 
+## Samen, Knaakie en Hansie onderscheiden
+- [ ] Samen opent een gezamenlijk tegeloverzicht; Knaakie opent alleen kosten met eigen titel en compacte kostentegels
+- [ ] Hansie: kleinere onderwerptegels, geen dubbele uitleg of voorbereidingsvragen eronder
+- [ ] Mobiele navigatie en overlap controleren, tests en lint uitvoeren
+
 ## Directe mobiele start
 - [x] Goed om te weten: hele vragenlijst standaard ingeklapt, afzonderlijke antwoorden blijven uitklapbaar
 - [x] Inloggen en Account maken: gedeelde fotobalk, tastbare Home-tegel, grote invoer en accountknoppen; bestaande toegang en next behouden

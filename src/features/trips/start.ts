@@ -13,3 +13,11 @@ export function loginDestination(next: string | null): string {
   if (!next || !next.startsWith("/") || next.startsWith("//") || next.includes("\\")) return "/";
   return next;
 }
+
+/** Account-level Knaakie opens an authorized trip's costs, never the guest-to-Home redirect. */
+export function knaakieDestination(trips: { id: string; status: string; start_date: string | null }[]): string {
+  const trip = trips.filter((item) => item.status !== "archived").sort((a, b) =>
+    (a.start_date || "9999").localeCompare(b.start_date || "9999"),
+  )[0];
+  return trip ? `/trip/${trip.id}/samen?section=expenses` : "/new-trip";
+}

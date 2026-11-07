@@ -1,5 +1,10 @@
 # Roadmap
 
+## Knaakie na publicatie
+- [x] Footerklik gereproduceerd: /knaakie stuurde ingelogde gebruikers terug naar Home
+- [x] Accountingang opent bestaande kosten van een actieve reis; zonder reis naar Nieuwe reis, nooit stil terug naar Home
+- [x] Ingelogde footerklik opent Knaakie op 393×706; 304 tests groen, build OK, lint 0 fouten/30 bestaande waarschuwingen
+
 ## Home en Profiel in de footer
 - [x] Home-bovenkant als één fotoveld met geïntegreerd logo en begroeting; losse witte logobalk weg
 - [x] Mobiel accountmenu bovenin verwijderd; Profiel direct bereikbaar in account- en tripfooter

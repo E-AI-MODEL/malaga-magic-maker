@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from "react";
+import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { Home } from "lucide-react";
 import { BrandLogo } from "@/components/BrandLogo";
@@ -12,7 +12,7 @@ export function AuthPage({ children }: { children: ReactNode }) {
       <div className="relative mx-auto flex h-full max-w-lg flex-col px-5 pb-[max(env(safe-area-inset-bottom),0.75rem)] pt-[max(env(safe-area-inset-top),0.75rem)]">
         <header className="flex h-12 shrink-0 items-center justify-between">
           <Link to="/" aria-label="Vakansie Home" className="py-2">
-            {logoFailed ? <span className="font-display text-3xl font-bold text-on-image">Vakansie</span> : <img src={logo.url} alt="Vakansie" width={169} height={43} onError={() => setLogoFailed(true)} className="h-8 w-auto object-contain" />}
+            <BrandLogo onImage />
           </Link>
           <Link to="/" className="tile-plain flex h-11 items-center gap-2 rounded-full px-4 text-sm font-bold"><Home className="size-5" />Home</Link>
         </header>

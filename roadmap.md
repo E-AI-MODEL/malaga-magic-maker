@@ -1,6 +1,7 @@
 # Roadmap
 
 ## Directe mobiele start
+- [x] Goed om te weten: hele vragenlijst standaard ingeklapt, afzonderlijke antwoorden blijven uitklapbaar
 - [x] Inloggen en Account maken: gedeelde fotobalk, tastbare Home-tegel, grote invoer en accountknoppen; bestaande toegang en next behouden
 - [x] Vakansie-tegel: directe login en Hansie-informatie met bestaande accounttoegang; FAQ sluit visueel aan op producttegels
 - [x] Directe scanactie en handmatige invoer in de Knaakie-tegel op openbare Home; dubbel bonnetje-blok verwijderd

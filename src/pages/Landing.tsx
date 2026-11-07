@@ -1,9 +1,10 @@
 import { useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, ChevronDown } from "lucide-react";
 import { ProductButtons } from "@/components/ProductButtons";
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ExpenseWizard, type WizardResult } from "@/features/together/ExpenseWizard";
 import { GUEST_SELF_ID, addGuestExpense, addGuestPerson, guestUsesLeft, loadGuestKnaakie, saveGuestKnaakie } from "@/features/knaakie-guest/store";
 import heroHome from "@/assets/hero-home.jpg";
@@ -57,6 +58,7 @@ export default function Landing() {
   const [guest, setGuest] = useState(() => loadGuestKnaakie());
   const [open, setOpen] = useState(false);
   const [logoFailed, setLogoFailed] = useState(false);
+  const [infoOpen, setInfoOpen] = useState(false);
   const [file, setFile] = useState<File>();
   const [initialStep, setInitialStep] = useState<"start" | "amount">("start");
   const gallery = useRef<HTMLInputElement>(null);
@@ -94,7 +96,15 @@ export default function Landing() {
         <input ref={gallery} aria-label="Kies bonfoto op Home" type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={(e) => { selectPhoto(e.target.files?.[0]); e.target.value = ""; }} />
 
         <section className="bg-background px-6 py-7">
-          <h2 className="font-display text-2xl font-bold">Goed om te weten</h2>
+          <Collapsible open={infoOpen} onOpenChange={setInfoOpen}>
+            <h2>
+              <CollapsibleTrigger asChild>
+                <Button variant="secondary" className="min-h-16 w-full justify-between rounded-lg bg-card px-4 text-left font-display text-2xl font-bold">
+                  Goed om te weten<ChevronDown aria-hidden className={`!size-5 ${infoOpen ? "rotate-180" : ""}`} />
+                </Button>
+              </CollapsibleTrigger>
+            </h2>
+            <CollapsibleContent>
           <Accordion type="single" collapsible className="mt-4 space-y-2">
             {FAQ.map((item) => (
               <AccordionItem key={item.q} value={item.q} className="rounded-lg border border-border bg-card px-4">
@@ -103,6 +113,8 @@ export default function Landing() {
               </AccordionItem>
             ))}
           </Accordion>
+            </CollapsibleContent>
+          </Collapsible>
         </section>
       </main>
 

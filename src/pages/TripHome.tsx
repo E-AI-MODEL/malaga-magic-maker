@@ -145,7 +145,7 @@ export default function TripHome() {
               <EmptyLine text="Zet je vlucht of verblijf erin." actionLabel="Naar Reis" to={`/trip/${activeTrip.id}/reis`} />
             ) : (
               <ol className="relative mt-1">
-                {view.upcoming.slice(0, 3).map((item, index, shown) => {
+                {view.upcoming.slice(0, typeof window !== "undefined" && window.innerHeight < 760 ? 2 : 3).map((item, index, shown) => {
                   const Icon = travelTypeIcon(item.type);
                   return (
                     <li key={item.id}>

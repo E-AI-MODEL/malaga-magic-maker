@@ -18,6 +18,7 @@ import { TripThumb, TripVisual } from "@/components/TripVisual";
 import { GettingStarted } from "@/features/onboarding/GettingStarted";
 import heroHome from "@/assets/hero-home.jpg";
 import { ProductButtons } from "@/components/ProductButtons";
+import { BrandLogo } from "@/components/BrandLogo";
 import { displayDecisionTitle } from "@/features/together/labels";
 
 function formatDateRange(startDate: string | null, endDate: string | null) {
@@ -135,11 +136,14 @@ export default function Trips() {
   return (
     <AppLayout>
       <section className="relative shrink-0">
-        <div className="relative h-[100px] w-full overflow-hidden bg-secondary sm:h-[200px]">
+        <div className="relative h-[calc(156px+env(safe-area-inset-top))] w-full overflow-hidden bg-secondary sm:h-[200px]">
           <img src={heroHome} alt="" aria-hidden width={1280} height={720} loading="eager" className="h-full w-full object-cover" />
           <div aria-hidden className="absolute inset-0 bg-foreground/40" />
-          <div className="absolute inset-x-0 top-0 mx-auto max-w-3xl px-5 pt-3 sm:pt-6">
-<PageHeader className="text-on-image" title={firstName ? `Hoi ${firstName}` : "Hoi"} action={userTrips.length > 0 &&
+          <div className="absolute inset-x-0 top-0 mx-auto max-w-3xl px-5 pt-[calc(env(safe-area-inset-top)+1rem)] sm:pt-6">
+            <Link to="/trips" aria-label="Naar Home" className="mb-4 inline-flex min-h-11 items-center rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:hidden">
+              <BrandLogo onImage className="h-10" />
+            </Link>
+            <PageHeader className="text-on-image" title={firstName ? `Hoi ${firstName}` : "Hoi"} action={userTrips.length > 0 &&
               <Button asChild variant="outline" size="sm" className="h-11 shrink-0 rounded-xl bg-card px-4 text-[15px] text-foreground hover:text-foreground">
                 <Link to="/new-trip"><Plus className="mr-1.5 h-3.5 w-3.5" />Nieuwe reis</Link>
               </Button>

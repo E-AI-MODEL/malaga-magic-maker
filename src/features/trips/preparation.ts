@@ -1,3 +1,4 @@
+import { displayDecisionTitle } from "@/features/together/labels";
 import type { Trip } from "@/contexts/TripContext";
 import type { TaskRow, TripItemRow } from "@/integrations/supabase/database";
 import type { DecisionBundle } from "@/features/together/data";
@@ -68,7 +69,7 @@ export function tripPreparation({ activeTrip, items, tasks, decisions, readiness
         })),
       mine: [
         ...myTasks.map((task) => ({ key: `task-${task.id}`, title: task.title, meta: "Jouw taak", actionLabel: "Taak openen", href: samen })),
-        ...myVotes.map((decision) => ({ key: `decision-${decision.id}`, title: decision.title, meta: "Wacht op jouw stem", actionLabel: "Stemmen", href: samen })),
+        ...myVotes.map((decision) => ({ key: `decision-${decision.id}`, title: displayDecisionTitle(decision.title), meta: "Stem nu", actionLabel: "Stem nu", href: samen })),
       ],
       basics: [...checkThing("dates"), ...checkThing("destination")],
       bookings: checkThing("bookings"),

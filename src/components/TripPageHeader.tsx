@@ -26,10 +26,10 @@ export function TripPageHeader({
   const hasMenu = Boolean(addMenu) || Boolean(addActions?.length);
   return (
     <div className="pt-12 md:pt-0">
-    <PageHeader title={title} meta={<>
+    <PageHeader title={title} meta={<span className="block truncate">
         {formatTripDateRange(startDate, endDate)}
-        {destination ? ` · ${destination}` : ""}
-      </>} action={onAdd ? (
+        {destination ? ` · ${destination.split(",")[0]}` : ""}
+      </span>} action={onAdd ? (
         <Button size="sm" variant="secondary" className="shrink-0 rounded-full" onClick={onAdd}>
           <Plus className="mr-1.5 h-3.5 w-3.5" />Toevoegen
         </Button>

@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Archive, Camera, Check, ChevronDown, Copy, Pencil, Send, Trash2 } from "lucide-react";
+import { Archive, Camera, PenLine, Check, ChevronDown, Copy, Pencil, Send, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { RowList, SectionLabel } from "@/components/primitives";
@@ -72,17 +72,20 @@ export function KostenSection() {
     <div>
       {readOnly && <p className="mt-4 flex items-start gap-2 text-sm text-muted-foreground"><Archive className="h-4 w-4 shrink-0" />Deze reis is gearchiveerd. Je kunt de kosten nog bekijken.</p>}
 
-      <section className="mt-5 overflow-hidden rounded-3xl bg-foreground px-5 pb-5 pt-6 text-background" aria-live="polite">
+      <section className="tile-knaakie mt-5 overflow-hidden rounded-3xl px-5 pb-5 pt-6 text-on-image" aria-live="polite">
         {loading ? <p className="text-sm opacity-70">Laden…</p>
           : expensesQuery.isError ? <p className="text-sm opacity-80">Laden lukt nu niet. <Button variant="link" className="text-background underline" onClick={() => void expensesQuery.refetch()}>Opnieuw proberen</Button></p>
-          : !expenses.length ? <><p className="font-display text-4xl font-semibold leading-none">Nog geen kosten</p><p className="mt-2 text-[15px] opacity-75">Iets betaald voor de groep? Maak een foto van je bonnetje.</p></>
-          : !balances.length ? <><p className="text-[15px] opacity-75">Iedereen is rond</p><p className="mt-1 flex items-center gap-2 font-display text-5xl font-semibold leading-none"><Check className="h-9 w-9 text-primary" strokeWidth={2.5} />Quitte</p></>
+          : !expenses.length ? <><p className="font-display text-4xl font-semibold leading-none">Nog geen kosten</p></>
+          : !balances.length ? <><p className="text-[15px] opacity-75">Iedereen is rond</p><p className="mt-1 flex items-center gap-2 font-display text-5xl font-semibold leading-none"><Check className="h-9 w-9 " strokeWidth={2.5} />Quitte</p></>
           : balances.map((balance) => <div key={balance.currency} className="py-1">
             <p className="text-[15px] opacity-75">{balance.cents > 0 ? "Je krijgt nog" : "Je moet nog betalen"}</p>
-            <p className={`num font-display text-6xl font-semibold leading-none tracking-tight ${balance.cents > 0 ? "text-primary" : ""}`}>{money(Math.abs(balance.cents) / 100, balance.currency)}</p>
+            <p className={`num font-display text-6xl font-semibold leading-none tracking-tight `}>{money(Math.abs(balance.cents) / 100, balance.currency)}</p>
           </div>)}
         {expenses.length > 0 && <p className="num mt-3 text-sm opacity-60">{expenses.length} {expenses.length === 1 ? "bonnetje" : "bonnetjes"} in deze reis</p>}
-        {!readOnly && <Button className="mt-6 h-16 w-full rounded-2xl font-display text-lg font-semibold [&_svg]:size-6" onClick={openNew}><Camera className="mr-2.5 h-6 w-6" strokeWidth={2} />Bonnetje toevoegen</Button>}
+        {!readOnly && <div className="mt-5 grid grid-cols-2 gap-2">
+          <button type="button" onClick={openNew} className="tile-plain flex h-14 items-center justify-center gap-2 rounded-2xl font-brand text-[17px] font-semibold text-foreground"><Camera className="h-5 w-5" strokeWidth={2} />Scan bon</button>
+          <button type="button" onClick={openNew} className="tile-plain flex h-14 items-center justify-center gap-2 rounded-2xl font-brand text-[17px] font-semibold text-foreground"><PenLine className="h-5 w-5" strokeWidth={2} />Vul in</button>
+        </div>}
       </section>
 
       {personal.length > 0 && <section className="py-5">

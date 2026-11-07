@@ -121,7 +121,7 @@ export default function TripHome() {
             </section>
           ) : <>
           <section className="py-2">
-            <SectionLabel>Nu doen</SectionLabel>
+            <SectionLabel>Eerst dit</SectionLabel>
             {readinessQuery.isLoading ? (
               <p className="mt-2 text-[15px] text-muted-foreground">Laden…</p>
             ) : first ? (
@@ -138,11 +138,11 @@ export default function TripHome() {
           </section>
 
           <section>
-            <SectionLabel>Eerstvolgend</SectionLabel>
+            <SectionLabel>Hierna</SectionLabel>
             {itemsQuery.isLoading ? (
               <p className="py-3 text-[14px] text-muted-foreground">Laden…</p>
             ) : view.upcoming.length === 0 ? (
-              <EmptyLine text="Nog niets ingepland." actionLabel="Naar Reis" to={`/trip/${activeTrip.id}/reis`} />
+              <EmptyLine text="Zet je vlucht of verblijf erin." actionLabel="Naar Reis" to={`/trip/${activeTrip.id}/reis`} />
             ) : (
               <ol className="relative mt-1">
                 {view.upcoming.slice(0, 3).map((item, index, shown) => {

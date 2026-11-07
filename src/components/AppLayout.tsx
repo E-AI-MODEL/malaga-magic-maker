@@ -65,7 +65,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
     if (!isTripScreen) {
       return (
         <div className="min-h-screen overflow-x-hidden bg-background pb-[env(safe-area-inset-bottom)]">
-          <header className="sticky top-0 z-40 bg-background/95 backdrop-blur">
+          <header className="sticky top-0 z-40 bg-background">
             <AdminBar />
             <div className="mx-auto flex h-14 max-w-3xl items-center justify-between px-5">
               <button type="button" onClick={goHome} aria-label="Naar Home" className="flex items-center">
@@ -80,7 +80,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
     }
     return (
       <div className={`min-h-screen overflow-x-hidden bg-background ${showHansie ? "pb-[calc(8.5rem+env(safe-area-inset-bottom))]" : "pb-[calc(4.75rem+env(safe-area-inset-bottom))]"}`}>
-        <header className="sticky top-0 z-40 bg-background/95 backdrop-blur">
+        <header className="sticky top-0 z-40 bg-background">
           <AdminBar />
           <div className="mx-auto grid h-12 max-w-2xl grid-cols-[40px_minmax(0,1fr)_40px] items-center px-2">
             <Button

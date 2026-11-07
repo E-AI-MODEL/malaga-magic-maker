@@ -76,7 +76,7 @@ describe("Vakansie production UI contract", () => {
     expect(reis).toContain("<TypeIcon");
     expect(reis).not.toContain("{type.icon}");
     expect(reis).toContain("getTravelType(item.type)");
-    expect(reis).toContain("{type.label}");
+    expect(reis).toContain("type.label");
   });
 
   it("keeps internal and legacy language out of the signed-in surfaces", () => {

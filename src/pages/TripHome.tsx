@@ -17,6 +17,7 @@ import { EmptyLine, RowItem, RowList, SectionLabel, TimelineRow } from "@/compon
 import { TripVisual } from "@/components/TripVisual";
 import { WeatherStrip } from "@/features/trips/WeatherStrip";
 import { showWeatherStrip } from "@/features/trips/weather";
+import { displayDecisionTitle } from "@/features/together/labels";
 
 function shortDate(value: string, timeZone: string) {
   return new Date(value)
@@ -76,7 +77,7 @@ export default function TripHome() {
 
     const personal = excludeFirstThings([
       ...myTasks.map((task) => ({ key: `task-${task.id}`, icon: CheckSquare, title: task.title, meta: "Jouw taak" })),
-      ...myVotes.map((decision) => ({ key: `decision-${decision.id}`, icon: Scale, title: decision.title, meta: "Nog niet gestemd" })),
+      ...myVotes.map((decision) => ({ key: `decision-${decision.id}`, icon: Scale, title: displayDecisionTitle(decision.title), meta: "Stem nu" })),
     ], things).slice(0, 3);
 
     return { things, upcoming, personal };

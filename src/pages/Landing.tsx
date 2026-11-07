@@ -29,7 +29,7 @@ const FAQ = [
   },
   {
     q: "Kan ik ook alleen reizen?",
-    a: "Ja. Een reis maken kan zonder iemand uit te nodigen. Je hebt dan één plek met je planning, je documenten en het overzicht over wat er nog moet.",
+    a: "Ja. Een reis maken kan zonder iemand uit te nodigen. Je hebt dan één plek met je planning, je documenten en je taken.",
   },
   {
     q: "Hoeveel reisgenoten kunnen er mee?",
@@ -37,7 +37,7 @@ const FAQ = [
   },
   {
     q: "Hoe werkt Knaakie met bonnetjes?",
-    a: "Open Knaakie en maak een foto van een kassabon of een handgeschreven briefje. Zonder account kun je 10 uitgaven gratis toevoegen; maak je daarna een account, dan gaan je kosten mee. AI ontcijfert het bedrag en, als die erop staat, de datum. Jij controleert het voorstel, kiest wie betaalde en slaat het op. De foto wordt nergens bewaard. Daarna zie je per persoon wie wie moet betalen en stuur je een betaalverzoek met je eigen rekeningnummer.",
+    a: "Open Knaakie en maak een foto van een kassabon of een handgeschreven briefje. Zonder account kun je 10 uitgaven gratis toevoegen; maak je daarna een account, dan gaan je kosten mee. Knaakie leest het bedrag en de datum. Check, kies wie betaalde en sla op. De foto wordt nergens bewaard. Daarna zie je per persoon wie wie moet betalen en stuur je een betaalverzoek met je eigen rekeningnummer.",
   },
   {
     q: "Wat kan Hansie?",

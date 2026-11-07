@@ -38,6 +38,8 @@
     --radius: 1.25rem;
     --scrim: 160 5% 8%;
     --shadow-sheet: 0 -8px 40px hsl(var(--scrim) / 0.12);
+    --shadow-button: 0 4px 0 hsl(var(--foreground) / 0.24), 0 7px 12px hsl(var(--foreground) / 0.08), inset 0 1px 0 hsl(var(--card) / 0.35);
+    --shadow-button-pressed: 0 1px 0 hsl(var(--foreground) / 0.24), inset 0 2px 3px hsl(var(--foreground) / 0.12);
 
     --rail: 220 14% 84%;
     --band: 220 24% 95%;
@@ -132,6 +134,16 @@
 }
 
 @layer components {
+  .button-physical {
+    border: 1px solid hsl(var(--foreground) / 0.15);
+    box-shadow: var(--shadow-button);
+    position: relative;
+    top: 0;
+  }
+  .button-physical:active:not(:disabled) {
+    top: 3px;
+    box-shadow: var(--shadow-button-pressed);
+  }
   .rule-divide > * + * {
     border-top: 1px solid hsl(var(--rule) / 0.06);
   }

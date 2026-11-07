@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ArrowRight, Camera, ImagePlus, PenLine, ReceiptText } from "lucide-react";
+import { ArrowRight, Camera, ImagePlus, PenLine } from "lucide-react";
+import { ProductButtons } from "@/components/ProductButtons";
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { ExpenseWizard, type WizardResult } from "@/features/together/ExpenseWizard";
@@ -81,13 +82,16 @@ export default function Landing() {
       </header>
 
       <main className="mx-auto max-w-2xl">
-        <section aria-labelledby="knaakie-title" className="px-6 pb-8 pt-6 sm:pt-10">
-          <p className="text-base font-medium text-muted-foreground">Jouw hele vakantie in je broekzak</p>
-          <div className="mt-7 flex items-center justify-between gap-4">
-            <h1 id="knaakie-title" className="font-display text-6xl font-bold leading-none">Knaakie</h1>
-            <span aria-hidden="true" className="flex h-14 w-14 items-center justify-center rounded-2xl bg-secondary"><ReceiptText className="h-7 w-7" /></span>
+        <section className="relative px-6 pb-8 pt-8">
+          <img src={heroHome} alt="Terras met uitzicht op zee" width={1280} height={720} className="absolute inset-0 h-full w-full object-cover" />
+          <div aria-hidden="true" className="absolute inset-0 bg-foreground/60" />
+          <div className="relative">
+            <h1 className="mb-8 max-w-md font-display text-4xl font-bold leading-tight text-on-image sm:text-5xl">Jouw hele vakantie in je broekzak</h1>
+            <ProductButtons knaakieTo="/knaakie" vakansieTo="/signup" />
           </div>
-          <p className="mt-3 text-xl font-semibold">Scan je bonnetje. Deel de kosten.</p>
+        </section>
+        <section aria-labelledby="knaakie-title" className="px-6 pb-8 pt-6 sm:pt-10">
+          <h2 id="knaakie-title" className="text-xl font-semibold">Voeg een bonnetje toe</h2>
           <p className="mt-2 text-base text-muted-foreground">10 uitgaven gratis. Zonder account.</p>
 
           {left > 0 ? <div className="mt-7 space-y-3">
@@ -107,16 +111,6 @@ export default function Landing() {
           <input ref={camera} aria-label="Maak bonfoto op Home" type="file" accept="image/jpeg,image/png,image/webp" capture="environment" className="hidden" onChange={(e) => { selectPhoto(e.target.files?.[0]); e.target.value = ""; }} />
           <input ref={gallery} aria-label="Kies bonfoto op Home" type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={(e) => { selectPhoto(e.target.files?.[0]); e.target.value = ""; }} />
           {guest.used > 0 && <Button asChild variant="link" className="mt-3 w-full text-foreground"><Link to="/knaakie">Bekijk je kosten<ArrowRight /></Link></Button>}
-        </section>
-
-        <section aria-labelledby="reis-title" className="relative min-h-56 overflow-hidden">
-          <img src={heroHome} alt="Terras met uitzicht op zee" width={1280} height={720} className="absolute inset-0 h-full w-full object-cover" />
-          <div aria-hidden="true" className="absolute inset-0 bg-foreground/60" />
-          <div className="relative px-6 py-8 text-on-image">
-            <h2 id="reis-title" className="font-display text-3xl font-bold">Plan ook je vakantie</h2>
-            <p className="mt-2 max-w-sm text-base">Boekingen, tickets en Hansie bij je reis.</p>
-            <Button asChild variant="secondary" className="mt-5 h-14 rounded-xl px-6 text-base"><Link to="/signup">Start je reis<ArrowRight /></Link></Button>
-          </div>
         </section>
 
         <section className="px-6 py-8">

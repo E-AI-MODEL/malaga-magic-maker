@@ -64,8 +64,8 @@ describe("Mijn reizen", () => {
 
 describe("Trip overzicht", () => {
   it("answers what is personal, what needs attention and what comes next", () => {
-    expect(tripHome).toContain("Voor jou");
-    expect(tripHome).toContain("Eerst dit");
+    expect(tripHome).not.toContain("Voor jou");
+    expect(tripHome).toContain("Nu doen");
     expect(tripHome).toContain("Eerstvolgend");
   });
 

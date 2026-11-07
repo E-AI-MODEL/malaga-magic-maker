@@ -3,7 +3,7 @@
 ## Home en Profiel in de footer
 - [x] Mobiel accountmenu bovenin verwijderd; Profiel direct bereikbaar in account- en tripfooter
 - [x] Home in vast scherm met compacte gelijkwaardige producttegels; Voor jou en overige reizen in panelen
-- [ ] Ingelogde schermcontrole en tests voor deze aanpassing
+- [x] Ingelogd Home → Profiel → Home op 393×706: geen paginascroll of overlap; navigatietests groen
 
 ## Bovenste reisnavigatie
 - [x] Home, paginatitel en menu in één gereserveerde rij; geen zwevende overlap met titel of Toevoegen

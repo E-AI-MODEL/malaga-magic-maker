@@ -47,7 +47,8 @@ describe("Bottom navigation", () => {
     for (const label of ["Overzicht", "Reis", "Samen"]) {
       expect(bottomNav).toContain(`label: "${label}"`);
     }
-    expect(bottomNav.match(/label: "/g)).toHaveLength(3);
+    const tripLinks = bottomNav.slice(bottomNav.indexOf("const links ="), bottomNav.indexOf("] :"));
+    expect(tripLinks.match(/label: "/g)).toHaveLength(3);
   });
 
   it("never exposes Hansie as a navigation item", () => {

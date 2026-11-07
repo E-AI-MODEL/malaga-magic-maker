@@ -29,6 +29,7 @@ const TripSamen = lazy(() => import("./pages/TripSamen"));
 const TripSettings = lazy(() => import("./pages/TripSettings"));
 const JoinTrip = lazy(() => import("./pages/JoinTrip"));
 const Profiel = lazy(() => import("./pages/Profiel"));
+const OAuthConsent = lazy(() => import("./pages/OAuthConsent"));
 const Ops = lazy(() => import("./pages/Ops"));
 const OpsErrors = lazy(() => import("./pages/OpsErrors"));
 const Afmelden = lazy(() => import("./pages/Afmelden"));
@@ -119,6 +120,7 @@ function AppRoutes() {
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/steun" element={<Steun />} />
         <Route path="/knaakie" element={user ? <Knaakie /> : <KnaakieGuest />} />
+        <Route path="/.lovable/oauth/consent" element={<OAuthConsent />} />
         <Route path="/terms" element={<TermsPage />} />
         <Route path="/privacy" element={<PrivacyPage />} />
         <Route path="/afmelden" element={<Afmelden />} />

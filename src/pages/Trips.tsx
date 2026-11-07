@@ -19,6 +19,7 @@ import { TripThumb, TripVisual } from "@/components/TripVisual";
 import { GettingStarted } from "@/features/onboarding/GettingStarted";
 import heroHome from "@/assets/hero-home.jpg";
 import { ProductButtons } from "@/components/ProductButtons";
+import { displayDecisionTitle } from "@/features/together/labels";
 
 function formatDateRange(startDate: string | null, endDate: string | null) {
   if (!startDate && !endDate) return "Data nog te kiezen";
@@ -167,7 +168,7 @@ export default function Trips() {
         {!loading && userTrips.length > 0 && <section className="mt-7 border-t border-rule pt-1">
           <SectionLabel>Voor jou</SectionLabel>
           {factsQuery.isPending ? <p className="py-3 text-sm text-muted-foreground">Laden…</p> : factsQuery.isError ? <p className="py-3 text-sm text-muted-foreground">Je overzicht is nu niet beschikbaar. <Button variant="link" onClick={() => void factsQuery.refetch()}>Opnieuw proberen</Button></p> : personal.length ? <RowList>
-            {personal.map((item) => <RowItem key={item.key} icon={item.kind === "task" ? CheckSquare : item.kind === "decision" ? Scale : Receipt} title={item.title} meta={item.tripName} to={item.href} />)}
+            {personal.map((item) => <RowItem key={item.key} icon={item.kind === "task" ? CheckSquare : item.kind === "decision" ? Scale : Receipt} title={item.kind === "decision" ? displayDecisionTitle(item.title) : item.title} meta={item.tripName} to={item.href} />)}
           </RowList> : <p className="py-3 text-sm text-muted-foreground">Niets dat op jou wacht.</p>}
         </section>}
 

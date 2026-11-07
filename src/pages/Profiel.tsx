@@ -11,7 +11,7 @@ import { PageHeader } from "@/components/primitives";
 import { NotificationPreferences } from "@/features/notifications/NotificationPreferences";
 import { ReminderPreferences } from "@/features/notifications/ReminderPreferences";
 import { toast } from "sonner";
-import { Bell, ChevronRight, CreditCard, LogOut, Map as MapIcon, Settings, ShieldAlert, Star, User } from "lucide-react";
+import { Bell, ChevronRight, CreditCard, LogOut, Map as MapIcon, Plus, Settings, ShieldAlert, Star, User } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
 import { usePro } from "@/features/pro/usePro";
 import { usePlanStatus } from "@/features/pro/limits";
@@ -301,6 +301,9 @@ export default function Profiel() {
               ))}
             </div>
           )}
+          <Button onClick={() => navigate("/new-trip")} className="mt-3 h-12 w-full">
+            <Plus className="h-5 w-5" />Nieuwe reis
+          </Button>
         </section>
 
         </>)}

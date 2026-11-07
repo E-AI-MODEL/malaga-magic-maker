@@ -63,17 +63,15 @@ describe("Vakansie BUILD 17 visual depth contract", () => {
     for (const file of [appLayout, trips, tripHome, hansie, bottomNav, reis, travelTypes, tripItemSheet]) {
       expect(file).not.toMatch(/[\u2705\u2714\u2713\u{1F300}-\u{1FAFF}\u{2708}\u{26F4}]/u);
     }
-    expect(appLayout).toContain("MoreHorizontal");
-    expect(appLayout).toContain("Check");
     expect(reis).toContain("travelTypeIcon");
     expect(tripItemSheet).not.toContain("option.icon");
   });
 
   it("uses the simple mobile trip header from the chosen direction", () => {
     expect(appLayout).toContain('aria-label="Naar Home"');
-    expect(appLayout).toContain('aria-label="Meer opties"');
-    expect(appLayout).toContain("Wissel reis");
-    expect(appLayout).toContain("ChevronDown");
+    // Profile, trip switching and new trip live in the footer Profiel screen, not a header menu.
+    expect(appLayout).not.toContain('aria-label="Meer opties"');
+    expect(appLayout).not.toContain("DropdownMenu");
     const mobileSection = appLayout.slice(appLayout.indexOf("if (isMobile)"), appLayout.indexOf("return (", appLayout.indexOf("if (isMobile)") + 20));
     expect(mobileSection).not.toContain("NotificationCenter");
   });

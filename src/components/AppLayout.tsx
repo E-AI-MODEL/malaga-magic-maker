@@ -1,6 +1,5 @@
-import { ReactNode, useState } from "react";
-import { CalendarFeedSheet } from "@/features/travel/CalendarFeedSheet";
-import { CalendarPlus, Check, ChevronDown, Home, MoreHorizontal, Plus, Settings, User } from "lucide-react";
+import { ReactNode } from "react";
+import { Home } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { BottomNav } from "./BottomNav";
 import { AppSidebar } from "./AppSidebar";
@@ -12,23 +11,14 @@ import { useTrip } from "@/contexts/TripContext";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { BrandLogo } from "@/components/BrandLogo";
 
 export function AppLayout({ children }: { children: ReactNode }) {
   const { profile } = useAuth();
-  const { activeTrip, userTrips, isOrganizer } = useTrip();
+  const { activeTrip } = useTrip();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const { pathname, search } = useLocation();
-  const [calendarOpen, setCalendarOpen] = useState(false);
   const isTripScreen = /^\/trip\/[^/]+(?:\/(?:reis|samen|settings))?\/?$/.test(pathname);
   const showHansie = isTripScreen && activeTrip?.status !== "archived";
   const title = pathname === "/trips" ? "Home" : pathname === "/profiel" ? "Profiel" : activeTrip?.name;
@@ -63,51 +53,18 @@ export function AppLayout({ children }: { children: ReactNode }) {
     return (
       <div className="flex h-[100dvh] flex-col overflow-hidden bg-background">
         <AdminBar />
-        {/* Reserved row: navigation never overlays the page heading or its actions. */}
+        {/* Reserved row: Home and the heading only; trip and account actions live in the footer screens. */}
         <div className="z-40 mx-auto flex w-full max-w-2xl shrink-0 items-center gap-3 px-5 pb-2 pt-[calc(env(safe-area-inset-top)+0.75rem)]">
           <Button variant="secondary" size="icon" onClick={goHome} className="h-11 w-11 rounded-2xl" aria-label="Naar Home">
             <Home className="h-5 w-5" strokeWidth={1.75} />
           </Button>
           <div className="min-w-0 flex-1">{tripHeading && <h1 className="truncate font-brand text-[28px] font-bold leading-tight">{tripHeading}</h1>}</div>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="secondary" size="icon" className="h-11 w-11 rounded-2xl" aria-label="Meer opties">
-                <MoreHorizontal className="h-5 w-5" strokeWidth={1.75} />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-64">
-              {activeTrip && userTrips.length > 1 && <DropdownMenuLabel className="text-xs text-muted-foreground">Wissel reis</DropdownMenuLabel>}
-              {activeTrip && userTrips.filter((trip) => trip.id !== activeTrip.id && trip.status !== "archived").slice(0, 5).map((trip) => (
-                <DropdownMenuItem key={trip.id} onClick={() => navigate(`/trip/${trip.id}`)}>
-                  <ChevronDown className="mr-2 h-4 w-4 -rotate-90" /><span className="truncate">{trip.name}</span>
-                </DropdownMenuItem>
-              ))}
-              {activeTrip && userTrips.length > 1 && <DropdownMenuSeparator />}
-              {activeTrip && isOrganizer && (
-                <DropdownMenuItem onClick={() => navigate(`/trip/${activeTrip.id}/settings`)}>
-                  <Settings className="mr-2 h-4 w-4" />Reisinstellingen
-                </DropdownMenuItem>
-              )}
-              {activeTrip && activeTrip.status !== "archived" && (
-                <DropdownMenuItem onClick={() => setCalendarOpen(true)}>
-                  <CalendarPlus className="mr-2 h-4 w-4" />Zet in je agenda
-                </DropdownMenuItem>
-              )}
-              <DropdownMenuItem onClick={() => navigate("/profiel")}>
-                <User className="mr-2 h-4 w-4" />Profiel
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => navigate("/new-trip")}>
-                <Plus className="mr-2 h-4 w-4" />Nieuwe reis
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
         </div>
 
         {/* Fixed frame: the page never scrolls; only this content box does, above the bottom nav. */}
         <main className="mx-auto w-full max-w-2xl flex-1 overflow-y-auto overflow-x-hidden overscroll-contain pb-[calc(4.75rem+env(safe-area-inset-bottom))]">{children}</main>
         {isTripScreen && <BottomNav />}
         {showHansie && <HansieWidget trip={activeTrip} floating showBar={false} />}
-        {activeTrip && <CalendarFeedSheet open={calendarOpen} onOpenChange={setCalendarOpen} tripId={activeTrip.id} />}
       </div>
     );
   }

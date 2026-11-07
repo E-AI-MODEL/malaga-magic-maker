@@ -1,11 +1,12 @@
 import { FormEvent, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Archive, ArrowLeft, Loader2, RotateCcw, Save } from "lucide-react";
+import { Archive, ArrowLeft, CalendarDays, MapPin, RotateCcw, Save, Settings, Users, StickyNote } from "lucide-react";
 import { useTrip } from "@/contexts/TripContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { PageHeader } from "@/components/primitives";
+import { FormSheet, FormSubmit } from "@/components/FormSheet";
 import { AppLayout } from "@/components/AppLayout";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -30,6 +31,7 @@ export default function TripSettings() {
   const [lifecycleBusy, setLifecycleBusy] = useState(false);
   const [error, setError] = useState("");
   const [saved, setSaved] = useState(false);
+  const [panel, setPanel] = useState<"naam" | "bestemming" | "data" | "reizigers" | "notitie" | "archief" | null>(null);
 
   useEffect(() => {
     if (!activeTrip) return;
@@ -125,16 +127,31 @@ export default function TripSettings() {
   };
 
   return (
-    <AppLayout><div className="mx-auto max-w-xl px-5 py-8 sm:py-12">
-      <PageHeader title="Reisinstellingen" meta="Wijzig de naam, bestemming en data van je reis." />
+    <AppLayout><div className="mx-auto max-w-xl px-5 pt-4 pb-4">
+      <div className="hidden md:block"><PageHeader title="Reisinstellingen" /></div>
+      <Button asChild variant="ghost" className="mb-3 px-0"><Link to={`/trip/${activeTrip.id}/reis`}><ArrowLeft />Reis</Link></Button>
+      <div className="grid grid-cols-2 gap-3">
+        {([
+          { key: "naam", label: "Naam", value: name, icon: Settings },
+          { key: "bestemming", label: "Bestemming", value: destination || "Niet ingevuld", icon: MapPin },
+          { key: "data", label: "Reisdata", value: startDate ? new Date(`${startDate}T12:00:00`).toLocaleDateString("nl-NL", { day: "numeric", month: "short" }) : "Niet ingevuld", icon: CalendarDays },
+          { key: "reizigers", label: "Reizigers en valuta", value: `${groupSize} · ${currency}`, icon: Users },
+          { key: "notitie", label: "Notitie", value: description || "Geen notitie", icon: StickyNote },
+          { key: "archief", label: activeTrip.status === "archived" ? "Herstellen" : "Archiveren", value: "", icon: Archive },
+        ] as const).map((tile) => <Button key={tile.key} variant="secondary" onClick={() => { setPanel(tile.key); setSaved(false); setError(""); }} className="tile-plain h-24 min-w-0 flex-col items-start justify-center rounded-2xl px-4 text-left">
+          <span className="flex items-center gap-2 text-base"><tile.icon />{tile.label}</span>
+          {tile.value && <span className="block w-full truncate text-sm font-normal text-muted-foreground">{tile.value}</span>}
+        </Button>)}
+      </div>
+      <FormSheet open={panel !== null} onOpenChange={(open) => { if (!open) setPanel(null); }} title={panel === "naam" ? "Naam" : panel === "bestemming" ? "Bestemming" : panel === "data" ? "Reisdata" : panel === "reizigers" ? "Reizigers en valuta" : panel === "notitie" ? "Notitie" : "Archief"}>
 
-      <form onSubmit={handleSubmit} className="mt-8 space-y-5">
-        <div>
+      <form onSubmit={handleSubmit} className="mt-4 space-y-4">
+        {panel === "naam" && <div>
           <label className="text-sm font-semibold" htmlFor="settings-name">Naam *</label>
           <Input id="settings-name" value={name} onChange={(event) => setName(event.target.value)} className="mt-2 h-12" />
-        </div>
+        </div>}
 
-        <div className="grid gap-4 sm:grid-cols-2">
+        {panel === "bestemming" && <div className="grid gap-4 sm:grid-cols-2">
           <div>
             <label className="text-sm font-semibold" htmlFor="settings-destination">Bestemming</label>
             <Input id="settings-destination" value={destination} onChange={(event) => setDestination(event.target.value)} className="mt-2 h-12" />
@@ -143,9 +160,9 @@ export default function TripSettings() {
             <label className="text-sm font-semibold" htmlFor="settings-country">Land</label>
             <Input id="settings-country" value={country} onChange={(event) => setCountry(event.target.value)} className="mt-2 h-12" />
           </div>
-        </div>
+        </div>}
 
-        <div className="grid grid-cols-2 gap-3">
+        {panel === "data" && <div className="grid min-w-0 grid-cols-2 gap-3 [&_input]:min-w-0 [&_input]:max-w-full">
           <div>
             <label className="text-sm font-semibold" htmlFor="settings-start">Van</label>
             <Input id="settings-start" type="date" value={startDate} onChange={(event) => setStartDate(event.target.value)} className="mt-2 h-12" />
@@ -154,9 +171,9 @@ export default function TripSettings() {
             <label className="text-sm font-semibold" htmlFor="settings-end">Tot</label>
             <Input id="settings-end" type="date" value={endDate} onChange={(event) => setEndDate(event.target.value)} className="mt-2 h-12" />
           </div>
-        </div>
+        </div>}
 
-        <div className="grid grid-cols-2 gap-3">
+        {panel === "reizigers" && <div className="grid grid-cols-2 gap-3">
           <div>
             <label className="text-sm font-semibold" htmlFor="settings-group">Aantal reizigers</label>
             <Input id="settings-group" type="number" min={1} max={99} value={groupSize} onChange={(event) => setGroupSize(event.target.value)} className="mt-2 h-12" />
@@ -167,29 +184,26 @@ export default function TripSettings() {
               id="settings-currency"
               value={currency}
               onChange={(event) => setCurrency(event.target.value)}
-              className="mt-2 h-12 w-full rounded-md border border-input bg-background px-3 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+              className="mt-2 h-12 w-full rounded-md border border-input bg-background px-3 text-base ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
             >
               {currencies.map((item) => <option key={item} value={item}>{item}</option>)}
             </select>
           </div>
-        </div>
+        </div>}
 
-        <div>
+        {panel === "notitie" && <div>
           <label className="text-sm font-semibold" htmlFor="settings-description">Notitie</label>
           <Textarea id="settings-description" value={description} onChange={(event) => setDescription(event.target.value)} className="mt-2" rows={3} />
-        </div>
+        </div>}
 
         {error && <p className="rounded-lg bg-destructive/10 px-4 py-3 text-sm font-medium text-destructive">{error}</p>}
         {saved && <p className="rounded-lg bg-primary/10 px-4 py-3 text-sm font-medium text-primary">Opgeslagen.</p>}
 
-        <Button type="submit" className="h-12 w-full font-bold" disabled={saving || lifecycleBusy}>
-          {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-          Wijzigingen opslaan
-        </Button>
+        {panel !== "archief" && <FormSubmit saving={saving || lifecycleBusy}><Save />Opslaan</FormSubmit>}
       </form>
 
-      <div className="mt-10 border-t border-border pt-8">
-        <h2 className="font-display text-lg font-extrabold">Reis bewaren of uit beeld halen</h2>
+      {panel === "archief" && <div className="py-5">
+        <h2 className="font-display text-lg font-extrabold">Archief</h2>
         <p className="mt-1 text-sm text-muted-foreground">Archiveren verwijdert niets. Je kunt de reis later weer herstellen.</p>
 
         {activeTrip.status === "archived" ? (
@@ -201,7 +215,8 @@ export default function TripSettings() {
             <Archive className="mr-2 h-4 w-4" />Reis archiveren
           </Button>
         )}
-      </div>
+      </div>}
+      </FormSheet>
     </div></AppLayout>
   );
 }

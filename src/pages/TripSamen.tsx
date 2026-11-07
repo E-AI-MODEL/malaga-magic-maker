@@ -40,7 +40,7 @@ import { TripInvitesCard } from "@/features/invites/TripInvitesCard";
 import { listTravelerProfiles, summariseProfile } from "@/features/travelers/data";
 import { TravelerProfileSheet } from "@/features/travelers/TravelerProfileSheet";
 import { RecentActivity } from "@/features/notifications/RecentActivity";
-import { EmptyLine, RowList, SectionLabel, Segmented, StatusWord, StickyBar } from "@/components/primitives";
+import { EmptyLine, RowList, Segmented, StatusWord, StickyBar } from "@/components/primitives";
 import { TripPageHeader } from "@/components/TripPageHeader";
 
 /** Shared work stays within Samen, including Kosten. */
@@ -206,10 +206,6 @@ export default function TripSamen() {
 
   const openTasks = tasks.filter((task) => task.status !== "done" && task.progress < 100);
   const openDecisions = decisions.filter((decision) => decision.status === "open");
-  const myTasks = openTasks.filter((task) => task.assigned_user_id === user.id || task.backup_user_id === user.id);
-  const myPendingDecisions = openDecisions.filter(
-    (decision) => !decision.options.some((option) => option.votes.some((vote) => vote.user_id === user.id)),
-  );
 
   const addAction = !readOnly
     ? section === "tasks"

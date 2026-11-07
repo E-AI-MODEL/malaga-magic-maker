@@ -1,5 +1,9 @@
 # Roadmap
 
+## Bovenste reisnavigatie
+- [x] Home, paginatitel en menu in één gereserveerde rij; geen zwevende overlap met titel of Toevoegen
+- [x] Ingelogd op 393×706 Overzicht, Reis, Samen en Knaakie gecontroleerd: geen titeloverlap, geen paginascroll of runtimefouten; 298 tests groen, lint 0 fouten/30 bestaande waarschuwingen, automatische build OK
+
 ## Samen, Knaakie en Hansie onderscheiden
 - [x] Samen opent een gezamenlijk tegeloverzicht; Knaakie opent alleen kosten met eigen titel en compacte kostentegels
 - [x] Hansie: kleinere onderwerptegels, geen dubbele uitleg of voorbereidingsvragen eronder

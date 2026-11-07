@@ -25,7 +25,7 @@ export function TripPageHeader({
 }) {
   const hasMenu = Boolean(addMenu) || Boolean(addActions?.length);
   return (
-    <div className="pt-12 md:pt-0">
+    <div className="[&_h1]:hidden md:[&_h1]:block [&_header]:gap-2 [&_header>div:first-child>div]:mt-0 md:[&_header>div:first-child>div]:mt-2">
     <PageHeader title={title} meta={<span className="block truncate">
         {formatTripDateRange(startDate, endDate)}
         {destination ? ` · ${destination.split(",")[0]}` : ""}

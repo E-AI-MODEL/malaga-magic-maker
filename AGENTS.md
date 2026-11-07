@@ -38,7 +38,8 @@ One generic `trip_items` model; type-specific details in metadata, no destinatio
 - Load the shared font stylesheet from the application entry point, not CSS URL imports, so font loading does not depend on CSS import resolution.
 - Mobile Hansie opens from its own button in the trip bottom navigation (no separate strip); content only reserves the nav height.
 - Mobile account and trip screens expose Profile directly in the shared footer; Home uses a fixed frame and opens secondary lists in sheets. Why: consistent access without a header-only account menu.
-- Signed-in /knaakie waits for authorized trips and opens active-trip expenses, or trip creation when none exist. Why: the public guest entry must not bounce account footer clicks back to Home.
+- Signed-in /knaakie renders its own account screen using KostenSection, with the authorized trip selected by URL query tripId and an inline creation action when no trips exist. Why: Knaakie stays a distinct destination without duplicating costs or authorization.
+- Auth restores persisted sessions regardless of deployment/version markers; explicit logout, access restrictions and server revocation remain authoritative. Why: routine updates must not unexpectedly sign users out.
 - Mobile AppLayout reserves one row for Home, the work-screen heading and the trip menu; TripPageHeader shows metadata and actions below it, keeping its own heading desktop-only. Why: navigation cannot cover page titles or add actions.
 - Trip settings use section tiles and the shared FormSheet/FormSubmit shell while retaining the existing update and lifecycle handlers. Why: keep editing compact without changing authorization or persistence.
 - Account and trip screens use AppLayout; desktop Hansie stays inside its content column, and route-scoped visibility excludes account and archived screens. Why: preserve one navigation shell without stale trip context or a third column.

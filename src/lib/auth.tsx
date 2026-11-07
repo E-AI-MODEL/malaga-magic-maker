@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useState, ReactNode } from "react
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import type { Session, User } from "@supabase/supabase-js";
-import { PRELAUNCH_ACCESS_RESTRICTED, PRELAUNCH_AUTH_VERSION } from "@/config/access";
+import { PRELAUNCH_ACCESS_RESTRICTED } from "@/config/access";
 
 // Temporary pre-launch allowlist. This is access control for the private build,
 // not the long-term product role model. BUILD 06 replaces this gate safely.
@@ -92,17 +92,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setTimeout(() => void enforceSession(session), 0);
     });
 
-    if (localStorage.getItem("auth-version") !== PRELAUNCH_AUTH_VERSION) {
-      localStorage.setItem("auth-version", PRELAUNCH_AUTH_VERSION);
-      sessionStorage.removeItem("boot-shown");
-      supabase.auth.signOut().finally(() => {
-        if (active) setLoading(false);
-      });
-    } else {
-      supabase.auth.getSession().then(({ data: { session } }) => {
-        void enforceSession(session);
-      });
-    }
+    // Restore the persisted session; deploy/version markers must not revoke login.
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      void enforceSession(session);
+    });
 
     return () => {
       active = false;

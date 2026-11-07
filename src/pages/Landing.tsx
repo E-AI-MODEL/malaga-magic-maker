@@ -82,12 +82,12 @@ export default function Landing() {
         <header className="flex h-12 shrink-0 items-center">
           <BrandLogo onImage />
         </header>
-        <div className="flex min-h-0 flex-1 flex-col justify-center gap-[3vh]">
-          <h1 className="mx-auto max-w-md text-center font-display text-[clamp(2.4rem,6.5vh,3.75rem)] font-bold leading-[1.05] text-on-image drop-shadow-md">Jouw hele vakantie in je <span className="relative inline-block">broekzak<span aria-hidden className="absolute -bottom-1 left-0 h-1.5 w-full rounded-full bg-primary" /></span></h1>
+        <div className="flex min-h-0 flex-1 flex-col justify-center gap-[2dvh]">
+          <h1 className="mx-auto max-w-md text-center font-display text-[clamp(1.75rem,5.5dvh,3.75rem)] font-bold leading-[1.05] text-on-image drop-shadow-md">Jouw hele vakantie in je <span className="relative inline-block">broekzak<span aria-hidden className="absolute -bottom-1 left-0 h-1.5 w-full rounded-full bg-primary" /></span></h1>
           <ProductButtons knaakieTo="/knaakie" vakansieTo="/signup" scanUnavailable={left === 0}
             onScan={() => { if (left === 0) navigate("/signup"); else gallery.current?.click(); }}
             onManual={() => { setFile(undefined); setInitialStep("amount"); setOpen(true); }} />
-          <Button variant="ghost" onClick={() => setInfoOpen(true)} className="tile-plain min-h-16 w-full shrink-0 justify-between rounded-[1.5rem] px-4 text-left text-lg font-bold hover:bg-card">
+          <Button variant="ghost" onClick={() => setInfoOpen(true)} className="tile-plain min-h-[min(4rem,9dvh)] w-full shrink-0 justify-between rounded-[1.5rem] px-4 text-left text-lg font-bold hover:bg-card">
             <span className="flex items-center gap-3"><Info aria-hidden className="!size-6" />Goed om te weten</span><ArrowRight aria-hidden className="!size-5" />
           </Button>
         </div>

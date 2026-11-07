@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { AlertTriangle, Archive, ChevronDown, Mail, Pencil, Trash2 } from "lucide-react";
+import { AlertTriangle, Archive, ChevronDown, Mail, Pencil, Settings, Trash2 } from "lucide-react";
+import { Link } from "react-router-dom";
 import { AppLayout } from "@/components/AppLayout";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth";
@@ -245,6 +246,10 @@ export default function TripReis() {
           destination={activeTrip.destination_name}
           onAdd={readOnly ? undefined : () => setAddOpen(true)}
         />
+
+        {isOrganizer && <Button asChild variant="secondary" className="tile-plain mt-3 min-h-14 w-full justify-start rounded-2xl px-4 text-base">
+          <Link to={`/trip/${activeTrip.id}/settings`}><Settings />Reisinstellingen</Link>
+        </Button>}
 
         {readOnly && (
           <div className="mt-4 flex items-center gap-2 text-sm text-muted-foreground">

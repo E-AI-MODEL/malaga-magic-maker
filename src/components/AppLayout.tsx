@@ -34,6 +34,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
   const title = pathname === "/trips" ? "Home" : pathname === "/profiel" ? "Profiel" : activeTrip?.name;
   const section = new URLSearchParams(search).get("section");
   const tripHeading = pathname.endsWith("/reis") ? "Reis"
+    : pathname.endsWith("/settings") ? "Reisinstellingen"
     : pathname.endsWith("/samen") ? section === "expenses" ? "Knaakie" : section === "tasks" ? "Taken" : section === "decisions" ? "Keuzes" : "Samen"
     : null;
 

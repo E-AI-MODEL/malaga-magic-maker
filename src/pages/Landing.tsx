@@ -8,7 +8,7 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "
 import { ExpenseWizard, type WizardResult } from "@/features/together/ExpenseWizard";
 import { GUEST_SELF_ID, addGuestExpense, addGuestPerson, guestUsesLeft, loadGuestKnaakie, saveGuestKnaakie } from "@/features/knaakie-guest/store";
 import heroHome from "@/assets/hero-home.jpg";
-import logo from "@/assets/vakansie_primary_complete.png.asset.json";
+import { BrandLogo } from "@/components/BrandLogo";
 
 const FAQ = [
   {
@@ -57,7 +57,6 @@ export default function Landing() {
   const navigate = useNavigate();
   const [guest, setGuest] = useState(() => loadGuestKnaakie());
   const [open, setOpen] = useState(false);
-  const [logoFailed, setLogoFailed] = useState(false);
   const [infoOpen, setInfoOpen] = useState(false);
   const [file, setFile] = useState<File>();
   const [initialStep, setInitialStep] = useState<"start" | "amount">("start");
@@ -81,7 +80,7 @@ export default function Landing() {
       <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-b from-foreground/50 via-foreground/10 to-foreground/40" />
       <main className="relative mx-auto flex h-full max-w-2xl flex-col px-5 pb-[max(env(safe-area-inset-bottom),0.75rem)] pt-[max(env(safe-area-inset-top),0.75rem)]">
         <header className="flex h-12 shrink-0 items-center">
-          {logoFailed ? <span className="font-display text-3xl font-bold text-on-image">Vakansie</span> : <img src={logo.url} alt="Vakansie" width={169} height={43} onError={() => setLogoFailed(true)} className="h-8 w-auto object-contain" />}
+          <BrandLogo onImage />
         </header>
         <div className="flex min-h-0 flex-1 flex-col justify-center gap-[3vh]">
           <h1 className="mx-auto max-w-md text-center font-display text-[clamp(2.4rem,6.5vh,3.75rem)] font-bold leading-[1.05] text-on-image drop-shadow-md">Jouw hele vakantie in je <span className="relative inline-block">broekzak<span aria-hidden className="absolute -bottom-1 left-0 h-1.5 w-full rounded-full bg-primary" /></span></h1>

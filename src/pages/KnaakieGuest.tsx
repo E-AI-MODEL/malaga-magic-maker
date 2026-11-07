@@ -20,7 +20,7 @@ import {
   saveGuestKnaakie,
   type GuestKnaakie,
 } from "@/features/knaakie-guest/store";
-import logo from "@/assets/vakansie_primary_complete.png.asset.json";
+import { BrandLogo } from "@/components/BrandLogo";
 
 
 export default function KnaakieGuest() {
@@ -51,7 +51,7 @@ export default function KnaakieGuest() {
     <div className="min-h-screen overflow-x-hidden bg-background text-foreground">
       <header className="sticky top-0 z-40 border-b border-border/70 bg-background">
         <div className="mx-auto flex h-14 max-w-xl items-center justify-between px-5">
-          <Link to="/" aria-label="Naar de homepage"><img src={logo.url} alt="Vakansie" width={169} height={43} className="h-8 w-auto object-contain" /></Link>
+          <Link to="/" aria-label="Naar de homepage"><BrandLogo /></Link>
           <Button asChild variant="ghost" size="sm" className="rounded-md"><Link to="/login">Inloggen</Link></Button>
         </div>
       </header>

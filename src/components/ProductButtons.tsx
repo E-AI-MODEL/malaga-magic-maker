@@ -17,9 +17,9 @@ export function ProductButtons({ knaakieTo, vakansieTo, onScan, onManual, scanUn
         </Link>
       </Button>
       {onScan && <div className="mt-3">
-        <div className="flex gap-2">
-          <Button onClick={onScan} className="min-h-14 min-w-0 flex-1 flex-col gap-1 whitespace-nowrap rounded-md px-2 text-sm"><Camera />{scanUnavailable ? "Ga verder" : "Scan bon"}</Button>
-          {!scanUnavailable && onManual && <Button variant="secondary" size="icon" aria-label="Vul zelf in" title="Vul zelf in" onClick={onManual}><PenLine /></Button>}
+        <div className="grid grid-cols-2 gap-2">
+          <Button onClick={onScan} className={`min-h-14 min-w-0 flex-col gap-1 rounded-md px-1 text-sm ${scanUnavailable || !onManual ? "col-span-2" : ""}`}><Camera />{scanUnavailable ? "Ga verder" : "Scan bon"}</Button>
+          {!scanUnavailable && onManual && <Button variant="secondary" className="min-h-14 min-w-0 flex-col gap-1 rounded-md px-1 text-sm" onClick={onManual}><PenLine />Vul in</Button>}
         </div>
       </div>}
       </div>

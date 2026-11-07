@@ -10,8 +10,7 @@ export function pendingInvitePath(read: () => string | null): string | null {
 }
 
 export function loginDestination(next: string | null): string {
-  if (!next || !next.startsWith("/") || next.startsWith("//") || next.includes("\\")) return "/";
-  return next;
+  return oauthReturnPath(next);
 }
 
 /** Keep Knaakie on its own screen; the selected authorized trip is scoped by URL. */

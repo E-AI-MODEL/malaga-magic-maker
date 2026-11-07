@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { Archive, ArrowRight, CheckSquare, ChevronDown, ChevronRight, Plus, Receipt, Scale } from "lucide-react";
+import { Archive, CheckSquare, ChevronDown, ChevronRight, Plus, Receipt, Scale } from "lucide-react";
 import { Trip, useTrip } from "@/contexts/TripContext";
 import { tripTimingLabel } from "@/features/trips/presentation";
 import { getTripReadiness } from "@/features/readiness/data";
@@ -17,6 +17,7 @@ import { PageHeader, RowItem, RowList, SectionLabel } from "@/components/primiti
 import { TripThumb, TripVisual } from "@/components/TripVisual";
 import { GettingStarted } from "@/features/onboarding/GettingStarted";
 import heroHome from "@/assets/hero-home.jpg";
+import { ProductButtons } from "@/components/ProductButtons";
 
 function formatDateRange(startDate: string | null, endDate: string | null) {
   if (!startDate && !endDate) return "Data nog te kiezen";
@@ -61,7 +62,7 @@ function NextTrip({ trip, facts, userId }: { trip: Trip; facts: HomeFacts; userI
   const first = preparation.things[0];
 
   return (
-    <section className="-mt-14 rounded-lg border border-border bg-card p-5 shadow-soft">
+      <section className="rounded-lg border border-border bg-card p-5 shadow-soft">
       <p className="font-ui text-[12px] font-semibold text-muted-foreground">Eerstvolgende reis</p>
       <Link to={`/trip/${trip.id}`} className="flex items-center gap-3.5 py-1">
         <TripVisual
@@ -90,8 +91,6 @@ function NextTrip({ trip, facts, userId }: { trip: Trip; facts: HomeFacts; userI
           {first && <Link to={first.href} className="block text-sm text-muted-foreground hover:text-foreground">{first.title}</Link>}
         </div>
       ) : <p className="mt-3 text-xs text-muted-foreground">Laden…</p>}
-      <Button asChild size="lg" className="mt-4 h-14 w-full rounded-xl font-display text-lg font-semibold [&_svg]:size-5"><Link to={`/trip/${trip.id}`}><span className="min-w-0 truncate">Naar {trip.name}</span><ArrowRight className="ml-2 shrink-0" /></Link></Button>
-      <Button asChild variant="outline" size="lg" className="mt-2 h-14 w-full rounded-xl bg-card font-display text-lg font-semibold text-foreground hover:text-foreground [&_svg]:size-5"><Link to={`/trip/${trip.id}/samen?section=expenses`}><Receipt className="mr-2 shrink-0" />Naar Knaakie</Link></Button>
     </section>
   );
 }
@@ -152,8 +151,11 @@ export default function Trips() {
         </div>
       </section>
       <div className="relative z-10 mx-auto max-w-3xl px-5 pb-16">
+        <div className="relative z-10 -mt-14 mb-8">
+          <ProductButtons knaakieTo={heroTrip ? `/trip/${heroTrip.id}/samen?section=expenses` : "/knaakie"} vakansieTo={heroTrip ? `/trip/${heroTrip.id}` : "/new-trip"} />
+        </div>
         {loading ? (
-          <div className="-mt-14 h-28 animate-pulse rounded-lg border border-border bg-card shadow-soft" />
+          <div className="h-28 animate-pulse rounded-lg border border-border bg-card shadow-soft" />
         ) : heroTrip ? (
           <>
             <NextTrip trip={heroTrip} facts={facts} userId={user?.id} />
@@ -161,7 +163,7 @@ export default function Trips() {
           </>
         ) : activeTrips.length ? <div className="pt-4"><GettingStarted trip={activeTrips[0]} hasAnyTrip={userTrips.length > 0} /></div> : (
           <div>
-            <div className="-mt-14 rounded-lg border border-border bg-card p-5 shadow-soft">
+            <div className="rounded-lg border border-border bg-card p-5 shadow-soft">
               <h2 className="font-display text-[22px] font-bold leading-tight">Start je eerste reis</h2>
               <p className="mt-2 text-[15px] leading-relaxed text-muted-foreground">
                 Begin met een naam. Data, mensen en plannen voeg je toe wanneer je wilt.

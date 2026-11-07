@@ -159,12 +159,6 @@ export default function Trips() {
           </>
         ) : activeTrips.length ? <div className="pt-4"><GettingStarted trip={activeTrips[0]} hasAnyTrip={userTrips.length > 0} /></div> : (
           <div>
-            <div className="tile-plain rounded-[1.5rem] bg-card p-5">
-              <h2 className="font-display text-[22px] font-bold leading-tight">Start je eerste reis</h2>
-              <Button asChild size="lg" className="mt-4 h-14 w-full rounded-xl font-display text-lg font-semibold [&_svg]:size-5">
-                <Link to="/new-trip"><Plus className="mr-2" />Je eerste reis starten</Link>
-              </Button>
-            </div>
             <GettingStarted trip={null} hasAnyTrip={userTrips.length > 0} />
           </div>
         )}

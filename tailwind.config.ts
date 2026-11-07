@@ -21,6 +21,9 @@ export default {
         brand: ["Barlow Condensed", "Barlow", "sans-serif"],
       },
       colors: {
+        knaakie: "hsl(var(--knaakie))",
+        vakansie: "hsl(var(--vakansie))",
+        hansie: { DEFAULT: "hsl(var(--hansie))", deep: "hsl(var(--hansie-deep))" },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",

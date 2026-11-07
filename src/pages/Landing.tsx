@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Info } from "lucide-react";
 import { ProductButtons } from "@/components/ProductButtons";
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -84,9 +84,9 @@ export default function Landing() {
       <main className="mx-auto max-w-2xl">
         <section className="relative px-6 pb-8 pt-8">
           <img src={heroHome} alt="Terras met uitzicht op zee" width={1280} height={720} className="absolute inset-0 h-full w-full object-cover" />
-          <div aria-hidden="true" className="absolute inset-0 bg-foreground/60" />
+          <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-b from-foreground/50 via-foreground/10 to-foreground/30" />
           <div className="relative">
-            <h1 className="mb-8 max-w-md font-display text-4xl font-bold leading-tight text-on-image sm:text-5xl">Jouw hele vakantie in je broekzak</h1>
+            <h1 className="mx-auto mb-8 max-w-md text-center font-display text-5xl font-bold leading-[1.05] text-on-image drop-shadow-md sm:text-6xl">Jouw hele vakantie in je <span className="relative inline-block">broekzak<span aria-hidden className="absolute -bottom-1 left-0 h-1.5 w-full rounded-full bg-primary" /></span></h1>
             <ProductButtons knaakieTo="/knaakie" vakansieTo="/signup" scanUnavailable={left === 0}
               onScan={() => { if (left === 0) navigate("/signup"); else gallery.current?.click(); }}
               onManual={() => { setFile(undefined); setInitialStep("amount"); setOpen(true); }} />
@@ -98,8 +98,8 @@ export default function Landing() {
           <Collapsible open={infoOpen} onOpenChange={setInfoOpen}>
             <h2>
               <CollapsibleTrigger asChild>
-                <Button variant="secondary" className="min-h-16 w-full justify-between rounded-lg bg-card px-4 text-left font-display text-2xl font-bold">
-                  Goed om te weten<ChevronDown aria-hidden className={`!size-5 ${infoOpen ? "rotate-180" : ""}`} />
+                <Button variant="ghost" className="tile-plain min-h-16 w-full justify-between rounded-[1.5rem] px-4 text-left text-lg font-bold hover:bg-card">
+                  <span className="flex items-center gap-3"><Info aria-hidden className="!size-6" />Goed om te weten</span><ChevronDown aria-hidden className={`!size-5 ${infoOpen ? "rotate-180" : ""}`} />
                 </Button>
               </CollapsibleTrigger>
             </h2>

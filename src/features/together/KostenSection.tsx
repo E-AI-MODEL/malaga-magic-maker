@@ -23,6 +23,7 @@ export function KostenSection() {
   const [wizardOpen, setWizardOpen] = useState(false);
   const [editing, setEditing] = useState<ExpenseBundle | null>(null);
   const [expanded, setExpanded] = useState<string | null>(null);
+  const [overviewOpen, setOverviewOpen] = useState(false);
   const [payment, setPayment] = useState<{ recipientName: string; amount: number; currency: string } | null>(null);
   const membersQuery = useQuery({ queryKey: ["trip-members-view", tripId], queryFn: () => listTripMembers(tripId), enabled: Boolean(tripId) });
   const expensesQuery = useQuery({ queryKey: ["together-expenses", tripId], queryFn: () => listExpenses(tripId), enabled: Boolean(tripId) });
@@ -72,7 +73,11 @@ export function KostenSection() {
     <div>
       {readOnly && <p className="mt-4 flex items-start gap-2 text-sm text-muted-foreground"><Archive className="h-4 w-4 shrink-0" />Deze reis is gearchiveerd. Je kunt de kosten nog bekijken.</p>}
 
-      <section className="tile-knaakie overflow-hidden rounded-2xl px-4 py-4 text-on-image" aria-live="polite">
+      <section className="tile-knaakie overflow-hidden rounded-2xl text-on-image" aria-live="polite">
+        <Button variant="ghost" className="min-h-14 w-full justify-between rounded-2xl px-4 text-left text-on-image hover:bg-transparent hover:text-on-image" onClick={() => setOverviewOpen((open) => !open)} aria-expanded={overviewOpen} aria-controls="knaakie-overview">
+          <span>Overzicht</span><ChevronDown className={overviewOpen ? "rotate-180" : ""} />
+        </Button>
+        {overviewOpen && <div id="knaakie-overview" className="px-4 pb-4">
         {loading ? <p className="text-sm opacity-70">Laden…</p>
           : expensesQuery.isError ? <p className="text-sm opacity-80">Laden lukt nu niet. <Button variant="link" className="text-background underline" onClick={() => void expensesQuery.refetch()}>Opnieuw proberen</Button></p>
           : !expenses.length ? <><p className="font-display text-2xl font-semibold leading-none">Nog geen kosten</p></>
@@ -82,6 +87,7 @@ export function KostenSection() {
             <p className={`num font-display text-4xl font-semibold leading-none tracking-tight `}>{money(Math.abs(balance.cents) / 100, balance.currency)}</p>
           </div>)}
         {expenses.length > 0 && <p className="num mt-3 text-sm opacity-60">{expenses.length} {expenses.length === 1 ? "bonnetje" : "bonnetjes"} in deze reis</p>}
+        </div>}
       </section>
       {!readOnly && <div className="mt-4 grid grid-cols-2 gap-3">
         <Button variant="secondary" onClick={openNew} className="tile-plain h-16 rounded-2xl text-base"><Camera />Scan bon</Button>

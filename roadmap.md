@@ -1,5 +1,11 @@
 # Roadmap
 
+## Reisinstellingen en compact Knaakie
+- [x] Reisinstellingen direct als tegel op Reis; lange formulierpagina vervangen door compacte tegels en afzonderlijke panelen
+- [x] Mobiele titel Reisinstellingen zichtbaar; datumvelden begrensd tot hun kolom
+- [x] Oranje Knaakie-overzicht standaard ingeklapt, handmatig openen en sluiten
+- [ ] Ingelogde visuele controle — geen beschikbare testsessie voor verzoeker
+
 ## Knaakie na publicatie
 - [x] Footerklik gereproduceerd: /knaakie stuurde ingelogde gebruikers terug naar Home
 - [x] Accountingang opent bestaande kosten van een actieve reis; zonder reis naar Nieuwe reis, nooit stil terug naar Home

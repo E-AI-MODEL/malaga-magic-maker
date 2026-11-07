@@ -40,6 +40,7 @@ One generic `trip_items` model; type-specific details in metadata, no destinatio
 - Mobile account and trip screens expose Profile directly in the shared footer; Home uses a fixed frame and opens secondary lists in sheets. Why: consistent access without a header-only account menu.
 - Signed-in /knaakie waits for authorized trips and opens active-trip expenses, or trip creation when none exist. Why: the public guest entry must not bounce account footer clicks back to Home.
 - Mobile AppLayout reserves one row for Home, the work-screen heading and the trip menu; TripPageHeader shows metadata and actions below it, keeping its own heading desktop-only. Why: navigation cannot cover page titles or add actions.
+- Trip settings use section tiles and the shared FormSheet/FormSubmit shell while retaining the existing update and lifecycle handlers. Why: keep editing compact without changing authorization or persistence.
 - Account and trip screens use AppLayout; desktop Hansie stays inside its content column, and route-scoped visibility excludes account and archived screens. Why: preserve one navigation shell without stale trip context or a third column.
 Bounded builds; no unrelated redesigns, extra features, duplicated concepts or branding changes during backend/security work. Mobile first, desktop functional.
 

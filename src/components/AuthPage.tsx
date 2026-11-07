@@ -1,11 +1,10 @@
 import { useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { Home } from "lucide-react";
-import logo from "@/assets/vakansie_primary_complete.png.asset.json";
+import { BrandLogo } from "@/components/BrandLogo";
 import heroHome from "@/assets/hero-home.jpg";
 
 export function AuthPage({ children }: { children: ReactNode }) {
-  const [logoFailed, setLogoFailed] = useState(false);
   return (
     <div className="relative h-[100dvh] overflow-hidden bg-foreground text-foreground">
       <img src={heroHome} alt="" aria-hidden className="absolute inset-0 h-full w-full object-cover" />

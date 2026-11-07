@@ -8,7 +8,7 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "
 import { ExpenseWizard, type WizardResult } from "@/features/together/ExpenseWizard";
 import { GUEST_SELF_ID, addGuestExpense, addGuestPerson, guestUsesLeft, loadGuestKnaakie, saveGuestKnaakie } from "@/features/knaakie-guest/store";
 import heroHome from "@/assets/hero-home.jpg";
-import logo from "@/assets/vakansie_primary_complete.png.asset.json";
+import { BrandLogo } from "@/components/BrandLogo";
 
 const FAQ = [
   {
@@ -57,7 +57,6 @@ export default function Landing() {
   const navigate = useNavigate();
   const [guest, setGuest] = useState(() => loadGuestKnaakie());
   const [open, setOpen] = useState(false);
-  const [logoFailed, setLogoFailed] = useState(false);
   const [infoOpen, setInfoOpen] = useState(false);
   const [file, setFile] = useState<File>();
   const [initialStep, setInitialStep] = useState<"start" | "amount">("start");

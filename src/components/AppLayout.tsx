@@ -19,7 +19,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import logo from "@/assets/vakansie_primary_complete.png.asset.json";
+import { BrandLogo } from "@/components/BrandLogo";
 
 function AccountMenu({ navigate }: { navigate: (path: string) => void }) {
   return (
@@ -69,7 +69,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
             <AdminBar />
             <div className="mx-auto flex h-14 max-w-3xl items-center justify-between px-5">
               <button type="button" onClick={goHome} aria-label="Naar Home" className="flex items-center">
-                <img src={logo.url} alt="Vakansie" width={169} height={43} className="h-8 w-auto object-contain" />
+                <BrandLogo />
               </button>
               <AccountMenu navigate={navigate} />
             </div>
@@ -171,7 +171,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
                 aria-label="Naar Home"
                 className="truncate font-ui text-sm font-semibold text-muted-foreground transition-colors hover:text-foreground"
               >
-                {isTripScreen ? "Home" : <img src={logo.url} alt="Vakansie" width={169} height={43} className="h-7 w-auto object-contain" />}
+                {isTripScreen ? "Home" : <BrandLogo className="h-7" />}
               </Button>
             </div>
             <div className="flex items-center gap-2">

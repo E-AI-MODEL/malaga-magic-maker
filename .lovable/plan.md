@@ -42,8 +42,9 @@ Every row says the action, not the topic. Examples:
 | Kosten | Kosten · Nog niets betaald / Je krijgt € 40 |
 | Nu doen | Eerst dit |
 | Nog niets ingepland. Naar Reis | Zet je vlucht of verblijf erin |
-| Iets betaald voor de groep? Maak een foto van je bonnetje. | Scan je bon. AI vult het in. |
+| Iets betaald voor de groep? Maak een foto van je bonnetje. | Scan je bon |
 
+- Copy rule: short commands without explanation. No "AI does X for you", no reassuring add-on sentences, no rhetorical questions. A button says the action ("Scan bon", "Stem nu", "Nodig uit"); a line says the fact ("1 wacht op je stem"). Anything that does not tell you what to do or what the state is gets deleted.
 - The backend keeps the stored title "Waar verblijven we?" so voting and choosing keep working. The app only displays it as "Kies jullie verblijf".
 - Sweep for old leftovers: "Recente activiteit", "Wacht op jouw stem", "Stemmen open", status labels in yellow, upper-case section labels.
 

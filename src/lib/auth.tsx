@@ -146,7 +146,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signInWithGoogle = async (next?: string) => {
     const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: next && next !== "/" ? new URL(next, window.location.origin).href : window.location.origin,
+      redirect_uri: next?.startsWith("/.lovable/oauth/") ? new URL(next, window.location.origin).href : window.location.origin,
     });
     if (result.error) return { error: "Inloggen met Google is niet gelukt." };
     return {};
@@ -162,7 +162,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       email: email.trim().toLowerCase(),
       password,
       options: {
-        emailRedirectTo: next && next !== "/" ? new URL(next, window.location.origin).href : `${window.location.origin}/`,
+        emailRedirectTo: next?.startsWith("/.lovable/oauth/") ? new URL(next, window.location.origin).href : `${window.location.origin}/`,
         data: { display_name: displayName.trim() },
       },
     });

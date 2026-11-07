@@ -358,7 +358,7 @@ export default function TripSamen() {
             ) : decisions.length === 0 ? (
               <EmptyLine text="Nog niets te kiezen." actionLabel={readOnly ? undefined : "Nieuwe keuze"} onClick={readOnly ? undefined : () => setDecisionSheetOpen(true)} />
             ) : (
-              <RowList className="mt-1">
+              <div className="mt-1 space-y-5">
                 {decisions.map((decision) => {
                   const manager = isOrganizer || decision.created_by === user.id;
                   const ownVote = decision.options.find((option) => option.votes.some((vote) => vote.user_id === user.id))?.id;
@@ -366,46 +366,52 @@ export default function TripSamen() {
                   const topVoteCount = decision.options.length > 0 ? Math.max(...decision.options.map((option) => option.votes.length)) : 0;
                   const expanded = expandedDecision === decision.id;
                   return (
-                    <div key={decision.id} className="py-3">
-                      <div className="flex min-h-[46px] items-center gap-3">
-                        <button
+                    <div key={decision.id}>
+                        <Button
                           type="button"
+                          variant="secondary"
                           onClick={() => setExpandedDecision(expanded ? null : decision.id)}
                           aria-expanded={expanded}
-                          className="min-w-0 flex-1 text-left"
+                          aria-controls={`decision-options-${decision.id}`}
+                          className="tile-plain min-h-24 w-full justify-between gap-3 rounded-2xl px-4 py-4 text-left"
                         >
-                          <span className="block truncate text-[15px] font-medium leading-tight">{displayDecisionTitle(decision.title)}</span>
-                          <span className="mt-0.5 block truncate text-xs text-muted-foreground">
+                          <span className="min-w-0 flex-1">
+                          <span className="block break-words font-brand text-xl font-semibold leading-tight">{displayDecisionTitle(decision.title)}</span>
+                          <span className="mt-1 block text-sm font-normal text-muted-foreground">
                             {decision.options.length} {decision.options.length === 1 ? "optie" : "opties"} · {totalVotes} {totalVotes === 1 ? "stem" : "stemmen"}
                           </span>
-                        </button>
-                        <span className={`shrink-0 text-[13px] font-semibold ${decision.status === "open" && !ownVote ? "text-primary" : "text-muted-foreground"}`}>
+                          </span>
+                        <span className="flex shrink-0 flex-col items-end gap-2">
+                        <span className={`text-sm font-semibold ${decision.status === "open" && !ownVote ? "text-primary" : "text-muted-foreground"}`}>
                           {decisionStatusLine(decision.status, Boolean(ownVote))}
                         </span>
-                        <ChevronDown className={`h-4 w-4 shrink-0 text-muted-foreground/60 transition-transform ${expanded ? "rotate-180" : ""}`} />
-                      </div>
+                        <ChevronDown className={`h-4 w-4 text-muted-foreground ${expanded ? "rotate-180" : ""}`} />
+                        </span>
+                        </Button>
 
                       {expanded && (
-                        <div className="mt-2 space-y-1.5 pl-1">
+                        <div id={`decision-options-${decision.id}`} className="mt-5 space-y-3">
                           {decision.description && <p className="text-sm text-muted-foreground">{decision.description}</p>}
                           {decision.options.map((option) => {
                             const chosen = ownVote === option.id;
                             const winner = decision.status === "closed" && totalVotes > 0 && option.votes.length === topVoteCount;
                             return (
-                              <button
+                              <Button
                                 key={option.id}
                                 type="button"
+                                variant="secondary"
                                 disabled={readOnly || decision.status !== "open"}
                                 onClick={() => void voteFor(decision, option.id)}
-                                className={`flex w-full items-center justify-between gap-3 rounded-lg border px-3.5 py-2.5 text-left transition-colors ${chosen ? "border-primary bg-primary/10" : "border-border"} ${!readOnly && decision.status === "open" ? "hover:border-primary/40" : "cursor-default"}`}
+                                aria-pressed={chosen}
+                                className={`min-h-14 w-full justify-between gap-3 rounded-2xl border px-4 py-3 text-left disabled:opacity-100 ${chosen ? "border-primary bg-primary/10" : "border-border"}`}
                               >
                                 <span className="flex min-w-0 items-center gap-2 text-sm font-medium">
                                   {chosen && <Check className="h-4 w-4 shrink-0 text-primary" />}
-                                  <span className="truncate">{option.label}</span>
+                                  <span className="break-words">{option.label}</span>
                                   {winner && <span className="shrink-0 text-[11px] font-semibold text-primary">meeste stemmen</span>}
                                 </span>
                                 <span className="shrink-0 text-xs font-semibold text-muted-foreground num">{option.votes.length}</span>
-                              </button>
+                              </Button>
                             );
                           })}
                           {!readOnly && manager && (
@@ -428,7 +434,7 @@ export default function TripSamen() {
                     </div>
                   );
                 })}
-              </RowList>
+              </div>
             )
           )}
 

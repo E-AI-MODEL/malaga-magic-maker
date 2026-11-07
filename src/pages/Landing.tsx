@@ -79,7 +79,6 @@ export default function Landing() {
     <div className="min-h-screen overflow-x-hidden bg-card text-foreground">
       <header className="mx-auto flex h-16 max-w-2xl items-center justify-between px-6">
         {logoFailed ? <span className="font-display text-3xl font-bold">Vakansie</span> : <img src={logo.url} alt="Vakansie" width={169} height={43} onError={() => setLogoFailed(true)} className="h-8 w-auto object-contain" />}
-        <Button asChild variant="ghost"><Link to="/login">Inloggen<ArrowRight /></Link></Button>
       </header>
 
       <main className="mx-auto max-w-2xl">

@@ -1,30 +1,25 @@
 import { useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
-import { ArrowUpLeft, Home } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Home } from "lucide-react";
 import logo from "@/assets/vakansie_primary_complete.png.asset.json";
 import heroHome from "@/assets/hero-home.jpg";
 
 export function AuthPage({ children }: { children: ReactNode }) {
   const [logoFailed, setLogoFailed] = useState(false);
   return (
-    <div className="min-h-screen overflow-x-hidden bg-background text-foreground">
-      <header className="mx-auto flex h-16 max-w-lg items-center justify-between px-5">
-        <Link to="/" aria-label="Vakansie Home" className="py-2">
-          {logoFailed ? <span className="font-display text-3xl font-bold">Vakansie</span> : <img src={logo.url} alt="Vakansie" width={169} height={43} onError={() => setLogoFailed(true)} className="h-8 w-auto object-contain" />}
-        </Link>
-      </header>
-      <div className="relative">
-        <img src={heroHome} alt="" aria-hidden className="absolute inset-0 h-full w-full object-cover" />
-        <div aria-hidden className="absolute inset-0 bg-foreground/60" />
-        <div className="relative mx-auto flex max-w-lg items-center gap-5 px-5 py-6">
-          <p className="flex-1 font-display text-2xl font-bold leading-tight text-on-image">Jouw hele vakantie in je broekzak</p>
-          <Button asChild variant="secondary" className="h-24 w-28 shrink-0 flex-col gap-2 rounded-lg bg-card px-3 text-foreground hover:bg-accent">
-            <Link to="/"><span aria-hidden className="flex w-full justify-between"><Home className="!size-6" /><ArrowUpLeft /></span><span className="w-full text-left text-base">Home</span></Link>
-          </Button>
-        </div>
+    <div className="relative h-[100dvh] overflow-hidden bg-foreground text-foreground">
+      <img src={heroHome} alt="" aria-hidden className="absolute inset-0 h-full w-full object-cover" />
+      <div aria-hidden className="absolute inset-0 bg-gradient-to-b from-foreground/50 via-foreground/10 to-foreground/40" />
+      <div className="relative mx-auto flex h-full max-w-lg flex-col px-5 pb-[max(env(safe-area-inset-bottom),0.75rem)] pt-[max(env(safe-area-inset-top),0.75rem)]">
+        <header className="flex h-12 shrink-0 items-center justify-between">
+          <Link to="/" aria-label="Vakansie Home" className="py-2">
+            {logoFailed ? <span className="font-display text-3xl font-bold text-on-image">Vakansie</span> : <img src={logo.url} alt="Vakansie" width={169} height={43} onError={() => setLogoFailed(true)} className="h-8 w-auto object-contain" />}
+          </Link>
+          <Link to="/" className="tile-plain flex h-11 items-center gap-2 rounded-full px-4 text-sm font-bold"><Home className="size-5" />Home</Link>
+        </header>
+        <p className="mt-[2vh] shrink-0 text-center font-display text-[clamp(2rem,5vh,3rem)] font-bold leading-[1.05] text-on-image drop-shadow-md">Jouw hele vakantie in je broekzak</p>
+        <main className="tile-plain mt-[2vh] min-h-0 flex-1 overflow-y-auto rounded-[1.75rem] bg-card p-5">{children}</main>
       </div>
-      <main className="mx-auto max-w-lg px-5 pb-[max(env(safe-area-inset-bottom),2rem)] pt-7">{children}</main>
     </div>
   );
 }

@@ -11,7 +11,7 @@ export default defineTool({
     if (!ctx.isAuthenticated()) throw new ToolError("Not authenticated");
     const db = supabaseForUser(ctx);
     const { data, error } = await db
-      .from("trips")
+      .from("trip")
       .select("id, name, destination_name, destination_country, start_date, end_date, status, currency")
       .order("start_date", { ascending: true, nullsFirst: false })
       .limit(100);

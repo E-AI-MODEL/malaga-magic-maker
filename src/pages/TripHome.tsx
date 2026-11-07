@@ -122,14 +122,12 @@ export default function TripHome() {
             </section>
           ) : <>
           <section className="py-2">
-            <SectionLabel>Eerst dit</SectionLabel>
             {readinessQuery.isLoading ? (
               <p className="mt-2 text-[15px] text-muted-foreground">Laden…</p>
             ) : first ? (
               <>
-                <p className="mt-1.5 text-[19px] font-semibold leading-snug">{first.title}</p>
-                {first.meta && <p className="mt-0.5 text-[13px] text-muted-foreground">{first.meta}</p>}
-                <Button className="mt-4 h-14 w-full text-[16px]" onClick={() => navigate(first.href)}>
+                <p className="text-[19px] font-semibold leading-snug">{first.title}</p>
+                                <Button className="mt-4 h-14 w-full text-[16px]" onClick={() => navigate(first.href)}>
                   {first.actionLabel}
                 </Button>
               </>
@@ -139,11 +137,11 @@ export default function TripHome() {
           </section>
 
           <section>
-            <SectionLabel>Hierna</SectionLabel>
+            <SectionLabel>Planning</SectionLabel>
             {itemsQuery.isLoading ? (
               <p className="py-3 text-[14px] text-muted-foreground">Laden…</p>
             ) : view.upcoming.length === 0 ? (
-              <EmptyLine text="Zet je vlucht of verblijf erin." actionLabel="Naar Reis" to={`/trip/${activeTrip.id}/reis`} />
+              <EmptyLine text="Nog niets gepland." actionLabel="Naar Reis" to={`/trip/${activeTrip.id}/reis`} />
             ) : (
               <ol className="relative mt-1">
                 {view.upcoming.slice(0, typeof window !== "undefined" && window.innerHeight < 760 ? 2 : 3).map((item, index, shown) => {

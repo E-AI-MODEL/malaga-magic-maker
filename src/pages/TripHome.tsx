@@ -84,7 +84,7 @@ export default function TripHome() {
 
   if (!activeTrip || !view) return null;
 
-  const [first, ...rest] = view.things;
+  const [first] = view.things;
 
   return (
     <AppLayout>
@@ -121,36 +121,16 @@ export default function TripHome() {
             </section>
           ) : <>
           <section className="py-2">
-            <SectionLabel>Eerst dit</SectionLabel>
+            <SectionLabel>Nu doen</SectionLabel>
             {readinessQuery.isLoading ? (
               <p className="mt-2 text-[15px] text-muted-foreground">Laden…</p>
             ) : first ? (
               <>
                 <p className="mt-1.5 text-[19px] font-semibold leading-snug">{first.title}</p>
                 {first.meta && <p className="mt-0.5 text-[13px] text-muted-foreground">{first.meta}</p>}
-                <Button className="mt-3 h-11 w-full" onClick={() => navigate(first.href)}>
+                <Button className="mt-4 h-14 w-full text-[16px]" onClick={() => navigate(first.href)}>
                   {first.actionLabel}
                 </Button>
-                {rest.length > 0 && (
-                  <>
-                    <button
-                      type="button"
-                      onClick={() => setExpanded((value) => !value)}
-                      className="mt-2.5 flex items-center gap-1 font-ui text-[12px] font-semibold text-muted-foreground hover:text-foreground"
-                      aria-expanded={expanded}
-                    >
-                      +{rest.length} {rest.length === 1 ? "ander punt" : "andere punten"}
-                      <ChevronDown className={`h-3.5 w-3.5 transition-transform ${expanded ? "rotate-180" : ""}`} aria-hidden />
-                    </button>
-                    {expanded && (
-                      <RowList className="mt-1">
-                        {rest.map((thing) => (
-                          <RowItem key={thing.key} title={thing.title} meta={thing.meta || thing.actionLabel} to={thing.href} />
-                        ))}
-                      </RowList>
-                    )}
-                  </>
-                )}
               </>
             ) : (
               <p className="mt-1.5 text-[15px] text-muted-foreground">Alles is bij.</p>
@@ -165,13 +145,13 @@ export default function TripHome() {
               <EmptyLine text="Nog niets ingepland." actionLabel="Naar Reis" to={`/trip/${activeTrip.id}/reis`} />
             ) : (
               <ol className="relative mt-1">
-                {view.upcoming.map((item, index) => {
+                {view.upcoming.slice(0, 3).map((item, index, shown) => {
                   const Icon = travelTypeIcon(item.type);
                   return (
                     <li key={item.id}>
                       <TimelineRow time={shortDate(item.start_at as string, item.timezone || timezone)} icon={Icon} title={item.title}
                         category={["own_vehicle", "flight", "train", "ferry", "transfer", "rental_car"].includes(item.type) ? "transport" : item.type === "stay" ? "stay" : item.type === "restaurant" ? "food" : ["activity", "event", "ticket"].includes(item.type) ? "activity" : "other"}
-                        connected={index < view.upcoming.length - 1} to={`/trip/${activeTrip.id}/reis`} />
+                        connected={index < shown.length - 1} to={`/trip/${activeTrip.id}/reis`} />
                     </li>
                   );
                 })}
@@ -179,16 +159,6 @@ export default function TripHome() {
             )}
           </section>
 
-          {view.personal.length > 0 && (
-            <section>
-              <SectionLabel>Voor jou</SectionLabel>
-              <RowList className="mt-0.5">
-                {view.personal.map((item) => (
-                  <RowItem key={item.key} icon={item.icon} title={item.title} meta={item.meta} to={`/trip/${activeTrip.id}/samen`} />
-                ))}
-              </RowList>
-            </section>
-          )}
           </>}
         </div>
       </div>

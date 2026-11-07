@@ -48,11 +48,11 @@ export function AppLayout({ children }: { children: ReactNode }) {
         <div className="flex h-[100dvh] flex-col overflow-hidden bg-background">
           <header className="z-40 shrink-0 bg-background">
             <AdminBar />
-            <div className="mx-auto flex h-14 max-w-3xl items-center justify-between px-5">
+            {pathname !== "/trips" && <div className="mx-auto flex h-14 max-w-3xl items-center justify-between px-5">
               <Button variant="ghost" type="button" onClick={goHome} aria-label="Naar Home" className="flex items-center p-0">
                 <BrandLogo />
               </Button>
-            </div>
+            </div>}
           </header>
           <main className={`mx-auto flex w-full max-w-2xl min-h-0 flex-1 flex-col pb-[calc(4.75rem+env(safe-area-inset-bottom))] ${pathname === "/trips" ? "overflow-hidden" : "overflow-y-auto overscroll-contain"}`}>{children}</main>
           <BottomNav />

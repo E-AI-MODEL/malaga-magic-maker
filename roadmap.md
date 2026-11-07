@@ -1,6 +1,7 @@
 # Roadmap
 
 ## Home en Profiel in de footer
+- [x] Home-bovenkant als één fotoveld met geïntegreerd logo en begroeting; losse witte logobalk weg
 - [x] Mobiel accountmenu bovenin verwijderd; Profiel direct bereikbaar in account- en tripfooter
 - [x] Home in vast scherm met compacte gelijkwaardige producttegels; Voor jou en overige reizen in panelen
 - [x] Ingelogd Home → Profiel → Home op 393×706: geen paginascroll of overlap; navigatietests groen

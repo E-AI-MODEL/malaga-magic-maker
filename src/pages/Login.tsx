@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { PageHeader } from "@/components/primitives";
 import { useAuth } from "@/lib/auth";
 import { GoogleAuthButton } from "@/components/GoogleAuthButton";
-import logo from "@/assets/vakansie_primary_complete.png.asset.json";
+import { AuthPage } from "@/components/AuthPage";
 import { loginDestination } from "@/features/trips/start";
 
 export default function Login() {
@@ -40,16 +40,9 @@ export default function Login() {
   if (user) return <Navigate to={next} replace />;
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-background px-5 py-10">
-      <div className="w-full max-w-md">
-        <div className="mb-6 flex items-center gap-2.5">
-          <img src={logo.url} alt="Vakansie" width={169} height={43} className="h-10 w-auto object-contain" />
-        </div>
-
-        <div className="rounded-lg border border-border bg-card p-7 shadow-soft">
-          <p className="font-ui text-[13px] font-medium text-muted-foreground">Inloggen</p>
-          <PageHeader title="Welkom terug" />
-          <p className="mt-2 text-sm text-muted-foreground">Log in om je reizen te bekijken en verder te werken.</p>
+    <AuthPage>
+        <div>
+          <PageHeader title="Inloggen" />
 
           <div className="mt-6">
             <GoogleAuthButton onClick={handleGoogle} loading={loading} label="Inloggen met Google" />
@@ -72,7 +65,7 @@ export default function Login() {
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
                 autoComplete="email"
-                className="mt-2 h-11"
+                className="mt-2 h-14 rounded-lg bg-card text-base"
               />
             </div>
             <div>
@@ -85,11 +78,11 @@ export default function Login() {
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
                 autoComplete="current-password"
-                className="mt-2 h-11"
+                className="mt-2 h-14 rounded-lg bg-card text-base"
               />
             </div>
             {error && <p className="rounded-lg bg-destructive/10 px-4 py-3 text-sm font-medium text-destructive">{error}</p>}
-            <Button type="submit" className="h-12 w-full rounded-md font-bold" disabled={loading}>
+            <Button type="submit" className="h-14 w-full rounded-lg text-lg font-bold" disabled={loading}>
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Inloggen
             </Button>
@@ -102,13 +95,7 @@ export default function Login() {
           </p>
         </div>
 
-        <p className="mt-6 text-center text-sm text-muted-foreground">
-          Nog geen account?{" "}
-          <Link to={`/signup?next=${encodeURIComponent(next)}`} className="font-semibold text-primary hover:underline">
-            Maak er een aan
-          </Link>
-        </p>
-      </div>
-    </div>
+        <Button asChild variant="secondary" className="mt-6 h-14 w-full rounded-lg bg-card text-base"><Link to={`/signup?next=${encodeURIComponent(next)}`}>Account maken</Link></Button>
+    </AuthPage>
   );
 }

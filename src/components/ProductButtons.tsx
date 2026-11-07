@@ -6,7 +6,7 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "
 import knaakieIcon from "@/assets/icon-knaakie.png";
 import vakansieIcon from "@/assets/icon-vakansie.png";
 
-const pill = "flex min-h-14 w-full items-center justify-center gap-2 whitespace-nowrap rounded-full bg-card/90 px-3 text-base font-bold text-foreground shadow-sm active:translate-y-0.5";
+const pill = "flex min-h-14 w-full items-center justify-center gap-2 whitespace-nowrap rounded-full bg-card/90 px-2 text-[15px] font-bold text-foreground shadow-sm active:translate-y-0.5";
 const title = "block text-center font-display text-4xl font-bold leading-none text-on-image drop-shadow-sm sm:text-5xl";
 
 export function ProductButtons({ knaakieTo, vakansieTo, onScan, onManual, scanUnavailable = false }: { knaakieTo: string; vakansieTo: string; onScan?: () => void; onManual?: () => void; scanUnavailable?: boolean }) {
@@ -25,15 +25,15 @@ export function ProductButtons({ knaakieTo, vakansieTo, onScan, onManual, scanUn
             <span className={title}>Knaakie</span>
           </Link>
           {publicHome
-            ? <button type="button" onClick={onScan} className={`${pill} mt-3`}>{scanUnavailable ? "Ga verder" : "Scan bon"}<ArrowRight className="size-5" /></button>
-            : <Link to={knaakieTo} className={`${pill} mt-3`}>Scan bon<ArrowRight className="size-5" /></Link>}
+            ? <button type="button" onClick={onScan} className={`${pill} mt-3`}>{scanUnavailable ? "Ga verder" : "Scan bon"}<ArrowRight className="size-5 shrink-0" /></button>
+            : <Link to={knaakieTo} className={`${pill} mt-3`}>Scan bon<ArrowRight className="size-5 shrink-0" /></Link>}
         </div>
         <div className="tile-vakansie flex min-w-0 flex-col rounded-[1.75rem] p-3 pb-4">
           <Link to={vakansieTo} className="flex flex-1 flex-col items-center gap-1 rounded-2xl">
             <img src={vakansieIcon} alt="" width={816} height={816} className="h-24 w-24 object-contain sm:h-28 sm:w-28" />
             <span className={title}>Vakansie</span>
           </Link>
-          <Link to={vakansieTo} aria-label="Direct regelen" className={`${pill} mt-3`}>Direct regelen<ArrowRight className="size-5" /></Link>
+          <Link to={vakansieTo} aria-label="Direct regelen" className={`${pill} mt-3`}>Direct regelen<ArrowRight className="size-5 shrink-0" /></Link>
         </div>
       </div>
       {publicHome && (

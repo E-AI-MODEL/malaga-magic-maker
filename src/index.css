@@ -34,6 +34,14 @@
 
     --rule: 222 47% 11%;
     --on-image: 0 0% 100%;
+    --knaakie: 20 100% 52%;
+    --knaakie-deep: 16 100% 44%;
+    --vakansie: 211 100% 52%;
+    --vakansie-deep: 218 90% 42%;
+    --hansie: 255 85% 89%;
+    --hansie-deep: 255 45% 70%;
+    --gradient-knaakie: linear-gradient(160deg, hsl(28 100% 58%), hsl(var(--knaakie-deep)));
+    --gradient-vakansie: linear-gradient(160deg, hsl(200 100% 58%), hsl(var(--vakansie-deep)));
 
     --radius: 1.25rem;
     --scrim: 160 5% 8%;
@@ -140,6 +148,12 @@
     position: relative;
     top: 0;
   }
+  .tile-knaakie { background: var(--gradient-knaakie); box-shadow: 0 6px 0 hsl(var(--knaakie-deep)), 0 14px 24px hsl(var(--foreground) / 0.25); }
+  .tile-vakansie { background: var(--gradient-vakansie); box-shadow: 0 6px 0 hsl(var(--vakansie-deep)), 0 14px 24px hsl(var(--foreground) / 0.25); }
+  .tile-hansie { background: hsl(var(--hansie)); box-shadow: 0 5px 0 hsl(var(--hansie-deep)), 0 10px 18px hsl(var(--foreground) / 0.18); }
+  .tile-plain { background: hsl(var(--card)); box-shadow: 0 5px 0 hsl(var(--foreground) / 0.18), 0 10px 18px hsl(var(--foreground) / 0.15); }
+  .tile-knaakie, .tile-vakansie, .tile-hansie, .tile-plain { position: relative; top: 0; transition: top .08s, box-shadow .08s; }
+  .tile-knaakie:active, .tile-vakansie:active, .tile-hansie:active, .tile-plain:active { top: 4px; box-shadow: 0 2px 0 hsl(var(--foreground) / 0.2); }
   .button-physical:active:not(:disabled) {
     top: 3px;
     box-shadow: var(--shadow-button-pressed);

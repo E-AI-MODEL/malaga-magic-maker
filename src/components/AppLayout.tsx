@@ -16,6 +16,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -83,16 +84,17 @@ export function AppLayout({ children }: { children: ReactNode }) {
         <AdminBar />
         {/* No header bar on trip screens: two floating buttons over the photo keep the screen full. */}
         <div className="pointer-events-none fixed inset-x-0 top-0 z-40 mx-auto flex max-w-2xl items-center justify-between px-3 pt-[calc(env(safe-area-inset-top)+0.5rem)]">
-          <Button variant="outline" size="icon" onClick={goHome} className="pointer-events-auto h-10 w-10 rounded-full border-0 bg-card/90 text-foreground shadow-soft backdrop-blur" aria-label="Naar Home">
+          <Button variant="outline" size="icon" onClick={goHome} className="pointer-events-auto h-10 w-10 rounded-full border-0 bg-card text-foreground shadow-soft" aria-label="Naar Home">
             <Home className="h-5 w-5" strokeWidth={1.75} />
           </Button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="icon" className="pointer-events-auto h-10 w-10 rounded-full border-0 bg-card/90 text-foreground shadow-soft backdrop-blur" aria-label="Meer opties">
+              <Button variant="outline" size="icon" className="pointer-events-auto h-10 w-10 rounded-full border-0 bg-card text-foreground shadow-soft" aria-label="Meer opties">
                 <MoreHorizontal className="h-5 w-5" strokeWidth={1.75} />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-64">
+              {activeTrip && userTrips.length > 1 && <DropdownMenuLabel className="text-xs text-muted-foreground">Wissel reis</DropdownMenuLabel>}
               {activeTrip && userTrips.filter((trip) => trip.id !== activeTrip.id && trip.status !== "archived").slice(0, 5).map((trip) => (
                 <DropdownMenuItem key={trip.id} onClick={() => navigate(`/trip/${trip.id}`)}>
                   <ChevronDown className="mr-2 h-4 w-4 -rotate-90" /><span className="truncate">{trip.name}</span>

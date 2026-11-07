@@ -4,23 +4,23 @@
 
 @layer base {
   :root {
-    --background: 40 30% 96%;
-    --foreground: 160 5% 12%;
+    --background: 220 20% 97%;
+    --foreground: 222 47% 11%;
 
     --card: 0 0% 100%;
-    --card-foreground: 160 5% 12%;
+    --card-foreground: 222 47% 11%;
 
-    --popover: 48 40% 98%;
-    --popover-foreground: 160 5% 12%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
 
-    --primary: 25 100% 50%;
-    --primary-foreground: 160 5% 10%;
+    --primary: 18 100% 55%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 45 18% 90%;
-    --secondary-foreground: 160 5% 12%;
+    --secondary: 220 20% 94%;
+    --secondary-foreground: 222 47% 11%;
 
-    --muted: 45 18% 90%;
-    --muted-foreground: 160 4% 38%;
+    --muted: 220 20% 94%;
+    --muted-foreground: 220 9% 46%;
 
     --accent: var(--secondary);
     --accent-foreground: var(--foreground);
@@ -28,19 +28,19 @@
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 45 10% 82%;
-    --input: 45 10% 78%;
-    --ring: 25 100% 50%;
+    --border: 220 16% 90%;
+    --input: 220 14% 86%;
+    --ring: 18 100% 55%;
 
-    --rule: 160 5% 12%;
+    --rule: 222 47% 11%;
     --on-image: 0 0% 100%;
 
-    --radius: 0.875rem;
+    --radius: 1.25rem;
     --scrim: 160 5% 8%;
     --shadow-sheet: 0 -8px 40px hsl(var(--scrim) / 0.12);
 
-    --rail: 45 10% 76%;
-    --band: 46 26% 91%;
+    --rail: 220 14% 84%;
+    --band: 220 24% 95%;
 
     --success: 217 80% 38%;
     --success-foreground: 0 0% 100%;
@@ -181,7 +181,7 @@
     font-family: 'Barlow', system-ui, sans-serif;
   }
   .shadow-soft {
-    box-shadow: 0 1px 2px hsl(var(--rule) / 0.04), 0 8px 24px -14px hsl(var(--rule) / 0.18);
+    box-shadow: 0 1px 2px hsl(var(--rule) / 0.04), 0 12px 32px -12px hsl(var(--rule) / 0.14);
   }
   .hairline {
     border-color: hsl(var(--rule) / 0.08);

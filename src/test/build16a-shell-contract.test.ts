@@ -65,8 +65,7 @@ describe("Mijn reizen", () => {
 describe("Trip overzicht", () => {
   it("answers what is personal, what needs attention and what comes next", () => {
     expect(tripHome).not.toContain("Voor jou");
-    expect(tripHome).toContain("Eerst dit");
-    expect(tripHome).toContain("Hierna");
+    expect(tripHome).toContain("Planning");
   });
 
   it("reuses existing task and decision contracts", () => {

@@ -10,7 +10,6 @@ import {
   CheckCircle2,
   ChevronDown,
   Circle,
-  ListChecks,
   Plus,
   Trash2,
   UserPlus,
@@ -41,7 +40,7 @@ import { TripInvitesCard } from "@/features/invites/TripInvitesCard";
 import { listTravelerProfiles, summariseProfile } from "@/features/travelers/data";
 import { TravelerProfileSheet } from "@/features/travelers/TravelerProfileSheet";
 import { RecentActivity } from "@/features/notifications/RecentActivity";
-import { CountBar, EmptyLine, RowItem, RowList, SectionLabel, Segmented, StatusWord, StickyBar } from "@/components/primitives";
+import { EmptyLine, RowList, SectionLabel, Segmented, StatusWord, StickyBar } from "@/components/primitives";
 import { TripPageHeader } from "@/components/TripPageHeader";
 
 /** Shared work stays within Samen, including Kosten. */
@@ -211,7 +210,6 @@ export default function TripSamen() {
   const myPendingDecisions = openDecisions.filter(
     (decision) => !decision.options.some((option) => option.votes.some((vote) => vote.user_id === user.id)),
   );
-  const personalAttentionCount = myTasks.length + myPendingDecisions.length;
 
   const addAction = !readOnly
     ? section === "tasks"

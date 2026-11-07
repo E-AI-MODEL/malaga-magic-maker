@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import { CalendarDays, Compass, Info, LayoutGrid, Loader2, MessageCircle, Navigation, Send, UtensilsCrossed, type LucideIcon } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -15,10 +15,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { toast } from "sonner";
-import { useQuery } from "@tanstack/react-query";
-import { listTripItems } from "@/features/travel/data";
-import { listDecisions, listExpenses } from "@/features/together/data";
-import { HANSIE_FOLLOW_UPS, HANSIE_TOPICS, hansieSuggestions, type HansieTopic } from "@/features/hansie/suggestions";
+import { HANSIE_FOLLOW_UPS, HANSIE_TOPICS, type HansieTopic } from "@/features/hansie/suggestions";
 
 const TOPIC_ICONS: Record<HansieTopic, LucideIcon> = {
   eten: UtensilsCrossed,
@@ -113,7 +110,7 @@ export type HansieTrip = { id: string; name: string; start_date?: string | null;
 
 function TopicGrid({ onPick }: { onPick: (topic: (typeof HANSIE_TOPICS)[number]) => void }) {
   return (
-    <div className="grid grid-cols-2 gap-2.5 pb-1">
+    <div className="grid grid-cols-2 gap-2 pb-1">
       {HANSIE_TOPICS.map((t, index) => {
         const Icon = TOPIC_ICONS[t.key];
         return (
@@ -122,10 +119,10 @@ function TopicGrid({ onPick }: { onPick: (topic: (typeof HANSIE_TOPICS)[number])
             type="button"
             variant="secondary"
             onClick={() => onPick(t)}
-            className={`min-h-[76px] flex-col items-start justify-between rounded-lg bg-card p-3 text-left text-foreground ${index === HANSIE_TOPICS.length - 1 ? "col-span-2 min-h-14 flex-row items-center justify-start" : ""}`}
+            className={`h-14 min-h-14 flex-row items-center justify-start rounded-2xl bg-card px-3 text-left text-foreground ${index === HANSIE_TOPICS.length - 1 ? "col-span-2" : ""}`}
           >
             <Icon className="!size-5" aria-hidden />
-            <span className="text-[15px] font-semibold">{t.label}</span>
+            <span className="text-sm font-semibold">{t.label}</span>
           </Button>
         );
       })}
@@ -168,35 +165,6 @@ export function HansieWidget({
     setTopic(null);
     setMenuOpen(false);
   }, [tripId]);
-
-  const itemsQuery = useQuery({
-    queryKey: ["trip-items", tripId],
-    queryFn: () => listTripItems(tripId as string),
-    enabled: Boolean(tripId && open),
-  });
-  const decisionsQuery = useQuery({
-    queryKey: ["trip-decisions", tripId],
-    queryFn: () => listDecisions(tripId as string),
-    enabled: Boolean(tripId && open),
-  });
-  const expensesQuery = useQuery({
-    queryKey: ["together-expenses", tripId],
-    queryFn: () => listExpenses(tripId as string),
-    enabled: Boolean(tripId && open),
-  });
-
-  const suggestions = useMemo(
-    () =>
-      hansieSuggestions({
-        now: new Date(),
-        startDate: trip?.start_date ?? null,
-        endDate: trip?.end_date ?? null,
-        itemCount: itemsQuery.data?.length ?? 0,
-        openDecisionTitle: decisionsQuery.data?.find((decision) => decision.status === "open")?.title ?? null,
-        expenseCount: expensesQuery.data?.length ?? 0,
-      }),
-    [trip?.start_date, trip?.end_date, itemsQuery.data, decisionsQuery.data, expensesQuery.data],
-  );
 
   const send = async (text: string, nextTopic?: HansieTopic) => {
     const trimmed = text.trim();
@@ -302,7 +270,7 @@ export function HansieWidget({
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetContent
           side={isMobile ? "bottom" : "right"}
-          className={isMobile ? "h-[87vh] rounded-t-md p-0" : "w-full p-0 sm:max-w-md"}
+          className={isMobile ? "h-[100dvh] rounded-none p-0" : "w-full p-0 sm:max-w-md"}
         >
           <div className="flex h-full flex-col bg-background">
             <SheetHeader className="border-b border-border bg-card px-5 py-4 text-left">
@@ -315,35 +283,12 @@ export function HansieWidget({
                   <span className="block truncate font-ui text-[11px] font-semibold text-muted-foreground">{trip.name}</span>
                 </span>
               </SheetTitle>
-              <SheetDescription>
-                {trip.destination_name ? `Je gids in ${trip.destination_name}.` : "Je gids voor deze reis."}
-              </SheetDescription>
+              <SheetDescription className="sr-only">Chat met Hansie over {trip.name}</SheetDescription>
             </SheetHeader>
 
-            <div className="flex-1 overflow-y-auto px-4 py-4">
+            <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4">
               {messages.length === 0 ? (
-                <div className="flex flex-col gap-5 py-2">
-                  <p className="font-display text-2xl font-bold tracking-tight">
-                    {trip.destination_name ? `Kies wat je wilt weten over ${trip.destination_name}` : "Kies wat je wilt weten"}
-                  </p>
-                  <TopicGrid onPick={(t) => void send(t.question, t.key)} />
-                  {suggestions.length > 0 && (
-                    <div>
-                      <p className="mb-2 text-xs font-semibold text-muted-foreground">Over de reis</p>
-                      <div className="flex flex-wrap gap-2">
-                        {suggestions.slice(0, 2).map((suggestion) => (
-                          <button
-                            key={suggestion}
-                            onClick={() => void send(suggestion)}
-                            className="rounded-md border border-border bg-card px-3 py-1.5 text-[13px] font-medium text-muted-foreground transition-colors hover:bg-accent"
-                          >
-                            {suggestion}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
+                <TopicGrid onPick={(t) => void send(t.question, t.key)} />
               ) : (
                 <div className="space-y-4">
                   {messages.map((message, index) => (
@@ -384,7 +329,7 @@ export function HansieWidget({
               </div>
             )}
 
-            <form ref={formRef} onSubmit={handleSubmit} className="flex gap-2 border-t border-border bg-card p-4">
+            <form ref={formRef} onSubmit={handleSubmit} className="flex shrink-0 gap-2 border-t border-border bg-card p-4 pb-[max(16px,env(safe-area-inset-bottom))]">
               {messages.length > 0 && (
                 <Button type="button" variant="secondary" size="icon" aria-label="Onderwerpen" aria-expanded={menuOpen} onClick={() => setMenuOpen((v) => !v)}>
                   <LayoutGrid className="h-4 w-4" />
@@ -393,7 +338,7 @@ export function HansieWidget({
               <Input
                 value={input}
                 onChange={(event) => setInput(event.target.value)}
-                placeholder="Vraag Hansie over deze reis…"
+                placeholder="Vraag Hansie…"
                 disabled={loading}
                 autoComplete="off"
               />

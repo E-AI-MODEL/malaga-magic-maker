@@ -1,7 +1,6 @@
 import { LayoutDashboard, Route, Users, Wallet } from "lucide-react";
 import { Link, NavLink, useLocation } from "react-router-dom";
 import { useTrip } from "@/contexts/TripContext";
-import { Button } from "@/components/ui/button";
 import { askHansie } from "@/features/hansie/bus";
 
 export function BottomNav() {
@@ -40,18 +39,16 @@ export function BottomNav() {
             )}
           </NavLink>
         ))}
-         <Button asChild variant="ghost" className={`${base} tile-knaakie h-[56px] rounded-2xl px-0 py-0 text-[11px] text-on-image hover:text-on-image ${expensesActive ? "ring-2 ring-foreground/20" : ""}`}>
-           <Link to={`/trip/${activeTrip.id}/samen?section=expenses`} aria-current={expensesActive ? "page" : undefined}>
-                          <Wallet className="!h-5 !w-5" strokeWidth={expensesActive ? 2 : 1.75} aria-hidden />
-             <span>Knaakie</span>
-           </Link>
-         </Button>
-         {activeTrip.status !== "archived" && (
-           <button type="button" onClick={() => askHansie()} className={`${base} tile-hansie text-foreground`} aria-label="Vraag Hansie">
-             <span aria-hidden className="flex h-6 w-6 items-center justify-center rounded-full bg-primary font-display text-[13px] font-bold text-primary-foreground">H</span>
-             <span>Hansie</span>
-           </button>
-         )}
+        <Link to={`/trip/${activeTrip.id}/samen?section=expenses`} aria-current={expensesActive ? "page" : undefined} className={`${base} ${expensesActive ? active : inactive}`}>
+          <span aria-hidden className="flex h-6 w-6 items-center justify-center rounded-full bg-knaakie text-on-image"><Wallet className="h-3.5 w-3.5" strokeWidth={2} /></span>
+          <span>Knaakie</span>
+        </Link>
+        {activeTrip.status !== "archived" && (
+          <button type="button" onClick={() => askHansie()} className={`${base} ${inactive}`} aria-label="Vraag Hansie">
+            <span aria-hidden className="flex h-6 w-6 items-center justify-center rounded-full bg-hansie-deep font-display text-[13px] font-bold text-on-image">H</span>
+            <span>Hansie</span>
+          </button>
+        )}
       </div>
     </nav>
   );

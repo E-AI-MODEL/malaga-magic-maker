@@ -33,7 +33,7 @@ export function buildGettingStartedSteps(input: GettingStartedInput): GettingSta
   const tripId = input.tripId;
   const itemStep: GettingStartedStep = {
     key: "item",
-    title: "Zet je vlucht of verblijf erin",
+    title: "Plan je vlucht of verblijf",
     tip: "Tip: plak je boekingsmail, dan vult Hansie het in.",
     done: input.hasBookedItem,
     href: tripId ? `/trip/${tripId}/reis` : "/new-trip",

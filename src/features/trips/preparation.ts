@@ -54,7 +54,7 @@ export function tripPreparation({ activeTrip, items, tasks, decisions, readiness
     const suggestions: FirstThing[] = [];
     if (readiness && !ended) {
       if (readiness.facts.trip_item_count === 0)
-        suggestions.push({ key: "s-items", title: "Zet je eerste onderdeel in je planning", actionLabel: "Naar Reis", href: `/trip/${activeTrip.id}/reis` });
+        suggestions.push({ key: "s-items", title: "Plan je vlucht of verblijf", actionLabel: "Naar Reis", href: `/trip/${activeTrip.id}/reis` });
     }
 
     const things = firstThings({

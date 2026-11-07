@@ -93,12 +93,12 @@ export default function Landing() {
         </section>
         <input ref={gallery} aria-label="Kies bonfoto op Home" type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={(e) => { selectPhoto(e.target.files?.[0]); e.target.value = ""; }} />
 
-        <section className="px-6 py-8">
-          <h2 className="text-xl font-semibold">Goed om te weten</h2>
-          <Accordion type="single" collapsible className="mt-3">
+        <section className="bg-background px-6 py-7">
+          <h2 className="font-display text-2xl font-bold">Goed om te weten</h2>
+          <Accordion type="single" collapsible className="mt-4 space-y-2">
             {FAQ.map((item) => (
-              <AccordionItem key={item.q} value={item.q}>
-                <AccordionTrigger className="min-h-14 py-4 text-left text-base font-medium hover:no-underline">{item.q}</AccordionTrigger>
+              <AccordionItem key={item.q} value={item.q} className="rounded-lg border border-border bg-card px-4">
+                <AccordionTrigger className="min-h-14 gap-3 py-4 text-left text-base font-semibold hover:no-underline">{item.q}</AccordionTrigger>
                 <AccordionContent className="text-base leading-relaxed text-muted-foreground">{item.a}</AccordionContent>
               </AccordionItem>
             ))}

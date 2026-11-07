@@ -139,7 +139,7 @@ export default function Signup() {
                 Wachtwoord
               </label>
               <Input
-                placeholder="Wachtwoord"
+                placeholder="Wachtwoord (min. 8 tekens)"
                 id="signup-password"
                 type="password"
                 value={password}
@@ -147,7 +147,7 @@ export default function Signup() {
                 autoComplete="new-password"
                 className="h-12 text-base"
               />
-              <p className="mt-1.5 text-xs text-muted-foreground">Minimaal 8 tekens.</p>
+              
             </div>
             <div>
               <label htmlFor="signup-confirm" className="sr-only">

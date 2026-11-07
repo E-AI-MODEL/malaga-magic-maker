@@ -1,3 +1,4 @@
+import { FormSheet } from "@/components/FormSheet";
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -170,32 +171,21 @@ export default function Trips() {
           </RowList> : <p className="py-3 text-sm text-muted-foreground">Niets dat op jou wacht.</p>}
         </section>}
 
-        {otherTrips.length > 0 && (
-          <section className="mt-8 border-t border-rule pt-1">
-            <SectionLabel>Andere reizen</SectionLabel>
-            <RowList className="mt-0.5">
-              {otherTrips.map((trip) => <TripRow key={trip.id} trip={trip} />)}
-            </RowList>
-          </section>
+        {(otherTrips.length > 0 || archivedTrips.length > 0) && (
+          <button type="button" onClick={() => setArchiveOpen(true)} className="tile-plain mt-6 flex h-14 w-full items-center gap-3 rounded-2xl px-4 text-left text-foreground">
+            <Archive className="h-5 w-5" strokeWidth={1.75} />
+            <span className="flex-1 font-brand text-[17px] font-semibold">Al je reizen</span>
+            <span className="num text-sm text-muted-foreground">{otherTrips.length + archivedTrips.length}</span>
+          </button>
         )}
-        {archivedTrips.length > 0 && (
-          <section className="mt-6 border-t border-rule">
-            <Button
-              variant="ghost"
-              onClick={() => setArchiveOpen((current) => !current)}
-              className="row-tap flex w-full items-center gap-2 py-3 text-left text-muted-foreground transition-colors hover:text-foreground"
-              aria-expanded={archiveOpen}
-            >
-              <Archive className="h-[18px] w-[18px]" strokeWidth={1.75} />
-              <span className="font-ui text-[13px] font-semibold">Archief</span>
-              <span className="num text-[13px]">{archivedTrips.length}</span>
-              <ChevronDown className={`ml-auto h-4 w-4 transition-transform ${archiveOpen ? "rotate-180" : ""}`} />
-            </Button>
-            {archiveOpen && (
-              <RowList>
-                {archivedTrips.map((trip) => <TripRow key={trip.id} trip={trip} />)}
-              </RowList>
-            )}
+        <FormSheet open={archiveOpen} onOpenChange={setArchiveOpen} title="Al je reizen">
+          {otherTrips.length > 0 && <RowList className="mt-2">{otherTrips.map((trip) => <TripRow key={trip.id} trip={trip} />)}</RowList>}
+          {archivedTrips.length > 0 && <>
+            <p className="mt-5 text-sm font-semibold text-muted-foreground">Afgelopen</p>
+            <RowList>{archivedTrips.map((trip) => <TripRow key={trip.id} trip={trip} />)}</RowList>
+          </>}
+          <div className="h-6" />
+        </FormSheet>
           </section>
         )}
       </div>

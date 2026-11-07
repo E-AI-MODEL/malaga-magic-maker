@@ -1,42 +1,47 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowUpRight, Camera, LogIn, Luggage, MessageCircle, PenLine, ReceiptText } from "lucide-react";
+import { ArrowRight, LogIn, MessageCircle, PenLine } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import knaakieIcon from "@/assets/icon-knaakie.png";
+import vakansieIcon from "@/assets/icon-vakansie.png";
+
+const pill = "flex min-h-14 w-full items-center justify-center gap-2 whitespace-nowrap rounded-full bg-card/90 px-3 text-base font-bold text-foreground shadow-sm active:translate-y-0.5";
+const title = "block text-center font-display text-4xl font-bold leading-none text-on-image drop-shadow-sm sm:text-5xl";
 
 export function ProductButtons({ knaakieTo, vakansieTo, onScan, onManual, scanUnavailable = false }: { knaakieTo: string; vakansieTo: string; onScan?: () => void; onManual?: () => void; scanUnavailable?: boolean }) {
   const [hansieOpen, setHansieOpen] = useState(false);
+  const publicHome = !!onScan;
   return (
     <>
-    <nav aria-label="Knaakie en Vakansie" className="grid grid-cols-2 gap-3 pb-1">
-      <div className={onScan ? "button-physical flex min-h-56 min-w-0 flex-col rounded-lg bg-card p-3 text-foreground sm:p-5" : "contents"}>
-      <Button asChild variant={onScan ? "ghost" : "secondary"} className={onScan ? "min-h-28 w-full flex-1 flex-col items-start justify-between px-1 py-2 text-foreground" : "h-36 min-w-0 flex-col items-start justify-between rounded-lg bg-card p-4 text-foreground hover:bg-accent sm:h-40 sm:p-5"}>
-        <Link to={knaakieTo}>
-          <span aria-hidden className="flex w-full items-center justify-between"><ReceiptText className="!size-7" /><ArrowUpRight className="!size-5" /></span>
-          <span className="text-left"><span className="block font-display text-3xl font-bold">Knaakie</span></span>
-        </Link>
-      </Button>
-      {onScan && <div className="mt-3">
-        <div className="grid grid-cols-2 gap-2">
-          <Button onClick={onScan} className={`min-h-14 min-w-0 flex-col gap-1 whitespace-nowrap rounded-md px-1 text-sm ${scanUnavailable || !onManual ? "col-span-2" : ""}`}><Camera />{scanUnavailable ? "Ga verder" : "Scan bon"}</Button>
-          {!scanUnavailable && onManual && <Button variant="secondary" className="min-h-14 min-w-0 flex-col gap-1 whitespace-nowrap rounded-md px-1 text-sm" aria-label="Vul zelf in" onClick={onManual}><PenLine />Vul in</Button>}
+    <nav aria-label="Knaakie en Vakansie" className="space-y-4 pb-2">
+      <div className="grid grid-cols-2 gap-3">
+        <div className="tile-knaakie flex min-w-0 flex-col rounded-[1.75rem] p-3 pb-4">
+          {publicHome && !scanUnavailable && onManual && (
+            <button type="button" aria-label="Vul zelf in" onClick={onManual} className="absolute right-2 top-2 z-10 grid size-11 place-items-center rounded-full bg-card/25 text-on-image"><PenLine className="size-5" /></button>
+          )}
+          <Link to={knaakieTo} className="flex flex-1 flex-col items-center gap-1 rounded-2xl">
+            <img src={knaakieIcon} alt="" width={816} height={816} className="h-24 w-24 object-contain sm:h-28 sm:w-28" />
+            <span className={title}>Knaakie</span>
+          </Link>
+          {publicHome
+            ? <button type="button" onClick={onScan} className={`${pill} mt-3`}>{scanUnavailable ? "Ga verder" : "Scan bon"}<ArrowRight className="size-5" /></button>
+            : <Link to={knaakieTo} className={`${pill} mt-3`}>Scan bon<ArrowRight className="size-5" /></Link>}
         </div>
-      </div>}
-      </div>
-      <div className={onScan ? "button-physical flex min-h-56 min-w-0 flex-col rounded-lg bg-card p-3 text-foreground sm:p-5" : "contents"}>
-      <Button asChild variant={onScan ? "ghost" : "secondary"} className={onScan ? "min-h-28 w-full flex-1 flex-col items-start justify-between px-1 py-2 text-foreground" : "h-36 min-w-0 flex-col items-start justify-between rounded-lg bg-card p-4 text-foreground hover:bg-accent sm:h-40 sm:p-5"}>
-        <Link to={vakansieTo}>
-          <span aria-hidden className="flex w-full items-center justify-between"><Luggage className="!size-7" /><ArrowUpRight className="!size-5" /></span>
-          <span className="text-left"><span className="block font-display text-3xl font-bold">Vakansie</span></span>
-        </Link>
-      </Button>
-      {onScan && <div className="mt-3">
-        <div className="grid grid-cols-2 gap-2">
-          <Button asChild variant="secondary" className="min-h-14 min-w-0 flex-col gap-1 whitespace-nowrap rounded-md px-1 text-sm"><Link to="/login"><LogIn />Inloggen</Link></Button>
-          <Button variant="secondary" className="min-h-14 min-w-0 flex-col gap-1 whitespace-nowrap rounded-md px-1 text-sm" onClick={() => setHansieOpen(true)}><MessageCircle />Hansie</Button>
+        <div className="tile-vakansie flex min-w-0 flex-col rounded-[1.75rem] p-3 pb-4">
+          <Link to={vakansieTo} className="flex flex-1 flex-col items-center gap-1 rounded-2xl">
+            <img src={vakansieIcon} alt="" width={816} height={816} className="h-24 w-24 object-contain sm:h-28 sm:w-28" />
+            <span className={title}>Vakansie</span>
+          </Link>
+          <Link to={vakansieTo} aria-label="Direct regelen" className={`${pill} mt-3`}>Direct regelen<ArrowRight className="size-5" /></Link>
         </div>
-      </div>}
       </div>
+      {publicHome && (
+        <div className="grid grid-cols-2 gap-3">
+          <Link to="/login" className="tile-plain flex min-h-16 items-center justify-center gap-3 rounded-[1.5rem] text-lg font-bold text-foreground"><LogIn className="size-6" />Inloggen</Link>
+          <button type="button" onClick={() => setHansieOpen(true)} className="tile-hansie flex min-h-16 items-center justify-center gap-3 rounded-[1.5rem] text-lg font-bold text-foreground"><MessageCircle className="size-6" />Hansie</button>
+        </div>
+      )}
     </nav>
     <Sheet open={hansieOpen} onOpenChange={setHansieOpen}>
       <SheetContent side="bottom" className="mx-auto max-w-2xl rounded-t-2xl px-6 pb-[max(env(safe-area-inset-bottom),1.5rem)] pt-8">

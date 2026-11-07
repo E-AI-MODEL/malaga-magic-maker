@@ -1,5 +1,11 @@
 # Roadmap
 
+## Eigen Knaakie en sessiebehoud
+- [ ] Eigen /knaakie-scherm voor ingelogde gebruikers, met bestaande kosten per gekozen reis
+- [ ] Home- en footerknoppen naar /knaakie; geen automatische omleiding naar Samen of Nieuwe reis
+- [ ] Sessieopslag en verversing controleren, onnodig vroeg uitloggen verhelpen
+- [ ] Tests, lint en browsercontrole; geen wijzigingen aan kostenopslag of rechten
+
 ## Reisinstellingen en compact Knaakie
 - [x] Reisinstellingen direct als tegel op Reis; lange formulierpagina vervangen door compacte tegels en afzonderlijke panelen
 - [x] Mobiele titel Reisinstellingen zichtbaar; datumvelden begrensd tot hun kolom

@@ -142,13 +142,15 @@ export default function Profiel() {
               <span className="font-brand text-lg font-semibold leading-tight">{tile.label}</span>
             </button>
           ))}
+        </div>
+        <div className="grid grid-cols-2 gap-3 pb-4">
           {isAdmin && (
-            <button onClick={() => navigate("/ops")} className="tile-plain flex items-center gap-2 rounded-2xl p-4 text-left text-foreground">
+            <button onClick={() => navigate("/ops")} className="tile-plain flex h-14 items-center gap-2 rounded-2xl px-4 text-left text-foreground">
               <Settings className="h-5 w-5" strokeWidth={1.75} />
               <span className="font-brand text-base font-semibold">Beheer</span>
             </button>
           )}
-          <button onClick={() => void signOut()} className={`tile-plain flex items-center gap-2 rounded-2xl p-4 text-left text-destructive ${isAdmin ? "" : "col-span-2"}`}>
+          <button onClick={() => void signOut()} className={`tile-plain flex h-14 items-center gap-2 rounded-2xl px-4 text-left text-destructive ${isAdmin ? "" : "col-span-2"}`}>
             <LogOut className="h-5 w-5" />
             <span className="font-brand text-base font-semibold">Uitloggen</span>
           </button>

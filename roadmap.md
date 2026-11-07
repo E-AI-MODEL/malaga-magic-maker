@@ -1,6 +1,7 @@
 # Roadmap
 
 ## Directe mobiele start
+- [x] Directe scanactie en handmatige invoer in de Knaakie-tegel op openbare Home; dubbel bonnetje-blok verwijderd
 - [x] Knaakie en Vakansie gelijkwaardige knoppen naast elkaar op openbare en ingelogde Home; tastbare solide knoppen gedeeld door bestaande schermen
 - [x] Strategie: bonnetje eerst, account later; bestaande gastkostenlogica en scancontrole hergebruiken, geen nieuwe route of backend
 - [x] Homepage: directe foto-/handmatige invoer, korte reisingang; voorbeeldsaldo en lange functie-/stappenblokken weg

@@ -26,9 +26,8 @@ describe("Knaakie footer shortcut", () => {
     (start) => {
       render(<MemoryRouter initialEntries={[start]}><BottomNav /><CurrentLocation /></MemoryRouter>);
       fireEvent.click(screen.getByRole("link", { name: "Knaakie" }));
-      expect(screen.getByTestId("destination").textContent).toBe("/trip/trip-one/samen?section=expenses");
+      expect(screen.getByTestId("destination").textContent).toBe("/knaakie?tripId=trip-one");
       expect(screen.getByRole("link", { name: "Knaakie" }).getAttribute("aria-current")).toBe("page");
-      expect(screen.getByRole("link", { name: "Samen" }).getAttribute("aria-current")).not.toBe("page");
     },
   );
 });

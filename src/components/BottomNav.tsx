@@ -8,7 +8,7 @@ export function BottomNav() {
   const { activeTrip } = useTrip();
   const { pathname, search } = useLocation();
   const isTripScreen = /^\/trip\/[^/]+(?:\/(?:reis|samen|settings))?\/?$/.test(pathname);
-  const expensesActive = activeTrip && pathname === `/trip/${activeTrip.id}/samen` && new URLSearchParams(search).get("section") === "expenses";
+  const expensesActive = pathname === "/knaakie" || (activeTrip && pathname === `/trip/${activeTrip.id}/samen` && new URLSearchParams(search).get("section") === "expenses");
 
   const base =
     "relative flex h-[56px] flex-1 flex-col items-center justify-center gap-0.5 rounded-2xl text-[11px] font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring";
@@ -20,7 +20,7 @@ export function BottomNav() {
     { to: `/trip/${activeTrip.id}/reis`, icon: Route, label: "Reis", end: false },
     { to: `/trip/${activeTrip.id}/samen`, icon: Users, label: "Samen", end: false },
   ] : [{ to: "/trips", icon: Home, label: "Home", end: true }];
-  const costsTo = activeTrip && isTripScreen ? `/trip/${activeTrip.id}/samen?section=expenses` : "/knaakie";
+  const costsTo = activeTrip && isTripScreen ? `/knaakie?tripId=${activeTrip.id}` : "/knaakie";
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-border bg-card px-2 pt-1.5 pb-[max(6px,env(safe-area-inset-bottom))] shadow-soft">

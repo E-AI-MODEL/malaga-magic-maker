@@ -16,16 +16,16 @@ describe("signed-in Knaakie entry", () => {
     expect(knaakieDestination([
       { id: "later", status: "planning", start_date: "2027-08-01" },
       { id: "first", status: "planning", start_date: "2027-07-01" },
-    ])).toBe("/trip/first/samen?section=expenses");
+    ])).toBe("/knaakie?tripId=first");
   });
   it("never selects an archived trip", () => {
     expect(knaakieDestination([
       { id: "old", status: "archived", start_date: "2026-01-01" },
       { id: "active", status: "planning", start_date: null },
-    ])).toBe("/trip/active/samen?section=expenses");
+    ])).toBe("/knaakie?tripId=active");
   });
-  it("opens trip creation instead of bouncing back Home without a trip", () => {
-    expect(knaakieDestination([])).toBe("/new-trip");
+  it("stays on Knaakie without a trip", () => {
+    expect(knaakieDestination([])).toBe("/knaakie");
   });
 });
 

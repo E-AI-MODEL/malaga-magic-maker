@@ -153,7 +153,7 @@ export default function Trips() {
       </section>
       <div className="relative z-10 mx-auto flex w-full max-w-3xl min-h-0 flex-1 flex-col gap-3 px-5 pb-3 sm:block sm:pb-16 max-sm:[&>section]:mt-0 max-sm:[&>section>div]:p-3 max-sm:[&>section_span.font-brand]:text-base">
         <div className="relative z-10 -mt-6 shrink-0 sm:-mt-14 sm:mb-8">
-          <ProductButtons compact knaakieTo={heroTrip ? `/trip/${heroTrip.id}/samen?section=expenses` : "/knaakie"} vakansieTo={heroTrip ? `/trip/${heroTrip.id}` : "/new-trip"} />
+          <ProductButtons compact knaakieTo={heroTrip ? `/knaakie?tripId=${heroTrip.id}` : "/knaakie"} vakansieTo={heroTrip ? `/trip/${heroTrip.id}` : "/new-trip"} />
         </div>
         {loading ? (
           <div className="h-28 animate-pulse rounded-lg border border-border bg-card shadow-soft" />

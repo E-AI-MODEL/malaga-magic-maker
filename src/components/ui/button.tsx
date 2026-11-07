@@ -5,22 +5,22 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-normal rounded-md text-[15px] font-semibold leading-snug ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+  "inline-flex items-center justify-center gap-2 whitespace-normal rounded-2xl text-[15px] font-bold leading-snug ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
   {
     variants: {
       variant: {
-        default: "button-physical bg-primary text-primary-foreground hover:bg-primary/90",
+        default: "button-physical bg-primary text-primary-foreground [background-image:var(--gradient-knaakie)] hover:brightness-105",
         destructive: "button-physical bg-destructive text-destructive-foreground hover:bg-destructive/90",
         outline: "button-physical border border-input bg-background hover:bg-accent hover:text-accent-foreground",
-        secondary: "button-physical bg-secondary text-secondary-foreground hover:bg-secondary/80",
+        secondary: "button-physical bg-card text-secondary-foreground hover:bg-secondary",
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
         row: "w-full justify-start bg-transparent text-foreground hover:bg-accent hover:text-accent-foreground",
       },
       size: {
         default: "min-h-11 px-4 py-2.5",
-        sm: "min-h-11 rounded-md px-3 text-sm",
-        lg: "min-h-12 rounded-md px-6 py-3",
+        sm: "min-h-11 rounded-xl px-3 text-sm",
+        lg: "min-h-14 rounded-2xl px-6 py-3 text-base",
         icon: "h-11 w-11 shrink-0",
       },
     },

@@ -2,7 +2,7 @@ import { FormSheet } from "@/components/FormSheet";
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { Archive, CheckSquare, ChevronDown, ChevronRight, Plus, Receipt, Scale } from "lucide-react";
+import { Archive, CheckSquare, ChevronRight, Plus, Receipt, Scale } from "lucide-react";
 import { Trip, useTrip } from "@/contexts/TripContext";
 import { tripTimingLabel } from "@/features/trips/presentation";
 import { getTripReadiness } from "@/features/readiness/data";
@@ -11,7 +11,6 @@ import { tripPreparation } from "@/features/trips/preparation";
 import { tripHasEnded } from "@/features/trips/overview";
 import { listTripItems } from "@/features/travel/data";
 import { useAuth } from "@/lib/auth";
-import { usePlanStatus } from "@/features/pro/limits";
 import { AppLayout } from "@/components/AppLayout";
 import { Button } from "@/components/ui/button";
 import { PageHeader, RowItem, RowList, SectionLabel } from "@/components/primitives";
@@ -64,7 +63,7 @@ function NextTrip({ trip, facts, userId }: { trip: Trip; facts: HomeFacts; userI
   const first = preparation.things[0];
 
   return (
-      <section className="rounded-lg border border-border bg-card p-5 shadow-soft">
+      <section className="tile-plain rounded-2xl p-3 sm:p-5">
       <p className="font-ui text-[12px] font-semibold text-muted-foreground">Eerstvolgende reis</p>
       <Link to={`/trip/${trip.id}`} className="flex items-center gap-3.5 py-1">
         <TripVisual
@@ -89,7 +88,7 @@ function NextTrip({ trip, facts, userId }: { trip: Trip; facts: HomeFacts; userI
       </Link>
 
       {ended ? <p className="mt-3 text-xs text-muted-foreground">Deze reis is afgelopen.</p> : readinessQuery.data && itemsQuery.data ? (
-        <div className="mt-3 space-y-3">
+        <div className="mt-1 space-y-1">
           {first && <Link to={first.href} className="block text-sm text-muted-foreground hover:text-foreground">{first.title}</Link>}
         </div>
       ) : <p className="mt-3 text-xs text-muted-foreground">Laden…</p>}
@@ -116,8 +115,8 @@ function TripRow({ trip }: { trip: Trip }) {
 export default function Trips() {
   const { userTrips, loading } = useTrip();
   const { user, profile } = useAuth();
-  const { status: plan } = usePlanStatus();
   const [archiveOpen, setArchiveOpen] = useState(false);
+  const [personalOpen, setPersonalOpen] = useState(false);
 
   const { activeTrips, archivedTrips } = useMemo(() => ({
     activeTrips: sortTrips(userTrips.filter((trip) => trip.status !== "archived")),
@@ -135,11 +134,11 @@ export default function Trips() {
 
   return (
     <AppLayout>
-      <section className="relative">
-        <div className="relative h-[150px] w-full overflow-hidden bg-secondary sm:h-[200px]">
+      <section className="relative shrink-0">
+        <div className="relative h-[100px] w-full overflow-hidden bg-secondary sm:h-[200px]">
           <img src={heroHome} alt="" aria-hidden width={1280} height={720} loading="eager" className="h-full w-full object-cover" />
           <div aria-hidden className="absolute inset-0 bg-foreground/40" />
-          <div className="absolute inset-x-0 top-0 mx-auto max-w-3xl px-5 pt-6">
+          <div className="absolute inset-x-0 top-0 mx-auto max-w-3xl px-5 pt-3 sm:pt-6">
 <PageHeader className="text-on-image" title={firstName ? `Hoi ${firstName}` : "Hoi"} action={userTrips.length > 0 &&
               <Button asChild variant="outline" size="sm" className="h-11 shrink-0 rounded-xl bg-card px-4 text-[15px] text-foreground hover:text-foreground">
                 <Link to="/new-trip"><Plus className="mr-1.5 h-3.5 w-3.5" />Nieuwe reis</Link>
@@ -148,9 +147,9 @@ export default function Trips() {
           </div>
         </div>
       </section>
-      <div className="relative z-10 mx-auto max-w-3xl px-5 pb-16">
-        <div className="relative z-10 -mt-14 mb-8">
-          <ProductButtons knaakieTo={heroTrip ? `/trip/${heroTrip.id}/samen?section=expenses` : "/knaakie"} vakansieTo={heroTrip ? `/trip/${heroTrip.id}` : "/new-trip"} />
+      <div className="relative z-10 mx-auto flex w-full max-w-3xl min-h-0 flex-1 flex-col gap-3 px-5 pb-3 sm:block sm:pb-16 max-sm:[&>section]:mt-0 max-sm:[&>section>div]:p-3 max-sm:[&>section_span.font-brand]:text-base">
+        <div className="relative z-10 -mt-6 shrink-0 sm:-mt-14 sm:mb-8">
+          <ProductButtons compact knaakieTo={heroTrip ? `/trip/${heroTrip.id}/samen?section=expenses` : "/knaakie"} vakansieTo={heroTrip ? `/trip/${heroTrip.id}` : "/new-trip"} />
         </div>
         {loading ? (
           <div className="h-28 animate-pulse rounded-lg border border-border bg-card shadow-soft" />
@@ -165,20 +164,18 @@ export default function Trips() {
           </div>
         )}
 
-        {!loading && userTrips.length > 0 && <section className="mt-7 border-t border-rule pt-1">
+        <div className="mt-auto grid shrink-0 grid-cols-2 gap-3 pt-1 sm:mt-6">
+          {!loading && userTrips.length > 0 && <Button variant="secondary" onClick={() => setPersonalOpen(true)}><CheckSquare />Voor jou{personal.length > 0 ? ` · ${personal.length}` : ""}</Button>}
+          {(otherTrips.length > 0 || archivedTrips.length > 0) && <Button variant="secondary" onClick={() => setArchiveOpen(true)}><Archive />Al je reizen</Button>}
+        </div>
+        <FormSheet open={personalOpen} onOpenChange={setPersonalOpen} title="Voor jou">
+        {!loading && userTrips.length > 0 && <section>
           <SectionLabel>Voor jou</SectionLabel>
           {factsQuery.isPending ? <p className="py-3 text-sm text-muted-foreground">Laden…</p> : factsQuery.isError ? <p className="py-3 text-sm text-muted-foreground">Je overzicht is nu niet beschikbaar. <Button variant="link" onClick={() => void factsQuery.refetch()}>Opnieuw proberen</Button></p> : personal.length ? <RowList>
             {personal.map((item) => <RowItem key={item.key} icon={item.kind === "task" ? CheckSquare : item.kind === "decision" ? Scale : Receipt} title={item.kind === "decision" ? displayDecisionTitle(item.title) : item.title} meta={item.tripName} to={item.href} />)}
           </RowList> : <p className="py-3 text-sm text-muted-foreground">Niets dat op jou wacht.</p>}
         </section>}
-
-        {(otherTrips.length > 0 || archivedTrips.length > 0) && (
-          <button type="button" onClick={() => setArchiveOpen(true)} className="tile-plain mt-6 flex h-14 w-full items-center gap-3 rounded-2xl px-4 text-left text-foreground">
-            <Archive className="h-5 w-5" strokeWidth={1.75} />
-            <span className="flex-1 font-brand text-[17px] font-semibold">Al je reizen</span>
-            <span className="num text-sm text-muted-foreground">{otherTrips.length + archivedTrips.length}</span>
-          </button>
-        )}
+        </FormSheet>
         <FormSheet open={archiveOpen} onOpenChange={setArchiveOpen} title="Al je reizen">
           {otherTrips.length > 0 && <RowList className="mt-2">{otherTrips.map((trip) => <TripRow key={trip.id} trip={trip} />)}</RowList>}
           {archivedTrips.length > 0 && <>

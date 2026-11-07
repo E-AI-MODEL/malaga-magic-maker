@@ -9,12 +9,12 @@ import vakansieIcon from "@/assets/icon-vakansie.png";
 const pill = "flex min-h-[min(3.5rem,8dvh)] w-full items-center justify-center gap-2 whitespace-nowrap rounded-full bg-card/90 px-2 text-[15px] font-bold text-foreground shadow-sm active:translate-y-0.5";
 const title = "block text-center font-display text-4xl font-bold leading-none text-on-image drop-shadow-sm sm:text-5xl";
 
-export function ProductButtons({ knaakieTo, vakansieTo, onScan, onManual, scanUnavailable = false }: { knaakieTo: string; vakansieTo: string; onScan?: () => void; onManual?: () => void; scanUnavailable?: boolean }) {
+export function ProductButtons({ knaakieTo, vakansieTo, onScan, onManual, scanUnavailable = false, compact = false }: { knaakieTo: string; vakansieTo: string; onScan?: () => void; onManual?: () => void; scanUnavailable?: boolean; compact?: boolean }) {
   const [hansieOpen, setHansieOpen] = useState(false);
   const publicHome = !!onScan;
   return (
     <>
-    <nav aria-label="Knaakie en Vakansie" className="space-y-[2dvh] pb-2">
+    <nav aria-label="Knaakie en Vakansie" className={`space-y-[2dvh] pb-2 ${compact ? "max-sm:[&_img]:h-12 max-sm:[&_img]:w-12 max-sm:[&_span.font-display]:text-3xl max-sm:[&_a.mt-3]:min-h-11 max-sm:[&_a.mt-3]:mt-2" : ""}`}>
       <div className="grid grid-cols-2 gap-3">
         <div className="tile-knaakie flex min-w-0 flex-col rounded-[1.75rem] p-3 pb-4">
           {publicHome && !scanUnavailable && onManual && (

@@ -1,5 +1,10 @@
 # Roadmap
 
+## Home en Profiel in de footer
+- [x] Mobiel accountmenu bovenin verwijderd; Profiel direct bereikbaar in account- en tripfooter
+- [x] Home in vast scherm met compacte gelijkwaardige producttegels; Voor jou en overige reizen in panelen
+- [ ] Ingelogde schermcontrole en tests voor deze aanpassing
+
 ## Bovenste reisnavigatie
 - [x] Home, paginatitel en menu in één gereserveerde rij; geen zwevende overlap met titel of Toevoegen
 - [x] Ingelogd op 393×706 Overzicht, Reis, Samen en Knaakie gecontroleerd: geen titeloverlap, geen paginascroll of runtimefouten; 298 tests groen, lint 0 fouten/30 bestaande waarschuwingen, automatische build OK

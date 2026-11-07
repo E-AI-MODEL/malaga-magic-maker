@@ -15,6 +15,12 @@ function CurrentLocation() {
 afterEach(cleanup);
 
 describe("Knaakie footer shortcut", () => {
+  it.each(["/trips", "/profiel", "/trip/trip-one/reis"])("opens Profile directly from %s", (start) => {
+    render(<MemoryRouter initialEntries={[start]}><BottomNav /><CurrentLocation /></MemoryRouter>);
+    fireEvent.click(screen.getByRole("link", { name: "Profiel" }));
+    expect(screen.getByTestId("destination").textContent).toBe("/profiel");
+  });
+
   it.each(["/trip/trip-one", "/trip/trip-one/reis", "/trip/trip-one/samen?section=tasks"])(
     "opens the current trip's existing costs from %s",
     (start) => {

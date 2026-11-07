@@ -153,7 +153,7 @@ export default function TripHome() {
                 )}
               </>
             ) : (
-              <p className="mt-1.5 text-[15px] text-muted-foreground">Niets dat nu op je wacht.</p>
+              <p className="mt-1.5 text-[15px] text-muted-foreground">Alles is bij.</p>
             )}
           </section>
 

@@ -20,6 +20,8 @@ import heroHome from "@/assets/hero-home.jpg";
 import { ProductButtons } from "@/components/ProductButtons";
 import { BrandLogo } from "@/components/BrandLogo";
 import { displayDecisionTitle } from "@/features/together/labels";
+import { useWebMCP } from "use-webmcp-tool";
+import { runWebMCPTool } from "@/lib/webmcp-telemetry";
 
 function formatDateRange(startDate: string | null, endDate: string | null) {
   if (!startDate && !endDate) return "Data nog te kiezen";
@@ -115,6 +117,17 @@ function TripRow({ trip }: { trip: Trip }) {
 
 export default function Trips() {
   const { userTrips, loading } = useTrip();
+  useWebMCP({
+    name: "list_my_trips",
+    description: "List the trips shown on this Home screen, with id, name and dates.",
+    annotations: { readOnlyHint: true, untrustedContentHint: true },
+    enabled: !loading,
+    execute: () => runWebMCPTool("list_my_trips", () =>
+      userTrips.length === 0
+        ? "No trips yet."
+        : userTrips.map((t) => `${t.id}: ${t.name} (${formatDateRange(t.start_date, t.end_date)})`).join("\n"),
+    ),
+  });
   const { user, profile } = useAuth();
   const [archiveOpen, setArchiveOpen] = useState(false);
   const [personalOpen, setPersonalOpen] = useState(false);

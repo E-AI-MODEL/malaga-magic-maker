@@ -22,11 +22,12 @@ interface AuthContextType {
   isAdmin: boolean;
   loading: boolean;
   signIn: (emailOrUsername: string, password: string) => Promise<{ error?: string }>;
-  signInWithGoogle: () => Promise<{ error?: string }>;
+  signInWithGoogle: (next?: string) => Promise<{ error?: string }>;
   signUp: (
     email: string,
     password: string,
     displayName: string,
+    next?: string,
   ) => Promise<{ error?: string; needsEmailConfirmation?: boolean }>;
   requestPasswordReset: (email: string) => Promise<{ error?: string }>;
   updatePassword: (password: string) => Promise<{ error?: string }>;
@@ -143,9 +144,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return {};
   };
 
-  const signInWithGoogle = async () => {
+  const signInWithGoogle = async (next?: string) => {
     const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin,
+      redirect_uri: next?.startsWith("/.lovable/oauth/") ? new URL(next, window.location.origin).href : window.location.origin,
     });
     if (result.error) return { error: "Inloggen met Google is niet gelukt." };
     return {};
@@ -156,12 +157,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await supabase.auth.signOut();
   };
 
-  const signUp = async (email: string, password: string, displayName: string) => {
+  const signUp = async (email: string, password: string, displayName: string, next?: string) => {
     const { data, error } = await supabase.auth.signUp({
       email: email.trim().toLowerCase(),
       password,
       options: {
-        emailRedirectTo: `${window.location.origin}/`,
+        emailRedirectTo: next?.startsWith("/.lovable/oauth/") ? new URL(next, window.location.origin).href : `${window.location.origin}/`,
         data: { display_name: displayName.trim() },
       },
     });

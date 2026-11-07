@@ -1,3 +1,5 @@
+import { oauthReturnPath } from "@/lib/oauth-return-path";
+
 /** Pending invite stored when a logged-out visitor opens /join/:code; consumed once at signed-in entry. */
 export function signedInEntryPath(invite: string | null): string {
   return invite || "/trips";
@@ -10,8 +12,7 @@ export function pendingInvitePath(read: () => string | null): string | null {
 }
 
 export function loginDestination(next: string | null): string {
-  if (!next || !next.startsWith("/") || next.startsWith("//") || next.includes("\\")) return "/";
-  return next;
+  return oauthReturnPath(next);
 }
 
 /** Keep Knaakie on its own screen; the selected authorized trip is scoped by URL. */

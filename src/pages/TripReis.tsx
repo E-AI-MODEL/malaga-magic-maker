@@ -1,16 +1,8 @@
 import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { AlertTriangle, Archive, ChevronDown, Mail, Pencil, Plus, Search, Trash2 } from "lucide-react";
+import { AlertTriangle, Archive, ChevronDown, Mail, Pencil, Trash2 } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/lib/auth";
 import { useTrip } from "@/contexts/TripContext";
 import { deleteTripItem, listTripItems, TripItemRow } from "@/features/travel/data";
@@ -27,20 +19,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { DocumentsSection } from "@/features/documents/DocumentsSection";
 import {
   DayHeader,
-  EmptyLine,
-  FilterChips,
-  StatusWord,
-  StickyBar,
   SwipeRow,
   TimelineRow,
 } from "@/components/primitives";
 import { travelTypeIcon } from "@/features/travel/icons";
 import {
   formatTripDay,
-  getTravelStatus,
   getTravelType,
   timelineWarnings,
-  travelStatuses,
   tripDayKey,
 } from "@/features/travel/presentation";
 
@@ -57,16 +43,8 @@ const filters: ReadonlyArray<{ id: "all" | "transport" | "stay" | "doing"; label
   { id: "doing", label: "Doen", types: ["activity", "restaurant", "event", "ticket"] },
 ];
 
-type FilterId = (typeof filters)[number]["id"];
 
 
-function statusTone(status: string): "done" | "attention" | "muted" | "neutral" {
-  if (status === "confirmed" || status === "paid") return "done";
-  if (status === "planned") return "attention";
-  if (status === "idea") return "neutral";
-  if (status === "completed" || status === "cancelled") return "muted";
-  return "neutral";
-}
 
 function timeAnchor(item: TripItemRow, timezone: string) {
   if (!item.start_at) return "—";

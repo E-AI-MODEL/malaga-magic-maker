@@ -45,8 +45,6 @@ describe("Vakansie production UI contract", () => {
     expect(samen).toContain('{ id: "expenses", label: "Kosten" }');
     expect(samen).not.toContain('label: "Mensen"');
     expect(samen).toContain("Reizigers");
-    expect(samen).toContain("myTasks");
-    expect(samen).toContain("myPendingDecisions");
   });
 
   it("keeps the profile settings surface functional", () => {

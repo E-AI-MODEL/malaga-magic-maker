@@ -18,7 +18,7 @@ import { TripItemSheet } from "@/features/travel/TripItemSheet";
 import { BookingPasteSheet } from "@/features/travel/BookingPasteSheet";
 import { AccommodationSearchSheet } from "@/features/travel/AccommodationSearchSheet";
 import { CalendarFeedSheet } from "@/features/travel/CalendarFeedSheet";
-import { CalendarPlus } from "lucide-react";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { ACCOMMODATION_DECISION_TITLE, chooseTripIdea, ideaActionMessage, undoTripIdeaChoice } from "@/features/travel/accommodation";
 import { providerLabel } from "@/features/travel/providers";
 import { TripPageHeader } from "@/components/TripPageHeader";
@@ -44,7 +44,11 @@ import {
   tripDayKey,
 } from "@/features/travel/presentation";
 
-const quickAddTypes = ["own_vehicle", "flight", "train", "stay", "activity", "custom"] as const;
+const addTiles = [
+  { type: "flight", label: "Vervoer" },
+  { type: "stay", label: "Verblijf" },
+  { type: "activity", label: "Activiteit" },
+] as const;
 
 const filters: ReadonlyArray<{ id: "all" | "transport" | "stay" | "doing"; label: string; types: readonly string[] }> = [
   { id: "all", label: "Alles", types: [] },
@@ -84,8 +88,7 @@ export default function TripReis() {
   const [editingItem, setEditingItem] = useState<TripItemRow | null>(null);
   const [createType, setCreateType] = useState<string>("custom");
   const [actionError, setActionError] = useState("");
-  const [filter, setFilter] = useState<FilterId>("all");
-  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [addOpen, setAddOpen] = useState(false);
 
   const tripId = activeTrip?.id || "";
   const timezone = activeTrip?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone || "Europe/Amsterdam";
@@ -100,23 +103,8 @@ export default function TripReis() {
 
   // Ideas are not on the timeline, so they never count towards the filters.
   const timelineItems = useMemo(() => (itemsQuery.data || []).filter((item) => item.status !== "idea"), [itemsQuery.data]);
-  const counts = useMemo(() => {
-    return filters
-      .map((entry) => ({
-        id: entry.id,
-        label: entry.label,
-        count: entry.types.length === 0 ? timelineItems.length : timelineItems.filter((item) => entry.types.includes(item.type)).length,
-      }))
-      .filter((entry) => entry.id === "all" || entry.count > 0);
-  }, [timelineItems]);
-  const showFilters = timelineItems.length >= 6;
-  const usedStatuses = travelStatuses.filter((s) => s.value !== "idea" && timelineItems.some((item) => item.status === s.value));
-
   const groups = useMemo(() => {
-    const allowed = filters.find((entry) => entry.id === filter)?.types || [];
-    const visible = (itemsQuery.data || []).filter(
-      (item) => item.status !== "idea" && (allowed.length === 0 || allowed.includes(item.type)) && (statusFilter === "all" || item.status === statusFilter),
-    );
+    const visible = (itemsQuery.data || []).filter((item) => item.status !== "idea");
     const grouped = new Map<string, TripItemRow[]>();
     for (const item of visible) {
       const key = tripDayKey(item.start_at, item.timezone || timezone);
@@ -128,7 +116,7 @@ export default function TripReis() {
       if (b === "undated") return -1;
       return a.localeCompare(b);
     });
-  }, [itemsQuery.data, timezone, filter, statusFilter]);
+  }, [itemsQuery.data, timezone]);
 
   const canChoose = isOrganizer || isAdmin;
   const openStayDecision = useQuery({
@@ -221,88 +209,23 @@ export default function TripReis() {
           startDate={activeTrip.start_date}
           endDate={activeTrip.end_date}
           destination={activeTrip.destination_name}
-          addMenu={readOnly ? undefined : (
-            <>
-              <DropdownMenuItem onClick={() => setBookingSheetOpen(true)}>
-                <Mail className="mr-2 h-4 w-4" strokeWidth={1.75} />Boeking scannen
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setStaySearchOpen(true)}>
-                <Search className="mr-2 h-4 w-4" strokeWidth={1.75} />Verblijf zoeken
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setCalendarOpen(true)}>
-                <CalendarPlus className="mr-2 h-4 w-4" strokeWidth={1.75} />Zet in je agenda
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuLabel className="text-[11px] font-semibold text-muted-foreground">Zelf invullen</DropdownMenuLabel>
-              {quickAddTypes.map((value) => {
-                const type = getTravelType(value);
-                const TypeIcon = travelTypeIcon(value);
-                return (
-                  <DropdownMenuItem key={value} onClick={() => openCreate(value)}>
-                    <TypeIcon className="mr-2 h-4 w-4" strokeWidth={1.75} />{type.label}
-                  </DropdownMenuItem>
-                );
-              })}
-            </>
-          )}
+          onAdd={readOnly ? undefined : () => setAddOpen(true)}
         />
 
         {readOnly && (
-          <div className="mt-4 flex items-center gap-2 border-t border-rule/10 pt-3 text-sm text-muted-foreground">
+          <div className="mt-4 flex items-center gap-2 text-sm text-muted-foreground">
             <Archive className="h-[18px] w-[18px] shrink-0" strokeWidth={1.75} />
-            Deze reis staat in het archief en is alleen-lezen.
+            Alleen-lezen: deze reis is gearchiveerd.
           </div>
         )}
 
-
         {actionError && <p className="mt-4 text-sm font-medium text-destructive">{actionError}</p>}
 
-        {showFilters && (
-          <StickyBar className="mt-4">
-            <div className="flex items-center gap-2 overflow-x-auto">
-              <FilterChips<FilterId> value={filter} onChange={setFilter} options={counts} />
-              {usedStatuses.length > 0 && (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button size="sm" variant="outline" className="h-8 shrink-0 rounded-md text-[13px]" aria-label="Filter op status">
-                      {statusFilter === "all" ? "Status" : getTravelStatus(statusFilter)}
-                      <ChevronDown className="ml-1 h-3.5 w-3.5" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-48">
-                    <DropdownMenuItem onClick={() => setStatusFilter("all")}>Alle statussen</DropdownMenuItem>
-                    {usedStatuses.map((s) => (
-                      <DropdownMenuItem key={s.value} onClick={() => setStatusFilter(s.value)}>{s.label}</DropdownMenuItem>
-                    ))}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              )}
-            </div>
-          </StickyBar>
-        )}
-
         {!readOnly && warnings.length > 0 && (
-          <details className="group mt-4 border-y border-rule">
-            <summary className="flex cursor-pointer list-none items-center gap-2 py-3 text-sm font-medium">
-              <AlertTriangle className="h-4 w-4 shrink-0 text-warning" strokeWidth={1.75} />
-              {warnings.length === 1 ? warnings[0].message : `${warnings.length} punten om na te kijken`}
-              {(warnings.length > 1 || warnings[0]?.kind === "outside_trip") && <ChevronDown className="ml-auto h-4 w-4 text-muted-foreground transition-transform group-open:rotate-180" />}
-            </summary>
-            {(warnings.length > 1 || warnings[0]?.kind === "outside_trip") && (
-              <div className="divide-y divide-rule border-t border-rule">
-                {warnings.map((w) => (
-                  <div key={w.kind + w.message} className="py-2 pl-6 text-sm text-muted-foreground">
-                    <p>{w.message}</p>
-                    {w.kind === "outside_trip" && (
-                      <ul className="mt-1 list-disc pl-4">
-                        {items.filter((i) => w.itemIds.includes(i.id)).map((i) => <li key={i.id}>{i.title}</li>)}
-                      </ul>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-          </details>
+          <p className="mt-4 flex items-center gap-2 text-sm text-muted-foreground">
+            <AlertTriangle className="h-4 w-4 shrink-0 text-warning" strokeWidth={1.75} />
+            {warnings[0].message}
+          </p>
         )}
 
         <section className="mt-3">
@@ -313,22 +236,17 @@ export default function TripReis() {
           ) : itemsQuery.isError ? (
             <p className="mt-3 text-sm text-destructive">Je reisgegevens konden niet worden geladen.</p>
           ) : groups.length === 0 ? (
-            <EmptyLine
-              text={
-                items.length === 0
-                  ? "Nog niets ingepland."
-                  : items.length === ideas.length
-                    ? "Nog niets vastgelegd."
-                    : "Niets in deze filter."
-              }
-            />
+            <div className="mt-6">
+              <p className="text-[17px] font-semibold">Nog niets ingepland.</p>
+              {!readOnly && <Button className="mt-4 h-14 w-full text-[16px]" onClick={() => setBookingSheetOpen(true)}><Mail className="mr-2 h-5 w-5" />Boeking scannen</Button>}
+              {!readOnly && <Button variant="outline" className="mt-2 h-12 w-full" onClick={() => setAddOpen(true)}>Zelf invullen</Button>}
+            </div>
           ) : (
             <div>
               {groups.map(([day, dayItems]) => (
                 <div key={day} className="mb-2">
                   <DayHeader
                     label={day === "undated" ? "Nog niet ingepland" : formatTripDay(day, timezone)}
-                    meta={`${dayItems.length}`}
                   />
                   <div className="border-t border-rule">
                     {dayItems.map((item, index) => {
@@ -343,7 +261,7 @@ export default function TripReis() {
                         category={filters[1].types.includes(item.type) ? "transport" : item.type === "stay" ? "stay" : item.type === "restaurant" ? "food" : filters[3].types.includes(item.type) ? "activity" : "other"}
                         connected={index < dayItems.length - 1}
                         onClick={canEdit ? () => openEdit(item) : undefined}
-                        meta={<>{[type.label, providerLabel(item.provider)].filter(Boolean).join(" · ")} · <StatusWord tone={statusTone(item.status)}>{getTravelStatus(item.status)}</StatusWord></>}
+                        meta={providerLabel(item.provider) || type.label}
                       />;
 
                       if (!canEdit) return <div key={item.id}>{row}</div>;
@@ -370,7 +288,7 @@ export default function TripReis() {
         {ideas.length > 0 && (
           <details className="group mt-4 border-y border-rule">
             <summary className="flex cursor-pointer list-none items-center gap-2 py-3 text-sm font-medium">
-              Ideeën ({ideas.length})
+              {ideas.length === 1 ? "1 idee" : `${ideas.length} ideeën`}
               <ChevronDown className="ml-auto h-4 w-4 text-muted-foreground transition-transform group-open:rotate-180" />
             </summary>
             {!readOnly && !canChoose && openStayDecision.data && (
@@ -405,6 +323,30 @@ export default function TripReis() {
         />
       </div>
 
+      <Sheet open={addOpen} onOpenChange={setAddOpen}>
+        <SheetContent side="bottom" className="rounded-t-2xl pb-[max(1.5rem,env(safe-area-inset-bottom))]">
+          <SheetHeader><SheetTitle className="text-left">Toevoegen</SheetTitle></SheetHeader>
+          <Button className="mt-4 h-14 w-full justify-start text-[16px]" onClick={() => { setAddOpen(false); setBookingSheetOpen(true); }}>
+            <Mail className="mr-3 h-5 w-5" />Boeking scannen
+          </Button>
+          <div className="mt-3 grid grid-cols-3 gap-2">
+            {addTiles.map((tile) => {
+              const TileIcon = travelTypeIcon(tile.type);
+              return (
+                <button key={tile.type} type="button" onClick={() => { setAddOpen(false); openCreate(tile.type); }}
+                  className="flex h-24 flex-col items-center justify-center gap-2 rounded-xl border border-border text-[14px] font-semibold hover:bg-accent">
+                  <TileIcon className="h-6 w-6" strokeWidth={1.75} />{tile.label}
+                </button>
+              );
+            })}
+          </div>
+          <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-[14px] font-medium text-muted-foreground">
+            <button type="button" className="py-2 hover:text-foreground" onClick={() => { setAddOpen(false); openCreate("custom"); }}>Iets anders</button>
+            <button type="button" className="py-2 hover:text-foreground" onClick={() => { setAddOpen(false); setStaySearchOpen(true); }}>Verblijf zoeken</button>
+            <button type="button" className="py-2 hover:text-foreground" onClick={() => { setAddOpen(false); setCalendarOpen(true); }}>Zet in je agenda</button>
+          </div>
+        </SheetContent>
+      </Sheet>
       <TripItemSheet
         open={sheetOpen}
         onOpenChange={setSheetOpen}

@@ -31,10 +31,10 @@ export function hansiePageQuestions(page: HansiePage): string[] {
 export function hansieBarLabel(page: HansiePage): string {
   switch (page) {
     case "reis":
-      return "Vraag Hansie naar je planning";
+      return "Vraag Hansie over je reis";
     case "samen":
-      return "Vraag Hansie wie wat moet doen";
+      return "Vraag Hansie over de groep";
     default:
-      return "Vraag Hansie wat er nog moet";
+      return "Vraag Hansie";
   }
 }

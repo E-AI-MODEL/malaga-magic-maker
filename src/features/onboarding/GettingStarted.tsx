@@ -1,9 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { Check, ChevronRight, Circle } from "lucide-react";
+import { ChevronRight, Circle, X } from "lucide-react";
 import { useAuth } from "@/lib/auth";
-import { SectionLabel } from "@/components/primitives";
 import {
   buildGettingStartedSteps,
   gettingStartedDone,
@@ -45,7 +44,6 @@ export function GettingStarted({ trip, hasAnyTrip }: { trip: { id: string } | nu
   if (gettingStartedDone(steps)) return null;
 
   const isCompanion = Boolean(trip && !facts.isOrganizer);
-  const doneCount = steps.filter((step) => step.done).length;
   const hide = () => {
     if (storageKey) {
       localStorage.setItem(storageKey, "1");
@@ -53,52 +51,21 @@ export function GettingStarted({ trip, hasAnyTrip }: { trip: { id: string } | nu
     }
   };
 
+  const next = steps.find((step) => !step.done);
+  if (!next) return null;
+
   return (
-    <section className="mt-7">
-      <SectionLabel
-        action={
-          <button
-            type="button"
-            onClick={hide}
-            className="shrink-0 text-[12px] font-semibold text-muted-foreground transition-colors hover:text-foreground"
-          >
-            Verbergen
-          </button>
-        }
-      >
-        {isCompanion ? "Help je groep" : "Aan de slag"}
-      </SectionLabel>
-      <p className="num mt-1 text-[12px] text-muted-foreground">
-        {doneCount} van {steps.length} afgevinkt
-      </p>
-      <ul className="rule-divide mt-1">
-        {steps.map((step) => (
-          <li key={step.key}>
-            {step.done ? (
-              <div className="flex min-h-[48px] items-center gap-3 py-3 text-muted-foreground">
-                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/10">
-                  <Check className="h-3 w-3 text-primary" strokeWidth={2.5} aria-hidden />
-                </span>
-                <span className="text-[14px]">{step.title}</span>
-              </div>
-            ) : (
-              <Link
-                to={step.href}
-                className="row-tap flex min-h-[48px] items-start gap-3 py-3 transition-opacity hover:opacity-70"
-              >
-                <Circle className="mt-0.5 h-5 w-5 shrink-0 text-muted-foreground/50" strokeWidth={1.5} aria-hidden />
-                <span className="min-w-0 flex-1">
-                  <span className="flex items-center gap-1 text-[15px] font-medium leading-tight">
-                    {step.title}
-                    <ChevronRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground/60" aria-hidden />
-                  </span>
-                  {step.tip && <span className="mt-0.5 block text-[13px] text-muted-foreground">{step.tip}</span>}
-                </span>
-              </Link>
-            )}
-          </li>
-        ))}
-      </ul>
+    <section className="mt-7" aria-label={isCompanion ? "Help je groep" : "Aan de slag"}>
+      <div className="tile-plain flex items-center gap-3 rounded-2xl p-4">
+        <Link to={next.href} className="flex min-w-0 flex-1 items-center gap-3">
+          <Circle className="h-6 w-6 shrink-0 text-primary" strokeWidth={2} aria-hidden />
+          <span className="min-w-0 flex-1 font-brand text-lg font-semibold leading-tight">{next.title}</span>
+          <ChevronRight className="h-5 w-5 shrink-0 text-muted-foreground" aria-hidden />
+        </Link>
+        <button type="button" onClick={hide} aria-label="Verbergen" className="shrink-0 rounded-full p-2 text-muted-foreground hover:text-foreground">
+          <X className="h-4 w-4" />
+        </button>
+      </div>
     </section>
   );
 }

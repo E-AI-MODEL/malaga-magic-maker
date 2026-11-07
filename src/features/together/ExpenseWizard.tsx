@@ -1,5 +1,5 @@
 import { FormEvent, useEffect, useRef, useState } from "react";
-import { ArrowRight, Camera, Check, ImagePlus, Loader2, PenLine, Plus, Sparkles, UserPlus } from "lucide-react";
+import { ArrowRight, Camera, Check, ImagePlus, Loader2, PenLine, Plus, ScanLine, UserPlus } from "lucide-react";
 import { StepSheet } from "@/components/steps";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -175,7 +175,7 @@ export function ExpenseWizard({ open, onOpenChange, tripId, people, selfId, defa
               {busy && <p className="flex items-center gap-2 text-[15px] text-muted-foreground"><Loader2 className="h-5 w-5 animate-spin" />Foto laden…</p>}
             </> : <>
               <img src={image} alt="Je bonnetje" className="mt-3 max-h-[38dvh] w-full rounded-2xl bg-secondary object-contain" />
-              <Button type="button" className="h-16 w-full rounded-2xl font-display text-xl font-semibold [&_svg]:size-6" disabled={busy} onClick={() => void read()}>{busy ? <Loader2 className="mr-2 animate-spin" /> : <Sparkles className="mr-2" />}{busy ? "AI leest je bonnetje…" : "Laat AI het uitlezen"}</Button>
+              <Button type="button" className="h-16 w-full rounded-2xl font-display text-xl font-semibold [&_svg]:size-6" disabled={busy} onClick={() => void read()}>{busy ? <Loader2 className="mr-2 animate-spin" /> : <ScanLine className="mr-2" />}{busy ? "AI leest je bonnetje…" : "Laat AI het uitlezen"}</Button>
               <p className="text-center text-sm text-muted-foreground">De foto wordt nergens bewaard.</p>
               <div className="grid grid-cols-2 gap-2">
                 <Button type="button" variant="outline" className="h-12 rounded-xl" onClick={() => { pending.current?.abort(); setBusy(false); setImage(""); }}>Kies andere foto</Button>
@@ -228,7 +228,7 @@ export function ExpenseWizard({ open, onOpenChange, tripId, people, selfId, defa
 
           {step === "summary" && <div className="space-y-5">
             {question("Check en sla op")}
-            {note && <p className="flex items-start gap-2 text-[15px] text-muted-foreground"><Sparkles className="mt-0.5 h-4 w-4 shrink-0" />{note}</p>}
+            {note && <p className="flex items-start gap-2 text-[15px] text-muted-foreground"><ScanLine className="mt-0.5 h-4 w-4 shrink-0" />{note}</p>}
             <div className="overflow-hidden rounded-3xl bg-foreground text-background">
               <button type="button" onClick={() => edit("amount")} className="block w-full px-5 pb-4 pt-5 text-left">
                 <span className="block text-sm opacity-70">Bedrag · tik om aan te passen</span>

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { ArrowLeft, CheckCircle2, Heart, Sparkles } from "lucide-react";
+import { ArrowLeft, CheckCircle2, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Surface } from "@/components/primitives";
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
@@ -80,7 +80,7 @@ export default function Steun() {
           </section>
         ) : isPro ? (
           <section className="mt-10 text-center">
-            <Sparkles className="mx-auto h-10 w-10 text-primary" strokeWidth={1.5} />
+            <Heart className="mx-auto h-10 w-10 text-primary" strokeWidth={1.5} />
             <h1 className="mt-4 font-display uppercase text-[28px] font-semibold leading-tight">Je hebt Vakansie Pro</h1>
             <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
               Bedankt voor je bijdrage. Pro staat blijvend op je account, er loopt geen abonnement.

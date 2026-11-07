@@ -1,6 +1,6 @@
 import { useRef, useState, type ComponentType, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
 import { Link } from "react-router-dom";
-import { ChevronRight, Sparkles, X, type LucideIcon } from "lucide-react";
+import { ChevronRight, MessageCircle, X, type LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -383,7 +383,7 @@ export function SuggestionRow({
 }) {
   return (
     <div className="flex items-center gap-3 border-l-2 border-primary py-3 pl-3">
-      <Sparkles className="h-[17px] w-[17px] shrink-0 text-primary" strokeWidth={1.75} aria-hidden />
+      <MessageCircle className="h-[17px] w-[17px] shrink-0 text-primary" strokeWidth={1.75} aria-hidden />
       <span className="min-w-0 flex-1">
         <span className="block truncate text-[15px] font-medium leading-tight">{title}</span>
         <span className="mt-0.5 block truncate text-xs text-muted-foreground">Hansie{meta ? ` · ${meta}` : ""}</span>

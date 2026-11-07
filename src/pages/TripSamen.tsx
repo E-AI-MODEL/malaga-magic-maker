@@ -1,3 +1,4 @@
+import { decisionStatusLine, decisionsTileLine, displayDecisionTitle, tasksTileLine } from "@/features/together/labels";
 import { ACCOMMODATION_DECISION_TITLE, decisionWinner, promoteDecisionWinner } from "@/features/travel/accommodation";
 import { toast } from "sonner";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -234,7 +235,7 @@ export default function TripSamen() {
         )}
 
         <section className="mt-5">
-          <div className="-mx-5 flex gap-4 overflow-x-auto px-5 pb-1 sm:mx-0 sm:px-0" aria-label="Reizigers">
+          <div className="-mx-5 flex gap-2 overflow-x-auto px-5 pb-1 sm:mx-0 sm:px-0" aria-label="Reizigers">
             {membersQuery.isLoading ? <LoadingRows /> : members.map((member) => {
               const isMe = member.userId === user.id;
               const role = member.role === "organizer" ? "organisator" : "reiziger";
@@ -247,21 +248,21 @@ export default function TripSamen() {
                   onClick={() => setProfileSheetOpen(true)}
                   title={summary || undefined}
                   aria-label={`${member.displayName}${isMe ? " (jij)" : ""}, ${role}${isMe ? ". Wensen invullen" : ""}`}
-                  className="flex w-16 shrink-0 flex-col items-center gap-1.5 disabled:cursor-default"
+                  className="flex shrink-0 items-center gap-2 rounded-full bg-card py-1 pl-1 pr-3 shadow-soft disabled:cursor-default"
                 >
-                  <span className={`flex h-14 w-14 items-center justify-center rounded-full bg-secondary text-[18px] font-semibold ${isMe ? "ring-2 ring-primary ring-offset-2 ring-offset-background" : ""}`}>
+                  <span className={`flex h-8 w-8 items-center justify-center rounded-full text-[14px] font-semibold ${isMe ? "bg-primary text-primary-foreground" : "bg-secondary"}`}>
                     {member.displayName.slice(0, 1).toUpperCase()}
                   </span>
-                  <span className="w-full truncate text-center text-[12px] font-medium">{isMe ? "Jij" : member.displayName}</span>
+                  <span className="max-w-[7rem] truncate text-[13px] font-medium">{isMe ? "Jij" : member.displayName}</span>
                 </button>
               );
             })}
             {!readOnly && (
-              <button type="button" onClick={() => setInviteOpen((open) => !open)} aria-expanded={inviteOpen} className="flex w-16 shrink-0 flex-col items-center gap-1.5">
-                <span className="flex h-14 w-14 items-center justify-center rounded-full border-2 border-dashed border-border text-muted-foreground">
-                  <UserPlus className="h-5 w-5" strokeWidth={1.75} />
+              <button type="button" onClick={() => setInviteOpen((open) => !open)} aria-expanded={inviteOpen} className="flex shrink-0 items-center gap-2 rounded-full border-2 border-dashed border-border py-1 pl-1 pr-3 text-muted-foreground">
+                <span className="flex h-8 w-8 items-center justify-center rounded-full">
+                  <UserPlus className="h-4 w-4" strokeWidth={1.75} />
                 </span>
-                <span className="text-[12px] font-medium text-muted-foreground">Uitnodigen</span>
+                <span className="text-[13px] font-medium">Nodig uit</span>
               </button>
             )}
           </div>
@@ -279,21 +280,24 @@ export default function TripSamen() {
           )}
         </section>
 
-        <StickyBar className="mt-5">
-          <Segmented
-            value={section}
-            onChange={(next) => {
-              setSection(next);
-              setActionError("");
-            }}
-            options={sectionOptions.map((option) => ({
-              ...option,
-              label: `${option.label} ${
-                option.id === "tasks" ? openTasks.length : option.id === "decisions" ? openDecisions.length : ""
-              }`,
-            }))}
-          />
-        </StickyBar>
+        <div className="mt-5 grid grid-cols-3 gap-2" role="tablist" aria-label="Onderdelen">
+          {sectionOptions.map((option) => {
+            const selected = section === option.id;
+            const line = option.id === "tasks"
+              ? tasksTileLine(openTasks.filter((task) => task.assigned_user_id === user.id || task.backup_user_id === user.id || !task.assigned_user_id).length)
+              : option.id === "decisions"
+                ? decisionsTileLine(openDecisions.filter((decision) => !decision.options.some((o) => o.votes.some((vote) => vote.user_id === user.id))).length)
+                : "Scan bon";
+            return (
+              <button key={option.id} type="button" role="tab" aria-selected={selected}
+                onClick={() => { setSection(option.id); setActionError(""); }}
+                className={`${option.id === "expenses" ? "tile-knaakie text-on-image" : "tile-plain text-foreground"} rounded-2xl px-3 py-3 text-left ${selected ? "ring-2 ring-foreground" : ""}`}>
+                <span className="block font-brand text-[17px] font-semibold leading-tight">{option.label}</span>
+                <span className={`mt-0.5 block truncate text-[12px] ${option.id === "expenses" ? "opacity-90" : "text-muted-foreground"}`}>{line}</span>
+              </button>
+            );
+          })}
+        </div>
 
         {actionError && <p className="mt-4 text-sm font-medium text-destructive">{actionError}</p>}
 
@@ -337,9 +341,7 @@ export default function TripSamen() {
                           {task.due_at ? <> · <CalendarClock className="mx-1 inline h-3 w-3" />{formatTripDateTime(task.due_at, timezone)}</> : null}
                         </span>
                       </button>
-                      <StatusWord tone={completed ? "done" : task.priority === "high" ? "attention" : "neutral"}>
-                        {completed ? "Afgerond" : task.priority === "high" ? "Belangrijk" : "Open"}
-                      </StatusWord>
+                      {!completed && task.priority === "high" && <span className="shrink-0 text-[13px] font-semibold text-primary">Eerst doen</span>}
                       {!readOnly && manager && (
                         <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0 text-muted-foreground hover:text-destructive" onClick={() => void removeTask(task)} aria-label="Taak verwijderen">
                           <Trash2 className="h-3.5 w-3.5" />
@@ -356,7 +358,7 @@ export default function TripSamen() {
             decisionsQuery.isLoading ? (
               <LoadingRows />
             ) : decisions.length === 0 ? (
-              <EmptyLine text="Nog niets te kiezen. Start een keuze wanneer er echt meerdere opties op tafel liggen." actionLabel={readOnly ? undefined : "Nieuwe keuze"} onClick={readOnly ? undefined : () => setDecisionSheetOpen(true)} />
+              <EmptyLine text="Nog niets te kiezen." actionLabel={readOnly ? undefined : "Nieuwe keuze"} onClick={readOnly ? undefined : () => setDecisionSheetOpen(true)} />
             ) : (
               <RowList className="mt-1">
                 {decisions.map((decision) => {
@@ -374,14 +376,14 @@ export default function TripSamen() {
                           aria-expanded={expanded}
                           className="min-w-0 flex-1 text-left"
                         >
-                          <span className="block truncate text-[15px] font-medium leading-tight">{decision.title}</span>
+                          <span className="block truncate text-[15px] font-medium leading-tight">{displayDecisionTitle(decision.title)}</span>
                           <span className="mt-0.5 block truncate text-xs text-muted-foreground">
                             {decision.options.length} {decision.options.length === 1 ? "optie" : "opties"} · {totalVotes} {totalVotes === 1 ? "stem" : "stemmen"}
                           </span>
                         </button>
-                        <StatusWord tone={decision.status === "open" ? "attention" : "muted"}>
-                          {decision.status === "open" ? "Stemmen open" : "Gesloten"}
-                        </StatusWord>
+                        <span className={`shrink-0 text-[13px] font-semibold ${decision.status === "open" && !ownVote ? "text-primary" : "text-muted-foreground"}`}>
+                          {decisionStatusLine(decision.status, Boolean(ownVote))}
+                        </span>
                         <ChevronDown className={`h-4 w-4 shrink-0 text-muted-foreground/60 transition-transform ${expanded ? "rotate-180" : ""}`} />
                       </div>
 
@@ -435,7 +437,6 @@ export default function TripSamen() {
           {section === "expenses" && <KostenSection key={tripId} />}
         </section>
 
-        <div className="px-5 pb-6 sm:px-8"><RecentActivity tripId={activeTrip.id} /></div>
       </div>
 
       <TravelerProfileSheet

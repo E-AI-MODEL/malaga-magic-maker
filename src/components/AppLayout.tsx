@@ -80,7 +80,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
       );
     }
     return (
-      <div className={`min-h-screen overflow-x-hidden bg-background ${showHansie ? "pb-[calc(8.5rem+env(safe-area-inset-bottom))]" : "pb-[calc(4.75rem+env(safe-area-inset-bottom))]"}`}>
+      <div className={`min-h-screen overflow-x-hidden bg-background ${"pb-[calc(4.75rem+env(safe-area-inset-bottom))]"}`}>
         <AdminBar />
         {/* No header bar on trip screens: two floating buttons over the photo keep the screen full. */}
         <div className="pointer-events-none fixed inset-x-0 top-0 z-40 mx-auto flex max-w-2xl items-center justify-between px-3 pt-[calc(env(safe-area-inset-top)+0.5rem)]">
@@ -123,7 +123,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
 
         <main className="mx-auto max-w-2xl">{children}</main>
         {isTripScreen && <BottomNav />}
-        {showHansie && <HansieWidget trip={activeTrip} floating />}
+        {showHansie && <HansieWidget trip={activeTrip} floating showBar={false} />}
         {activeTrip && <CalendarFeedSheet open={calendarOpen} onOpenChange={setCalendarOpen} tripId={activeTrip.id} />}
       </div>
     );

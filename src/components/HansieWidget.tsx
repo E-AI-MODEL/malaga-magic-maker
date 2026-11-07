@@ -136,9 +136,11 @@ function TopicGrid({ onPick }: { onPick: (topic: (typeof HANSIE_TOPICS)[number])
 export function HansieWidget({
   trip,
   floating = true,
+  showBar = true,
 }: {
   trip: HansieTrip | null;
   floating?: boolean;
+  showBar?: boolean;
 }) {
   const isMobile = useIsMobile();
   const { pathname } = useLocation();
@@ -273,7 +275,7 @@ export function HansieWidget({
 
   return (
     <>
-      <div
+      {showBar && <div
         className={
           floating
             ? "fixed bottom-[calc(62px+max(6px,env(safe-area-inset-bottom)))] inset-x-0 z-40 border-t border-border bg-card px-3 py-1.5"
@@ -295,7 +297,7 @@ export function HansieWidget({
             <Send className="h-3.5 w-3.5" strokeWidth={1.9} />
           </span>
         </Button>
-      </div>
+      </div>}
 
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetContent
@@ -304,7 +306,7 @@ export function HansieWidget({
         >
           <div className="flex h-full flex-col bg-background">
             <SheetHeader className="border-b border-border bg-card px-5 py-4 text-left">
-              <SheetTitle className="flex items-center gap-2.5 font-display text-xl font-extrabold uppercase tracking-tight">
+              <SheetTitle className="flex items-center gap-2.5 font-display text-xl font-extrabold tracking-tight">
                 <span aria-hidden className="flex h-9 w-9 items-center justify-center rounded-sm bg-foreground text-background">
                   <MessageCircle className="h-[18px] w-[18px]" strokeWidth={1.75} />
                 </span>

@@ -215,7 +215,7 @@ export default function TripReis() {
             <p className="mt-3 text-sm text-destructive">Je reisgegevens konden niet worden geladen.</p>
           ) : groups.length === 0 ? (
             <div className="mt-6">
-              <p className="text-[17px] font-semibold">Nog niets ingepland.</p>
+              <p className="text-[17px] font-semibold">Zet je vlucht of verblijf erin.</p>
               {!readOnly && <Button className="mt-4 h-14 w-full text-[16px]" onClick={() => setBookingSheetOpen(true)}><Mail className="mr-2 h-5 w-5" />Boeking scannen</Button>}
               {!readOnly && <Button variant="outline" className="mt-2 h-12 w-full" onClick={() => setAddOpen(true)}>Zelf invullen</Button>}
             </div>

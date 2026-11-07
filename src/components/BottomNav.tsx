@@ -2,6 +2,7 @@ import { LayoutDashboard, Route, Users, Wallet } from "lucide-react";
 import { Link, NavLink, useLocation } from "react-router-dom";
 import { useTrip } from "@/contexts/TripContext";
 import { Button } from "@/components/ui/button";
+import { askHansie } from "@/features/hansie/bus";
 
 export function BottomNav() {
   const { activeTrip } = useTrip();
@@ -45,6 +46,12 @@ export function BottomNav() {
              <span>Knaakie</span>
            </Link>
          </Button>
+         {activeTrip.status !== "archived" && (
+           <button type="button" onClick={() => askHansie()} className={`${base} tile-hansie text-foreground`} aria-label="Vraag Hansie">
+             <span aria-hidden className="flex h-6 w-6 items-center justify-center rounded-full bg-primary font-display text-[13px] font-bold text-primary-foreground">H</span>
+             <span>Hansie</span>
+           </button>
+         )}
       </div>
     </nav>
   );

@@ -22,30 +22,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { BrandLogo } from "@/components/BrandLogo";
 
-function AccountMenu({ navigate }: { navigate: (path: string) => void }) {
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="h-9 w-9 text-muted-foreground" aria-label="Meer opties">
-          <MoreHorizontal className="h-5 w-5" strokeWidth={1.75} />
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-60">
-        <DropdownMenuItem onClick={() => navigate("/trips")}>
-          <Home className="mr-2 h-4 w-4" />Home
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => navigate("/profiel")}>
-          <User className="mr-2 h-4 w-4" />Profiel
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => navigate("/new-trip")}>
-          <Plus className="mr-2 h-4 w-4" />Nieuwe reis
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
-  );
-}
-
-
 export function AppLayout({ children }: { children: ReactNode }) {
   const { profile } = useAuth();
   const { activeTrip, userTrips, isOrganizer } = useTrip();
@@ -69,17 +45,17 @@ export function AppLayout({ children }: { children: ReactNode }) {
   if (isMobile) {
     if (!isTripScreen) {
       return (
-        <div className="min-h-screen overflow-x-hidden bg-background pb-[env(safe-area-inset-bottom)]">
-          <header className="sticky top-0 z-40 bg-background">
+        <div className="flex h-[100dvh] flex-col overflow-hidden bg-background">
+          <header className="z-40 shrink-0 bg-background">
             <AdminBar />
             <div className="mx-auto flex h-14 max-w-3xl items-center justify-between px-5">
-              <button type="button" onClick={goHome} aria-label="Naar Home" className="flex items-center">
+              <Button variant="ghost" type="button" onClick={goHome} aria-label="Naar Home" className="flex items-center p-0">
                 <BrandLogo />
-              </button>
-              <AccountMenu navigate={navigate} />
+              </Button>
             </div>
           </header>
-          <main className="mx-auto max-w-2xl">{children}</main>
+          <main className={`mx-auto flex w-full max-w-2xl min-h-0 flex-1 flex-col pb-[calc(4.75rem+env(safe-area-inset-bottom))] ${pathname === "/trips" ? "overflow-hidden" : "overflow-y-auto overscroll-contain"}`}>{children}</main>
+          <BottomNav />
         </div>
       );
     }

@@ -17,7 +17,8 @@ describe("Vakansie production UI contract", () => {
   const opsShell = source("src/features/ops/OpsShell.tsx");
 
   it("keeps exactly three trip navigation destinations", () => {
-    const items = nav.match(/label: "/g) || [];
+    const tripLinks = nav.slice(nav.indexOf("const links ="), nav.indexOf("] :"));
+    const items = tripLinks.match(/label: "/g) || [];
     expect(items).toHaveLength(3);
     expect(nav).toContain('label: "Overzicht"');
     expect(nav).toContain('label: "Reis"');

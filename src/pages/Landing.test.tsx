@@ -40,7 +40,7 @@ describe("direct receipt entry", () => {
   it("blocks an eleventh free expense at the direct entry point", async () => {
     localStorage.setItem(GUEST_KNAAKIE_KEY, JSON.stringify({ ...emptyGuestKnaakie(), used: 10 }));
     start();
-    fireEvent.click(screen.getByRole("link", { name: /Gratis account maken/ }));
+    fireEvent.click(screen.getByRole("button", { name: /Ga verder/ }));
     await screen.findByText("Aanmelden geopend");
     expect(JSON.parse(localStorage.getItem(GUEST_KNAAKIE_KEY) || "{}").used).toBe(10);
   });

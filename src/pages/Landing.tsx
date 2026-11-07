@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ArrowRight, Camera, ImagePlus, PenLine } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { ProductButtons } from "@/components/ProductButtons";
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -59,7 +59,6 @@ export default function Landing() {
   const [logoFailed, setLogoFailed] = useState(false);
   const [file, setFile] = useState<File>();
   const [initialStep, setInitialStep] = useState<"start" | "amount">("start");
-  const camera = useRef<HTMLInputElement>(null);
   const gallery = useRef<HTMLInputElement>(null);
   const left = guestUsesLeft(guest);
 
@@ -87,31 +86,12 @@ export default function Landing() {
           <div aria-hidden="true" className="absolute inset-0 bg-foreground/60" />
           <div className="relative">
             <h1 className="mb-8 max-w-md font-display text-4xl font-bold leading-tight text-on-image sm:text-5xl">Jouw hele vakantie in je broekzak</h1>
-            <ProductButtons knaakieTo="/knaakie" vakansieTo="/signup" />
+            <ProductButtons knaakieTo="/knaakie" vakansieTo="/signup" scanUnavailable={left === 0}
+              onScan={() => { if (left === 0) navigate("/signup"); else gallery.current?.click(); }}
+              onManual={() => { setFile(undefined); setInitialStep("amount"); setOpen(true); }} />
           </div>
         </section>
-        <section aria-labelledby="knaakie-title" className="px-6 pb-8 pt-6 sm:pt-10">
-          <h2 id="knaakie-title" className="text-xl font-semibold">Voeg een bonnetje toe</h2>
-          <p className="mt-2 text-base text-muted-foreground">10 uitgaven gratis. Zonder account.</p>
-
-          {left > 0 ? <div className="mt-7 space-y-3">
-            <Button className="h-20 w-full justify-start rounded-2xl px-6 text-xl [&_svg]:size-7" onClick={() => camera.current?.click()}>
-              <Camera className="mr-2" />Maak een foto<ArrowRight className="ml-auto" />
-            </Button>
-            <Button variant="secondary" className="h-16 w-full justify-start rounded-2xl px-6 text-lg [&_svg]:size-6" onClick={() => gallery.current?.click()}>
-              <ImagePlus className="mr-2" />Kies een foto<ArrowRight className="ml-auto" />
-            </Button>
-            <Button variant="ghost" className="h-12 w-full text-base" onClick={() => { setFile(undefined); setInitialStep("amount"); setOpen(true); }}>
-              <PenLine />Vul zelf in
-            </Button>
-          </div> : <div className="mt-7">
-            <Button asChild className="h-16 w-full rounded-2xl text-lg"><Link to="/signup">Gratis account maken<ArrowRight /></Link></Button>
-            <p className="mt-3 text-sm text-muted-foreground">Je hebt 10 uitgaven toegevoegd. Je kosten blijven beschikbaar.</p>
-          </div>}
-          <input ref={camera} aria-label="Maak bonfoto op Home" type="file" accept="image/jpeg,image/png,image/webp" capture="environment" className="hidden" onChange={(e) => { selectPhoto(e.target.files?.[0]); e.target.value = ""; }} />
-          <input ref={gallery} aria-label="Kies bonfoto op Home" type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={(e) => { selectPhoto(e.target.files?.[0]); e.target.value = ""; }} />
-          {guest.used > 0 && <Button asChild variant="link" className="mt-3 w-full text-foreground"><Link to="/knaakie">Bekijk je kosten<ArrowRight /></Link></Button>}
-        </section>
+        <input ref={gallery} aria-label="Kies bonfoto op Home" type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={(e) => { selectPhoto(e.target.files?.[0]); e.target.value = ""; }} />
 
         <section className="px-6 py-8">
           <h2 className="text-xl font-semibold">Goed om te weten</h2>

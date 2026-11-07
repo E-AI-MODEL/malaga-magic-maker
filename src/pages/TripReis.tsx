@@ -67,6 +67,7 @@ export default function TripReis() {
   const [createType, setCreateType] = useState<string>("custom");
   const [actionError, setActionError] = useState("");
   const [addOpen, setAddOpen] = useState(false);
+  const [allOpen, setAllOpen] = useState(false);
 
   const tripId = activeTrip?.id || "";
   const timezone = activeTrip?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone || "Europe/Amsterdam";
@@ -179,6 +180,59 @@ export default function TripReis() {
     await refreshItems();
   };
 
+  // Keep the page short: the first three rows here, the full list in a panel.
+  const shownGroups: typeof groups = [];
+  let budget = 3;
+  for (const [day, dayItems] of groups) {
+    if (budget <= 0) break;
+    shownGroups.push([day, dayItems.slice(0, budget)]);
+    budget -= Math.min(budget, dayItems.length);
+  }
+  const hiddenCount = timelineItems.length - shownGroups.reduce((n, [, d]) => n + d.length, 0);
+
+  const renderGroups = (list: typeof groups) => (
+    <>
+              {list.map(([day, dayItems]) => (
+                <div key={day} className="mb-2">
+                  <DayHeader
+                    label={day === "undated" ? "Nog niet ingepland" : formatTripDay(day, timezone)}
+                  />
+                  <div className="border-t border-rule">
+                    {dayItems.map((item, index) => {
+                      const type = getTravelType(item.type);
+                      const canEdit = !readOnly && (isOrganizer || item.created_by === user?.id);
+                      const displayTimezone = item.timezone || timezone;
+                      const TypeIcon = travelTypeIcon(item.type);
+                      const row = <TimelineRow
+                        time={timeAnchor(item, displayTimezone)}
+                        icon={TypeIcon}
+                        title={item.title}
+                        category={filters[1].types.includes(item.type) ? "transport" : item.type === "stay" ? "stay" : item.type === "restaurant" ? "food" : filters[3].types.includes(item.type) ? "activity" : "other"}
+                        connected={index < dayItems.length - 1}
+                        onClick={canEdit ? () => openEdit(item) : undefined}
+                        meta={providerLabel(item.provider) || type.label}
+                      />;
+
+                      if (!canEdit) return <div key={item.id}>{row}</div>;
+
+                      return (
+                        <SwipeRow
+                          key={item.id}
+                          actions={[
+                            { label: "Bewerken", icon: Pencil, onClick: () => openEdit(item) },
+                            { label: "Wissen", icon: Trash2, tone: "danger", onClick: () => void handleDelete(item) },
+                          ]}
+                        >
+                          {row}
+                        </SwipeRow>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+    </>
+  );
+
   return (
     <AppLayout>
       <div className="px-5 pb-12 pt-4 sm:px-8">
@@ -221,44 +275,12 @@ export default function TripReis() {
             </div>
           ) : (
             <div>
-              {groups.map(([day, dayItems]) => (
-                <div key={day} className="mb-2">
-                  <DayHeader
-                    label={day === "undated" ? "Nog niet ingepland" : formatTripDay(day, timezone)}
-                  />
-                  <div className="border-t border-rule">
-                    {dayItems.map((item, index) => {
-                      const type = getTravelType(item.type);
-                      const canEdit = !readOnly && (isOrganizer || item.created_by === user?.id);
-                      const displayTimezone = item.timezone || timezone;
-                      const TypeIcon = travelTypeIcon(item.type);
-                      const row = <TimelineRow
-                        time={timeAnchor(item, displayTimezone)}
-                        icon={TypeIcon}
-                        title={item.title}
-                        category={filters[1].types.includes(item.type) ? "transport" : item.type === "stay" ? "stay" : item.type === "restaurant" ? "food" : filters[3].types.includes(item.type) ? "activity" : "other"}
-                        connected={index < dayItems.length - 1}
-                        onClick={canEdit ? () => openEdit(item) : undefined}
-                        meta={providerLabel(item.provider) || type.label}
-                      />;
-
-                      if (!canEdit) return <div key={item.id}>{row}</div>;
-
-                      return (
-                        <SwipeRow
-                          key={item.id}
-                          actions={[
-                            { label: "Bewerken", icon: Pencil, onClick: () => openEdit(item) },
-                            { label: "Wissen", icon: Trash2, tone: "danger", onClick: () => void handleDelete(item) },
-                          ]}
-                        >
-                          {row}
-                        </SwipeRow>
-                      );
-                    })}
-                  </div>
-                </div>
-              ))}
+              {renderGroups(shownGroups)}
+              {hiddenCount > 0 && (
+                <Button variant="outline" className="mt-2 h-12 w-full" onClick={() => setAllOpen(true)}>
+                  Alle onderdelen ({timelineItems.length})
+                </Button>
+              )}
             </div>
           )}
         </section>
@@ -301,6 +323,12 @@ export default function TripReis() {
         />
       </div>
 
+      <Sheet open={allOpen} onOpenChange={setAllOpen}>
+        <SheetContent side="bottom" className="max-h-[85dvh] overflow-y-auto rounded-t-2xl pb-[max(1.5rem,env(safe-area-inset-bottom))]">
+          <SheetHeader><SheetTitle className="text-left">Alle onderdelen</SheetTitle></SheetHeader>
+          <div className="mt-3">{renderGroups(groups)}</div>
+        </SheetContent>
+      </Sheet>
       <Sheet open={addOpen} onOpenChange={setAddOpen}>
         <SheetContent side="bottom" className="rounded-t-2xl pb-[max(1.5rem,env(safe-area-inset-bottom))]">
           <SheetHeader><SheetTitle className="text-left">Toevoegen</SheetTitle></SheetHeader>

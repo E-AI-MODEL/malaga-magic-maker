@@ -40,8 +40,7 @@ import { TaskWizard } from "@/features/together/TaskWizard";
 import { TripInvitesCard } from "@/features/invites/TripInvitesCard";
 import { listTravelerProfiles, summariseProfile } from "@/features/travelers/data";
 import { TravelerProfileSheet } from "@/features/travelers/TravelerProfileSheet";
-import { RecentActivity } from "@/features/notifications/RecentActivity";
-import { EmptyLine, RowList, Segmented, StatusWord, StickyBar } from "@/components/primitives";
+import { EmptyLine, RowList } from "@/components/primitives";
 import { TripPageHeader } from "@/components/TripPageHeader";
 
 /** Shared work stays within Samen, including Kosten. */

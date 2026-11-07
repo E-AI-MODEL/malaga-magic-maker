@@ -18,8 +18,8 @@ export function ProductButtons({ knaakieTo, vakansieTo, onScan, onManual, scanUn
       </Button>
       {onScan && <div className="mt-3">
         <div className="grid grid-cols-2 gap-2">
-          <Button onClick={onScan} className={`min-h-14 min-w-0 flex-col gap-1 rounded-md px-1 text-sm ${scanUnavailable || !onManual ? "col-span-2" : ""}`}><Camera />{scanUnavailable ? "Ga verder" : "Scan bon"}</Button>
-          {!scanUnavailable && onManual && <Button variant="secondary" className="min-h-14 min-w-0 flex-col gap-1 rounded-md px-1 text-sm" onClick={onManual}><PenLine />Vul in</Button>}
+          <Button onClick={onScan} className={`min-h-14 min-w-0 flex-col gap-1 whitespace-nowrap rounded-md px-1 text-sm ${scanUnavailable || !onManual ? "col-span-2" : ""}`}><Camera />{scanUnavailable ? "Ga verder" : "Scan bon"}</Button>
+          {!scanUnavailable && onManual && <Button variant="secondary" className="min-h-14 min-w-0 flex-col gap-1 whitespace-nowrap rounded-md px-1 text-sm" aria-label="Vul zelf in" onClick={onManual}><PenLine />Vul in</Button>}
         </div>
       </div>}
       </div>
@@ -32,8 +32,8 @@ export function ProductButtons({ knaakieTo, vakansieTo, onScan, onManual, scanUn
       </Button>
       {onScan && <div className="mt-3">
         <div className="grid grid-cols-2 gap-2">
-          <Button asChild variant="secondary" className="min-h-14 min-w-0 flex-col gap-1 rounded-md px-1 text-sm"><Link to="/login"><LogIn />Inloggen</Link></Button>
-          <Button variant="secondary" className="min-h-14 min-w-0 flex-col gap-1 rounded-md px-1 text-sm" onClick={() => setHansieOpen(true)}><MessageCircle />Hansie</Button>
+          <Button asChild variant="secondary" className="min-h-14 min-w-0 flex-col gap-1 whitespace-nowrap rounded-md px-1 text-sm"><Link to="/login"><LogIn />Inloggen</Link></Button>
+          <Button variant="secondary" className="min-h-14 min-w-0 flex-col gap-1 whitespace-nowrap rounded-md px-1 text-sm" onClick={() => setHansieOpen(true)}><MessageCircle />Hansie</Button>
         </div>
       </div>}
       </div>

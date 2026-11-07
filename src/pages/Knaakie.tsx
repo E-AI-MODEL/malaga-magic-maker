@@ -14,6 +14,7 @@ export default function Knaakie() {
   const [readyId, setReadyId] = useState<string | null>(null);
   const [failed, setFailed] = useState(false);
   const selected = userTrips.find((trip) => trip.id === tripId);
+  const selectedId = selected?.id;
 
   useEffect(() => {
     if (loading || tripId) return;
@@ -25,15 +26,15 @@ export default function Knaakie() {
   useEffect(() => {
     setReadyId(null);
     setFailed(false);
-    if (!selected) return;
+    if (!selectedId) return;
     let cancelled = false;
-    void openTrip(selected.id).then((trip) => {
+    void openTrip(selectedId).then((trip) => {
       if (cancelled) return;
       setReadyId(trip?.id || null);
       setFailed(!trip);
     }).catch(() => { if (!cancelled) setFailed(true); });
     return () => { cancelled = true; };
-  }, [selected?.id, openTrip]);
+  }, [selectedId, openTrip]);
 
   return <AppLayout>
     <div className="px-5 pb-5 pt-3 sm:pt-6">

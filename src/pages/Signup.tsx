@@ -96,67 +96,71 @@ export default function Signup() {
         <div>
           <PageHeader title="Account maken" />
 
-          <div className="mt-6">
+          <div className="mt-3">
             <GoogleAuthButton onClick={handleGoogle} loading={loading} label="Ga verder met Google" />
           </div>
 
-          <div className="my-5 flex items-center gap-3">
+          <div className="my-3 flex items-center gap-3">
             <span className="h-px flex-1 bg-border" />
             <span className="text-xs font-medium text-muted-foreground">of met e-mail</span>
             <span className="h-px flex-1 bg-border" />
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-2.5">
             <div>
-              <label htmlFor="signup-name" className="text-sm font-semibold">
+              <label htmlFor="signup-name" className="sr-only">
                 Naam
               </label>
               <Input
+                placeholder="Naam"
                 id="signup-name"
                 value={displayName}
                 onChange={(event) => setDisplayName(event.target.value)}
                 autoComplete="name"
-                className="mt-2 h-14 rounded-lg bg-card text-base"
+                className="h-12 text-base"
               />
             </div>
             <div>
-              <label htmlFor="signup-email" className="text-sm font-semibold">
+              <label htmlFor="signup-email" className="sr-only">
                 E-mailadres
               </label>
               <Input
+                placeholder="E-mailadres"
                 id="signup-email"
                 type="email"
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
                 autoComplete="email"
-                className="mt-2 h-14 rounded-lg bg-card text-base"
+                className="h-12 text-base"
               />
             </div>
             <div>
-              <label htmlFor="signup-password" className="text-sm font-semibold">
+              <label htmlFor="signup-password" className="sr-only">
                 Wachtwoord
               </label>
               <Input
+                placeholder="Wachtwoord (min. 8 tekens)"
                 id="signup-password"
                 type="password"
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
                 autoComplete="new-password"
-                className="mt-2 h-14 rounded-lg bg-card text-base"
+                className="h-12 text-base"
               />
-              <p className="mt-1.5 text-xs text-muted-foreground">Minimaal 8 tekens.</p>
+              
             </div>
             <div>
-              <label htmlFor="signup-confirm" className="text-sm font-semibold">
+              <label htmlFor="signup-confirm" className="sr-only">
                 Herhaal wachtwoord
               </label>
               <Input
+                placeholder="Herhaal wachtwoord"
                 id="signup-confirm"
                 type="password"
                 value={confirmPassword}
                 onChange={(event) => setConfirmPassword(event.target.value)}
                 autoComplete="new-password"
-                className="mt-2 h-14 rounded-lg bg-card text-base"
+                className="h-12 text-base"
               />
             </div>
             {error && (

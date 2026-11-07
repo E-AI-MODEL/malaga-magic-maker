@@ -16,8 +16,8 @@ export function AuthPage({ children }: { children: ReactNode }) {
           </Link>
           <Link to="/" className="tile-plain flex h-11 items-center gap-2 rounded-full px-4 text-sm font-bold"><Home className="size-5" />Home</Link>
         </header>
-        <p className="mt-[2vh] shrink-0 text-center font-display text-[clamp(2rem,5vh,3rem)] font-bold leading-[1.05] text-on-image drop-shadow-md">Jouw hele vakantie in je broekzak</p>
-        <main className="tile-plain mt-[2vh] min-h-0 flex-1 overflow-y-auto rounded-[1.75rem] bg-card p-5">{children}</main>
+        <p className="mt-[1vh] shrink-0 text-center font-display text-[clamp(1.6rem,4vh,2.6rem)] font-bold leading-[1.05] text-on-image drop-shadow-md">Jouw hele vakantie in je broekzak</p>
+        <main className="tile-plain mt-[2vh] min-h-0 flex-1 overflow-y-auto rounded-[1.75rem] bg-card p-4">{children}</main>
       </div>
     </div>
   );

@@ -44,41 +44,43 @@ export default function Login() {
         <div>
           <PageHeader title="Inloggen" />
 
-          <div className="mt-6">
+          <div className="mt-3">
             <GoogleAuthButton onClick={handleGoogle} loading={loading} label="Inloggen met Google" />
           </div>
 
-          <div className="my-5 flex items-center gap-3">
+          <div className="my-3 flex items-center gap-3">
             <span className="h-px flex-1 bg-border" />
             <span className="text-xs font-medium text-muted-foreground">of met e-mail</span>
             <span className="h-px flex-1 bg-border" />
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-2.5">
             <div>
-              <label htmlFor="login-email" className="text-sm font-semibold">
+              <label htmlFor="login-email" className="sr-only">
                 E-mailadres
               </label>
               <Input
+                placeholder="E-mailadres"
                 id="login-email"
                 type="email"
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
                 autoComplete="email"
-                className="mt-2 h-14 rounded-lg bg-card text-base"
+                className="h-12 text-base"
               />
             </div>
             <div>
-              <label htmlFor="login-password" className="text-sm font-semibold">
+              <label htmlFor="login-password" className="sr-only">
                 Wachtwoord
               </label>
               <Input
+                placeholder="Wachtwoord"
                 id="login-password"
                 type="password"
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
                 autoComplete="current-password"
-                className="mt-2 h-14 rounded-lg bg-card text-base"
+                className="h-12 text-base"
               />
             </div>
             {error && <p className="rounded-lg bg-destructive/10 px-4 py-3 text-sm font-medium text-destructive">{error}</p>}

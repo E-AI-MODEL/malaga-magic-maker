@@ -134,15 +134,11 @@ export default function Trips() {
   return (
     <AppLayout>
       <section className="relative">
-        <div className="relative h-[210px] w-full overflow-hidden bg-secondary sm:h-[240px]">
+        <div className="relative h-[150px] w-full overflow-hidden bg-secondary sm:h-[200px]">
           <img src={heroHome} alt="" aria-hidden width={1280} height={720} loading="eager" className="h-full w-full object-cover" />
-          <div aria-hidden className="absolute inset-0 bg-foreground/60" />
-          <div className="absolute inset-x-0 top-0 mx-auto max-w-3xl px-5 pt-7">
-            <p className="flex items-center gap-2.5 font-ui text-[13px] font-medium text-on-image/80">
-              <span aria-hidden className="h-px w-7 bg-on-image/40" />
-              Jouw hele vakantie in je broekzak
-            </p>
-            <PageHeader className="mt-3 text-on-image" title={firstName ? `Hoi ${firstName}` : "Hoi"} action={
+          <div aria-hidden className="absolute inset-0 bg-foreground/40" />
+          <div className="absolute inset-x-0 top-0 mx-auto max-w-3xl px-5 pt-6">
+<PageHeader className="text-on-image" title={firstName ? `Hoi ${firstName}` : "Hoi"} action={userTrips.length > 0 &&
               <Button asChild variant="outline" size="sm" className="h-11 shrink-0 rounded-xl bg-card px-4 text-[15px] text-foreground hover:text-foreground">
                 <Link to="/new-trip"><Plus className="mr-1.5 h-3.5 w-3.5" />Nieuwe reis</Link>
               </Button>
@@ -163,20 +159,11 @@ export default function Trips() {
           </>
         ) : activeTrips.length ? <div className="pt-4"><GettingStarted trip={activeTrips[0]} hasAnyTrip={userTrips.length > 0} /></div> : (
           <div>
-            <div className="rounded-lg border border-border bg-card p-5 shadow-soft">
-              <h2 className="font-display text-[22px] font-bold leading-tight">Start je eerste reis</h2>
-              <p className="mt-2 text-[15px] leading-relaxed text-muted-foreground">
-                Begin met een naam. Data, mensen en plannen voeg je toe wanneer je wilt.
-              </p>
-              <Button asChild size="lg" className="mt-4 h-14 w-full rounded-xl font-display text-lg font-semibold [&_svg]:size-5">
-                <Link to="/new-trip"><Plus className="mr-2" />Je eerste reis starten</Link>
-              </Button>
-            </div>
             <GettingStarted trip={null} hasAnyTrip={userTrips.length > 0} />
           </div>
         )}
 
-        {!loading && <section className="mt-7 border-t border-rule pt-1">
+        {!loading && userTrips.length > 0 && <section className="mt-7 border-t border-rule pt-1">
           <SectionLabel>Voor jou</SectionLabel>
           {factsQuery.isPending ? <p className="py-3 text-sm text-muted-foreground">Laden…</p> : factsQuery.isError ? <p className="py-3 text-sm text-muted-foreground">Je overzicht is nu niet beschikbaar. <Button variant="link" onClick={() => void factsQuery.refetch()}>Opnieuw proberen</Button></p> : personal.length ? <RowList>
             {personal.map((item) => <RowItem key={item.key} icon={item.kind === "task" ? CheckSquare : item.kind === "decision" ? Scale : Receipt} title={item.title} meta={item.tripName} to={item.href} />)}

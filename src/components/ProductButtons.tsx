@@ -14,14 +14,14 @@ export function ProductButtons({ knaakieTo, vakansieTo, onScan, onManual, scanUn
   const publicHome = !!onScan;
   return (
     <>
-    <nav aria-label="Knaakie en Vakansie" className="space-y-4 pb-2">
+    <nav aria-label="Knaakie en Vakansie" className="space-y-[2dvh] pb-2">
       <div className="grid grid-cols-2 gap-3">
         <div className="tile-knaakie flex min-w-0 flex-col rounded-[1.75rem] p-3 pb-4">
           {publicHome && !scanUnavailable && onManual && (
             <button type="button" aria-label="Vul zelf in" onClick={onManual} className="absolute right-2 top-2 z-10 grid size-11 place-items-center rounded-full bg-card/25 text-on-image"><PenLine className="size-5" /></button>
           )}
           <Link to={knaakieTo} className="flex flex-1 flex-col items-center gap-1 rounded-2xl">
-            <img src={knaakieIcon} alt="" width={816} height={816} className="h-[min(6rem,11dvh)] w-[min(6rem,11dvh)] object-contain sm:h-28 sm:w-28" />
+            <img src={knaakieIcon} alt="" width={816} height={816} className="h-[min(6rem,11dvh)] w-[min(6rem,11dvh)] object-contain sm:h-28 sm:w-28 [@media(max-height:640px)]:hidden" />
             <span className={title}>Knaakie</span>
           </Link>
           {publicHome
@@ -30,7 +30,7 @@ export function ProductButtons({ knaakieTo, vakansieTo, onScan, onManual, scanUn
         </div>
         <div className="tile-vakansie flex min-w-0 flex-col rounded-[1.75rem] p-3 pb-4">
           <Link to={vakansieTo} className="flex flex-1 flex-col items-center gap-1 rounded-2xl">
-            <img src={vakansieIcon} alt="" width={816} height={816} className="h-[min(6rem,11dvh)] w-[min(6rem,11dvh)] object-contain sm:h-28 sm:w-28" />
+            <img src={vakansieIcon} alt="" width={816} height={816} className="h-[min(6rem,11dvh)] w-[min(6rem,11dvh)] object-contain sm:h-28 sm:w-28 [@media(max-height:640px)]:hidden" />
             <span className={title}>Vakansie</span>
           </Link>
           <Link to={vakansieTo} aria-label="Direct regelen" className={`${pill} mt-3`}>Direct regelen<ArrowRight className="size-5 shrink-0" /></Link>

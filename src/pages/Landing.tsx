@@ -82,7 +82,7 @@ export default function Landing() {
         <header className="flex h-12 shrink-0 items-center">
           <BrandLogo onImage />
         </header>
-        <div className="flex min-h-0 flex-1 flex-col justify-center gap-[2dvh]">
+        <div className="flex min-h-0 flex-1 flex-col [justify-content:safe_center] gap-[2dvh]">
           <h1 className="mx-auto max-w-md text-center font-display text-[clamp(1.75rem,5.5dvh,3.75rem)] font-bold leading-[1.05] text-on-image drop-shadow-md">Jouw hele vakantie in je <span className="relative inline-block">broekzak<span aria-hidden className="absolute -bottom-1 left-0 h-1.5 w-full rounded-full bg-primary" /></span></h1>
           <ProductButtons knaakieTo="/knaakie" vakansieTo="/signup" scanUnavailable={left === 0}
             onScan={() => { if (left === 0) navigate("/signup"); else gallery.current?.click(); }}

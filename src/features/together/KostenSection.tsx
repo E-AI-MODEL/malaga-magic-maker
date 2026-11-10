@@ -96,19 +96,19 @@ export function KostenSection() {
 
       {personal.length > 0 && <section className="py-5">
         <SectionLabel>Jouw bedragen</SectionLabel>
-        <div className="space-y-2.5">
+        <div className="space-y-2">
           {personal.map((transfer) => {
             const pay = transfer.fromUserId === user.id;
             const name = names.get(pay ? transfer.toUserId : transfer.fromUserId) || "Medereiziger";
-            return <div key={`${transfer.currency}-${transfer.fromUserId}-${transfer.toUserId}`} className="tile-plain rounded-2xl bg-card p-4">
-              <div className="flex items-center gap-3">
-                <span aria-hidden className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-secondary font-display text-xl font-semibold">{name.trim().charAt(0).toUpperCase() || "?"}</span>
+            return <div key={`${transfer.currency}-${transfer.fromUserId}-${transfer.toUserId}`} className="tile-plain flex items-center gap-3 rounded-2xl bg-card px-3 py-2.5">
+              <div className="flex min-w-0 flex-1 items-center gap-3">
+                <span aria-hidden className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-secondary font-display text-base font-semibold">{name.trim().charAt(0).toUpperCase() || "?"}</span>
                 <div className="min-w-0 flex-1">
-                  <p className="break-words text-[15px] text-muted-foreground">{pay ? `Jij betaalt ${name}` : `${name} betaalt jou`}</p>
-                  <p className="num font-display text-3xl font-semibold leading-tight">{money(transfer.cents / 100, transfer.currency)}</p>
+                  <p className="break-words text-sm text-muted-foreground">{pay ? `Jij betaalt ${name}` : `${name} betaalt jou`}</p>
+                  <p className="num font-display text-xl font-semibold leading-tight">{money(transfer.cents / 100, transfer.currency)}</p>
                 </div>
               </div>
-              {!pay && !readOnly && <Button variant="secondary" className="mt-3 h-14 w-full rounded-xl text-base font-semibold [&_svg]:size-5" onClick={() => setPayment({ recipientName: name, amount: transfer.cents / 100, currency: transfer.currency })}><Send className="mr-2 h-5 w-5" />Betaalverzoek sturen</Button>}
+              {!pay && !readOnly && <Button variant="secondary" size="sm" className="h-11 shrink-0 rounded-xl px-3 font-semibold" onClick={() => setPayment({ recipientName: name, amount: transfer.cents / 100, currency: transfer.currency })}><Send className="mr-1.5 h-4 w-4" />Vraag</Button>}
             </div>;
           })}
         </div>
@@ -116,12 +116,12 @@ export function KostenSection() {
 
       {expenses.length > 0 && <section className="border-t border-border py-5">
         <SectionLabel>Bonnetjes</SectionLabel>
-        <div className="space-y-3">{expenses.map((expense) => {
+        <div className="space-y-2">{expenses.map((expense) => {
           const manager = isOrganizer || expense.created_by === user.id;
           const isExpanded = expanded === expense.id;
-          return <div key={expense.id} className="tile-plain rounded-2xl bg-card px-4 py-3">
+          return <div key={expense.id} className="tile-plain rounded-xl bg-card px-3 py-1.5">
             <Button variant="ghost" onClick={() => setExpanded(isExpanded ? null : expense.id)} aria-expanded={isExpanded} className="h-auto w-full justify-start gap-3 whitespace-normal px-0 py-1 text-left hover:bg-transparent">
-              <div className="min-w-0 flex-1"><span className="block break-words text-[15px] font-medium">{expense.description}</span><span className="mt-1 block text-xs font-normal text-muted-foreground">Betaald door {names.get(expense.paid_by_user_id || "") || "onbekend"}</span></div>
+              <div className="min-w-0 flex-1"><span className="block break-words text-sm font-medium">{expense.description}</span><span className="mt-0.5 block text-xs font-normal text-muted-foreground">Betaald door {names.get(expense.paid_by_user_id || "") || "onbekend"}</span></div>
               <span className="num shrink-0 text-sm font-semibold">{money(expense.amount, expense.currency)}</span><ChevronDown className={`h-4 w-4 shrink-0 text-muted-foreground ${isExpanded ? "rotate-180" : ""}`} />
             </Button>
             {isExpanded && <div className="mt-3 border-l border-border pl-3">

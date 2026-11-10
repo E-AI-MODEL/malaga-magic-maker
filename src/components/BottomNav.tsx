@@ -15,12 +15,15 @@ export function BottomNav() {
   const active = "bg-vakansie/10 text-vakansie";
   const inactive = "text-muted-foreground";
 
-  const links = isTripScreen && activeTrip ? [
+  const showTripLinks = !!activeTrip && (isTripScreen || activeTrip.status !== "archived");
+  const links = activeTrip && showTripLinks ? [
     { to: `/trip/${activeTrip.id}`, icon: LayoutDashboard, label: "Overzicht", end: true },
     { to: `/trip/${activeTrip.id}/reis`, icon: Route, label: "Reis", end: false },
     { to: `/trip/${activeTrip.id}/samen`, icon: Users, label: "Samen", end: false },
-  ] : [{ to: "/trips", icon: Home, label: "Home", end: true }];
-  const costsTo = activeTrip && isTripScreen ? `/knaakie?tripId=${activeTrip.id}` : "/knaakie";
+  ] : [];
+  // Account screens lead with Home so every page shows the full footer.
+  if (!isTripScreen) links.unshift({ to: "/trips", icon: Home, label: "Home", end: true });
+  const costsTo = activeTrip ? `/knaakie?tripId=${activeTrip.id}` : "/knaakie";
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-border bg-card px-2 pt-1.5 pb-[max(6px,env(safe-area-inset-bottom))] shadow-soft">

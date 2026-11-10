@@ -282,16 +282,14 @@ export default function TripReis() {
           </p>
         )}
 
-        <section className="mt-3">
+        <section className={groups.length > 0 || itemsQuery.isLoading || itemsQuery.isError ? "mt-3" : ""}>
           {itemsQuery.isLoading ? (
             <div className="mt-2 space-y-2">
               {[0, 1, 2].map((row) => <div key={row} className="h-12 animate-pulse rounded-sm bg-secondary" />)}
             </div>
           ) : itemsQuery.isError ? (
             <p className="mt-3 text-sm text-destructive">Je reisgegevens konden niet worden geladen.</p>
-          ) : groups.length === 0 ? (
-            !readOnly && <p className="mt-1 text-sm text-muted-foreground">Eigen auto of geen boeking? Vul het gewoon zelf in.</p>
-          ) : (
+          ) : groups.length === 0 ? null : (
             <div>
               {renderGroups(shownGroups)}
               {hiddenCount > 0 && (

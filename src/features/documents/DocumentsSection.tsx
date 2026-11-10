@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Download, FilePlus2, FileText, Loader2, Plus, ScanLine, Trash2 } from "lucide-react";
+import { ChevronRight, ClipboardList, Download, FilePlus2, FileText, Loader2, Pencil, Plus, ScanLine, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { TripItemRow } from "@/integrations/supabase/database";
 import {
@@ -16,6 +16,9 @@ import {
 } from "./data";
 import { DocumentUploadSheet } from "./DocumentUploadSheet";
 import { IconBubble, SuggestionRow } from "@/components/primitives";
+import { FormSheet } from "@/components/FormSheet";
+import { NoteCreateSheet } from "./NoteCreateSheet";
+import type { NoteKind } from "./note-file";
 
 function formatSize(value: number | null) {
   if (!value) return null;
@@ -45,6 +48,8 @@ export function DocumentsSection({
 }) {
   const queryClient = useQueryClient();
   const [uploadOpen, setUploadOpen] = useState(false);
+  const [optionsOpen, setOptionsOpen] = useState(false);
+  const [noteKind, setNoteKind] = useState<NoteKind | null>(null);
   const [actionError, setActionError] = useState("");
   const [openingId, setOpeningId] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
@@ -80,7 +85,7 @@ export function DocumentsSection({
   useEffect(() => {
     if (readOnly) return;
     const pending = (documentsQuery.data || []).find(
-      (document) => document.extraction_status === "pending" && !startedRef.current.has(document.id),
+      (document) => document.extraction_status === "pending" && !isWrittenNote(document) && !startedRef.current.has(document.id),
     );
     if (!pending) return;
     startedRef.current.add(pending.id);
@@ -147,43 +152,32 @@ export function DocumentsSection({
   };
 
   return (
-    <section className="mt-8 border-t border-rule/10 pt-5">
-      <div className="flex items-center justify-between gap-3">
-        <h2 className="font-ui text-[15px] font-semibold">Documenten</h2>
-        {!readOnly && (documentsQuery.isPending || documents.length > 0) && (
-          <Button variant="ghost" size="sm" onClick={() => setUploadOpen(true)} className="-mr-2 h-8 rounded-full px-2 text-muted-foreground">
-            <Plus className="mr-1 h-3.5 w-3.5" />Toevoegen
-          </Button>
-        )}
-      </div>
+    <section className="mt-2">
+      <Button variant="secondary" className="tile-plain min-h-[68px] w-full justify-start gap-3 rounded-2xl px-3 py-2.5 text-left" onClick={() => setOptionsOpen(true)}>
+        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-secondary"><Pencil className="h-5 w-5" /></span>
+        <span className="min-w-0 flex-1">
+          <span className="block text-[16px] font-semibold">Notities</span>
+          <span className="block text-sm font-normal text-muted-foreground">Paklijst of iets om te onthouden</span>
+        </span>
+        <ChevronRight className="h-5 w-5 shrink-0 text-muted-foreground" />
+      </Button>
 
       {actionError && <p className="mt-4 rounded-xl bg-destructive/10 px-4 py-3 text-sm font-medium text-destructive">{actionError}</p>}
 
+      <FormSheet open={optionsOpen} onOpenChange={setOptionsOpen} title="Notities">
+      {!readOnly && <div className="mt-4 space-y-2">
+        <Button variant="secondary" className="tile-plain min-h-14 w-full justify-start text-base" onClick={() => { setOptionsOpen(false); setNoteKind("packing"); }}><ClipboardList />Paklijst maken</Button>
+        <Button variant="secondary" className="tile-plain min-h-14 w-full justify-start text-base" onClick={() => { setOptionsOpen(false); setNoteKind("note"); }}><Pencil />Notitie schrijven</Button>
+        <Button variant="secondary" className="tile-plain min-h-14 w-full justify-start text-base" onClick={() => { setOptionsOpen(false); setUploadOpen(true); }}><FilePlus2 />Bestand toevoegen</Button>
+      </div>}
       {documentsQuery.isLoading ? (
         <div className="mt-3 space-y-2">
           {[0, 1].map((item) => <div key={item} className="h-12 animate-pulse rounded-sm bg-secondary" />)}
         </div>
       ) : documentsQuery.isError ? (
-        <p className="mt-3 text-sm text-destructive">Je documenten konden niet worden geladen.</p>
+        <p className="mt-3 text-sm text-destructive">Je notities konden niet worden geladen.</p>
       ) : documents.length === 0 ? (
-        readOnly ? (
-          <p className="mt-3 text-sm text-muted-foreground">Nog geen documenten.</p>
-        ) : (
-          <Button
-            variant="secondary"
-            className="tile-plain mt-3 min-h-[68px] w-full justify-start gap-3 rounded-2xl px-3 py-2.5 text-left"
-            onClick={() => setUploadOpen(true)}
-          >
-            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-secondary">
-              <FilePlus2 className="h-5 w-5" />
-            </span>
-            <span className="min-w-0 flex-1">
-              <span className="block text-[16px] font-semibold">Document toevoegen</span>
-              <span className="block text-sm font-normal text-muted-foreground">Paklijst, tickets of bevestigingen</span>
-            </span>
-            <Plus className="h-5 w-5 shrink-0 text-muted-foreground" />
-          </Button>
-        )
+        readOnly ? <p className="mt-3 text-sm text-muted-foreground">Nog geen notities.</p> : null
       ) : (
         <div className="mt-2 border-t border-rule/10">
           {documentsQuery.data?.map((document) => {
@@ -191,7 +185,7 @@ export function DocumentsSection({
             const linkedItem = document.trip_item_id ? itemTitles.get(document.trip_item_id) : null;
             const createdAt = new Date(document.created_at).toLocaleDateString("nl-NL", { day: "numeric", month: "short", year: "numeric" });
             const size = formatSize(document.size_bytes);
-            const suggestion = readOnly ? null : parseDocumentSuggestion(document.extracted_suggestion);
+            const suggestion = readOnly || isWrittenNote(document) ? null : parseDocumentSuggestion(document.extracted_suggestion);
             const reading = document.extraction_status === "processing" || busyId === document.id;
             const suggestionMeta = suggestion
               ? [formatMoment(suggestion.start_at), suggestion.provider, suggestion.booking_reference]
@@ -212,7 +206,7 @@ export function DocumentsSection({
                     </p>
                   ) : document.extracted_summary ? (
                     <p className="mt-1 truncate text-xs text-muted-foreground">{document.extracted_summary}</p>
-                  ) : document.extraction_status === "failed" && !readOnly ? (
+                  ) : document.extraction_status === "failed" && !readOnly && !isWrittenNote(document) ? (
                     <button
                       type="button"
                       onClick={() => void runExtraction(document)}
@@ -247,6 +241,10 @@ export function DocumentsSection({
           })}
         </div>
       )}
+      <div className="h-6" />
+      </FormSheet>
+
+      {noteKind && <NoteCreateSheet kind={noteKind} tripId={tripId} onClose={() => setNoteKind(null)} onSaved={async () => { await refresh(); setOptionsOpen(true); }} />}
 
       <DocumentUploadSheet
         open={uploadOpen}
@@ -257,4 +255,8 @@ export function DocumentsSection({
       />
     </section>
   );
+}
+
+function isWrittenNote(document: TripDocumentRow) {
+  return document.document_type === "other" && ["Paklijst.pdf", "Notitie.pdf"].includes(document.filename);
 }

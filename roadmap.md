@@ -1,5 +1,10 @@
 # Roadmap
 
+## Notities op Reis
+- [x] Witruimte onder Activiteiten verwijderen; Documenten vervangen door compacte Notities-tegel
+- [x] Paklijst maken, Notitie schrijven en Bestand toevoegen via bestaande privéopslag
+- [x] 11 tests groen; ingelogd mobiel paklijst opgeslagen, na herladen teruggelezen en testbestand verwijderd
+
 ## Eigen Knaakie en sessiebehoud
 - [x] Eigen /knaakie-scherm voor ingelogde gebruikers, met bestaande kosten per gekozen reis
 - [x] Home- en footerknoppen naar /knaakie; geen automatische omleiding naar Samen of Nieuwe reis

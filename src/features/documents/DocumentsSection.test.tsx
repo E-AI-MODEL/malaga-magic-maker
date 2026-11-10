@@ -58,23 +58,20 @@ afterEach(() => {
 });
 
 describe("empty documents", () => {
-  it("shows one tappable add tile with concrete copy", async () => {
-    renderSection();
-    const tile = await screen.findByRole("button", { name: /Document toevoegen/ });
-    expect(screen.queryByText(/Handig, niet verplicht/)).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Toevoegen" })).not.toBeInTheDocument();
-  });
-
   it("opens the upload panel straight from that tile", async () => {
     renderSection();
-    fireEvent.click(await screen.findByRole("button", { name: /Document toevoegen/ }));
+    fireEvent.click(await screen.findByRole("button", { name: /^Notities/ }));
+    fireEvent.click(await screen.findByRole("button", { name: "Bestand toevoegen" }));
     expect(await screen.findByText("Uploadpaneel open")).toBeInTheDocument();
   });
 
   it("shows no add action for an archived trip", async () => {
     renderSection(true);
-    expect(await screen.findByText("Nog geen documenten.")).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: /Document toevoegen/ })).not.toBeInTheDocument();
+    fireEvent.click(await screen.findByRole("button", { name: /^Notities/ }));
+    expect(await screen.findByText("Nog geen notities.")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Paklijst maken" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Notitie schrijven" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Bestand toevoegen" })).not.toBeInTheDocument();
   });
 });
 
@@ -82,8 +79,8 @@ describe("documents present", () => {
   it("lists the file and keeps the header add action", async () => {
     state.documents = [document];
     renderSection();
+    fireEvent.click(await screen.findByRole("button", { name: /^Notities/ }));
     expect(await screen.findByText("ticket.pdf")).toBeInTheDocument();
-    await waitFor(() => expect(screen.getByRole("button", { name: "Toevoegen" })).toBeInTheDocument());
-    expect(screen.queryByRole("button", { name: /Document toevoegen/ })).not.toBeInTheDocument();
+    await waitFor(() => expect(screen.getByRole("button", { name: "Bestand toevoegen" })).toBeInTheDocument());
   });
 });

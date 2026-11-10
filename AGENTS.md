@@ -34,6 +34,7 @@ Home and trip overview share trip preparation derivation. Why: their score and f
 One generic `trip_items` model; type-specific details in metadata, no destination-specific columns. Golf is an activity; accommodation comparison is a generic decision.
 
 ## Code changes
+- Save notes as private PDFs; skip AI extraction to keep written text local.
 - Shared presentation primitives and semantic tokens carry the approved homepage style across working screens; keep page-specific data logic unchanged. PageHeader and TimelineRow own heading/itinerary presentation; FormSheet and FormSubmit own the common form shell and sticky save area; new costs, tasks, choices and trips use the shared step flow in `components/steps` (one question per screen, auto-advance, swipe, editable summary), while editing existing records keeps the form sheets. Why: consistent typography, touch targets and safe-area behavior without duplicating screen logic.
 - Load the shared font stylesheet from the application entry point, not CSS URL imports, so font loading does not depend on CSS import resolution.
 - Mobile Hansie opens from its own button in the trip bottom navigation (no separate strip); content only reserves the nav height.

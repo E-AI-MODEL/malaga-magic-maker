@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Download, FileText, Loader2, Plus, ScanLine, Trash2 } from "lucide-react";
+import { Download, FilePlus2, FileText, Loader2, Plus, ScanLine, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { TripItemRow } from "@/integrations/supabase/database";
 import {
@@ -15,7 +15,7 @@ import {
   type TripDocumentRow,
 } from "./data";
 import { DocumentUploadSheet } from "./DocumentUploadSheet";
-import { EmptyLine, IconBubble, SuggestionRow } from "@/components/primitives";
+import { IconBubble, SuggestionRow } from "@/components/primitives";
 
 function formatSize(value: number | null) {
   if (!value) return null;
@@ -56,6 +56,7 @@ export function DocumentsSection({
     enabled: Boolean(tripId),
   });
 
+  const documents = documentsQuery.data || [];
   const itemTitles = new Map(items.map((item) => [item.id, item.title]));
 
   const refresh = async () => {
@@ -149,7 +150,7 @@ export function DocumentsSection({
     <section className="mt-8 border-t border-rule/10 pt-5">
       <div className="flex items-center justify-between gap-3">
         <h2 className="font-ui text-[15px] font-semibold">Documenten</h2>
-        {!readOnly && (
+        {!readOnly && (documentsQuery.isPending || documents.length > 0) && (
           <Button variant="ghost" size="sm" onClick={() => setUploadOpen(true)} className="-mr-2 h-8 rounded-full px-2 text-muted-foreground">
             <Plus className="mr-1 h-3.5 w-3.5" />Toevoegen
           </Button>
@@ -164,10 +165,25 @@ export function DocumentsSection({
         </div>
       ) : documentsQuery.isError ? (
         <p className="mt-3 text-sm text-destructive">Je documenten konden niet worden geladen.</p>
-      ) : (documentsQuery.data?.length || 0) === 0 ? (
-        <EmptyLine
-          text="Handig, niet verplicht: bewaar hier tickets of je paspoort."
-        />
+      ) : documents.length === 0 ? (
+        readOnly ? (
+          <p className="mt-3 text-sm text-muted-foreground">Nog geen documenten.</p>
+        ) : (
+          <Button
+            variant="secondary"
+            className="tile-plain mt-3 min-h-[68px] w-full justify-start gap-3 rounded-2xl px-3 py-2.5 text-left"
+            onClick={() => setUploadOpen(true)}
+          >
+            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-secondary">
+              <FilePlus2 className="h-5 w-5" />
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="block text-[16px] font-semibold">Document toevoegen</span>
+              <span className="block truncate text-sm font-normal text-muted-foreground">Tickets, bevestigingen of je paspoort</span>
+            </span>
+            <Plus className="h-5 w-5 shrink-0 text-muted-foreground" />
+          </Button>
+        )
       ) : (
         <div className="mt-2 border-t border-rule/10">
           {documentsQuery.data?.map((document) => {

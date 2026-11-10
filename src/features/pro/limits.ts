@@ -4,7 +4,7 @@ import { useAuth } from "@/lib/auth";
 
 /** Server-side plan limits, mirrored here for copy only. Enforcement lives in the database. */
 export const FREE_LIMITS = {
-  trips: 1,
+  trips: 3,
   hansiePerDay: 12,
   documentsPerTrip: 5,
 } as const;
@@ -15,7 +15,7 @@ export const PRO_LIMITS = {
 } as const;
 
 const LIMIT_MESSAGES: Record<string, string> = {
-  trip_limit_reached: `Zonder Pro kun je één actieve reis hebben. Archiveer je huidige reis of activeer Pro voor onbeperkt reizen.`,
+  trip_limit_reached: `Je hebt nu ${FREE_LIMITS.trips} Knaakies of reizen. Archiveer er een, of maak Pro aan voor onbeperkt.`,
   document_limit_reached: `Deze reis zit op de gratis grens van ${FREE_LIMITS.documentsPerTrip} documenten. Met Pro kun je er ${PRO_LIMITS.documentsPerTrip} per reis bewaren.`,
   hansie_limit_reached: `Je hebt je Hansie-vragen voor vandaag gebruikt. Met Pro krijg je er ${PRO_LIMITS.hansiePerDay} per dag.`,
 };

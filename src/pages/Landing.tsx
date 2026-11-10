@@ -13,7 +13,7 @@ import { BrandLogo } from "@/components/BrandLogo";
 const FAQ = [
   {
     q: "Wat kost Vakansie?",
-    a: "Je kiest: gratis of Pro. Gratis is één actieve reis, 5 documenten per reis en 12 Hansie-vragen per dag. Pro is een eenmalige bijdrage van € 2, € 5 of € 10 en geeft meer ruimte. Beide opties hebben dezelfde functies.",
+    a: "Je kiest: gratis of Pro. Gratis is 3 losse Knaakies of reizen, 5 documenten per reis en 12 Hansie-vragen per dag. Pro is een eenmalige bijdrage van € 2, € 5 of € 10 en geeft meer ruimte. Beide opties hebben dezelfde functies.",
   },
   {
     q: "Wat is Pro precies?",

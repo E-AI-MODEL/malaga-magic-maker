@@ -10,7 +10,7 @@ export const PRO_PLANS: ProPlan[] = [
 ];
 
 export const PRO_BENEFITS = [
-  "Onbeperkt reizen (gratis: één actieve reis)",
+  "Onbeperkt Knaakies en reizen (gratis: 3)",
   "150 Hansie-vragen per dag in plaats van 12",
   "200 documenten per reis in plaats van 5",
   "Blijvende toegang, geen abonnement",

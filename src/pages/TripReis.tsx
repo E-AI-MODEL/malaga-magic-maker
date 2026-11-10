@@ -18,7 +18,7 @@ import { TripVisual } from "@/components/TripVisual";
 import { countdownLabel } from "@/features/trips/overview";
 import { TripTodoPanel } from "@/features/together/TripTodoPanel";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
+import { listDecisions, listTripMembers } from "@/features/together/data";
 import { DocumentsSection } from "@/features/documents/DocumentsSection";
 import {
   DayHeader,
@@ -102,14 +102,11 @@ export default function TripReis() {
   }, [itemsQuery.data, timezone]);
 
   const canChoose = isOrganizer || isAdmin;
-  const openStayDecision = useQuery({
-    queryKey: ["open-stay-decision", tripId],
-    queryFn: async () => {
-      const { data } = await supabase.from("decisions").select("id").eq("trip_id", tripId).eq("status", "open").eq("title", ACCOMMODATION_DECISION_TITLE).limit(1);
-      return Boolean(data && data.length > 0);
-    },
-    enabled: Boolean(tripId),
-  });
+  const decisionsQuery = useQuery({ queryKey: ["together-decisions", tripId], queryFn: () => listDecisions(tripId), enabled: Boolean(tripId) });
+  const membersQuery = useQuery({ queryKey: ["trip-members-view", tripId], queryFn: () => listTripMembers(tripId), enabled: Boolean(tripId) });
+  const stayDecision = (decisionsQuery.data || []).find((d) => d.status === "open" && d.title === ACCOMMODATION_DECISION_TITLE);
+  const stayVoters = stayDecision ? new Set(stayDecision.options.flatMap((o) => o.votes.map((v) => v.user_id))).size : 0;
+  const openStayDecision = { data: Boolean(stayDecision) };
 
   const ideas = useMemo(() => (itemsQuery.data || []).filter((item) => item.status === "idea"), [itemsQuery.data]);
 
@@ -258,7 +255,7 @@ export default function TripReis() {
 
         {!readOnly && openStayDecision.data && (
           <Button variant="secondary" className="tile-plain mt-3 h-auto min-h-14 w-full justify-between rounded-2xl px-4 py-3 text-left" onClick={() => setSearchParams({ tab: "todo" }, { replace: true })}>
-            <span className="min-w-0"><span className="block font-semibold">Verblijf</span><span className="block text-sm font-normal text-muted-foreground">Stemming loopt</span></span>
+            <span className="min-w-0"><span className="block font-semibold">Verblijf</span><span className="block text-sm font-normal text-muted-foreground">Stemming loopt · {stayVoters} van {membersQuery.data?.length || stayVoters} gestemd</span></span>
             <span className="flex shrink-0 items-center gap-1 rounded-full bg-primary/10 px-3 py-1.5 text-sm font-semibold text-primary"><Vote className="h-4 w-4" />Stem nu</span>
           </Button>
         )}

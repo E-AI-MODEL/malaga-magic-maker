@@ -75,6 +75,7 @@ export function TripTodoPanel({ planning }: { planning: ReactNode }) {
   const [actionError, setActionError] = useState("");
   const [inviteOpen, setInviteOpen] = useState(false);
   const [profileSheetOpen, setProfileSheetOpen] = useState(false);
+  const [allMembersOpen, setAllMembersOpen] = useState(false);
 
   const tripId = activeTrip?.id || "";
   const timezone = activeTrip?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone || "Europe/Amsterdam";
@@ -231,7 +232,7 @@ export function TripTodoPanel({ planning }: { planning: ReactNode }) {
 
         <section className="mt-4">
           <div className="-mx-5 flex gap-2 overflow-x-auto px-5 pb-1 sm:mx-0 sm:px-0" aria-label="Reizigers">
-            {membersQuery.isLoading ? <LoadingRows /> : members.map((member) => {
+            {membersQuery.isLoading ? <LoadingRows /> : [...members].sort((a, b) => Number(b.userId === user.id) - Number(a.userId === user.id)).slice(0, allMembersOpen || members.length <= 5 ? members.length : 4).map((member) => {
               const isMe = member.userId === user.id;
               const role = member.role === "organizer" ? "organisator" : "reiziger";
               const summary = summariseProfile(profileMapByUser.get(member.userId));
@@ -252,6 +253,9 @@ export function TripTodoPanel({ planning }: { planning: ReactNode }) {
                 </button>
               );
             })}
+            {!allMembersOpen && members.length > 5 && (
+              <button type="button" onClick={() => setAllMembersOpen(true)} aria-label={`Toon alle ${members.length} reizigers`} className="flex h-10 shrink-0 items-center rounded-full bg-card px-3 text-[13px] font-semibold shadow-soft">+{members.length - 4}</button>
+            )}
             {!readOnly && (
               <button type="button" onClick={() => setInviteOpen((open) => !open)} aria-expanded={inviteOpen} className="flex shrink-0 items-center gap-2 rounded-full border-2 border-dashed border-border py-1 pl-1 pr-3 text-muted-foreground">
                 <span className="flex h-8 w-8 items-center justify-center rounded-full">

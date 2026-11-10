@@ -44,9 +44,10 @@ export default function Profiel() {
     const name = displayName.trim();
     const handle = username.trim().toLowerCase().replace(/^@/, "");
     if (!name) { toast.error("Vul je naam in"); return; }
-    if (!/^[a-z0-9_]{3,20}$/.test(handle)) { toast.error("Gebruikersnaam: 3 tot 20 tekens, alleen letters, cijfers en _"); return; }
+    const usernameChanged = username !== (profile.username || "");
+    if (usernameChanged && !/^[a-z0-9_]{3,20}$/.test(handle)) { toast.error("Gebruikersnaam: 3 tot 20 tekens, alleen letters, cijfers en _"); return; }
     setSaving(true);
-    const { error } = await supabase.from("profiles").update({ display_name: name, username: handle }).eq("id", profile.id);
+    const { error } = await supabase.from("profiles").update(usernameChanged ? { display_name: name, username: handle } : { display_name: name }).eq("id", profile.id);
     if (error) toast.error(error.code === "23505" ? "Deze gebruikersnaam is al bezet" : "Opslaan lukt nu niet");
     else { toast.success("Opgeslagen"); await refreshProfile(); }
     setSaving(false);

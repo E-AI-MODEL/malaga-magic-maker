@@ -22,10 +22,9 @@ export function AppLayout({ children }: { children: ReactNode }) {
   const isTripScreen = /^\/trip\/[^/]+(?:\/(?:reis|samen|settings))?\/?$/.test(pathname);
   const showHansie = isTripScreen && activeTrip?.status !== "archived";
   const title = pathname === "/trips" ? "Home" : pathname === "/profiel" ? "Profiel" : activeTrip?.name;
-  const section = new URLSearchParams(search).get("section");
+  void search;
   const tripHeading = pathname.endsWith("/reis") ? "Reis"
     : pathname.endsWith("/settings") ? "Reisinstellingen"
-    : pathname.endsWith("/samen") ? section === "expenses" ? "Knaakie" : section === "tasks" ? "Taken" : section === "decisions" ? "Keuzes" : "Samen"
     : null;
 
   const goHome = () => {

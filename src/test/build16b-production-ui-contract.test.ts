@@ -10,7 +10,7 @@ describe("Vakansie production UI contract", () => {
   const nav = source("src/components/BottomNav.tsx");
   const hansie = source("src/components/HansieWidget.tsx");
   const reis = source("src/pages/TripReis.tsx");
-  const samen = source("src/pages/TripSamen.tsx");
+  const samen = source("src/features/together/TripTodoPanel.tsx");
   const profiel = source("src/pages/Profiel.tsx");
   const ops = source("src/pages/Ops.tsx");
   const opsErrors = source("src/pages/OpsErrors.tsx");
@@ -19,10 +19,10 @@ describe("Vakansie production UI contract", () => {
   it("keeps exactly three trip navigation destinations", () => {
     const tripLinks = nav.slice(nav.indexOf("const links ="), nav.indexOf("] :"));
     const items = tripLinks.match(/label: "/g) || [];
-    expect(items).toHaveLength(3);
+    expect(items).toHaveLength(2);
     expect(nav).toContain('label: "Overzicht"');
     expect(nav).toContain('label: "Reis"');
-    expect(nav).toContain('label: "Samen"');
+    expect(nav).not.toContain('label: "Samen"');
   });
 
   it("preserves the Hansie concrete tripId and stale-context contract", () => {
@@ -39,11 +39,8 @@ describe("Vakansie production UI contract", () => {
     expect(reis).not.toContain("createTripItem(");
   });
 
-  it("limits the Samen primary switcher to Taken, Keuzes and Kosten", () => {
-    expect(samen).toContain('type Section = "tasks" | "decisions" | "expenses"');
-    expect(samen).toContain('{ id: "tasks", label: "Taken" }');
-    expect(samen).toContain('{ id: "decisions", label: "Keuzes" }');
-    expect(samen).toContain('{ id: "expenses", label: "Kosten" }');
+  it("switches Reis between Planning and Te doen", () => {
+    expect(samen).toContain('export type ReisTab = "planning" | "todo"');
     expect(samen).not.toContain('label: "Mensen"');
     expect(samen).toContain("Reizigers");
   });

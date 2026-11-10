@@ -18,7 +18,7 @@ describe("Dit wordt het: server choice and undo", () => {
   });
   it("a fellow traveler does not get the button", () => {
     expect(reis).toContain("const canChoose = isOrganizer || isAdmin;");
-    expect(reis).toContain("De organisator kiest; stem mee via Samen.");
+    expect(reis).toContain("De organisator kiest; stem mee bij Te doen.");
   });
   it("organizer choice plans the stay at 15:00/11:00, removes other stay ideas and closes the stay choice", () => {
     expect(choose).toContain("time '15:00'");

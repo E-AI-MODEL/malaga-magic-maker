@@ -1,4 +1,4 @@
-import { Home, LayoutDashboard, Route, User, Users, Wallet } from "lucide-react";
+import { Home, LayoutDashboard, Route, User, Wallet } from "lucide-react";
 import { Link, NavLink, useLocation } from "react-router-dom";
 import { useTrip } from "@/contexts/TripContext";
 import { askHansie } from "@/features/hansie/bus";
@@ -8,7 +8,8 @@ export function BottomNav() {
   const { activeTrip } = useTrip();
   const { pathname, search } = useLocation();
   const isTripScreen = /^\/trip\/[^/]+(?:\/(?:reis|samen|settings))?\/?$/.test(pathname);
-  const expensesActive = pathname === "/knaakie" || (activeTrip && pathname === `/trip/${activeTrip.id}/samen` && new URLSearchParams(search).get("section") === "expenses");
+  void search;
+  const expensesActive = pathname === "/knaakie";
 
   const base =
     "relative flex h-[56px] flex-1 flex-col items-center justify-center gap-0.5 rounded-2xl text-[11px] font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring";
@@ -19,7 +20,6 @@ export function BottomNav() {
   const links = activeTrip && showTripLinks ? [
     { to: `/trip/${activeTrip.id}`, icon: LayoutDashboard, label: "Overzicht", end: true },
     { to: `/trip/${activeTrip.id}/reis`, icon: Route, label: "Reis", end: false },
-    { to: `/trip/${activeTrip.id}/samen`, icon: Users, label: "Samen", end: false },
   ] : [];
   // Account screens lead with Home so every page shows the full footer.
   if (!isTripScreen) links.unshift({ to: "/trips", icon: Home, label: "Home", end: true });
@@ -33,7 +33,6 @@ export function BottomNav() {
             key={link.to}
             to={link.to}
             end={link.end}
-             aria-current={link.label === "Samen" && expensesActive ? false : undefined}
              className={({ isActive }) => `${base} ${isActive && !expensesActive ? active : inactive}`}
           >
             {({ isActive }) => (

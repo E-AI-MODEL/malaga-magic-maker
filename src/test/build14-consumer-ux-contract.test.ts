@@ -9,7 +9,7 @@ function source(path: string) {
 describe("Vakansie BUILD 14 consumer UX contract", () => {
   const reis = source("src/pages/TripReis.tsx");
   const itemSheet = source("src/features/travel/TripItemSheet.tsx");
-  const samen = source("src/pages/TripSamen.tsx");
+  const samen = source("src/features/together/TripTodoPanel.tsx");
 
   it("uses quick add only to preselect the existing travel form", () => {
     expect(reis).toContain('openCreate(value)');

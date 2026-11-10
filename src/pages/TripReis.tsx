@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { AlertTriangle, Archive, ChevronDown, Mail, Pencil, Settings, Trash2 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { AlertTriangle, ChevronDown, Mail, Pencil, Plus, Settings, Trash2, Vote } from "lucide-react";
+import { Link, useSearchParams } from "react-router-dom";
 import { AppLayout } from "@/components/AppLayout";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth";
@@ -14,7 +14,9 @@ import { CalendarFeedSheet } from "@/features/travel/CalendarFeedSheet";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { ACCOMMODATION_DECISION_TITLE, chooseTripIdea, ideaActionMessage, undoTripIdeaChoice } from "@/features/travel/accommodation";
 import { providerLabel } from "@/features/travel/providers";
-import { TripPageHeader } from "@/components/TripPageHeader";
+import { TripVisual } from "@/components/TripVisual";
+import { countdownLabel } from "@/features/trips/overview";
+import { TripTodoPanel } from "@/features/together/TripTodoPanel";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { DocumentsSection } from "@/features/documents/DocumentsSection";
@@ -69,6 +71,7 @@ export default function TripReis() {
   const [actionError, setActionError] = useState("");
   const [addOpen, setAddOpen] = useState(false);
   const [allOpen, setAllOpen] = useState(false);
+  const [, setSearchParams] = useSearchParams();
 
   const tripId = activeTrip?.id || "";
   const timezone = activeTrip?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone || "Europe/Amsterdam";
@@ -105,7 +108,7 @@ export default function TripReis() {
       const { data } = await supabase.from("decisions").select("id").eq("trip_id", tripId).eq("status", "open").eq("title", ACCOMMODATION_DECISION_TITLE).limit(1);
       return Boolean(data && data.length > 0);
     },
-    enabled: Boolean(tripId) && !canChoose,
+    enabled: Boolean(tripId),
   });
 
   const ideas = useMemo(() => (itemsQuery.data || []).filter((item) => item.status === "idea"), [itemsQuery.data]);
@@ -238,21 +241,26 @@ export default function TripReis() {
 
   return (
     <AppLayout>
-      <div className="px-5 pb-12 pt-4 sm:px-8">
-        <TripPageHeader
-          title="Reis"
-          startDate={activeTrip.start_date}
-          endDate={activeTrip.end_date}
-          destination={activeTrip.destination_name}
-          onAdd={readOnly ? undefined : () => setAddOpen(true)}
-        />
-
-
-        {readOnly && (
-          <div className="mt-4 flex items-center gap-2 text-sm text-muted-foreground">
-            <Archive className="h-[18px] w-[18px] shrink-0" strokeWidth={1.75} />
-            Alleen-lezen: deze reis is gearchiveerd.
+      <div className="pb-12">
+        <TripVisual name={activeTrip.name} coverImageUrl={activeTrip.cover_image_url} height="h-[180px]" rounded="rounded-none" overlay showBadge={false}>
+          <div className="min-w-0">
+            <h1 className="break-words font-brand text-[24px] font-bold leading-tight text-on-image">{activeTrip.name}</h1>
+            {activeTrip.destination_name && <p className="truncate text-[12px] font-semibold text-on-image/85">{activeTrip.destination_name}</p>}
+            <p className="num mt-1 font-display text-[30px] font-bold uppercase leading-none text-on-image">{countdownLabel(activeTrip.start_date, activeTrip.end_date)}</p>
           </div>
+        </TripVisual>
+      <div className="px-5 sm:px-8">
+      <TripTodoPanel planning={<>
+        <div className="mt-5 flex items-center justify-between gap-3">
+          <h2 className="font-brand text-xl font-semibold">Jouw reisplanning</h2>
+          {!readOnly && <Button variant="secondary" className="tile-plain h-11 shrink-0 rounded-full px-4" onClick={() => setAddOpen(true)}><Plus />Plannen</Button>}
+        </div>
+
+        {!readOnly && openStayDecision.data && (
+          <Button variant="secondary" className="tile-plain mt-3 h-auto min-h-14 w-full justify-between rounded-2xl px-4 py-3 text-left" onClick={() => setSearchParams({ tab: "todo" }, { replace: true })}>
+            <span className="min-w-0"><span className="block font-semibold">Verblijf</span><span className="block text-sm font-normal text-muted-foreground">Stemming loopt</span></span>
+            <span className="flex shrink-0 items-center gap-1 rounded-full bg-primary/10 px-3 py-1.5 text-sm font-semibold text-primary"><Vote className="h-4 w-4" />Stem nu</span>
+          </Button>
         )}
 
         {actionError && <p className="mt-4 text-sm font-medium text-destructive">{actionError}</p>}
@@ -272,9 +280,8 @@ export default function TripReis() {
           ) : itemsQuery.isError ? (
             <p className="mt-3 text-sm text-destructive">Je reisgegevens konden niet worden geladen.</p>
           ) : groups.length === 0 ? (
-            <div className="mt-6">
-              <p className="text-[17px] font-semibold">Wat staat er al vast?</p>
-              {!readOnly && <div className="mt-3 grid grid-cols-3 gap-2">
+            <div className="mt-3">
+              {!readOnly && <div className="grid grid-cols-3 gap-2">
                 {addTiles.map((tile) => (
                   <Button key={tile.type} variant="secondary" className="tile-plain h-16 rounded-2xl text-[15px]" onClick={() => openCreate(tile.type)}>{tile.label}</Button>
                 ))}
@@ -300,7 +307,7 @@ export default function TripReis() {
               <ChevronDown className="ml-auto h-4 w-4 text-muted-foreground transition-transform group-open:rotate-180" />
             </summary>
             {!readOnly && !canChoose && openStayDecision.data && (
-              <p className="border-t border-rule py-2.5 text-sm text-muted-foreground">De organisator kiest; stem mee via Samen.</p>
+              <p className="border-t border-rule py-2.5 text-sm text-muted-foreground">De organisator kiest; stem mee bij Te doen.</p>
             )}
             <div className="divide-y divide-rule border-t border-rule">
               {ideas.map((idea) => (
@@ -333,6 +340,8 @@ export default function TripReis() {
         {isOrganizer && <Button asChild variant="secondary" className="tile-plain mt-6 min-h-14 w-full justify-start rounded-2xl px-4 text-base">
           <Link to={`/trip/${activeTrip.id}/settings`}><Settings />Reisinstellingen</Link>
         </Button>}
+      </>} />
+      </div>
       </div>
 
       <Sheet open={allOpen} onOpenChange={setAllOpen}>

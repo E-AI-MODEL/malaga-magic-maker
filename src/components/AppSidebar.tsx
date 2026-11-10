@@ -1,4 +1,4 @@
-import { LayoutDashboard, Check, ChevronDown, Home, LogOut, Plus, Route, Settings, User, Users } from "lucide-react";
+import { LayoutDashboard, Check, ChevronDown, Home, LogOut, Plus, Route, Settings, User } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/lib/auth";
 import { useTrip } from "@/contexts/TripContext";
@@ -35,7 +35,6 @@ export function AppSidebar() {
   const mainLinks = activeTrip ? [
     { to: `/trip/${activeTrip.id}`, icon: LayoutDashboard, label: "Overzicht", end: true },
     { to: `/trip/${activeTrip.id}/reis`, icon: Route, label: "Reis", end: false },
-    { to: `/trip/${activeTrip.id}/samen`, icon: Users, label: "Samen", end: false },
   ] : [];
 
   const isActive = (path: string, end = false) =>

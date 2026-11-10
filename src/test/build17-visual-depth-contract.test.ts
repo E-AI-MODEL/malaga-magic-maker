@@ -84,7 +84,7 @@ describe("Vakansie BUILD 17 visual depth contract", () => {
   it("keeps the bottom nav at exactly three Lucide destinations with a stronger active state", () => {
     const tripLinks = bottomNav.slice(bottomNav.indexOf("const links ="), bottomNav.indexOf("] :"));
     const labels = [...tripLinks.matchAll(/label: "([^"]+)"/g)].map((match) => match[1]);
-    expect(labels).toEqual(["Overzicht", "Reis", "Samen"]);
+    expect(labels).toEqual(["Overzicht", "Reis"]);
     expect(bottomNav).toContain('className="h-5 w-5"');
     expect(bottomNav).toContain("bg-card");
     expect(bottomNav).toContain("bg-vakansie/10 text-vakansie");

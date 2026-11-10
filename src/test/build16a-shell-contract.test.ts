@@ -43,12 +43,12 @@ describe("Hansie trip scoping", () => {
 });
 
 describe("Bottom navigation", () => {
-  it("has exactly three trip destinations", () => {
-    for (const label of ["Overzicht", "Reis", "Samen"]) {
+  it("has the Overzicht and Reis trip destinations", () => {
+    for (const label of ["Overzicht", "Reis"]) {
       expect(bottomNav).toContain(`label: "${label}"`);
     }
     const tripLinks = bottomNav.slice(bottomNav.indexOf("const links ="), bottomNav.indexOf("] :"));
-    expect(tripLinks.match(/label: "/g)).toHaveLength(3);
+    expect(tripLinks.match(/label: "/g)).toHaveLength(2);
   });
 
   it("never exposes Hansie as a navigation item", () => {

@@ -166,7 +166,7 @@ export function DocumentsSection({
         <p className="mt-3 text-sm text-destructive">Je documenten konden niet worden geladen.</p>
       ) : (documentsQuery.data?.length || 0) === 0 ? (
         <EmptyLine
-          text="Tickets en boekingen, voor iedereen bij de hand."
+          text="Handig, niet verplicht: bewaar hier tickets of je paspoort."
         />
       ) : (
         <div className="mt-2 border-t border-rule/10">

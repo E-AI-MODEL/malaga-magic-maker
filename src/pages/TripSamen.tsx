@@ -1,4 +1,5 @@
-import { decisionStatusLine, decisionsTileLine, displayDecisionTitle, tasksTileLine } from "@/features/together/labels";
+import { decisionStatusLine, decisionsLiveLine, displayDecisionTitle, knaakieLiveLine, samenHeadline, tasksLiveLine } from "@/features/together/labels";
+import { formatExpenseMoney, settlementByCurrency } from "@/features/together/settlement";
 import { ACCOMMODATION_DECISION_TITLE, decisionWinner, promoteDecisionWinner } from "@/features/travel/accommodation";
 import { toast } from "sonner";
 import { useMemo, useState } from "react";
@@ -31,6 +32,7 @@ import {
   deleteTask,
   type DecisionBundle,
   listDecisions,
+  listExpenses,
   listTasks,
   listTripMembers,
   setDecisionStatus,
@@ -96,6 +98,11 @@ export default function TripSamen() {
   const decisionsQuery = useQuery({
     queryKey: ["together-decisions", tripId],
     queryFn: () => listDecisions(tripId),
+    enabled: Boolean(tripId),
+  });
+  const expensesQuery = useQuery({
+    queryKey: ["together-expenses", tripId],
+    queryFn: () => listExpenses(tripId),
     enabled: Boolean(tripId),
   });
   const profilesQuery = useQuery({
@@ -204,6 +211,20 @@ export default function TripSamen() {
   const openTasks = tasks.filter((task) => task.status !== "done" && task.progress < 100);
   const openDecisions = decisions.filter((decision) => decision.status === "open");
 
+  const nameOf = (id: string | null | undefined) => (id ? memberMap.get(id)?.displayName || null : null);
+  const expenses = expensesQuery.data || [];
+  const transfers = settlementByCurrency(expenses).flatMap((group) => group.transfers.map((t) => ({ ...t, currency: group.currency })));
+  const tasksLine = tasksLiveLine({ tasks, userId: user.id, nameOf });
+  const decisionsLine = decisionsLiveLine({ decisions, userId: user.id, memberCount: members.length, nameOf });
+  const knaakieLine = knaakieLiveLine({ expenses, transfers, userId: user.id, nameOf, format: formatExpenseMoney });
+  const waitingForMe = openDecisions.some((d) => !d.options.some((o) => o.votes.some((v) => v.user_id === user.id)));
+  const headline = samenHeadline({
+    tasksDone: tasks.length > 0 && openTasks.length === 0,
+    decisionsDone: decisions.length > 0 && openDecisions.length === 0,
+    waitingForMe,
+    hasAnything: tasks.length + decisions.length + expenses.length > 0,
+  });
+
   const addAction = !readOnly
     ? section === "tasks"
       ? { label: "Nieuwe taak", run: openNewTask }
@@ -276,18 +297,16 @@ export default function TripSamen() {
           )}
         </section>}
 
-        {!section && <div className="mt-5 grid grid-cols-2 gap-3" aria-label="Samen">
+        {!section && <p className="mt-5 text-[17px] font-semibold">{headline}</p>}
+
+        {!section && <div className="mt-3 grid grid-cols-2 gap-3" aria-label="Samen">
           {sectionOptions.map((option) => {
             const Icon = option.id === "tasks" ? ListTodo : option.id === "decisions" ? Vote : Wallet;
-            const line = option.id === "tasks"
-              ? tasksTileLine(openTasks.filter((task) => task.assigned_user_id === user.id || task.backup_user_id === user.id || !task.assigned_user_id).length)
-              : option.id === "decisions"
-                ? decisionsTileLine(openDecisions.filter((decision) => !decision.options.some((o) => o.votes.some((vote) => vote.user_id === user.id))).length)
-                : "Kosten";
+            const line = option.id === "tasks" ? tasksLine : option.id === "decisions" ? decisionsLine : knaakieLine;
             return (
               <Button key={option.id} type="button" variant="secondary"
                 onClick={() => { setSection(option.id); setActionError(""); }}
-                className={`${option.id === "expenses" ? "tile-knaakie text-on-image col-span-2" : "tile-plain text-foreground"} h-24 flex-col items-start justify-center rounded-2xl px-4 text-left`}>
+                className={`${option.id === "expenses" ? "tile-knaakie text-on-image col-span-2" : "tile-plain text-foreground"} h-auto min-h-24 flex-col items-start justify-center gap-1 whitespace-normal rounded-2xl px-4 py-3 text-left`}>
                 <span className="flex items-center gap-2"><Icon className="h-5 w-5" /><span className="font-brand text-xl font-semibold">{option.id === "expenses" ? "Knaakie" : option.label}</span></span>
                 <span className={`block text-sm font-normal ${option.id === "expenses" ? "opacity-90" : "text-muted-foreground"}`}>{line}</span>
               </Button>

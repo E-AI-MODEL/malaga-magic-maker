@@ -247,9 +247,6 @@ export default function TripReis() {
           onAdd={readOnly ? undefined : () => setAddOpen(true)}
         />
 
-        {isOrganizer && <Button asChild variant="secondary" className="tile-plain mt-3 min-h-14 w-full justify-start rounded-2xl px-4 text-base">
-          <Link to={`/trip/${activeTrip.id}/settings`}><Settings />Reisinstellingen</Link>
-        </Button>}
 
         {readOnly && (
           <div className="mt-4 flex items-center gap-2 text-sm text-muted-foreground">
@@ -276,9 +273,13 @@ export default function TripReis() {
             <p className="mt-3 text-sm text-destructive">Je reisgegevens konden niet worden geladen.</p>
           ) : groups.length === 0 ? (
             <div className="mt-6">
-              <p className="text-[17px] font-semibold">Nog niets gepland.</p>
-              {!readOnly && <Button className="mt-4 h-14 w-full text-[16px]" onClick={() => setBookingSheetOpen(true)}><Mail className="mr-2 h-5 w-5" />Boeking scannen</Button>}
-              {!readOnly && <Button variant="outline" className="mt-2 h-12 w-full" onClick={() => setAddOpen(true)}>Zelf invullen</Button>}
+              <p className="text-[17px] font-semibold">Wat staat er al vast?</p>
+              {!readOnly && <div className="mt-3 grid grid-cols-3 gap-2">
+                {addTiles.map((tile) => (
+                  <Button key={tile.type} variant="secondary" className="tile-plain h-16 rounded-2xl text-[15px]" onClick={() => openCreate(tile.type)}>{tile.label}</Button>
+                ))}
+              </div>}
+              {!readOnly && <p className="mt-3 text-sm text-muted-foreground">Eigen auto of geen boeking? Vul het gewoon zelf in.</p>}
             </div>
           ) : (
             <div>
@@ -328,6 +329,10 @@ export default function TripReis() {
           isOrganizer={isOrganizer}
           readOnly={readOnly}
         />
+
+        {isOrganizer && <Button asChild variant="secondary" className="tile-plain mt-6 min-h-14 w-full justify-start rounded-2xl px-4 text-base">
+          <Link to={`/trip/${activeTrip.id}/settings`}><Settings />Reisinstellingen</Link>
+        </Button>}
       </div>
 
       <Sheet open={allOpen} onOpenChange={setAllOpen}>

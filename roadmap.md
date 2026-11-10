@@ -179,3 +179,9 @@ Home-ronde: gewijzigd `src/App.tsx`, `src/features/trips/start.ts` en tests, `sr
 - [x] Nieuwe reis, nieuwe taak en nieuwe keuze als stappen
 - [ ] Reis: onderdeel toevoegen (vlucht, verblijf, vervoer, activiteit) als stappen
 - [ ] Stappen ingelogd nalopen op telefoon (reis, taak, keuze, Knaakie in een reis)
+
+## Meerdere Knaakies
+- [x] Eigen "Nieuwe Knaakie"-actie op het Knaakie-scherm, ook als er al potten zijn; één vraag (naam) in een paneel, daarna direct de nieuwe pot openen
+- [x] Gratis limiet server-side van 1 naar 3 eigen potten; planstatus, Pro-voordelen en Home-tekst meegenomen; Pro blijft onbeperkt
+- [x] 310 tests groen (4 nieuw); lint van aangepaste bestanden schoon; automatische build en typecheck OK
+- [x] Ingelogd op 393×706: pot "Testpot 2027" aangemaakt, automatisch geselecteerd en daarna weer verwijderd; geen paginascroll of overlap

@@ -179,7 +179,7 @@ export function DocumentsSection({
             </span>
             <span className="min-w-0 flex-1">
               <span className="block text-[16px] font-semibold">Document toevoegen</span>
-              <span className="block truncate text-sm font-normal text-muted-foreground">Tickets, bevestigingen of je paspoort</span>
+              <span className="block text-sm font-normal text-muted-foreground">Paklijst, tickets of bevestigingen</span>
             </span>
             <Plus className="h-5 w-5 shrink-0 text-muted-foreground" />
           </Button>

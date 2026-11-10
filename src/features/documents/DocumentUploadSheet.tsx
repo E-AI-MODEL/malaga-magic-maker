@@ -70,7 +70,7 @@ export function DocumentUploadSheet({
       open={open}
       onOpenChange={onOpenChange}
       title="Document toevoegen"
-      description="Bewaar een bevestiging, ticket of voucher veilig bij deze reis."
+      description="Voeg een paklijst, ticket of bevestiging toe. Geen paspoort of identiteitskaart."
     >
       <form onSubmit={handleSubmit} className="mt-6 space-y-5">
         <FormField label="Bestand" htmlFor="document-file" required>

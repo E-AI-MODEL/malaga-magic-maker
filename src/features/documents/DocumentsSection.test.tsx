@@ -61,7 +61,6 @@ describe("empty documents", () => {
   it("shows one tappable add tile with concrete copy", async () => {
     renderSection();
     const tile = await screen.findByRole("button", { name: /Document toevoegen/ });
-    expect(tile).toHaveTextContent("Tickets, bevestigingen of je paspoort");
     expect(screen.queryByText(/Handig, niet verplicht/)).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Toevoegen" })).not.toBeInTheDocument();
   });

@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { AlertTriangle, ChevronDown, Mail, Pencil, Plus, Settings, Trash2, Vote } from "lucide-react";
+import { AlertTriangle, ChevronDown, ChevronRight, House, Plane, Ticket, Mail, Pencil, Plus, Settings, Trash2, Vote } from "lucide-react";
 import { Link, useSearchParams } from "react-router-dom";
 import { AppLayout } from "@/components/AppLayout";
 import { Button } from "@/components/ui/button";
@@ -34,9 +34,9 @@ import {
 } from "@/features/travel/presentation";
 
 const addTiles = [
-  { type: "flight", label: "Vervoer" },
-  { type: "stay", label: "Verblijf" },
-  { type: "activity", label: "Activiteit" },
+  { type: "flight", label: "Vervoer", filter: 1, icon: Plane, tone: "bg-secondary text-foreground" },
+  { type: "stay", label: "Verblijf", filter: 2, icon: House, tone: "bg-primary/10 text-primary" },
+  { type: "activity", label: "Activiteiten", filter: 3, icon: Ticket, tone: "bg-accent text-accent-foreground" },
 ] as const;
 
 const filters: ReadonlyArray<{ id: "all" | "transport" | "stay" | "doing"; label: string; types: readonly string[] }> = [
@@ -184,7 +184,7 @@ export default function TripReis() {
   // Keep the page short: the first three rows here, the full list in a panel.
   const shownGroups: typeof groups = [];
   // Short phones get two rows so Documenten still fits on the screen.
-  let budget = typeof window !== "undefined" && window.innerHeight < 760 ? 2 : 3;
+  let budget = typeof window !== "undefined" && window.innerHeight < 760 ? 1 : 2;
   for (const [day, dayItems] of groups) {
     if (budget <= 0) break;
     shownGroups.push([day, dayItems.slice(0, budget)]);
@@ -253,12 +253,25 @@ export default function TripReis() {
           {!readOnly && <Button variant="secondary" className="tile-plain h-11 shrink-0 rounded-full px-4" onClick={() => setAddOpen(true)}><Plus />Plannen</Button>}
         </div>
 
-        {!readOnly && openStayDecision.data && (
-          <Button variant="secondary" className="tile-plain mt-3 h-auto min-h-14 w-full justify-between rounded-2xl px-4 py-3 text-left" onClick={() => setSearchParams({ tab: "todo" }, { replace: true })}>
-            <span className="min-w-0"><span className="block font-semibold">Verblijf</span><span className="block text-sm font-normal text-muted-foreground">Stemming loopt · {stayVoters} van {membersQuery.data?.length || stayVoters} gestemd</span></span>
-            <span className="flex shrink-0 items-center gap-1 rounded-full bg-primary/10 px-3 py-1.5 text-sm font-semibold text-primary"><Vote className="h-4 w-4" />Stem nu</span>
-          </Button>
-        )}
+        <div className="mt-3 space-y-2">
+          {addTiles.map((tile) => {
+            const Icon = tile.icon;
+            const count = timelineItems.filter((i) => filters[tile.filter].types.includes(i.type)).length;
+            const voting = tile.type === "stay" && !readOnly && !!openStayDecision.data;
+            const status = voting
+              ? `Stemming loopt · ${stayVoters} van ${membersQuery.data?.length || stayVoters} gestemd`
+              : count === 0 ? "Nog niets ingepland" : count === 1 ? "1 ingepland" : `${count} ingepland`;
+            return (
+              <Button key={tile.type} variant="secondary" disabled={readOnly && !voting} className="tile-plain h-auto min-h-[68px] w-full justify-start gap-3 rounded-2xl px-3 py-2.5 text-left"
+                onClick={() => voting ? setSearchParams({ tab: "todo" }, { replace: true }) : openCreate(tile.type)}>
+                <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${tile.tone}`}><Icon className="h-5 w-5" /></span>
+                <span className="min-w-0 flex-1"><span className="block text-[16px] font-semibold">{tile.label}</span><span className="block truncate text-sm font-normal text-muted-foreground">{status}</span></span>
+                {voting && <span className="flex shrink-0 items-center gap-1 rounded-full bg-primary/10 px-2.5 py-1 text-sm font-semibold text-primary"><Vote className="h-4 w-4" />Stem nu</span>}
+                <ChevronRight className="h-5 w-5 shrink-0 text-muted-foreground" />
+              </Button>
+            );
+          })}
+        </div>
 
         {actionError && <p className="mt-4 text-sm font-medium text-destructive">{actionError}</p>}
 
@@ -277,14 +290,7 @@ export default function TripReis() {
           ) : itemsQuery.isError ? (
             <p className="mt-3 text-sm text-destructive">Je reisgegevens konden niet worden geladen.</p>
           ) : groups.length === 0 ? (
-            <div className="mt-3">
-              {!readOnly && <div className="grid grid-cols-3 gap-2">
-                {addTiles.map((tile) => (
-                  <Button key={tile.type} variant="secondary" className="tile-plain h-16 rounded-2xl text-[15px]" onClick={() => openCreate(tile.type)}>{tile.label}</Button>
-                ))}
-              </div>}
-              {!readOnly && <p className="mt-3 text-sm text-muted-foreground">Eigen auto of geen boeking? Vul het gewoon zelf in.</p>}
-            </div>
+            !readOnly && <p className="mt-1 text-sm text-muted-foreground">Eigen auto of geen boeking? Vul het gewoon zelf in.</p>
           ) : (
             <div>
               {renderGroups(shownGroups)}

@@ -363,10 +363,10 @@ export default function TripReis() {
             {addTiles.map(({ type: value, label }) => {
               const TypeIcon = travelTypeIcon(value);
               return (
-                <button key={value} type="button" onClick={() => { setAddOpen(false); openCreate(value); }}
-                  className="flex h-24 flex-col items-center justify-center gap-2 rounded-xl border border-border text-[14px] font-semibold hover:bg-accent">
+                <Button variant="secondary" key={value} type="button" onClick={() => { setAddOpen(false); openCreate(value); }}
+                  className="tile-plain flex h-24 flex-col items-center justify-center gap-2 rounded-2xl text-[14px] font-semibold">
                   <TypeIcon className="h-6 w-6" strokeWidth={1.75} />{label}
-                </button>
+                </Button>
               );
             })}
           </div>

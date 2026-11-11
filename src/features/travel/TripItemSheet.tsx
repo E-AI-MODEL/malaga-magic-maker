@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, ReactNode, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -11,7 +11,9 @@ import { createExpenseWithSplits, listTripMembers } from "@/features/together/da
 import { splitEvenly } from "@/features/together/money";
 import { createTripDocumentSignedUrl, listTripDocuments } from "@/features/documents/data";
 import type { Json } from "@/integrations/supabase/types";
-import { MapPin } from "lucide-react";
+import { ChevronRight, MapPin, Pencil } from "lucide-react";
+import { StepError, StepNext, StepQuestion, StepSheet, StepSummary, StepTile, useStepFlow } from "@/components/steps";
+import { travelTypeIcon } from "./icons";
 import { currentMapsPlatform, mapsUrl } from "./maps";
 
 type Props = {
@@ -110,6 +112,9 @@ export function TripItemSheet({ open, onOpenChange, tripId, timezone, currency, 
     setDeleting(false);
     setDetails(readDetails(item?.metadata));
     setExpenseState("idle");
+    flow.reset();
+  // Reset only when opening another record, not while moving through its steps.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, item, initialType, timezone, currency]);
 
   const handleDelete = async () => {
@@ -127,8 +132,8 @@ export function TripItemSheet({ open, onOpenChange, tripId, timezone, currency, 
     }
   };
 
-  const handleSubmit = async (event: FormEvent) => {
-    event.preventDefault();
+  const handleSubmit = async (event?: FormEvent) => {
+    event?.preventDefault();
     setError("");
 
     if (!title.trim()) {
@@ -176,152 +181,87 @@ export function TripItemSheet({ open, onOpenChange, tripId, timezone, currency, 
   };
 
   const selectedType = travelTypes.find((option) => option.value === type);
+  const creationSteps = ["type", "title", "status", "when", "location", ...(detailFieldsFor(type).length ? ["details"] : []), "booking", "price", "notes", "summary"];
+  const datesValid = !(startAt && endAt && endAt < startAt);
+  const flow = useStepFlow(creationSteps, { title: Boolean(title.trim()), when: datesValid }, "summary");
+  const [editSection, setEditSection] = useState("title");
+  const skip = () => {
+    if (flow.step === "title") setTitle(selectedType?.label || "Reisonderdeel");
+    if (flow.step === "when") { setStartAt(""); setEndAt(""); }
+    if (flow.step === "location") setLocation("");
+    if (flow.step === "details") setDetails({});
+    if (flow.step === "booking") { setProvider(""); setBookingReference(""); setBookingUrl(""); }
+    if (flow.step === "price") setPrice("");
+    if (flow.step === "notes") setNotes("");
+    flow.go(flow.backToSummary ? "summary" : creationSteps[Math.min(flow.index + 1, creationSteps.length - 1)]);
+  };
+  const fields: Record<string, ReactNode> = {
+    title: <FormField label="Naam" htmlFor="travel-title"><Input id="travel-title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder={selectedType?.label || "Naam"} maxLength={200} className="h-14 rounded-2xl text-lg" /></FormField>,
+    type: <div className="grid grid-cols-2 gap-3">{travelTypes.map((option) => {
+      const Icon = travelTypeIcon(option.value);
+      return <StepTile key={option.value} selected={type === option.value} icon={<Icon />} onClick={() => { setType(option.value); if (!item) flow.next(); }}>{option.label}</StepTile>;
+    })}</div>,
+    status: <div className="grid grid-cols-2 gap-3">{travelStatuses.map((option) => <StepTile key={option.value} selected={status === option.value} onClick={() => { setStatus(option.value); if (!item) flow.next(); }}>{option.label}</StepTile>)}</div>,
+    when: <><div className="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2">
+      <FormField label="Begin" htmlFor="travel-start" className="min-w-0"><Input id="travel-start" type="datetime-local" value={startAt} onChange={(e) => setStartAt(e.target.value)} className="h-14 min-w-0 w-full rounded-2xl" /></FormField>
+      <FormField label="Einde" htmlFor="travel-end" className="min-w-0"><Input id="travel-end" type="datetime-local" value={endAt} onChange={(e) => setEndAt(e.target.value)} className="h-14 min-w-0 w-full rounded-2xl" /></FormField>
+    </div>{!datesValid && <StepError message="Het einde ligt vóór het begin." />}</>,
+    location: <FormField label="Plaats of adres" htmlFor="travel-location"><Input id="travel-location" value={location} onChange={(e) => setLocation(e.target.value)} className="h-14 rounded-2xl" /></FormField>,
+    details: <div className="grid gap-3">{detailFieldsFor(type).map((field) => <FormField key={field.key} label={field.label} htmlFor={`travel-detail-${field.key}`}><Input id={`travel-detail-${field.key}`} value={details[field.key] || ""} onChange={(e) => setDetails((prev) => ({ ...prev, [field.key]: e.target.value }))} placeholder={field.placeholder} maxLength={200} className="h-14 rounded-2xl" /></FormField>)}</div>,
+    booking: <div className="space-y-3">
+      <FormField label="Aanbieder" htmlFor="travel-provider"><Input id="travel-provider" value={provider} onChange={(e) => setProvider(e.target.value)} className="h-14 rounded-2xl" /></FormField>
+      <FormField label="Boekingsnummer" htmlFor="travel-reference"><Input id="travel-reference" value={bookingReference} onChange={(e) => setBookingReference(e.target.value)} className="h-14 rounded-2xl" /></FormField>
+      <FormField label="Boekingslink" htmlFor="travel-url"><Input id="travel-url" type="url" value={bookingUrl} onChange={(e) => setBookingUrl(e.target.value)} placeholder="https://..." className="h-14 rounded-2xl" /></FormField>
+    </div>,
+    price: <div className="grid grid-cols-[minmax(0,1fr)_100px] gap-3">
+      <FormField label="Bedrag" htmlFor="travel-price"><Input id="travel-price" type="number" min="0" step="0.01" value={price} onChange={(e) => setPrice(e.target.value)} className="h-14 rounded-2xl" /></FormField>
+      <FormField label="Valuta" htmlFor="travel-currency"><FormSelect id="travel-currency" value={itemCurrency} onChange={setItemCurrency} options={currencies.map((value) => ({ value, label: value }))} /></FormField>
+    </div>,
+    notes: <FormField label="Notitie" htmlFor="travel-notes"><Textarea id="travel-notes" value={notes} onChange={(e) => setNotes(e.target.value)} rows={3} className="rounded-2xl" /></FormField>,
+  };
+  const headings: Record<string, string> = { type: "Kies wat je toevoegt", title: "Geef het een naam", status: "Kies de status", when: "Kies datum en tijd", location: "Vul de locatie in", details: "Vul de details in", booking: "Vul de boeking in", price: "Vul het bedrag in", notes: "Schrijf een notitie" };
+  const summaries = [
+    { key: "title", label: "Naam", value: title || selectedType?.label || "Reisonderdeel" },
+    { key: "type", label: "Soort", value: selectedType?.label || "Anders" },
+    { key: "status", label: "Status", value: travelStatuses.find((s) => s.value === status)?.label || status },
+    { key: "when", label: "Datum en tijd", value: [startAt, endAt].filter(Boolean).map((v) => v.replace("T", " · ")).join(" — ") || "Later" },
+    { key: "location", label: "Locatie", value: location || "Later" },
+    ...(detailFieldsFor(type).length ? [{ key: "details", label: "Details", value: detailFieldsFor(type).map((f) => details[f.key]).filter(Boolean).join(" · ") || "Later" }] : []),
+    { key: "booking", label: "Boeking", value: [provider, bookingReference, bookingUrl].filter(Boolean).join(" · ") || "Later" },
+    { key: "price", label: "Bedrag", value: price ? `${price} ${itemCurrency}` : "Prijs nog onbekend" },
+    { key: "notes", label: "Notitie", value: notes || "Later" },
+  ];
 
-  return (
-    <FormSheet
-      open={open}
-      onOpenChange={onOpenChange}
-      title={item ? "Reisonderdeel wijzigen" : selectedType ? `${selectedType.label} toevoegen` : "Toevoegen aan je reis"}
-      description="Vul in wat je weet; de rest kan later."
-    >
-      {item && (() => {
-        const href = mapsUrl(item, destination, currentMapsPlatform());
-        return href ? (
-          <a
-            href={href}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-4 inline-flex min-h-[44px] items-center gap-2 text-sm font-medium text-foreground underline-offset-4 hover:underline"
-          >
-            <MapPin className="h-4 w-4" strokeWidth={1.75} />
-            Open in Kaarten
-          </a>
-        ) : null;
-      })()}
-      <form onSubmit={handleSubmit} className="mt-6 space-y-5">
-        <div className="grid grid-cols-2 gap-3">
-          <FormField label="Soort" htmlFor="travel-type">
-            <FormSelect
-              id="travel-type"
-              value={type}
-              onChange={setType}
-              options={travelTypes.map((option) => ({ value: option.value, label: option.label }))}
-            />
-          </FormField>
-          <FormField label="Hoe staat het ervoor?" htmlFor="travel-status">
-            <FormSelect
-              id="travel-status"
-              value={status}
-              onChange={setStatus}
-              options={travelStatuses.map((option) => ({ value: option.value, label: option.label }))}
-            />
-          </FormField>
-        </div>
-
-        <FormField label="Korte naam" htmlFor="travel-title" required>
-          <Input id="travel-title" value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Bijv. Vlucht naar Rome" className="h-11" autoFocus />
-        </FormField>
-
-        <div className="grid grid-cols-2 gap-3">
-          <FormField label="Begin" htmlFor="travel-start">
-            <Input id="travel-start" type="datetime-local" value={startAt} onChange={(event) => setStartAt(event.target.value)} className="h-11" />
-          </FormField>
-          <FormField label="Einde" htmlFor="travel-end">
-            <Input id="travel-end" type="datetime-local" value={endAt} onChange={(event) => setEndAt(event.target.value)} className="h-11" />
-          </FormField>
-        </div>
-        <p className="-mt-3 text-xs text-muted-foreground">Tijden worden opgeslagen in de tijdzone van deze reis.</p>
-
-        <FormField label="Waar?" htmlFor="travel-location">
-          <Input id="travel-location" value={location} onChange={(event) => setLocation(event.target.value)} placeholder="Plaats, luchthaven, adres of locatie" className="h-11" />
-        </FormField>
-
-        {detailFieldsFor(type).length > 0 && (
-          <div className="grid gap-3 sm:grid-cols-2">
-            {detailFieldsFor(type).map((field) => (
-              <FormField key={field.key} label={field.label} htmlFor={`travel-detail-${field.key}`}>
-                <Input
-                  id={`travel-detail-${field.key}`}
-                  value={details[field.key] || ""}
-                  onChange={(event) => setDetails((prev) => ({ ...prev, [field.key]: event.target.value }))}
-                  placeholder={field.placeholder}
-                  maxLength={200}
-                  className="h-11"
-                />
-              </FormField>
-            ))}
-          </div>
-        )}
-
-        <div className="grid gap-3 sm:grid-cols-2">
-          <FormField label="Bij wie?" htmlFor="travel-provider">
-            <Input id="travel-provider" value={provider} onChange={(event) => setProvider(event.target.value)} placeholder="Bijv. KLM of Hertz" className="h-11" />
-          </FormField>
-          <FormField label="Boekingsnummer" htmlFor="travel-reference">
-            <Input id="travel-reference" value={bookingReference} onChange={(event) => setBookingReference(event.target.value)} className="h-11" />
-          </FormField>
-        </div>
-
-        <FormField label="Boekingslink" htmlFor="travel-url">
-          <Input id="travel-url" type="url" value={bookingUrl} onChange={(event) => setBookingUrl(event.target.value)} placeholder="https://..." className="h-11" />
-        </FormField>
-
-        <div className="grid grid-cols-[1fr_110px] gap-3">
-          <FormField label="Bedrag" htmlFor="travel-price">
-            <Input id="travel-price" type="number" min="0" step="0.01" value={price} onChange={(event) => setPrice(event.target.value)} className="h-11" />
-          </FormField>
-          <FormField label="Valuta" htmlFor="travel-currency">
-            <FormSelect
-              id="travel-currency"
-              value={itemCurrency}
-              onChange={setItemCurrency}
-              options={currencies.map((option) => ({ value: option, label: option }))}
-            />
-          </FormField>
-        </div>
-
-        <FormField label="Notitie" htmlFor="travel-notes">
-          <Textarea id="travel-notes" value={notes} onChange={(event) => setNotes(event.target.value)} rows={3} placeholder="Alleen wat handig is om bij dit onderdeel te onthouden" />
-        </FormField>
-
-        {item && linkedDocs.length > 0 && (
-          <div>
-            <p className="text-sm font-semibold">Documenten bij dit onderdeel</p>
-            <div className="mt-2 divide-y divide-rule border-y border-rule">
-              {linkedDocs.map((doc) => (
-                <button key={doc.id} type="button" onClick={() => void openDocument(doc)} className="block w-full truncate py-2.5 text-left text-sm font-medium underline-offset-2 hover:underline">
-                  {doc.filename}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {item && item.price != null && Number(item.price) > 0 && (
-          existingExpenseId || expenseState === "done" ? (
-            <p className="text-sm text-muted-foreground">Dit bedrag staat al bij Samen &gt; Kosten.</p>
-          ) : (
-            <Button type="button" variant="outline" className="h-11 w-full" disabled={expenseState === "busy"} onClick={() => void addAsExpense()}>
-              {expenseState === "busy" ? "Bezig…" : "Bedrag als kosten toevoegen (gelijk verdeeld)"}
-            </Button>
-          )
-        )}
-
-        <FormError message={error} />
-
-        <FormSubmit saving={saving}>{item ? "Wijzigingen opslaan" : "Toevoegen aan reisplan"}</FormSubmit>
-
-        {item && onDelete && (
-          <button
-            type="button"
-            onClick={() => void handleDelete()}
-            disabled={deleting || saving}
-            className="w-full py-2 text-center text-sm font-medium text-destructive underline-offset-4 hover:underline disabled:opacity-60"
-          >
-            {deleting ? "Verwijderen…" : "Dit onderdeel verwijderen"}
-          </button>
-        )}
+  if (!item) return <StepSheet open={open} onOpenChange={onOpenChange} title="Toevoegen aan Reis" total={creationSteps.length} index={flow.index} onBack={flow.back} onSwipeNext={flow.step !== "summary" ? flow.next : undefined} hint={false}>
+    {flow.step === "summary" ? <>
+      <StepQuestion>Check en sla op</StepQuestion>
+      <StepSummary rows={summaries.map((s) => ({ ...s, onEdit: () => flow.edit(s.key) }))} />
+      <StepError message={error} />
+      <StepNext onClick={() => void handleSubmit()} busy={saving} disabled={!flow.complete} done>Opslaan</StepNext>
+    </> : <>
+      <StepQuestion>{headings[flow.step]}</StepQuestion>
+      <Button type="button" variant="secondary" className="tile-plain mb-5 min-h-12 w-full" onClick={skip}>Sla over</Button>
+      <form onSubmit={(e) => { e.preventDefault(); flow.next(); }}>
+        {fields[flow.step]}
+        {!['type', 'status'].includes(flow.step) && <StepNext disabled={flow.step === "title" ? !title.trim() : flow.step === "when" ? !datesValid : false}>{flow.backToSummary ? "Klaar" : "Volgende"}</StepNext>}
       </form>
-    </FormSheet>
-  );
+    </>}
+  </StepSheet>;
+
+  return <FormSheet open={open} onOpenChange={onOpenChange} title={item.title}>
+    {(() => { const href = mapsUrl(item, destination, currentMapsPlatform()); return href ? <Button asChild variant="secondary" className="tile-plain mt-4 w-full"><a href={href} target="_blank" rel="noopener noreferrer"><MapPin />Open in Kaarten</a></Button> : null; })()}
+    <form onSubmit={handleSubmit} className="mt-5 space-y-4">
+      {summaries.map((section) => <div key={section.key}>
+        <Button type="button" variant="secondary" aria-expanded={editSection === section.key} className="tile-plain min-h-16 w-full justify-start gap-3 px-4 text-left" onClick={() => setEditSection(editSection === section.key ? "" : section.key)}>
+          <span className="min-w-0 flex-1"><span className="block text-sm text-muted-foreground">{section.label}</span><span className="block truncate text-base font-semibold">{section.value}</span></span>{editSection === section.key ? <Pencil /> : <ChevronRight />}
+        </Button>
+        {editSection === section.key && <div className="pb-2 pt-5">{fields[section.key]}</div>}
+      </div>)}
+      {linkedDocs.map((doc) => <Button key={doc.id} type="button" variant="secondary" className="tile-plain w-full justify-start" onClick={() => void openDocument(doc)}>{doc.filename}</Button>)}
+      {item.price != null && Number(item.price) > 0 && (existingExpenseId || expenseState === "done" ? <p className="text-sm text-muted-foreground">Dit bedrag staat in Knaakie.</p> : <Button type="button" variant="secondary" className="tile-plain min-h-14 w-full" disabled={expenseState === "busy"} onClick={() => void addAsExpense()}>{expenseState === "busy" ? "Bezig…" : "Toevoegen aan Knaakie"}</Button>)}
+      <FormError message={error} />
+      <FormSubmit saving={saving}>Opslaan</FormSubmit>
+      {onDelete && <Button type="button" variant="ghost" className="w-full text-destructive" disabled={deleting || saving} onClick={() => void handleDelete()}>{deleting ? "Verwijderen…" : "Verwijderen"}</Button>}
+    </form>
+  </FormSheet>;
 }

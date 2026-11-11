@@ -22,9 +22,19 @@ export type TripStep = "name" | "where" | "when" | "who" | "size" | "invite" | "
 export function newTripSteps(partyType: string): TripStep[] {
   const steps: TripStep[] = ["name", "where", "when", "who"];
   if (["family", "friends", "business"].includes(partyType)) steps.push("size");
-  if (partyType !== "solo") steps.push("invite");
+  if (partyType && partyType !== "solo") steps.push("invite");
   steps.push("wishes", "summary");
   return steps;
+}
+
+export function newTripName(name: string) {
+  return name.trim() || "Nieuwe reis";
+}
+
+export function newTripGroupSize(partyType: string, value: string) {
+  if (partyType === "solo") return 1;
+  if (partyType === "couple") return 2;
+  return value ? Math.max(1, Number.parseInt(value, 10) || 1) : undefined;
 }
 
 const formatDay = (value: string) => new Date(`${value}T12:00:00`).toLocaleDateString("nl-NL", { day: "numeric", month: "short", year: "numeric" });
@@ -39,7 +49,7 @@ export default function NewTrip() {
   const [description, setDescription] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
-  const [groupSize, setGroupSize] = useState("1");
+  const [groupSize, setGroupSize] = useState("");
   const [currency, setCurrency] = useState("EUR");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -59,12 +69,6 @@ export default function NewTrip() {
   const handleSubmit = async () => {
     setError("");
 
-    if (!name.trim()) {
-      flow.go("name");
-      setError("Geef je reis een naam.");
-      return;
-    }
-
     if (startDate && endDate && endDate < startDate) {
       flow.go("when");
       setError("De einddatum kan niet vóór de startdatum liggen.");
@@ -81,13 +85,13 @@ export default function NewTrip() {
     setSubmitting(true);
     try {
       const trip = await createTrip({
-        name: name.trim(),
+        name: newTripName(name),
         description: description.trim() || undefined,
         destination_name: destination.trim() || undefined,
         destination_country: country.trim() || undefined,
         start_date: startDate || null,
         end_date: endDate || null,
-        group_size: Math.max(1, Number.parseInt(groupSize, 10) || 1),
+        group_size: newTripGroupSize(partyType, groupSize),
         timezone,
         currency,
       });
@@ -128,7 +132,7 @@ export default function NewTrip() {
         }
       }
 
-      if (parsedEmails.length > 0) {
+      if (partyType && !solo && parsedEmails.length > 0) {
         const links: Array<{ email: string; url: string }> = [];
         for (const email of parsedEmails) {
           try {
@@ -157,19 +161,29 @@ export default function NewTrip() {
   const solo = partyType === "solo";
   const steps: TripStep[] = newTripSteps(partyType);
   const datesValid = !(startDate && endDate && endDate < startDate);
-  const flow = useStepFlow<TripStep>(steps, { name: Boolean(name.trim()), when: datesValid, invite: !parsedEmails.some((v) => !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) }, "summary");
+  const flow = useStepFlow<TripStep>(steps, { when: datesValid, invite: !parsedEmails.some((v) => !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) }, "summary");
   const after = (target: TripStep) => flow.go(flow.backToSummary ? "summary" : target);
   const nextOf = (current: TripStep) => steps[steps.indexOf(current) + 1] || "summary";
   const choosePeople = (value: string) => {
     setPartyType(value);
-    const size = value === "solo" ? 1 : value === "couple" ? 2 : Math.max(3, Number.parseInt(groupSize, 10) || 3);
-    setGroupSize(String(size));
+    setGroupSize(value === "solo" ? "1" : value === "couple" ? "2" : "");
     const nextSteps = newTripSteps(value);
     flow.go(flow.backToSummary && value !== "family" && value !== "friends" && value !== "business" ? "summary" : nextSteps[nextSteps.indexOf("who") + 1]);
   };
   const dateLabel = startDate ? `${formatDay(startDate)}${endDate ? ` – ${formatDay(endDate)}` : ""}` : "Nog niet bekend";
   const whereLabel = [destination.trim(), country.trim()].filter(Boolean).join(", ") || "Nog niet bekend";
-  const whoLabel = partyType ? `${partyTypeOptions.find((o) => o.value === partyType)?.label}${!solo && partyType !== "couple" ? ` · ${groupSize} personen` : ""}` : "Nog niet gekozen";
+  const whoLabel = partyType ? `${partyTypeOptions.find((o) => o.value === partyType)?.label}${!solo && partyType !== "couple" && groupSize ? ` · ${groupSize} personen` : ""}` : "Nog niet gekozen";
+
+  const skipStep = () => {
+    if (flow.step === "name") setName("");
+    if (flow.step === "where") { setDestination(""); setCountry(""); }
+    if (flow.step === "when") { setStartDate(""); setEndDate(""); }
+    if (flow.step === "who") { setPartyType(""); setGroupSize(""); setInviteEmails(""); after("wishes"); return; }
+    if (flow.step === "size") setGroupSize("");
+    if (flow.step === "invite") setInviteEmails("");
+    if (flow.step === "wishes") setProfile(emptyTravelerDraft);
+    after(nextOf(flow.step));
+  };
 
   if (inviteLinks.length > 0) {
     return (
@@ -201,28 +215,29 @@ export default function NewTrip() {
   return (
     <div className="flex h-[100dvh] flex-col bg-background">
       <div className="mx-auto flex min-h-0 w-full max-w-xl flex-1 flex-col">
-        <StepFrame total={steps.length} index={flow.index} onBack={flow.back} onClose={() => navigate("/trips")} closeLabel="Terug naar Home" onSwipeNext={flow.step !== "summary" ? flow.next : undefined}>
+        <StepFrame total={steps.length} index={flow.index} onBack={flow.back} onClose={() => navigate("/trips")} closeLabel="Terug naar Home" onSwipeNext={flow.step !== "summary" ? flow.next : undefined} hint={false}>
+          {flow.step !== "summary" && <Button type="button" variant="secondary" className="tile-plain mb-5 min-h-12 w-full" onClick={skipStep}>Sla over</Button>}
           {flow.step === "name" && <form onSubmit={(e: FormEvent) => { e.preventDefault(); flow.next(); }}>
             <StepQuestion sub="Meer is niet nodig. De rest vul je later aan.">Geef je reis een naam</StepQuestion>
             <Input aria-label="Naam van de reis" autoFocus autoComplete="off" value={name} maxLength={80} onChange={(e) => setName(e.target.value)} placeholder="Bijvoorbeeld zomer in Italië" className="h-16 rounded-2xl text-xl" />
-            <StepNext disabled={!name.trim()}>{flow.backToSummary ? "Klaar" : "Volgende"}</StepNext>
+            <StepNext>{flow.backToSummary ? "Klaar" : "Volgende"}</StepNext>
           </form>}
 
           {flow.step === "where" && <form onSubmit={(e: FormEvent) => { e.preventDefault(); after(nextOf("where")); }}>
             <StepQuestion>Vul je bestemming in</StepQuestion>
             <Input aria-label="Bestemming" autoFocus value={destination} onChange={(e) => setDestination(e.target.value)} placeholder="Plaats of regio" className="h-16 rounded-2xl text-xl" />
             <Input aria-label="Land" value={country} onChange={(e) => setCountry(e.target.value)} placeholder="Land" className="mt-3 h-14 rounded-2xl text-lg" />
-            <StepNext>{destination.trim() || country.trim() ? (flow.backToSummary ? "Klaar" : "Volgende") : "Sla over"}</StepNext>
+            <StepNext>{flow.backToSummary ? "Klaar" : "Volgende"}</StepNext>
           </form>}
 
           {flow.step === "when" && <form onSubmit={(e: FormEvent) => { e.preventDefault(); if (datesValid) after(nextOf("when")); }}>
             <StepQuestion>Kies wanneer je gaat</StepQuestion>
-            <div className="grid grid-cols-2 gap-3">
-              <label><span className="text-sm font-semibold text-muted-foreground">Van</span><Input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} className="mt-2 h-14 rounded-2xl text-lg" /></label>
-              <label><span className="text-sm font-semibold text-muted-foreground">Tot</span><Input type="date" value={endDate} min={startDate || undefined} onChange={(e) => setEndDate(e.target.value)} className="mt-2 h-14 rounded-2xl text-lg" /></label>
+            <div className="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2">
+              <label className="min-w-0"><span className="text-sm font-semibold text-muted-foreground">Van</span><Input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} className="mt-2 h-14 min-w-0 w-full rounded-2xl text-lg" /></label>
+              <label className="min-w-0"><span className="text-sm font-semibold text-muted-foreground">Tot</span><Input type="date" value={endDate} min={startDate || undefined} onChange={(e) => setEndDate(e.target.value)} className="mt-2 h-14 min-w-0 w-full rounded-2xl text-lg" /></label>
             </div>
             {!datesValid && <StepError message="De einddatum kan niet vóór de startdatum liggen." />}
-            <StepNext disabled={!datesValid}>{startDate || endDate ? (flow.backToSummary ? "Klaar" : "Volgende") : "Sla over"}</StepNext>
+            <StepNext disabled={!datesValid}>{flow.backToSummary ? "Klaar" : "Volgende"}</StepNext>
           </form>}
 
           {flow.step === "who" && <div className="space-y-3">
@@ -234,7 +249,7 @@ export default function NewTrip() {
             <StepQuestion>Kies met hoeveel personen je gaat</StepQuestion>
             <div className="flex items-center justify-center gap-6 py-4">
               <Button type="button" variant="outline" className="h-16 w-16 rounded-full text-3xl" aria-label="Minder" onClick={() => setGroupSize(String(Math.max(2, (Number.parseInt(groupSize, 10) || 2) - 1)))}><Minus className="h-7 w-7" /></Button>
-              <span className="num w-24 text-center font-display text-7xl font-semibold" aria-live="polite">{groupSize}</span>
+              <span className="num w-24 text-center font-display text-7xl font-semibold" aria-live="polite">{groupSize || "—"}</span>
               <Button type="button" variant="outline" className="h-16 w-16 rounded-full text-3xl" aria-label="Meer" onClick={() => setGroupSize(String(Math.min(99, (Number.parseInt(groupSize, 10) || 2) + 1)))}><Plus className="h-7 w-7" /></Button>
             </div>
             <StepNext onClick={() => after(nextOf("size"))}>{flow.backToSummary ? "Klaar" : "Volgende"}</StepNext>
@@ -256,11 +271,13 @@ export default function NewTrip() {
           {flow.step === "summary" && <div className="space-y-5">
             <StepQuestion sub="Alles is later aan te passen.">Check je reis</StepQuestion>
             <StepSummary rows={[
-              { label: "Reis", value: name.trim(), onEdit: () => flow.edit("name") },
+              { label: "Reis", value: newTripName(name), onEdit: () => flow.edit("name") },
               { label: "Waarheen", value: whereLabel, onEdit: () => flow.edit("where") },
               { label: "Wanneer", value: dateLabel, onEdit: () => flow.edit("when") },
               { label: "Met wie", value: whoLabel, onEdit: () => flow.edit("who") },
+              ...(steps.includes("size") ? [{ label: "Aantal personen", value: groupSize || "Nog niet bekend", onEdit: () => flow.edit("size") }] : []),
               ...(steps.includes("invite") ? [{ label: "Uitnodigen", value: parsedEmails.length ? `${parsedEmails.length} ${parsedEmails.length === 1 ? "persoon" : "personen"}` : "Later", onEdit: () => flow.edit("invite") }] : []),
+              { label: "Wensen", value: profile.priorities.length || profile.notes || profile.pace || profile.comfort || profile.budgetFeel || profile.mobility || profile.diet.length || profile.allergies ? "Ingevuld" : "Later", onEdit: () => flow.edit("wishes") },
               { label: "Valuta", value: currency, onEdit: () => setCurrency(currencies[(currencies.indexOf(currency) + 1) % currencies.length]) },
             ]} />
             <StepError message={error} />

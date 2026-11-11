@@ -1,5 +1,11 @@
 # Roadmap
 
+## Vervoer, Activiteiten en reis toevoegen
+- [x] Onderliggende reisitems: nieuwe invoer in gedeelde stappen, bestaande items bewerken met sectietegels; dezelfde opslaghandlers behouden
+- [x] Reis toevoegen: alle invoerstappen overslaan, naamfallback, onbekend gezelschap zonder uitnodigingen, geen verzonnen groepsgrootte in invoer; datumvelden mobiel onder elkaar
+- [x] 343 tests groen, gewijzigde bestanden lint 0 fouten/4 waarschuwingen; automatische build OK; twee opslagflowtests met gecontroleerde testvervanging
+- [ ] Ingelogde mobiele en desktopcontrole — sessie voor verzoeker niet beschikbaar; /new-trip opent login. Echte opslag en iOS-datumvelden nog niet visueel bevestigd
+
 ## Hansie en definitief verblijf
 - [x] Hansie in Knaakie bij de URL-geselecteerde actieve reis; mobiel geopend en desktop zichtbaar
 - [x] Organisator/admin kiest expliciet verblijf; atomic RPC bewaart optie bij gepland verblijf, sluit keuze en ververst planning

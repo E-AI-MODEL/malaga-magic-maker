@@ -93,9 +93,9 @@ type TileProps = { children: ReactNode; onClick: () => void; icon?: ReactNode; s
 /** Big tappable answer. */
 export function StepTile({ children, onClick, icon, selected, strong, disabled, size = "md" }: TileProps) {
   return (
-    <button type="button" onClick={onClick} disabled={disabled} aria-pressed={selected}
+    <Button variant={strong ? "default" : "secondary"} type="button" onClick={onClick} disabled={disabled} aria-pressed={selected}
       className={cn(
-        "flex w-full items-center gap-4 rounded-2xl border px-5 text-left text-lg font-semibold transition-colors disabled:opacity-50",
+        "tile-plain flex w-full justify-start items-center gap-4 rounded-2xl border px-5 text-left text-lg font-semibold transition-colors disabled:opacity-50",
         size === "lg" ? "min-h-24" : "min-h-[72px] py-3",
         strong ? "border-foreground bg-foreground text-background hover:bg-foreground/90" : "border-border bg-card hover:bg-secondary active:bg-secondary",
         selected && !strong && "border-foreground ring-1 ring-foreground",
@@ -103,7 +103,7 @@ export function StepTile({ children, onClick, icon, selected, strong, disabled, 
       {icon && <span className="shrink-0 [&_svg]:h-7 [&_svg]:w-7">{icon}</span>}
       <span className="min-w-0 flex-1">{children}</span>
       {selected && <Check className="h-6 w-6 shrink-0" />}
-    </button>
+    </Button>
   );
 }
 

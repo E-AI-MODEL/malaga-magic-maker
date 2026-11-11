@@ -1,5 +1,6 @@
 import { decisionStatusLine, decisionsLiveLine, displayDecisionTitle, samenHeadline, tasksLiveLine } from "@/features/together/labels";
-import { ACCOMMODATION_DECISION_TITLE, decisionWinner, promoteDecisionWinner } from "@/features/travel/accommodation";
+import { ACCOMMODATION_DECISION_TITLE, finalizeAccommodationChoice, selectedStayOption } from "@/features/travel/accommodation";
+import { listTripItems } from "@/features/travel/data";
 import { toast } from "sonner";
 import { useMemo, useState } from "react";
 import type { ReactNode } from "react";
@@ -55,7 +56,7 @@ export function todoCount(tasks: Array<{ status: string; progress: number }>, de
 
 /** Reis workspace: travellers, Planning/Te doen switch and the shared tasks and decisions. */
 export function TripTodoPanel({ planning }: { planning: ReactNode }) {
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const { activeTrip, isOrganizer } = useTrip();
   const queryClient = useQueryClient();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -73,6 +74,7 @@ export function TripTodoPanel({ planning }: { planning: ReactNode }) {
   const [decisionSheetOpen, setDecisionSheetOpen] = useState(false);
   const [expandedDecision, setExpandedDecision] = useState<string | null>(null);
   const [actionError, setActionError] = useState("");
+  const [finalizing, setFinalizing] = useState(false);
   const [inviteOpen, setInviteOpen] = useState(false);
   const [profileSheetOpen, setProfileSheetOpen] = useState(false);
   const [allMembersOpen, setAllMembersOpen] = useState(false);
@@ -96,6 +98,7 @@ export function TripTodoPanel({ planning }: { planning: ReactNode }) {
     queryFn: () => listDecisions(tripId),
     enabled: Boolean(tripId),
   });
+  const itemsQuery = useQuery({ queryKey: ["trip-items", tripId], queryFn: () => listTripItems(tripId), enabled: Boolean(tripId) });
   const expensesQuery = useQuery({
     queryKey: ["together-expenses", tripId],
     queryFn: () => listExpenses(tripId),
@@ -167,19 +170,19 @@ export function TripTodoPanel({ planning }: { planning: ReactNode }) {
     }
   };
 
-  const placeWinner = async (decision: DecisionBundle) => {
-    const winner = decisionWinner(decision.options);
-    if (!winner || !activeTrip) return;
+  const finalizeStay = async (decision: DecisionBundle, option: DecisionBundle["options"][number]) => {
+    if (finalizing || !window.confirm(`${option.label} definitief kiezen?`)) return;
     setActionError("");
+    setFinalizing(true);
     try {
-      await promoteDecisionWinner(activeTrip.id, winner.option, winner.url, {
-        startDate: activeTrip.start_date || "",
-        endDate: activeTrip.end_date || "",
-      });
-      toast.success(`${winner.option.label} staat op de tijdlijn.`);
+      await finalizeAccommodationChoice(decision.id, option.id);
+      await queryClient.invalidateQueries();
+      toast.success(`Het wordt ${option.label}!`);
     } catch (error) {
-      console.error("promote winner failed", error);
-      setActionError("Op de tijdlijn zetten lukte niet.");
+      console.error("finalize stay failed", error);
+      setActionError("Kiezen lukte niet. Probeer het opnieuw.");
+    } finally {
+      setFinalizing(false);
     }
   };
 
@@ -366,7 +369,9 @@ export function TripTodoPanel({ planning }: { planning: ReactNode }) {
             ) : (
               <div className="mt-1 space-y-5">
                 {decisions.map((decision) => {
-                  const manager = isOrganizer || decision.created_by === user.id;
+                  const manager = isOrganizer || isAdmin || decision.created_by === user.id;
+                  const stayChoice = decision.title.trim() === ACCOMMODATION_DECISION_TITLE;
+                  const finalOption = stayChoice ? selectedStayOption(itemsQuery.data || [], decision.id) : null;
                   const ownVote = decision.options.find((option) => option.votes.some((vote) => vote.user_id === user.id))?.id;
                   const totalVotes = decision.options.reduce((sum, option) => sum + option.votes.length, 0);
                   const topVoteCount = decision.options.length > 0 ? Math.max(...decision.options.map((option) => option.votes.length)) : 0;
@@ -389,7 +394,7 @@ export function TripTodoPanel({ planning }: { planning: ReactNode }) {
                           </span>
                         <span className="flex shrink-0 flex-col items-end gap-2">
                         <span className={`text-sm font-semibold ${decision.status === "open" && !ownVote ? "text-primary" : "text-muted-foreground"}`}>
-                          {decisionStatusLine(decision.status, Boolean(ownVote))}
+                          {decision.status === "closed" && finalOption ? "Gekozen" : decisionStatusLine(decision.status, Boolean(ownVote))}
                         </span>
                         <ChevronDown className={`h-4 w-4 text-muted-foreground ${expanded ? "rotate-180" : ""}`} />
                         </span>
@@ -400,10 +405,11 @@ export function TripTodoPanel({ planning }: { planning: ReactNode }) {
                           {decision.description && <p className="text-sm text-muted-foreground">{decision.description}</p>}
                           {decision.options.map((option) => {
                             const chosen = ownVote === option.id;
-                            const winner = decision.status === "closed" && totalVotes > 0 && option.votes.length === topVoteCount;
+                            const definitive = decision.status === "closed" && finalOption === option.id;
+                            const winner = !finalOption && decision.status === "closed" && totalVotes > 0 && option.votes.length === topVoteCount;
                             return (
+                              <div key={option.id} className="space-y-2">
                               <Button
-                                key={option.id}
                                 type="button"
                                 variant="secondary"
                                 disabled={readOnly || decision.status !== "open"}
@@ -414,22 +420,24 @@ export function TripTodoPanel({ planning }: { planning: ReactNode }) {
                                 <span className="flex min-w-0 items-center gap-2 text-sm font-medium">
                                   {chosen && <Check className="h-4 w-4 shrink-0 text-primary" />}
                                   <span className="break-words">{option.label}</span>
+                                  {definitive && <span className="shrink-0 text-[11px] font-semibold text-primary">Gekozen</span>}
                                   {winner && <span className="shrink-0 text-[11px] font-semibold text-primary">meeste stemmen</span>}
                                 </span>
                                 <span className="shrink-0 text-xs font-semibold text-muted-foreground num">{option.votes.length}</span>
                               </Button>
+                              {stayChoice && !readOnly && (isOrganizer || isAdmin) && (decision.status === "open" || !finalOption) && (
+                                <Button variant="secondary" className="h-auto min-h-11 w-full whitespace-normal" disabled={finalizing || itemsQuery.isLoading || itemsQuery.isError} onClick={() => void finalizeStay(decision, option)}>
+                                  <Check className="h-4 w-4 shrink-0" />Kies dit verblijf
+                                </Button>
+                              )}
+                              </div>
                             );
                           })}
                           {!readOnly && manager && (
-                            <div className="flex gap-3 pt-1">
+                            <div className="flex flex-wrap gap-3 pt-1">
                               <button type="button" onClick={() => void toggleDecisionClosed(decision)} className="text-[13px] font-semibold text-primary underline-offset-4 hover:underline">
                                 {decision.status === "open" ? "Keuze sluiten" : "Keuze heropenen"}
                               </button>
-                              {decision.status === "closed" && decision.title === ACCOMMODATION_DECISION_TITLE && decisionWinner(decision.options) && (
-                                <button type="button" onClick={() => void placeWinner(decision)} className="text-[13px] font-semibold text-primary underline-offset-4 hover:underline">
-                                  Zet winnaar op de tijdlijn
-                                </button>
-                              )}
                               <button type="button" onClick={() => void removeDecision(decision)} className="text-[13px] font-medium text-destructive underline-offset-4 hover:underline">
                                 Verwijderen
                               </button>

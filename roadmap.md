@@ -1,5 +1,12 @@
 # Roadmap
 
+## Hansie en definitief verblijf
+- [x] Hansie in Knaakie bij de URL-geselecteerde actieve reis; mobiel geopend en desktop zichtbaar
+- [x] Organisator/admin kiest expliciet verblijf; atomic RPC bewaart optie bij gepland verblijf, sluit keuze en ververst planning
+- [x] Ingelogd een optie zonder stemmen gekozen, na herladen teruggelezen; herhaalde opslag geeft één verblijf; tijdelijke keuze/verblijf verwijderd
+- [x] 338 tests groen, gewijzigde bestanden lint 0 fouten/1 waarschuwing; automatische build OK; geen losse typecheck-uitkomst beschikbaar
+- [x] Migratie 0017 toegepast; volledige lint blijft 7 bestaande fouten/31 waarschuwingen melden in oauth-returncontrole en gegenereerde MCP-functie
+
 ## Notities op Reis
 - [x] Witruimte onder Activiteiten verwijderen; Documenten vervangen door compacte Notities-tegel
 - [x] Paklijst maken, Notitie schrijven en Bestand toevoegen via bestaande privéopslag

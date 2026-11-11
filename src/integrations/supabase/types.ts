@@ -1891,6 +1891,10 @@ export type Database = {
         Returns: undefined
       }
       export_my_vakansie_data: { Args: never; Returns: Json }
+      finalize_accommodation_choice: {
+        Args: { p_decision_id: string; p_option_id: string }
+        Returns: string
+      }
       finalize_trip_document: {
         Args: { p_document_id: string; p_size_bytes: number }
         Returns: boolean

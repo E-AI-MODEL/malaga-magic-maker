@@ -106,6 +106,24 @@ export async function createAccommodationDecision(tripId: string, candidates: Ac
 
 export const ACCOMMODATION_DECISION_TITLE = "Waar verblijven we?";
 
+/** Explicit selection persists with its planned stay; votes are not a final choice. */
+export async function finalizeAccommodationChoice(decisionId: string, optionId: string) {
+  const { data, error } = await supabase.rpc("finalize_accommodation_choice", {
+    p_decision_id: decisionId, p_option_id: optionId,
+  });
+  if (error) throw error;
+  return data;
+}
+
+export function selectedStayOption(items: Array<{ type: string; status: string; metadata: unknown }>, decisionId: string): string | null {
+  for (const item of items) {
+    if (item.type !== "stay" || item.status === "idea" || !item.metadata || typeof item.metadata !== "object") continue;
+    const meta = item.metadata as Record<string, unknown>;
+    if (meta.decision_id === decisionId && typeof meta.selected_option_id === "string") return meta.selected_option_id;
+  }
+  return null;
+}
+
 /** Search candidates are ideas; only an explicit choice ("Dit wordt het" or a vote winner) becomes planned. */
 export function candidateStayStatus(chosen: boolean): "idea" | "planned" {
   return chosen ? "planned" : "idea";

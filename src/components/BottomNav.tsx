@@ -3,12 +3,13 @@ import { Link, NavLink, useLocation } from "react-router-dom";
 import { useTrip } from "@/contexts/TripContext";
 import { askHansie } from "@/features/hansie/bus";
 import { Button } from "@/components/ui/button";
+import { hansieAvailable } from "@/features/hansie/visibility";
 
 export function BottomNav() {
   const { activeTrip } = useTrip();
   const { pathname, search } = useLocation();
   const isTripScreen = /^\/trip\/[^/]+(?:\/(?:reis|samen|settings))?\/?$/.test(pathname);
-  void search;
+  const showHansie = hansieAvailable(pathname, search, activeTrip);
   const expensesActive = pathname === "/knaakie";
 
   const base =
@@ -22,7 +23,7 @@ export function BottomNav() {
     { to: `/trip/${activeTrip.id}/reis`, icon: Route, label: "Reis", end: false },
   ] : [];
   // Account screens lead with Home so every page shows the full footer.
-  if (!isTripScreen) links.unshift({ to: "/trips", icon: Home, label: "Home", end: true });
+  if (!isTripScreen && !showHansie) links.unshift({ to: "/trips", icon: Home, label: "Home", end: true });
   const costsTo = activeTrip ? `/knaakie?tripId=${activeTrip.id}` : "/knaakie";
 
   return (
@@ -47,7 +48,7 @@ export function BottomNav() {
           <span aria-hidden className="flex h-6 w-6 items-center justify-center rounded-full bg-knaakie text-on-image"><Wallet className="h-3.5 w-3.5" strokeWidth={2} /></span>
           <span>Knaakie</span>
         </Link>
-        {isTripScreen && activeTrip && activeTrip.status !== "archived" && (
+        {showHansie && (
           <Button variant="ghost" type="button" onClick={() => askHansie()} className={`${base} ${inactive} px-0 py-0`} aria-label="Vraag Hansie">
             <span aria-hidden className="flex h-6 w-6 items-center justify-center rounded-full bg-hansie-deep font-display text-[13px] font-bold text-on-image">H</span>
             <span>Hansie</span>

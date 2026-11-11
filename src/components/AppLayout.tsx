@@ -12,6 +12,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { BrandLogo } from "@/components/BrandLogo";
+import { hansieAvailable } from "@/features/hansie/visibility";
 
 export function AppLayout({ children }: { children: ReactNode }) {
   const { profile } = useAuth();
@@ -20,9 +21,8 @@ export function AppLayout({ children }: { children: ReactNode }) {
   const isMobile = useIsMobile();
   const { pathname, search } = useLocation();
   const isTripScreen = /^\/trip\/[^/]+(?:\/(?:reis|samen|settings))?\/?$/.test(pathname);
-  const showHansie = isTripScreen && activeTrip?.status !== "archived";
+  const showHansie = hansieAvailable(pathname, search, activeTrip);
   const title = pathname === "/trips" ? "Home" : pathname === "/profiel" ? "Profiel" : activeTrip?.name;
-  void search;
   const tripHeading = pathname.endsWith("/reis") ? "Reis"
     : pathname.endsWith("/settings") ? "Reisinstellingen"
     : null;
@@ -46,6 +46,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
           </header>
           <main className={`mx-auto flex w-full max-w-2xl min-h-0 flex-1 flex-col pb-[calc(4.75rem+env(safe-area-inset-bottom))] ${pathname === "/trips" ? "overflow-hidden" : "overflow-y-auto overscroll-contain"}`}>{children}</main>
           <BottomNav />
+          {showHansie && <HansieWidget trip={activeTrip} floating showBar={false} />}
         </div>
       );
     }

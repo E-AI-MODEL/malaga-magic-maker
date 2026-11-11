@@ -257,13 +257,15 @@ export default function TripReis() {
           {addTiles.map((tile) => {
             const Icon = tile.icon;
             const count = timelineItems.filter((i) => filters[tile.filter].types.includes(i.type)).length;
-            const voting = tile.type === "stay" && !readOnly && !!openStayDecision.data;
+            const stays = timelineItems.filter((i) => i.type === "stay");
+            const voting = tile.type === "stay" && stays.length === 0 && !readOnly && !!openStayDecision.data;
             const status = voting
               ? `Stemming loopt · ${stayVoters} van ${membersQuery.data?.length || stayVoters} gestemd`
+              : tile.type === "stay" && stays.length === 1 ? stays[0].title
               : count === 0 ? "Nog niets ingepland" : count === 1 ? "1 ingepland" : `${count} ingepland`;
             return (
               <Button key={tile.type} variant="secondary" disabled={readOnly && !voting} className="tile-plain h-auto min-h-[68px] w-full justify-start gap-3 rounded-2xl px-3 py-2.5 text-left"
-                onClick={() => voting ? setSearchParams({ tab: "todo" }, { replace: true }) : openCreate(tile.type)}>
+                onClick={() => voting ? setSearchParams({ tab: "todo" }, { replace: true }) : tile.type === "stay" && stays.length === 1 ? openEdit(stays[0]) : openCreate(tile.type)}>
                 <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${tile.tone}`}><Icon className="h-5 w-5" /></span>
                 <span className="min-w-0 flex-1"><span className="block text-[16px] font-semibold">{tile.label}</span><span className="block truncate text-sm font-normal text-muted-foreground">{status}</span></span>
                 {voting && <span className="flex shrink-0 items-center gap-1 rounded-full bg-primary/10 px-2.5 py-1 text-sm font-semibold text-primary"><Vote className="h-4 w-4" />Stem nu</span>}

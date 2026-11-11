@@ -120,6 +120,13 @@
       "when": 1794337167344,
       "tag": "0016_free_trip_limit_three",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1794355566638,
+      "tag": "0017_finalize_accommodation_choice",
+      "breakpoints": true
     }
   ]
 }

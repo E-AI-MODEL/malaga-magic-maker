@@ -43,13 +43,14 @@ One generic `trip_items` model; type-specific details in metadata, no destinatio
 - Auth restores persisted sessions regardless of deployment/version markers; explicit logout, access restrictions and server revocation remain authoritative. Why: routine updates must not unexpectedly sign users out.
 - Mobile AppLayout reserves one row for Home, the work-screen heading and the trip menu; TripPageHeader shows metadata and actions below it, keeping its own heading desktop-only. Why: navigation cannot cover page titles or add actions.
 - Trip settings use section tiles and the shared FormSheet/FormSubmit shell while retaining the existing update and lifecycle handlers. Why: keep editing compact without changing authorization or persistence.
-- Account and trip screens use AppLayout; desktop Hansie stays inside its content column, and route-scoped visibility excludes account and archived screens. Why: preserve one navigation shell without stale trip context or a third column.
+- AppLayout shares Hansie visibility; Knaakie requires its URL-selected active trip. Why: avoid stale context.
 Bounded builds; no unrelated redesigns, extra features, duplicated concepts or branding changes during backend/security work. Mobile first, desktop functional.
 
 ## Quality gate
 Run build, lint, typecheck and tests; browser-test relevant flows. Report changed files, migrations, tests, failures and risks. Never report done while acceptance criteria fail.
 
 ## Koppelingen
+- Finalize stays via finalize_accommodation_choice; metadata stores decision/option IDs. Why: atomic, retry-safe selection.
 - Reis is the single trip workspace: travellers row plus a Planning / Te doen switch (`?tab=todo`) hosting the shared tasks and decisions; `/trip/:id/samen` only redirects (expenses section to /knaakie). Footer: Overzicht, Reis, Knaakie, Hansie, Profiel. Receipts return ephemeral Gateway proposals saved only via the expense RPC. Why: distinct destinations without duplicate routes, cost logic or retained receipt data.
 - `trip-calendar`: secret link per user; store only the token hash. Why: bearer secret.
 - `trip-weather`: MET Norway, Nominatim with Photon fallback; credit sources in UI. Why: licence terms.
